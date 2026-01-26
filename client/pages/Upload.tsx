@@ -79,7 +79,8 @@ export default function Upload() {
           people: "",
           value: "",
         });
-        
+        setNeedsEvacuation(false);
+
         // Redirect to requests page after 2 seconds
         setTimeout(() => {
           navigate("/requests");
