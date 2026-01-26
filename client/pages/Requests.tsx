@@ -457,7 +457,7 @@ export default function Requests() {
                 ⏳ Pending Requests ({pendingRequests.length})
               </h2>
             </div>
-            <RequestsTable requests={pendingRequests} />
+            <RequestsTable requests={pendingRequests} onStatusChange={handleStatusChange} />
           </div>
         )}
 
@@ -469,7 +469,7 @@ export default function Requests() {
                 ✓ Completed Requests ({metRequests.length})
               </h2>
             </div>
-            <RequestsTable requests={metRequests} />
+            <RequestsTable requests={metRequests} onStatusChange={handleStatusChange} />
           </div>
         )}
 
