@@ -90,6 +90,7 @@ export default function Requests() {
     peopleInvolved: "",
     amountSpent: "",
     source: "INGD" as "INGD" | "Chamber",
+    status: "pending" as "pending" | "met" | "partially_met",
   });
 
   const handleInputChange = (
