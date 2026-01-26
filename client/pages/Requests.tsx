@@ -450,14 +450,16 @@ export default function Requests() {
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-medium transition-colors"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-primary hover:bg-orange-600 disabled:bg-orange-400 text-white py-3 rounded-lg font-medium transition-colors"
                 >
-                  Add Request
+                  {isSubmitting ? "Adding..." : "Add Request"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 rounded-lg font-medium transition-colors"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 text-slate-800 py-3 rounded-lg font-medium transition-colors"
                 >
                   Cancel
                 </button>
