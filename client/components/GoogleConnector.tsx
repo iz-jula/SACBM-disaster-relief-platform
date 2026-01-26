@@ -22,6 +22,8 @@ export default function GoogleConnector() {
     setError(null);
 
     try {
+      // For now, we'll use a simplified approach with the ID token from GSI
+      // A more complete implementation would require a backend OAuth handler
       const googleUser = await signInWithGoogle();
 
       if (googleUser) {
@@ -29,11 +31,15 @@ export default function GoogleConnector() {
         setIsConnected(true);
         saveGoogleUser(googleUser);
       } else {
-        setError("Failed to connect to Google. Please try again.");
+        // If authentication is skipped or cancelled
+        setError(null);
       }
     } catch (err) {
-      setError("Failed to connect to Google. Please check your configuration.");
-      console.error(err);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      if (!errorMsg.includes('requestPermission')) {
+        setError("Failed to connect to Google. Please try again.");
+        console.error(err);
+      }
     } finally {
       setIsLoading(false);
     }
