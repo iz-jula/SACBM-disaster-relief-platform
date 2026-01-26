@@ -101,10 +101,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await supabase.auth.signOut();
+      localStorage.removeItem("auth_demo");
       setIsAuthenticated(false);
       setUser(null);
     } catch (error) {
       console.error("Logout failed:", error);
+      // Still logout locally even if Supabase fails
+      setIsAuthenticated(false);
+      setUser(null);
     }
   };
 
