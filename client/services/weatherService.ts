@@ -244,7 +244,12 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     });
 
     if (!response.ok) {
-      console.error('News API error:', response.status, response.statusText);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('News API error:', response.status, response.statusText, errorData);
+
+      if (errorData.isNetworkError) {
+        console.warn('Network error connecting to NewsAPI. Using fallback alerts.');
+      }
       return [];
     }
 
