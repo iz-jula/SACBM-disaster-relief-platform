@@ -109,38 +109,54 @@ export default function Alerts() {
   };
 
   const getTitle = (alert: AlertType): string => {
-    if ("title" in alert) {
-      return alert.title;
-    }
-    return "Calendar Event";
+    return alert.title || "Alert";
   };
 
   const getDescription = (alert: AlertType): string => {
-    if ("description" in alert) {
-      return alert.description;
-    }
-    return "";
+    return alert.description || "";
   };
 
   const getTime = (alert: AlertType): string => {
     if ("time" in alert) {
       return alert.time;
     }
-    return new Date(alert.start).toLocaleString();
+    if ("publishedAt" in alert) {
+      const date = new Date(alert.publishedAt);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      } else {
+        return 'Just now';
+      }
+    }
+    return "";
   };
 
   const getSeverity = (alert: AlertType): "high" | "medium" | "low" => {
-    if ("severity" in alert) {
-      return alert.severity;
-    }
-    return "medium";
+    return alert.severity || "medium";
   };
 
   const getLocation = (alert: AlertType): string => {
     if ("location" in alert) {
       return alert.location;
     }
+    if ("source" in alert) {
+      return `Source: ${alert.source}`;
+    }
     return "";
+  };
+
+  const getUrl = (alert: AlertType): string | undefined => {
+    if ("url" in alert) {
+      return alert.url;
+    }
+    return undefined;
   };
 
   return (
