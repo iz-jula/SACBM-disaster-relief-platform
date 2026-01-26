@@ -60,7 +60,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 text-sm font-medium">Total Requests</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">{totalRequests}</p>
+                <p className="text-3xl font-bold text-slate-900 mt-2">
+                  {metrics?.totalRequests || 0}
+                </p>
               </div>
               <div className="bg-blue-100 rounded-lg p-3">
                 <BarChart3 size={24} className="text-blue-600" />
@@ -74,7 +76,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-slate-600 text-sm font-medium">People Assisted</p>
                 <p className="text-3xl font-bold text-slate-900 mt-2">
-                  {totalPeople.toLocaleString()}
+                  {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
                 </p>
               </div>
               <div className="bg-green-100 rounded-lg p-3">
@@ -89,7 +91,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-slate-600 text-sm font-medium">Total Value</p>
                 <p className="text-2xl font-bold text-primary mt-2">
-                  {(totalValue / 1000000).toFixed(1)}M MZN
+                  {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M MZN
                 </p>
               </div>
               <div className="bg-orange-100 rounded-lg p-3">
@@ -104,7 +106,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-slate-600 text-sm font-medium">Avg. Per Request</p>
                 <p className="text-3xl font-bold text-slate-900 mt-2">
-                  {(avgValue / 1000).toFixed(0)}K
+                  {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
                 </p>
               </div>
               <div className="bg-purple-100 rounded-lg p-3">
