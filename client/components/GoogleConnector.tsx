@@ -22,7 +22,7 @@ export default function GoogleConnector() {
     setError(null);
 
     try {
-      // Attempt to sign in with Google
+      // Initiate the Google Sign-In flow
       const googleUser = await signInWithGoogle();
 
       if (googleUser) {
@@ -31,23 +31,36 @@ export default function GoogleConnector() {
         saveGoogleUser(googleUser);
       } else {
         // If authentication is skipped or cancelled, show helpful message
-        setError("Google sign-in was cancelled. Please verify your Google Client ID is correctly configured in the Google Cloud Console.");
+        setError("Google sign-in was cancelled. Please try again.");
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       console.error('Google sign-in error:', err);
 
       if (errorMsg.includes('invalid_client')) {
-        setError("Google Client ID is invalid. Please verify it in your Google Cloud Console and ensure this application URL is authorized.");
+        setError("Google Client ID is invalid. Please verify it in your Google Cloud Console.");
       } else if (errorMsg.includes('popup_blocked')) {
         setError("Pop-up was blocked. Please allow pop-ups and try again.");
+      } else if (errorMsg.includes('Failed to load Google API')) {
+        setError("Unable to load Google Sign-In. Please check your internet connection.");
       } else {
-        setError("Failed to connect to Google. Please check your configuration and try again.");
+        setError(`Error: ${errorMsg}`);
       }
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Render Google Sign-In button when component mounts
+    signInWithGoogle().catch((err) => {
+      // This is expected - we're just rendering the button, not completing auth
+      // The error will be handled when user actually clicks the button
+      if (err instanceof Error && !err.message.includes('container not found')) {
+        console.log('GoogleConnector initialized');
+      }
+    });
+  }, []);
 
   const handleDisconnect = () => {
     signOutGoogle();
