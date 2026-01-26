@@ -210,32 +210,45 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-4">
-            {recentRequests.map((request) => (
-              <div
-                key={request.id}
-                className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-blue-50 transition-colors"
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">{request.company}</p>
-                  <p className="text-sm text-slate-600 mt-1">{request.location}</p>
-                  <div className="flex items-center gap-3 mt-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
-                      {request.helpType}
-                    </span>
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                        request.source === "INGD"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {request.source}
-                    </span>
+            {isLoading ? (
+              <p className="text-slate-600 text-center py-8">Loading recent requests...</p>
+            ) : recentRequests.length > 0 ? (
+              recentRequests.map((request) => {
+                const timeAgo = request.createdAt
+                  ? new Date(request.createdAt).toLocaleString()
+                  : "Unknown";
+                return (
+                  <div
+                    key={request.id}
+                    className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-blue-50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-900">{request.originator}</p>
+                      <p className="text-sm text-slate-600 mt-1">{request.location}</p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                          {request.helpType}
+                        </span>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                            request.status === "pending"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : request.status === "met"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-orange-100 text-orange-700"
+                          }`}
+                        >
+                          {request.status}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-500">{timeAgo}</p>
                   </div>
-                </div>
-                <p className="text-sm text-slate-500">{request.time}</p>
-              </div>
-            ))}
+                );
+              })
+            ) : (
+              <p className="text-slate-600 text-center py-8">No recent requests</p>
+            )}
           </div>
         </div>
       </div>
