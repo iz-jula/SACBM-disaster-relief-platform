@@ -1,19 +1,9 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-
-interface RelieRequest {
-  id: string;
-  originator: string;
-  location: string;
-  helpType: string;
-  evacuationType: string;
-  peopleInvolved: number;
-  amountSpent: number;
-  category: "Category 1" | "Category 2" | "Category 3";
-  status: "pending" | "met" | "partially_met";
-}
+import { getRequests, createRequest, RelieRequest } from "@/services/requestsService";
 
 function getCategoryStyles(category: "Category 1" | "Category 2" | "Category 3") {
   switch (category) {
