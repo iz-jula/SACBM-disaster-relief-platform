@@ -80,8 +80,10 @@ export default function Upload() {
       }
     } catch (error) {
       setSubmitStatus("error");
-      setErrorMessage(error instanceof Error ? error.message : "Failed to submit request");
-      setTimeout(() => setSubmitStatus("idle"), 3000);
+      const msg = error instanceof Error ? error.message : "Failed to submit request. Please try again.";
+      setErrorMessage(msg);
+      console.error("Submit error:", error);
+      setTimeout(() => setSubmitStatus("idle"), 4000);
     }
   };
 
