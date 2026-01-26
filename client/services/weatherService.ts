@@ -225,14 +225,81 @@ const newsAlertsCache: CacheEntry = {
 
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
-// Fetch news alerts from NewsAPI
-// Note: Direct frontend calls to external APIs are blocked by CORS restrictions.
-// This function returns an empty array to trigger fallback alerts in the UI.
-// For production, implement a backend proxy endpoint to fetch from NewsAPI.
+// Fetch news alerts from NewsAPI.ai
+// Fetches real-time news about Mozambique disasters and weather events
 export async function getNewsAlerts(): Promise<NewsAlert[]> {
-  // For frontend-only apps, we cannot directly call external APIs due to CORS restrictions
-  // Return empty array to use fallback alerts from the component
-  return [];
+  const now = Date.now();
+
+  // Return cached data if still valid
+  if (newsAlertsCache.data.length > 0 && now - newsAlertsCache.timestamp < CACHE_DURATION) {
+    return newsAlertsCache.data;
+  }
+
+  try {
+    const apiKey = API_CONFIG.newsApi.apiKey;
+
+    if (!apiKey) {
+      // API key not configured - use fallback alerts
+      console.log('NewsAPI key not configured - using fallback alerts');
+      return [];
+    }
+
+    // Fetch from NewsAPI.ai
+    // Using the search endpoint to find Mozambique-related news
+    const query = 'Mozambique AND (floods OR weather OR emergency OR government)';
+    const url = `https://newsapi.ai/api/v1/articleSearch?query=${encodeURIComponent(query)}&sortBy=date&maxArticles=10&apiKey=${apiKey}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`NewsAPI returned status ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+
+    if (!data || !data.articles || data.articles.length === 0) {
+      console.log('No articles found from NewsAPI');
+      return [];
+    }
+
+    const articles = data.articles;
+
+    const alerts: NewsAlert[] = articles.slice(0, 10).map((article: any, index: number) => ({
+      id: `news-${index}-${Date.now()}`,
+      title: article.title || 'Untitled',
+      description: article.body || article.summary || article.description || '',
+      source: article.source?.title || article.source || 'Unknown Source',
+      url: article.url || '#',
+      publishedAt: article.datePublished || article.publishedAt || new Date().toISOString(),
+      severity: determineSeverity((article.title || '') + ' ' + (article.body || article.summary || article.description || '')),
+    }));
+
+    // Sort by severity (high first) and then by recency
+    const sortedAlerts = alerts.sort((a, b) => {
+      const severityOrder = { high: 0, medium: 1, low: 2 };
+      if (severityOrder[a.severity] !== severityOrder[b.severity]) {
+        return severityOrder[a.severity] - severityOrder[b.severity];
+      }
+      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    });
+
+    // Update cache
+    newsAlertsCache.data = sortedAlerts;
+    newsAlertsCache.timestamp = now;
+
+    console.log(`Fetched ${sortedAlerts.length} news alerts from NewsAPI`);
+    return sortedAlerts;
+  } catch (error) {
+    console.error('Error fetching news alerts from NewsAPI:', error);
+    // Return empty array to trigger fallback alerts if there's an error
+    return [];
+  }
 }
 
 function determineSeverity(text: string): 'high' | 'medium' | 'low' {
