@@ -15,6 +15,8 @@ export default function Upload() {
     value: "",
   });
 
+  const [needsEvacuation, setNeedsEvacuation] = useState(false);
+
   const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
