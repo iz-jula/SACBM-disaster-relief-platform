@@ -74,11 +74,21 @@ function getWindDirection(degrees: number): string {
   return directions[index];
 }
 
+// Weather cache to minimize API calls (OpenWeatherMap has 1000 requests/day limit)
+const weatherCache = new Map<string, { data: WeatherData | null; timestamp: number }>();
+const WEATHER_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
 export async function getCurrentWeather(city: string): Promise<WeatherData | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
   if (!coords || !API_CONFIG.openWeather.apiKey) {
     console.warn(`City ${city} not found or API key not configured`);
     return null;
+  }
+
+  // Check cache
+  const cached = weatherCache.get(city);
+  if (cached && Date.now() - cached.timestamp < WEATHER_CACHE_DURATION) {
+    return cached.data;
   }
 
   try {
@@ -93,7 +103,7 @@ export async function getCurrentWeather(city: string): Promise<WeatherData | nul
 
     const data = await response.json();
 
-    return {
+    const weatherData: WeatherData = {
       temp: Math.round(data.main.temp),
       high: Math.round(data.main.temp_max),
       low: Math.round(data.main.temp_min),
@@ -106,6 +116,11 @@ export async function getCurrentWeather(city: string): Promise<WeatherData | nul
       pressure: data.main.pressure,
       description: data.weather[0].description,
     };
+
+    // Cache the result
+    weatherCache.set(city, { data: weatherData, timestamp: Date.now() });
+
+    return weatherData;
   } catch (error) {
     console.error('Error fetching weather:', error);
     return null;
