@@ -72,6 +72,30 @@ export default function Layout({ children }: LayoutProps) {
                   </Link>
                 );
               })}
+
+              {/* Admin Separator */}
+              <div className="my-4 border-t border-slate-200" />
+
+              {/* Admin Items */}
+              {adminItems.map(({ href, label, icon: Icon }) => {
+                const isActive = location.pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    to={href}
+                    onClick={() => setSidebarOpen(false)}
+                    title={sidebarCollapsed ? label : ""}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                      isActive
+                        ? "bg-red-100 text-red-700 shadow-md"
+                        : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <Icon size={20} className="flex-shrink-0" />
+                    {!sidebarCollapsed && <span>{label}</span>}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         </div>
