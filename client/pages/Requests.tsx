@@ -499,7 +499,7 @@ export default function Requests() {
                 ⏳ Pending Requests ({pendingRequests.length})
               </h2>
             </div>
-            <RequestsTable requests={pendingRequests} onStatusChange={handleStatusChange} />
+            <RequestsTable requests={pendingRequests} onStatusChange={handleStatusChange} selectedRequests={selectedRequests} onToggleSelect={toggleSelectRequest} />
           </div>
         )}
 
@@ -511,7 +511,7 @@ export default function Requests() {
                 ✓ Completed Requests ({metRequests.length})
               </h2>
             </div>
-            <RequestsTable requests={metRequests} onStatusChange={handleStatusChange} />
+            <RequestsTable requests={metRequests} onStatusChange={handleStatusChange} selectedRequests={selectedRequests} onToggleSelect={toggleSelectRequest} />
           </div>
         )}
 
