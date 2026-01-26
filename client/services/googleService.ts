@@ -51,6 +51,40 @@ export function initializeGoogleAPI(): Promise<void> {
   });
 }
 
+// Global holder for the current sign-in promise
+let currentSignInPromise: {
+  resolve: (user: GoogleUser | null) => void;
+  reject: (error: any) => void;
+} | null = null;
+
+// Callback for Google Sign-In
+function handleGoogleCallback(response: any) {
+  if (response.credential && currentSignInPromise) {
+    const decoded = parseJwt(response.credential);
+    if (decoded && decoded.email) {
+      const user: GoogleUser = {
+        email: decoded.email,
+        name: decoded.name || 'Google User',
+        picture: decoded.picture || '',
+        accessToken: response.credential, // This is the ID token
+      };
+      currentSignInPromise.resolve(user);
+      currentSignInPromise = null;
+    } else {
+      currentSignInPromise.reject(new Error('Failed to parse Google credentials'));
+      currentSignInPromise = null;
+    }
+  }
+}
+
+// Make the callback globally accessible
+declare global {
+  interface Window {
+    handleGoogleCallback: typeof handleGoogleCallback;
+  }
+}
+window.handleGoogleCallback = handleGoogleCallback;
+
 // Sign in with Google using Google Identity Services
 export async function signInWithGoogle(): Promise<GoogleUser | null> {
   try {
@@ -64,66 +98,41 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
       return null;
     }
 
-    return new Promise((resolve) => {
-      let resolved = false;
+    return new Promise((resolve, reject) => {
+      // Store the promise handlers for the callback to use
+      currentSignInPromise = { resolve, reject };
 
-      // Initialize the Google Sign-In with one-tap or button
+      // Initialize Google Sign-In
       window.google.accounts.id.initialize({
         client_id: API_CONFIG.google.clientId,
-        callback: (response: any) => {
-          if (!resolved && response.credential) {
-            resolved = true;
-            const decoded = parseJwt(response.credential);
-            if (decoded && decoded.email) {
-              const user: GoogleUser = {
-                email: decoded.email,
-                name: decoded.name || 'Google User',
-                picture: decoded.picture || '',
-                accessToken: response.credential, // This is the ID token
-              };
-              // Clean up any sign-in UI elements
-              const containers = document.querySelectorAll('[id^="google-"]');
-              containers.forEach(c => c.remove());
-              resolve(user);
-            } else {
-              resolve(null);
-            }
-          }
-        },
-        error_callback: () => {
-          if (!resolved) {
-            resolved = true;
-            resolve(null);
-          }
-        },
+        callback: handleGoogleCallback,
       });
 
-      // Create a container for the sign-in button
-      const buttonContainer = document.createElement('div');
-      buttonContainer.id = 'google-signin-button-container';
-      // Don't hide it - let the button be visible and clickable
-      document.body.appendChild(buttonContainer);
-
-      try {
-        // Render the standard Google Sign-In button
-        window.google.accounts.id.renderButton(buttonContainer, {
-          type: 'standard',
-          theme: 'outline',
-          size: 'large',
-        });
-
-        // The user needs to click the button manually
-        // If using One-Tap, it will appear automatically
-        window.google.accounts.id.prompt((notification: any) => {
-          // One-Tap UI will be displayed if conditions are met
-        });
-      } catch (e) {
-        console.error('Error rendering Google button:', e);
-        if (!resolved) {
-          resolved = true;
-          resolve(null);
+      // Try to render the button in the existing container
+      const buttonContainer = document.getElementById('google-signin-button');
+      if (buttonContainer) {
+        try {
+          window.google.accounts.id.renderButton(buttonContainer, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+          });
+        } catch (e) {
+          console.error('Error rendering Google button:', e);
+          reject(e);
         }
+      } else {
+        console.warn('Google button container not found');
+        reject(new Error('Button container not found'));
       }
+
+      // Set a timeout for the auth to complete
+      setTimeout(() => {
+        if (currentSignInPromise) {
+          reject(new Error('Google sign-in timeout'));
+          currentSignInPromise = null;
+        }
+      }, 30000); // 30 second timeout
     });
   } catch (error) {
     console.error('Error signing in with Google:', error);
