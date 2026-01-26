@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Cloud, CloudRain, Sun, Wind, Droplets, Eye, Gauge } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
+import MozambiqueMap from "@/components/MozambiqueMap";
 
 interface DetailedWeather {
   date: string;
@@ -19,22 +20,7 @@ interface DetailedWeather {
   uvIndex: number;
 }
 
-const mozambiqueRegions = [
-  "Inhambane",
-  "Gaza",
-  "Inhambane Province",
-  "Sofala",
-  "Tete",
-  "Manica",
-  "Chimoio",
-  "Beira",
-  "Quelimane",
-  "Maputo",
-  "Matola",
-  "Xai-Xai",
-];
-
-const weatherDataByRegion: Record<string, DetailedWeather[]> = {
+const locationData: Record<string, DetailedWeather[]> = {
   Inhambane: [
     {
       date: "2024-01-26",
@@ -266,19 +252,174 @@ const weatherDataByRegion: Record<string, DetailedWeather[]> = {
       uvIndex: 9,
     },
   ],
+  Sofala: [
+    {
+      date: "2024-01-26",
+      day: "Today",
+      high: 26,
+      low: 20,
+      condition: "cloudy",
+      humidity: 70,
+      windSpeed: 14,
+      windDirection: "E",
+      visibility: 9,
+      pressure: 1012,
+      rainChance: 50,
+      rainTrajectory: "Scattered showers possible",
+      uvIndex: 6,
+    },
+    {
+      date: "2024-01-27",
+      day: "Tomorrow",
+      high: 25,
+      low: 19,
+      condition: "rainy",
+      humidity: 75,
+      windSpeed: 16,
+      windDirection: "SE",
+      visibility: 7,
+      pressure: 1010,
+      rainChance: 70,
+      rainTrajectory: "Moderate rainfall expected",
+      uvIndex: 5,
+    },
+    {
+      date: "2024-01-28",
+      day: "Wed",
+      high: 27,
+      low: 21,
+      condition: "cloudy",
+      humidity: 65,
+      windSpeed: 12,
+      windDirection: "E",
+      visibility: 10,
+      pressure: 1013,
+      rainChance: 40,
+      rainTrajectory: "Clearing in afternoon",
+      uvIndex: 6,
+    },
+    {
+      date: "2024-01-29",
+      day: "Thu",
+      high: 28,
+      low: 22,
+      condition: "sunny",
+      humidity: 60,
+      windSpeed: 10,
+      windDirection: "NE",
+      visibility: 11,
+      pressure: 1015,
+      rainChance: 15,
+      rainTrajectory: "Mostly clear",
+      uvIndex: 8,
+    },
+    {
+      date: "2024-01-30",
+      day: "Fri",
+      high: 29,
+      low: 23,
+      condition: "sunny",
+      humidity: 55,
+      windSpeed: 9,
+      windDirection: "N",
+      visibility: 12,
+      pressure: 1016,
+      rainChance: 5,
+      rainTrajectory: "Clear skies",
+      uvIndex: 8,
+    },
+  ],
+  Tete: [
+    {
+      date: "2024-01-26",
+      day: "Today",
+      high: 32,
+      low: 25,
+      condition: "sunny",
+      humidity: 55,
+      windSpeed: 10,
+      windDirection: "W",
+      visibility: 12,
+      pressure: 1015,
+      rainChance: 15,
+      rainTrajectory: "No significant rain",
+      uvIndex: 9,
+    },
+    {
+      date: "2024-01-27",
+      day: "Tomorrow",
+      high: 31,
+      low: 24,
+      condition: "sunny",
+      humidity: 58,
+      windSpeed: 11,
+      windDirection: "SW",
+      visibility: 11,
+      pressure: 1013,
+      rainChance: 20,
+      rainTrajectory: "Mostly sunny",
+      uvIndex: 9,
+    },
+    {
+      date: "2024-01-28",
+      day: "Wed",
+      high: 30,
+      low: 23,
+      condition: "cloudy",
+      humidity: 62,
+      windSpeed: 13,
+      windDirection: "S",
+      visibility: 10,
+      pressure: 1011,
+      rainChance: 35,
+      rainTrajectory: "Scattered showers",
+      uvIndex: 7,
+    },
+    {
+      date: "2024-01-29",
+      day: "Thu",
+      high: 29,
+      low: 22,
+      condition: "cloudy",
+      humidity: 65,
+      windSpeed: 14,
+      windDirection: "SE",
+      visibility: 9,
+      pressure: 1009,
+      rainChance: 45,
+      rainTrajectory: "Rain expected",
+      uvIndex: 6,
+    },
+    {
+      date: "2024-01-30",
+      day: "Fri",
+      high: 28,
+      low: 21,
+      condition: "rainy",
+      humidity: 70,
+      windSpeed: 15,
+      windDirection: "SE",
+      visibility: 8,
+      pressure: 1007,
+      rainChance: 65,
+      rainTrajectory: "Continuous rainfall",
+      uvIndex: 5,
+    },
+  ],
 };
 
 export default function Weather() {
   const navigate = useNavigate();
   const [selectedRegion, setSelectedRegion] = useState("Inhambane");
   const [searchTerm, setSearchTerm] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const filteredRegions = mozambiqueRegions.filter((region) =>
-    region.toLowerCase().includes(searchTerm.toLowerCase()),
+  const allLocations = Object.keys(locationData);
+  const filteredLocations = allLocations.filter((location) =>
+    location.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const weatherData = weatherDataByRegion[selectedRegion] || weatherDataByRegion.Inhambane;
+  const weatherData = locationData[selectedRegion] || locationData.Inhambane;
 
   const getWeatherIcon = (condition: string) => {
     switch (condition) {
@@ -293,10 +434,16 @@ export default function Weather() {
     }
   };
 
+  const handleLocationSelect = (location: string) => {
+    setSelectedRegion(location);
+    setSearchTerm("");
+    setShowSuggestions(false);
+  };
+
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Header with Back Button */}
+      <div className="space-y-8">
+        {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Weather Forecast</h1>
@@ -310,48 +457,49 @@ export default function Weather() {
           </button>
         </div>
 
-        {/* Region Search */}
+        {/* Search Bar */}
         <div className="relative">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
             <input
               type="text"
-              placeholder="Search regions in Mozambique..."
+              placeholder="Search by city, region, or district..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setIsSearchOpen(true);
+                setShowSuggestions(true);
               }}
-              onFocus={() => setIsSearchOpen(true)}
+              onFocus={() => setShowSuggestions(true)}
               className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
 
-          {/* Dropdown Results */}
-          {isSearchOpen && filteredRegions.length > 0 && (
+          {/* Search Suggestions */}
+          {showSuggestions && searchTerm && filteredLocations.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-300 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
-              {filteredRegions.map((region) => (
+              {filteredLocations.map((location) => (
                 <button
-                  key={region}
-                  onClick={() => {
-                    setSelectedRegion(region);
-                    setSearchTerm("");
-                    setIsSearchOpen(false);
-                  }}
+                  key={location}
+                  onClick={() => handleLocationSelect(location)}
                   className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-slate-100 last:border-b-0 transition-colors"
                 >
-                  <p className="font-medium text-slate-900">{region}</p>
+                  <p className="font-medium text-slate-900">{location}</p>
                 </button>
               ))}
             </div>
           )}
         </div>
 
+        {/* Map Component */}
+        <MozambiqueMap
+          selectedRegion={selectedRegion}
+          onRegionSelect={handleLocationSelect}
+        />
+
         {/* Current Region Display */}
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6">
-          <p className="text-sm opacity-90 mb-4">Currently viewing:</p>
-          <h2 className="text-3xl font-bold mb-2">{selectedRegion}</h2>
-          <p className="opacity-90">Mozambique</p>
+          <p className="text-sm opacity-90 mb-2">Currently viewing:</p>
+          <h2 className="text-4xl font-bold">{selectedRegion}</h2>
         </div>
 
         {/* Weather Cards */}
@@ -481,8 +629,8 @@ export default function Weather() {
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
           <p className="text-lg font-semibold text-orange-900 mb-2">⚠️ Regional Alert</p>
           <p className="text-orange-800">
-            Heavy rainfall is expected in southern and central regions. Please ensure disaster relief
-            operations account for difficult road conditions and increased risk of flooding.
+            Heavy rainfall is expected in southern and central regions. Please ensure disaster
+            relief operations account for difficult road conditions and increased risk of flooding.
           </p>
         </div>
       </div>
