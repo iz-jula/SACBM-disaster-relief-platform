@@ -40,12 +40,19 @@ export default function Upload() {
       !formData.originator ||
       !formData.location ||
       !formData.help_type ||
-      !formData.evacuation_type ||
       !formData.people ||
       !formData.value
     ) {
       setSubmitStatus("error");
       setErrorMessage("Please fill in all required fields");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+      return;
+    }
+
+    // Validate evacuation type if evacuation is needed
+    if (needsEvacuation && !formData.evacuation_type) {
+      setSubmitStatus("error");
+      setErrorMessage("Please select evacuation type");
       setTimeout(() => setSubmitStatus("idle"), 3000);
       return;
     }
