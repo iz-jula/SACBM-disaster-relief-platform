@@ -404,6 +404,11 @@ export default function Requests() {
                   </div>
 
                   <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Originator</p>
+                    <p className="text-sm text-slate-700 mt-1">{request.originator}</p>
+                  </div>
+
+                  <div>
                     <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Location</p>
                     <p className="text-sm text-slate-700 mt-1">{request.location}</p>
                   </div>
