@@ -66,55 +66,63 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
 
     return new Promise((resolve) => {
       let resolved = false;
-      let buttonClicked = false;
 
-      // Initialize the Google Sign-In
+      // Initialize the Google Sign-In with one-tap or button
       window.google.accounts.id.initialize({
         client_id: API_CONFIG.google.clientId,
         callback: (response: any) => {
           if (!resolved && response.credential) {
             resolved = true;
             const decoded = parseJwt(response.credential);
-            const user: GoogleUser = {
-              email: decoded.email,
-              name: decoded.name,
-              picture: decoded.picture,
-              accessToken: response.credential, // This is the ID token
-            };
-            // Clean up containers
-            const containers = document.querySelectorAll('[id^="google-"]');
-            containers.forEach(c => c.remove());
-            resolve(user);
+            if (decoded && decoded.email) {
+              const user: GoogleUser = {
+                email: decoded.email,
+                name: decoded.name || 'Google User',
+                picture: decoded.picture || '',
+                accessToken: response.credential, // This is the ID token
+              };
+              // Clean up any sign-in UI elements
+              const containers = document.querySelectorAll('[id^="google-"]');
+              containers.forEach(c => c.remove());
+              resolve(user);
+            } else {
+              resolve(null);
+            }
+          }
+        },
+        error_callback: () => {
+          if (!resolved) {
+            resolved = true;
+            resolve(null);
           }
         },
       });
 
-      // Create a hidden container for the sign-in button
+      // Create a container for the sign-in button
       const buttonContainer = document.createElement('div');
       buttonContainer.id = 'google-signin-button-container';
-      buttonContainer.style.display = 'none';
+      // Don't hide it - let the button be visible and clickable
       document.body.appendChild(buttonContainer);
 
-      // Render the button (it will trigger the callback when clicked)
       try {
+        // Render the standard Google Sign-In button
         window.google.accounts.id.renderButton(buttonContainer, {
           type: 'standard',
           theme: 'outline',
           size: 'large',
-          text: 'signin_with',
         });
 
-        // Find and click the button to start authentication
-        setTimeout(() => {
-          const button = buttonContainer.querySelector('button');
-          if (button && !buttonClicked) {
-            buttonClicked = true;
-            button.click();
-          }
-        }, 100);
+        // The user needs to click the button manually
+        // If using One-Tap, it will appear automatically
+        window.google.accounts.id.prompt((notification: any) => {
+          // One-Tap UI will be displayed if conditions are met
+        });
       } catch (e) {
         console.error('Error rendering Google button:', e);
-        resolve(null);
+        if (!resolved) {
+          resolved = true;
+          resolve(null);
+        }
       }
     });
   } catch (error) {
