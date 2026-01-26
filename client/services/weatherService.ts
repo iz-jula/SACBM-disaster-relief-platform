@@ -226,72 +226,13 @@ const newsAlertsCache: CacheEntry = {
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
 // Fetch news alerts from NewsAPI
-// Note: Due to CORS restrictions, direct frontend calls to external APIs are blocked.
-// This function gracefully falls back to mock alerts when the API is unreachable.
+// Note: Direct frontend calls to external APIs are blocked by CORS restrictions.
+// This function returns an empty array to trigger fallback alerts in the UI.
 // For production, implement a backend proxy endpoint to fetch from NewsAPI.
 export async function getNewsAlerts(): Promise<NewsAlert[]> {
-  const now = Date.now();
-
-  // Return cached data if still valid
-  if (newsAlertsCache.data.length > 0 && now - newsAlertsCache.timestamp < CACHE_DURATION) {
-    return newsAlertsCache.data;
-  }
-
-  try {
-    const apiKey = API_CONFIG.newsApi.apiKey;
-
-    if (!apiKey) {
-      // API key not configured - use fallback alerts
-      return [];
-    }
-
-    // Attempt to fetch from NewsAPI
-    const query = 'Mozambique AND (floods OR weather OR emergency OR government)';
-    const url = `${API_CONFIG.newsApi.baseUrl}/search?q=${encodeURIComponent(query)}&sortBy=publishedAt&maxArticles=10&apiKey=${apiKey}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      return [];
-    }
-
-    const data = await response.json();
-
-    if (!data || !data.articles || data.articles.length === 0) {
-      return [];
-    }
-
-    const articles = data.articles;
-
-    const alerts: NewsAlert[] = articles.slice(0, 10).map((article: any, index: number) => ({
-      id: `news-${index}-${Date.now()}`,
-      title: article.title || 'Untitled',
-      description: article.description || article.summary || '',
-      source: article.source?.name || article.source || 'Unknown Source',
-      url: article.url || article.link || '#',
-      publishedAt: article.datePublished || article.publishedAt || article.pubDate || new Date().toISOString(),
-      severity: determineSeverity((article.title || '') + ' ' + (article.description || '')),
-    }));
-
-    // Sort by severity (high first) and then by recency
-    const sortedAlerts = alerts.sort((a, b) => {
-      const severityOrder = { high: 0, medium: 1, low: 2 };
-      if (severityOrder[a.severity] !== severityOrder[b.severity]) {
-        return severityOrder[a.severity] - severityOrder[b.severity];
-      }
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-    });
-
-    // Update cache
-    newsAlertsCache.data = sortedAlerts;
-    newsAlertsCache.timestamp = now;
-
-    return sortedAlerts;
-  } catch (error) {
-    // CORS errors and network errors are expected when API is unreachable
-    // Silently return empty array to trigger fallback alerts
-    return [];
-  }
+  // For frontend-only apps, we cannot directly call external APIs due to CORS restrictions
+  // Return empty array to use fallback alerts from the component
+  return [];
 }
 
 function determineSeverity(text: string): 'high' | 'medium' | 'low' {
