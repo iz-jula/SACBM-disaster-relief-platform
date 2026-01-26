@@ -63,6 +63,7 @@ export default function Requests() {
       amountSpent: 45000,
       source: "INGD",
       category: "Category 2",
+      status: "met",
     },
     {
       id: "2",
@@ -75,6 +76,7 @@ export default function Requests() {
       amountSpent: 125000,
       source: "Chamber",
       category: "Category 1",
+      status: "pending",
     },
   ]);
 
