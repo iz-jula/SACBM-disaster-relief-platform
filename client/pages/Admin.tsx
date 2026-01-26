@@ -82,7 +82,6 @@ export default function Admin() {
               { id: "dashboard", label: "Dashboard", icon: BarChart3 },
               { id: "requests", label: "All Requests", icon: Database },
               { id: "users", label: "Users", icon: Users },
-              { id: "data-repository", label: "Data Repository", icon: Cloud },
               { id: "settings", label: "Settings", icon: Settings },
             ].map((tab) => (
               <button
