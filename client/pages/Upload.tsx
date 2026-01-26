@@ -63,6 +63,8 @@ export default function Upload() {
       // Save to Supabase
       const newRequest = await createRequest({
         originator: formData.originator,
+        email: formData.email,
+        full_name: formData.full_name,
         location: formData.location,
         help_type: formData.help_type,
         evacuation_type: formData.evacuation_type,
@@ -75,6 +77,8 @@ export default function Upload() {
         setSubmitStatus("success");
         setFormData({
           originator: "",
+          email: "",
+          full_name: "",
           location: "",
           help_type: "",
           evacuation_type: "",
