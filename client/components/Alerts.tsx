@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, Cloud, MapPin, TrendingUp } from "lucide-react";
-import { getGoogleCalendarAlerts, getStoredGoogleUser, GoogleAlert } from "@/services/googleService";
+import { AlertCircle, Cloud, MapPin, TrendingUp, ExternalLink } from "lucide-react";
+import { getNewsAlerts, NewsAlert } from "@/services/weatherService";
 
 interface FallbackAlert {
   id: string;
@@ -12,7 +12,7 @@ interface FallbackAlert {
   time: string;
 }
 
-type AlertType = GoogleAlert | FallbackAlert;
+type AlertType = NewsAlert | FallbackAlert;
 
 // Fallback alerts when Google Calendar is not connected
 const FALLBACK_ALERTS: FallbackAlert[] = [
