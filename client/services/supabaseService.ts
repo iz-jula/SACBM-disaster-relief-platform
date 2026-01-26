@@ -54,17 +54,30 @@ export async function getRecentRequests(limit = 5): Promise<RelieRequest[]> {
 // Create a new relief request
 export async function createRequest(request: Omit<RelieRequest, 'id' | 'created_at' | 'edited_at'>): Promise<RelieRequest | null> {
   try {
+    console.log('Attempting to create request:', request);
+
     const { data, error } = await supabase
       .from('relief_requests')
       .insert([request])
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      throw error;
+    }
+
+    console.log('Request created successfully:', data);
     return data;
   } catch (error) {
-    console.error('Error creating request:', error);
-    return null;
+    const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error('Error creating request:', errorMessage);
+    throw new Error(`Failed to create request: ${errorMessage}`);
   }
 }
 
