@@ -14,7 +14,13 @@ interface AdminUser {
 
 export default function Admin() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<"dashboard" | "requests" | "users" | "settings">("dashboard");
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([
     {
       id: "1",
