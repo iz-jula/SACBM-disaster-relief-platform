@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, Cloud, CloudRain, Sun, Droplets, Wind, Eye, AlertCircle, Loader } from "lucide-react";
-import { getCurrentWeather, getForecast, MOZAMBIQUE_CITIES, WeatherData, ForecastDay } from "@/services/weatherService";
+import { getCurrentWeather, getForecast, WeatherData, ForecastDay } from "@/services/weatherService";
+import { MOZAMBIQUE_CITIES } from "@/config/api";
 
 const allCities = Object.keys(MOZAMBIQUE_CITIES);
 
