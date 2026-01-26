@@ -33,7 +33,6 @@ export const MOZAMBIQUE_CITIES = {
   Beira: { lat: -19.8333, lon: 34.5333 },
   Chimoio: { lat: -19.8161, lon: 33.2915 },
   Quelimane: { lat: -18.8789, lon: 36.8867 },
-  Nampula: { lat: -15.1167, lon: 39.2667 },
   Tete: { lat: -16.1667, lon: 33.5833 },
   Lichinga: { lat: -13.3167, lon: 35.2667 },
   Nacala: { lat: -14.5403, lon: 40.6347 },
