@@ -51,8 +51,21 @@ export function initializeGoogleAPI(): Promise<void> {
   });
 }
 
+// Store the callback handler globally so it persists across multiple calls
+let googleCallbackHandler: ((user: GoogleUser) => void) | null = null;
+let googleErrorHandler: ((error: string) => void) | null = null;
+
+// Register callback handlers for Google authentication
+export function registerGoogleCallbacks(
+  onSuccess: (user: GoogleUser) => void,
+  onError: (error: string) => void
+) {
+  googleCallbackHandler = onSuccess;
+  googleErrorHandler = onError;
+}
+
 // Sign in with Google using Google Identity Services
-export async function signInWithGoogle(): Promise<GoogleUser | null> {
+export async function signInWithGoogle(): Promise<void> {
   try {
     // Load the Google API script if not already loaded
     if (!window.google) {
@@ -67,57 +80,55 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
       throw new Error('Google Client ID not configured. Please add VITE_GOOGLE_CLIENT_ID to your .env file.');
     }
 
-    return new Promise<GoogleUser | null>((resolve, reject) => {
-      let callbackReceived = false;
-
-      try {
-        // Initialize Google Sign-In
-        window.google.accounts.id.initialize({
-          client_id: API_CONFIG.google.clientId,
-          callback: (response: any) => {
-            if (!callbackReceived && response.credential) {
-              callbackReceived = true;
-              const decoded = parseJwt(response.credential);
-              if (decoded && decoded.email) {
-                const user: GoogleUser = {
-                  email: decoded.email,
-                  name: decoded.name || 'Google User',
-                  picture: decoded.picture || '',
-                  accessToken: response.credential,
-                };
-                resolve(user);
-              } else {
-                reject(new Error('Failed to parse Google credentials'));
-              }
-            } else if (response.error) {
-              reject(new Error(response.error));
+    // Initialize Google Sign-In with callback
+    window.google.accounts.id.initialize({
+      client_id: API_CONFIG.google.clientId,
+      callback: (response: any) => {
+        if (response.credential) {
+          const decoded = parseJwt(response.credential);
+          if (decoded && decoded.email) {
+            const user: GoogleUser = {
+              email: decoded.email,
+              name: decoded.name || 'Google User',
+              picture: decoded.picture || '',
+              accessToken: response.credential,
+            };
+            if (googleCallbackHandler) {
+              googleCallbackHandler(user);
             }
-          },
-          error_callback: () => {
-            if (!callbackReceived) {
-              reject(new Error('Google authentication failed'));
+          } else {
+            if (googleErrorHandler) {
+              googleErrorHandler('Failed to parse Google credentials');
             }
-          },
-        });
-
-        // Render the button in the existing container
-        const buttonContainer = document.getElementById('google-signin-button');
-        if (buttonContainer) {
-          window.google.accounts.id.renderButton(buttonContainer, {
-            type: 'standard',
-            theme: 'outline',
-            size: 'large',
-          });
-        } else {
-          reject(new Error('Google button container not found in DOM'));
+          }
+        } else if (response.error) {
+          if (googleErrorHandler) {
+            googleErrorHandler(response.error);
+          }
         }
-      } catch (e) {
-        reject(e);
-      }
+      },
+      error_callback: () => {
+        if (googleErrorHandler) {
+          googleErrorHandler('Google authentication failed');
+        }
+      },
     });
+
+    // Render the button in the existing container
+    const buttonContainer = document.getElementById('google-signin-button');
+    if (buttonContainer && !buttonContainer.querySelector('button')) {
+      window.google.accounts.id.renderButton(buttonContainer, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+      });
+    }
   } catch (error) {
-    console.error('Error signing in with Google:', error);
-    throw error;
+    console.error('Error initializing Google Sign-In:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    if (googleErrorHandler) {
+      googleErrorHandler(errorMsg);
+    }
   }
 }
 
