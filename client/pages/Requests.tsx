@@ -142,6 +142,19 @@ function RequestsTable({ requests, onStatusChange }: { requests: RelieRequest[],
                   <p className="text-lg font-bold text-primary mt-1">{parseInt(request.value || '0').toLocaleString()}</p>
                 </div>
               </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => onStatusChange(request.id || 0, !request.status)}
+                  className={`w-full px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    request.status
+                      ? "bg-blue-100 hover:bg-blue-200 text-blue-700"
+                      : "bg-green-100 hover:bg-green-200 text-green-700"
+                  }`}
+                >
+                  {request.status ? "Mark Pending" : "Mark Met"}
+                </button>
+              </div>
             </div>
           </div>
         ))}
