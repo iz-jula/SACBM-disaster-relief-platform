@@ -1,17 +1,17 @@
 // Mock data - will be replaced with Supabase queries
-const MOCK_USERS = [
+const MOCK_USERS: AdminUser[] = [
   {
     id: "1",
     name: "Admin User",
     email: "admin@sabcm.org",
-    role: "admin" as const,
+    role: "admin",
     lastLogin: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
   },
   {
     id: "2",
     name: "Manager User",
     email: "manager@sabcm.org",
-    role: "manager" as const,
+    role: "manager",
     lastLogin: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];
