@@ -184,7 +184,7 @@ export default function Upload() {
             {/* Relief Details Section */}
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-6">Relief Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 {/* Type of Help */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -208,27 +208,50 @@ export default function Upload() {
                   </select>
                 </div>
 
-                {/* Type of Evacuation */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Type of Evacuation *
+                {/* Evacuation Needed Checkbox */}
+                <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="needsEvacuation"
+                    checked={needsEvacuation}
+                    onChange={(e) => {
+                      setNeedsEvacuation(e.target.checked);
+                      if (!e.target.checked) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          evacuation_type: "",
+                        }));
+                      }
+                    }}
+                    className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                  />
+                  <label htmlFor="needsEvacuation" className="text-sm font-medium text-slate-700 cursor-pointer">
+                    Is evacuation needed for this relief operation?
                   </label>
-                  <select
-                    name="evacuation_type"
-                    value={formData.evacuation_type}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="">Select evacuation type</option>
-                    <option value="By boat">By boat</option>
-                    <option value="By tractor">By tractor</option>
-                    <option value="By helicopter">By helicopter</option>
-                    <option value="By vehicle">By vehicle</option>
-                    <option value="On foot">On foot</option>
-                    <option value="Other">Other means</option>
-                  </select>
                 </div>
+
+                {/* Type of Evacuation - Only shows if evacuation is needed */}
+                {needsEvacuation && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Type of Evacuation *
+                    </label>
+                    <select
+                      name="evacuation_type"
+                      value={formData.evacuation_type}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Select evacuation type</option>
+                      <option value="By boat">By boat</option>
+                      <option value="By tractor">By tractor</option>
+                      <option value="By helicopter">By helicopter</option>
+                      <option value="By vehicle">By vehicle</option>
+                      <option value="On foot">On foot</option>
+                      <option value="Other">Other means</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
 
