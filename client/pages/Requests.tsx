@@ -358,13 +358,11 @@ export default function Requests() {
                       <p className="text-base font-bold text-slate-900 mt-1">{request.company}</p>
                     </div>
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${
-                        request.source === "INGD"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
+                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${getCategoryStyles(
+                        request.category || getRequestCategory(request.source),
+                      )}`}
                     >
-                      {request.source}
+                      {request.category || getRequestCategory(request.source)}
                     </span>
                   </div>
 
