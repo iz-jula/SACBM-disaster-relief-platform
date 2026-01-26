@@ -225,8 +225,10 @@ const newsAlertsCache: CacheEntry = {
 
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
-// Fetch news alerts - uses fallback alerts due to CORS restrictions on direct API calls
-// In production, you would need a backend proxy to fetch from NewsAPI
+// Fetch news alerts from NewsAPI
+// Note: Due to CORS restrictions, direct frontend calls to external APIs are blocked.
+// This function gracefully falls back to mock alerts when the API is unreachable.
+// For production, implement a backend proxy endpoint to fetch from NewsAPI.
 export async function getNewsAlerts(): Promise<NewsAlert[]> {
   const now = Date.now();
 
@@ -238,33 +240,24 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
   try {
     const apiKey = API_CONFIG.newsApi.apiKey;
 
-    // Note: Direct frontend calls to NewsAPI are blocked by CORS restrictions.
-    // For production use, implement a backend proxy endpoint instead.
-    // For now, return empty array to trigger fallback alerts in the UI.
     if (!apiKey) {
-      console.log('NewsAPI key not configured - using fallback alerts');
+      // API key not configured - use fallback alerts
       return [];
     }
 
-    // Attempt to fetch from NewsAPI via CORS proxy (fallback for demo)
-    // In production, use a backend endpoint instead
+    // Attempt to fetch from NewsAPI
     const query = 'Mozambique AND (floods OR weather OR emergency OR government)';
-    const corsProxyUrl = 'https://api.allorigins.win/get?url=';
-    const newsApiUrl = `${API_CONFIG.newsApi.baseUrl}/search?q=${encodeURIComponent(query)}&sortBy=publishedAt&maxArticles=10&apiKey=${apiKey}`;
+    const url = `${API_CONFIG.newsApi.baseUrl}/search?q=${encodeURIComponent(query)}&sortBy=publishedAt&maxArticles=10&apiKey=${apiKey}`;
 
-    const response = await fetch(corsProxyUrl + encodeURIComponent(newsApiUrl), {
-      method: 'GET',
-    });
+    const response = await fetch(url);
 
     if (!response.ok) {
       return [];
     }
 
-    const corsData = await response.json();
-    const data = corsData.contents ? JSON.parse(corsData.contents) : null;
+    const data = await response.json();
 
     if (!data || !data.articles || data.articles.length === 0) {
-      // No articles found, let UI show fallback alerts
       return [];
     }
 
@@ -295,8 +288,8 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 
     return sortedAlerts;
   } catch (error) {
-    // CORS errors and network errors are expected - silently use fallback alerts
-    // This is normal behavior when NewsAPI cannot be reached
+    // CORS errors and network errors are expected when API is unreachable
+    // Silently return empty array to trigger fallback alerts
     return [];
   }
 }
