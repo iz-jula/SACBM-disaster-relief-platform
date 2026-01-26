@@ -1,5 +1,5 @@
 import { BarChart3, Users, TrendingUp, Activity } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import WeatherForecast from "@/components/WeatherForecast";
 
