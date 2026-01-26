@@ -169,6 +169,8 @@ export default function Requests() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
+  const [showActionDropdown, setShowActionDropdown] = useState(false);
   const [formData, setFormData] = useState({
     originator: "",
     email: "",
