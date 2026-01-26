@@ -3,6 +3,7 @@ import {
   getRecentRequests as getSupabaseRecentRequests,
   createRequest as createSupabaseRequest,
   updateRequest as updateSupabaseRequest,
+  deleteRequest as deleteSupabaseRequest,
   getMetrics as getSupabaseMetrics,
   RelieRequest,
 } from "./supabaseService";
