@@ -225,7 +225,7 @@ const newsAlertsCache: CacheEntry = {
 
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
-// Fetch news alerts using NewsAPI.ai
+// Fetch news alerts using backend proxy for NewsAPI.ai
 export async function getNewsAlerts(): Promise<NewsAlert[]> {
   const now = Date.now();
 
@@ -234,22 +234,9 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     return newsAlertsCache.data;
   }
 
-  const apiKey = import.meta.env.VITE_NEWSAPI_KEY;
-  if (!apiKey) {
-    console.warn('NewsAPI key not configured');
-    return [];
-  }
-
   try {
-    // NewsAPI.ai search endpoint using GET request
-    const searchParams = new URLSearchParams({
-      query: '(Mozambique AND (floods OR weather OR government OR emergency))',
-      sortBy: 'publishedAt',
-      maxArticles: '20',
-      apiKey: apiKey,
-    });
-
-    const response = await fetch(`https://api.newsapi.ai/v1/search?${searchParams}`, {
+    // Call the backend proxy endpoint
+    const response = await fetch('/api/news/alerts', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -257,15 +244,15 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     });
 
     if (!response.ok) {
-      console.error('NewsAPI error:', response.status, response.statusText);
+      console.error('News API error:', response.status, response.statusText);
       return [];
     }
 
     const data = await response.json();
-    const articles = data.articles || data.data || [];
+    const articles = data.articles || [];
 
     if (!articles.length) {
-      console.warn('No articles returned from NewsAPI');
+      console.warn('No articles returned from news service');
       return [];
     }
 
