@@ -53,11 +53,19 @@ export async function handleNewsAlerts(req: any, res: any) {
     // Return the articles directly
     res.json({ articles, success: true });
   } catch (error: any) {
-    console.error('Error fetching news alerts:', error?.message || error);
+    const isNetworkError = error?.code === 'ENOTFOUND' || error?.name === 'AbortError' || error?.message?.includes('fetch failed');
+
+    if (isNetworkError) {
+      console.warn('News API - Network error (dev environment may not have external DNS access):', error?.message || error);
+    } else {
+      console.error('Error fetching news alerts:', error?.message || error);
+    }
+
     res.status(500).json({
-      error: error?.message || 'Internal server error',
+      error: isNetworkError ? 'Network connectivity issue - using fallback alerts' : (error?.message || 'Internal server error'),
       articles: [],
-      isNetworkError: error?.code === 'ENOTFOUND' || error?.name === 'AbortError'
+      isNetworkError: isNetworkError,
+      isFallbackMode: isNetworkError
     });
   }
 }
