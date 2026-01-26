@@ -1,3 +1,11 @@
+import {
+  getRequestsFromSheet,
+  addRequestToSheet,
+  updateRequestInSheet,
+  getRequestMetrics,
+} from "./googleDriveService";
+import { getStoredGoogleUser } from "./googleService";
+
 export interface RelieRequest {
   id: string;
   originator: string;
@@ -17,27 +25,35 @@ export interface Metrics {
   totalValueDeployed: number;
   averagePerRequest: number;
   byStatus: Record<string, number>;
-  byHelpType: Record<string, number>;
   byCategory: Record<string, number>;
 }
 
-// Fetch all requests or filter by status
+// Fetch all requests from Google Sheet
 export async function getRequests(
   status?: string,
   limit?: number
 ): Promise<RelieRequest[]> {
   try {
-    const params = new URLSearchParams();
-    if (status) params.append("status", status);
-    if (limit) params.append("limit", limit.toString());
-
-    const response = await fetch(`/api/requests?${params}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch requests: ${response.statusText}`);
+    // Check if user is authenticated
+    const user = getStoredGoogleUser();
+    if (!user?.accessToken) {
+      console.warn("User not authenticated with Google");
+      return [];
     }
 
-    const data = await response.json();
-    return data.requests || [];
+    let requests = await getRequestsFromSheet();
+
+    // Filter by status if provided
+    if (status) {
+      requests = requests.filter((r) => r.status === status);
+    }
+
+    // Apply limit if provided
+    if (limit) {
+      requests = requests.slice(0, limit);
+    }
+
+    return requests;
   } catch (error) {
     console.error("Error fetching requests:", error);
     return [];
@@ -56,64 +72,61 @@ export async function getRequestsByStatus(
   return getRequests(status);
 }
 
-// Create a new request
+// Create a new request in Google Sheet
 export async function createRequest(
   request: Omit<RelieRequest, "id" | "createdAt">
 ): Promise<RelieRequest | null> {
   try {
-    const response = await fetch("/api/requests", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to create request: ${response.statusText}`);
+    const user = getStoredGoogleUser();
+    if (!user?.accessToken) {
+      console.error("User not authenticated");
+      return null;
     }
 
-    return await response.json();
+    const newRequest = await addRequestToSheet(request);
+    return newRequest;
   } catch (error) {
     console.error("Error creating request:", error);
     return null;
   }
 }
 
-// Update request status or category
+// Update request status or category in Google Sheet
 export async function updateRequest(
   id: string,
   updates: Partial<Pick<RelieRequest, "status" | "category">>
 ): Promise<RelieRequest | null> {
   try {
-    const response = await fetch(`/api/requests/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updates),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to update request: ${response.statusText}`);
+    const user = getStoredGoogleUser();
+    if (!user?.accessToken) {
+      console.error("User not authenticated");
+      return null;
     }
 
-    return await response.json();
+    const success = await updateRequestInSheet(id, updates);
+    if (success) {
+      // Return the updated request - ideally fetch it from the sheet
+      // For now, return a partial object
+      return { id } as RelieRequest;
+    }
+    return null;
   } catch (error) {
     console.error("Error updating request:", error);
     return null;
   }
 }
 
-// Fetch metrics (aggregates)
+// Fetch metrics (aggregates) from Google Sheet
 export async function getMetrics(): Promise<Metrics | null> {
   try {
-    const response = await fetch("/api/metrics");
-    if (!response.ok) {
-      throw new Error(`Failed to fetch metrics: ${response.statusText}`);
+    const user = getStoredGoogleUser();
+    if (!user?.accessToken) {
+      console.warn("User not authenticated");
+      return null;
     }
 
-    return await response.json();
+    const metrics = await getRequestMetrics();
+    return metrics as unknown as Metrics;
   } catch (error) {
     console.error("Error fetching metrics:", error);
     return null;
