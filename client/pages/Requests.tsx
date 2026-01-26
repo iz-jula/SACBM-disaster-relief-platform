@@ -13,7 +13,7 @@ function getStatusLabel(status: boolean) {
   return status ? "✓ Met" : "⏳ Pending";
 }
 
-function RequestsTable({ requests, onStatusChange }: { requests: RelieRequest[], onStatusChange: (id: number, newStatus: boolean) => void }) {
+function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSelect }: { requests: RelieRequest[], onStatusChange: (id: number, newStatus: boolean) => void, selectedRequests: Set<number>, onToggleSelect: (id: number) => void }) {
   return (
     <>
       {/* Desktop Table View */}
@@ -21,6 +21,12 @@ function RequestsTable({ requests, onStatusChange }: { requests: RelieRequest[],
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
+              <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                <input type="checkbox" className="w-4 h-4 rounded" disabled />
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                #Ref
+              </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                 Originator
               </th>
@@ -41,9 +47,6 @@ function RequestsTable({ requests, onStatusChange }: { requests: RelieRequest[],
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                 Status
-              </th>
-              <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
-                Action
               </th>
             </tr>
           </thead>
