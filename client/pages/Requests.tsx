@@ -113,13 +113,21 @@ export default function Requests() {
             <h1 className="text-3xl font-bold text-slate-900">Relief Requests</h1>
             <p className="text-slate-600 mt-1">Manage all disaster relief requests</p>
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="inline-flex items-center gap-2 bg-primary hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
-          >
-            <Plus size={20} />
-            New Request
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+            >
+              ← Back
+            </button>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="inline-flex items-center gap-2 bg-primary hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+            >
+              <Plus size={20} />
+              New Request
+            </button>
+          </div>
         </div>
 
         {/* Form */}
