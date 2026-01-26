@@ -321,6 +321,38 @@ export default function Requests() {
             >
               ← Back
             </button>
+
+            {/* Action Dropdown */}
+            {selectedRequests.size > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowActionDropdown(!showActionDropdown)}
+                  className="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                >
+                  Actions ({selectedRequests.size})
+                  <ChevronDown size={18} />
+                </button>
+
+                {showActionDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 z-10">
+                    <button
+                      onClick={handleResolveSelected}
+                      className="w-full text-left px-4 py-3 hover:bg-green-50 text-slate-900 font-medium transition-colors border-b border-slate-200"
+                    >
+                      ✓ Resolved
+                    </button>
+                    <button
+                      onClick={handleDeleteSelected}
+                      className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-700 font-medium transition-colors inline-flex items-center gap-2"
+                    >
+                      <Trash2 size={18} />
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             <button
               onClick={() => setShowForm(!showForm)}
               className="inline-flex items-center gap-2 bg-primary hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
