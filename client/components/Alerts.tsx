@@ -12,6 +12,8 @@ interface FallbackAlert {
   time: string;
 }
 
+type AlertType = GoogleAlert | FallbackAlert;
+
 // Fallback alerts when Google Calendar is not connected
 const FALLBACK_ALERTS: FallbackAlert[] = [
   {
@@ -53,7 +55,7 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
 ];
 
 export default function Alerts() {
-  const [alerts, setAlerts] = useState<GoogleAlert[] | FallbackAlert[]>(FALLBACK_ALERTS);
+  const [alerts, setAlerts] = useState<AlertType[]>(FALLBACK_ALERTS);
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -72,7 +74,6 @@ export default function Alerts() {
         if (googleAlerts.length > 0) {
           setAlerts(googleAlerts);
         } else {
-          // If no Google Calendar events, use fallback
           setAlerts(FALLBACK_ALERTS);
         }
       } catch (error) {
@@ -113,11 +114,39 @@ export default function Alerts() {
     }
   };
 
-  const getIcon = (type: string) => {
-    if (type === "weather") {
-      return <Cloud size={20} />;
+  const getTitle = (alert: AlertType): string => {
+    if ("title" in alert) {
+      return alert.title;
     }
-    return <AlertCircle size={20} />;
+    return "Calendar Event";
+  };
+
+  const getDescription = (alert: AlertType): string => {
+    if ("description" in alert) {
+      return alert.description;
+    }
+    return "";
+  };
+
+  const getTime = (alert: AlertType): string => {
+    if ("time" in alert) {
+      return alert.time;
+    }
+    return new Date(alert.start).toLocaleString();
+  };
+
+  const getSeverity = (alert: AlertType): "high" | "medium" | "low" => {
+    if ("severity" in alert) {
+      return alert.severity;
+    }
+    return "medium";
+  };
+
+  const getLocation = (alert: AlertType): string => {
+    if ("location" in alert) {
+      return alert.location;
+    }
+    return "";
   };
 
   return (
@@ -145,8 +174,8 @@ export default function Alerts() {
       <div className="space-y-3 p-6">
         {alerts.length > 0 ? (
           alerts.map((alert) => {
-            const isFallback = !("start" in alert);
-            const severity = "severity" in alert ? alert.severity : "medium";
+            const severity = getSeverity(alert);
+            const isGoogle = "start" in alert;
 
             return (
               <div
@@ -155,33 +184,31 @@ export default function Alerts() {
               >
                 <div className="flex items-start gap-3">
                   <div className={`p-2 rounded-lg flex-shrink-0 ${getSeverityBadgeColor(severity)}`}>
-                    {isFallback && "type" in alert && alert.type === "weather" ? (
-                      <Cloud size={20} />
-                    ) : (
-                      <AlertCircle size={20} />
-                    )}
+                    {isGoogle ? <AlertCircle size={20} /> : <Cloud size={20} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="font-semibold truncate">"title" in alert ? alert.title : alert.title</p>
+                      <p className="font-semibold truncate">{getTitle(alert)}</p>
                       <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getSeverityBadgeColor(severity)}`}>
                         {severity.charAt(0).toUpperCase() + severity.slice(1)}
                       </span>
                     </div>
 
-                    {isFallback && "location" in alert && (
+                    {getLocation(alert) && (
                       <p className="text-sm opacity-75 flex items-center gap-1 mb-2">
                         <MapPin size={14} />
-                        {(alert as FallbackAlert).location}
+                        {getLocation(alert)}
                       </p>
                     )}
 
-                    <p className="text-sm opacity-90 mb-2">
-                      {"description" in alert ? (alert as FallbackAlert).description : (alert as GoogleAlert).title}
-                    </p>
+                    {getDescription(alert) && (
+                      <p className="text-sm opacity-90 mb-2">
+                        {getDescription(alert)}
+                      </p>
+                    )}
 
                     <p className="text-xs opacity-70">
-                      {isFallback && "time" in alert ? alert.time : new Date(alert.start).toLocaleString()}
+                      {getTime(alert)}
                     </p>
                   </div>
                 </div>
