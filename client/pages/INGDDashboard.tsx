@@ -1,8 +1,24 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Layout from "@/components/Layout";
 
 export default function INGDDashboard() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load Tableau API script
+    const script = document.createElement("script");
+    script.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
 
   return (
     <Layout>
