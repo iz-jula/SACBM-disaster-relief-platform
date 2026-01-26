@@ -5,26 +5,25 @@ import Layout from "@/components/Layout";
 
 interface RelieRequest {
   id: string;
-  company: string;
   originator: string;
   location: string;
   helpType: string;
   evacuationType: string;
   peopleInvolved: number;
   amountSpent: number;
-  source: "INGD" | "Chamber";
-  category?: "Category 1" | "Category 2";
+  category: "Category 1" | "Category 2" | "Category 3";
   status: "pending" | "met" | "partially_met";
 }
 
-function getRequestCategory(source: "INGD" | "Chamber"): "Category 1" | "Category 2" {
-  return source === "Chamber" ? "Category 1" : "Category 2";
-}
-
-function getCategoryStyles(category: "Category 1" | "Category 2") {
-  return category === "Category 1"
-    ? "bg-red-100 text-red-700"
-    : "bg-orange-100 text-orange-700";
+function getCategoryStyles(category: "Category 1" | "Category 2" | "Category 3") {
+  switch (category) {
+    case "Category 1":
+      return "bg-red-100 text-red-700";
+    case "Category 2":
+      return "bg-orange-100 text-orange-700";
+    case "Category 3":
+      return "bg-yellow-100 text-yellow-700";
+  }
 }
 
 function getStatusStyles(status: "pending" | "met" | "partially_met") {
@@ -49,32 +48,164 @@ function getStatusLabel(status: "pending" | "met" | "partially_met") {
   }
 }
 
+function RequestsTable({ requests }: { requests: RelieRequest[] }) {
+  return (
+    <>
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50">
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Category
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Status
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Originator
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Location
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Help Type
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Evacuation Type
+              </th>
+              <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                People
+              </th>
+              <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
+                Value (MZN)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map((request, index) => (
+              <tr
+                key={request.id}
+                className={`border-b border-slate-200 transition-colors hover:bg-blue-50 ${
+                  index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                }`}
+              >
+                <td className="px-6 py-4 text-sm">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getCategoryStyles(request.category)}`}>
+                    {request.category}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}>
+                    {getStatusLabel(request.status)}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                  {request.originator}
+                </td>
+                <td className="px-6 py-4 text-sm text-slate-600">
+                  {request.location}
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                    {request.helpType}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-sm text-slate-600">
+                  {request.evacuationType}
+                </td>
+                <td className="px-6 py-4 text-sm text-center text-slate-900 font-medium">
+                  {request.peopleInvolved}
+                </td>
+                <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
+                  {request.amountSpent.toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden divide-y divide-slate-200">
+        {requests.map((request) => (
+          <div key={request.id} className="px-6 py-6 hover:bg-blue-50 transition-colors">
+            <div className="space-y-4">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Originator</p>
+                  <p className="text-base font-bold text-slate-900 mt-1 break-words">{request.originator}</p>
+                </div>
+                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap flex-shrink-0 ${getCategoryStyles(request.category)}`}>
+                  {request.category}
+                </span>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Location</p>
+                <p className="text-sm text-slate-700 mt-1 break-words">{request.location}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Help Type</p>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 mt-1">
+                    {request.helpType}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Status</p>
+                  <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium mt-1 ${getStatusStyles(request.status)}`}>
+                    {getStatusLabel(request.status)}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Evacuation Type</p>
+                <p className="text-sm text-slate-700 mt-1 break-words">{request.evacuationType}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                <div>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">People</p>
+                  <p className="text-lg font-bold text-slate-900 mt-1">{request.peopleInvolved}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Value (MZN)</p>
+                  <p className="text-lg font-bold text-primary mt-1">{request.amountSpent.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 export default function Requests() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<RelieRequest[]>([
     {
       id: "1",
-      company: "Local Hospital",
       originator: "Ministry of Health",
       location: "District 1, Village A",
       helpType: "Materials",
       evacuationType: "By boat",
       peopleInvolved: 150,
       amountSpent: 45000,
-      source: "INGD",
       category: "Category 2",
       status: "met",
     },
     {
       id: "2",
-      company: "Community Center",
       originator: "Local Government",
       location: "District 2, Village B",
       helpType: "Food",
       evacuationType: "By tractor",
       peopleInvolved: 320,
       amountSpent: 125000,
-      source: "Chamber",
       category: "Category 1",
       status: "pending",
     },
@@ -82,14 +213,13 @@ export default function Requests() {
 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    company: "",
     originator: "",
     location: "",
     helpType: "",
     evacuationType: "",
     peopleInvolved: "",
     amountSpent: "",
-    source: "INGD" as "INGD" | "Chamber",
+    category: "Category 1" as "Category 1" | "Category 2" | "Category 3",
     status: "pending" as "pending" | "met" | "partially_met",
   });
 
@@ -99,10 +229,7 @@ export default function Requests() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "peopleInvolved" || name === "amountSpent"
-          ? value
-          : value,
+      [name]: value,
     }));
   };
 
@@ -111,32 +238,49 @@ export default function Requests() {
 
     const newRequest: RelieRequest = {
       id: (requests.length + 1).toString(),
-      company: formData.company,
       originator: formData.originator,
       location: formData.location,
       helpType: formData.helpType,
       evacuationType: formData.evacuationType,
       peopleInvolved: parseInt(formData.peopleInvolved) || 0,
       amountSpent: parseInt(formData.amountSpent) || 0,
-      source: formData.source,
-      category: getRequestCategory(formData.source),
+      category: formData.category,
       status: formData.status,
     };
 
     setRequests([...requests, newRequest]);
     setFormData({
-      company: "",
       originator: "",
       location: "",
       helpType: "",
       evacuationType: "",
       peopleInvolved: "",
       amountSpent: "",
-      source: "INGD",
+      category: "Category 1",
       status: "pending",
     });
     setShowForm(false);
   };
+
+  // Group and sort requests
+  const pendingRequests = requests.filter((r) => r.status === "pending").sort((a, b) => {
+    // Category 1 first
+    if (a.category === "Category 1" && b.category !== "Category 1") return -1;
+    if (a.category !== "Category 1" && b.category === "Category 1") return 1;
+    return 0;
+  });
+
+  const partiallyMetRequests = requests.filter((r) => r.status === "partially_met").sort((a, b) => {
+    if (a.category === "Category 1" && b.category !== "Category 1") return -1;
+    if (a.category !== "Category 1" && b.category === "Category 1") return 1;
+    return 0;
+  });
+
+  const metRequests = requests.filter((r) => r.status === "met").sort((a, b) => {
+    if (a.category === "Category 1" && b.category !== "Category 1") return -1;
+    if (a.category !== "Category 1" && b.category === "Category 1") return 1;
+    return 0;
+  });
 
   return (
     <Layout>
@@ -181,21 +325,6 @@ export default function Requests() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Company Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Enter company name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Originator of Request *
                   </label>
                   <input
@@ -207,6 +336,22 @@ export default function Requests() {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="e.g., Ministry of Health, Local Government"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Category *
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="Category 1">Member of the SACBM (Category 1)</option>
+                    <option value="Category 2">INGD (Category 2)</option>
+                    <option value="Category 3">Others (Category 3)</option>
+                  </select>
                 </div>
 
                 <div>
@@ -258,7 +403,7 @@ export default function Requests() {
                     <option value="By boat">By boat</option>
                     <option value="By tractor">By tractor</option>
                     <option value="By helicopter">By helicopter</option>
-                    <option value="Other">Other means</option>
+                    <option value="Other means">Other means</option>
                   </select>
                 </div>
 
@@ -290,21 +435,6 @@ export default function Requests() {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Enter amount in meticais"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Request Source *
-                  </label>
-                  <select
-                    name="source"
-                    value={formData.source}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  >
-                    <option value="INGD">INGD</option>
-                    <option value="Chamber">Chamber Members</option>
-                  </select>
                 </div>
 
                 <div>
@@ -343,176 +473,50 @@ export default function Requests() {
           </div>
         )}
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-            <h2 className="text-xl font-bold text-slate-900">
-              All Requests ({requests.length})
-            </h2>
-          </div>
-
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                    Category
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                    Company
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                    Originator
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                    Location
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                    Help Type
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                    Evacuation
-                  </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
-                    People
-                  </th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
-                    Value (MZN)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((request, index) => (
-                  <tr
-                    key={request.id}
-                    className={`border-b border-slate-200 transition-colors hover:bg-blue-50 ${
-                      index % 2 === 0 ? "bg-white" : "bg-slate-50"
-                    }`}
-                  >
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getCategoryStyles(
-                          request.category || getRequestCategory(request.source),
-                        )}`}
-                      >
-                        {request.category || getRequestCategory(request.source)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}
-                      >
-                        {getStatusLabel(request.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                      {request.company}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {request.originator}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {request.location}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                        {request.helpType}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {request.evacuationType}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center text-slate-900 font-medium">
-                      {request.peopleInvolved}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
-                      {request.amountSpent.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Card View */}
-          <div className="md:hidden divide-y divide-slate-200">
-            {requests.map((request) => (
-              <div key={request.id} className="px-6 py-6 hover:bg-blue-50 transition-colors">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start gap-4">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Company</p>
-                      <p className="text-base font-bold text-slate-900 mt-1">{request.company}</p>
-                    </div>
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${getCategoryStyles(
-                        request.category || getRequestCategory(request.source),
-                      )}`}
-                    >
-                      {request.category || getRequestCategory(request.source)}
-                    </span>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Originator</p>
-                    <p className="text-sm text-slate-700 mt-1">{request.originator}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Location</p>
-                    <p className="text-sm text-slate-700 mt-1">{request.location}</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Help Type</p>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 mt-1">
-                        {request.helpType}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Status</p>
-                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium mt-1 ${getStatusStyles(request.status)}`}>
-                        {getStatusLabel(request.status)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Evacuation</p>
-                      <p className="text-sm text-slate-700 mt-1">{request.evacuationType}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">People</p>
-                      <p className="text-lg font-bold text-slate-900 mt-1">{request.peopleInvolved}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Value (MZN)</p>
-                      <p className="text-lg font-bold text-primary mt-1">{request.amountSpent.toLocaleString()}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {requests.length === 0 && (
-            <div className="px-6 py-12 text-center">
-              <p className="text-slate-500 text-lg">No relief requests yet.</p>
-              <p className="text-slate-400 mt-2">
-                Click "New Request" to add your first relief request.
-              </p>
+        {/* Pending Requests Section */}
+        {pendingRequests.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100">
+              <h2 className="text-xl font-bold text-slate-900">
+                ⏳ Pending Requests ({pendingRequests.length})
+              </h2>
             </div>
-          )}
-        </div>
+            <RequestsTable requests={pendingRequests} />
+          </div>
+        )}
+
+        {/* Partially Met Requests Section */}
+        {partiallyMetRequests.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-yellow-50 to-yellow-100">
+              <h2 className="text-xl font-bold text-slate-900">
+                ◐ Partially Met Requests ({partiallyMetRequests.length})
+              </h2>
+            </div>
+            <RequestsTable requests={partiallyMetRequests} />
+          </div>
+        )}
+
+        {/* Completed Requests Section */}
+        {metRequests.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-green-50 to-green-100">
+              <h2 className="text-xl font-bold text-slate-900">
+                ✓ Completed Requests ({metRequests.length})
+              </h2>
+            </div>
+            <RequestsTable requests={metRequests} />
+          </div>
+        )}
+
+        {requests.length === 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 px-6 py-12 text-center">
+            <p className="text-slate-500 text-lg">No relief requests yet.</p>
+            <p className="text-slate-400 mt-2">
+              Click "New Request" to add your first relief request.
+            </p>
+          </div>
+        )}
       </div>
     </Layout>
   );
