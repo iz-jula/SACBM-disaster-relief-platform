@@ -218,33 +218,41 @@ export default function Requests() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    const newRequest: RelieRequest = {
-      id: (requests.length + 1).toString(),
-      originator: formData.originator,
-      location: formData.location,
-      helpType: formData.helpType,
-      evacuationType: formData.evacuationType,
-      peopleInvolved: parseInt(formData.peopleInvolved) || 0,
-      amountSpent: parseInt(formData.amountSpent) || 0,
-      category: formData.category,
-      status: formData.status,
-    };
+    try {
+      const newRequest = await createRequest({
+        originator: formData.originator,
+        location: formData.location,
+        helpType: formData.helpType,
+        evacuationType: formData.evacuationType,
+        peopleInvolved: parseInt(formData.peopleInvolved) || 0,
+        amountSpent: parseInt(formData.amountSpent) || 0,
+        category: formData.category,
+        status: formData.status,
+      });
 
-    setRequests([...requests, newRequest]);
-    setFormData({
-      originator: "",
-      location: "",
-      helpType: "",
-      evacuationType: "",
-      peopleInvolved: "",
-      amountSpent: "",
-      category: "Category 1",
-      status: "pending",
-    });
-    setShowForm(false);
+      if (newRequest) {
+        setRequests([...requests, newRequest]);
+        setFormData({
+          originator: "",
+          location: "",
+          helpType: "",
+          evacuationType: "",
+          peopleInvolved: "",
+          amountSpent: "",
+          category: "Category 1",
+          status: "pending",
+        });
+        setShowForm(false);
+      }
+    } catch (error) {
+      console.error("Error creating request:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Group and sort requests
