@@ -81,7 +81,7 @@ export default function Upload() {
         help_type: formData.help_type,
         evacuation_type: formData.evacuation_type,
         people: formData.people,
-        value: formData.value,
+        value: formData.value.replace(/,/g, ''), // Remove commas before saving
         status: false, // New requests start as pending
       });
 
