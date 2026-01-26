@@ -70,9 +70,18 @@ export default function WeatherForecast() {
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-      <div className="mb-6">
-        <h2 className="text-lg font-bold text-slate-900">Weather Forecast</h2>
-        <p className="text-sm text-slate-600 mt-1">Mozambique Region</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">Weather Forecast</h2>
+          <p className="text-sm text-slate-600 mt-1">Mozambique Region</p>
+        </div>
+        <Link
+          to="/weather"
+          className="inline-flex items-center gap-2 text-primary hover:text-orange-600 font-medium transition-colors"
+        >
+          View Full Forecast
+          <ArrowRight size={16} />
+        </Link>
       </div>
 
       {/* Current Weather - Large Card */}
