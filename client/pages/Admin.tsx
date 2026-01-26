@@ -76,17 +76,18 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="border-b border-slate-200">
-          <div className="flex gap-8">
+          <div className="flex gap-8 overflow-x-auto">
             {[
               { id: "dashboard", label: "Dashboard", icon: BarChart3 },
               { id: "requests", label: "All Requests", icon: Database },
               { id: "users", label: "Users", icon: Users },
+              { id: "data-repository", label: "Data Repository", icon: Cloud },
               { id: "settings", label: "Settings", icon: Settings },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-4 font-medium flex items-center gap-2 border-b-2 transition-all ${
+                className={`px-4 py-4 font-medium flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "border-primary text-primary"
                     : "border-transparent text-slate-600 hover:text-slate-900"
