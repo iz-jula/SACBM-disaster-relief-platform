@@ -245,6 +245,8 @@ export default function Requests() {
         setRequests([newRequest, ...requests]);
         setFormData({
           originator: "",
+          email: "",
+          full_name: "",
           location: "",
           help_type: "",
           evacuation_type: "",
