@@ -307,13 +307,25 @@ export default function Admin() {
         {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="space-y-6">
-            {/* Google Connector - Prominent */}
-            <GoogleConnector />
-
-            {/* Other Data Connectors */}
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Additional Integrations</h3>
-              <Connectors />
+            {/* Supabase Connection Status */}
+            <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+              <div className="flex items-start gap-3">
+                <div className="bg-green-100 rounded-lg p-3">
+                  <BarChart3 size={24} className="text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-green-900 mb-1">Supabase Connected</h3>
+                  <p className="text-green-800 mb-3">
+                    Your app is connected to Supabase PostgreSQL database for reliable data management.
+                  </p>
+                  <ul className="space-y-1 text-sm text-green-700">
+                    <li>✓ Real-time data synchronization</li>
+                    <li>✓ Relief requests management</li>
+                    <li>✓ User authentication</li>
+                    <li>✓ Automatic backups</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             {/* System Configuration */}
