@@ -17,6 +17,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/upload", label: "Upload Requests", icon: Upload },
     { href: "/weather", label: "Weather Forecast", icon: Cloud },
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
+    { href: "/data-repository", label: "Data Repository", icon: Database },
   ];
 
   const adminItems = [
