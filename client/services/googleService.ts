@@ -69,14 +69,12 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
 
     return new Promise<GoogleUser | null>((resolve, reject) => {
       let callbackReceived = false;
-      let timeout: NodeJS.Timeout;
 
       try {
         // Initialize Google Sign-In
         window.google.accounts.id.initialize({
           client_id: API_CONFIG.google.clientId,
           callback: (response: any) => {
-            clearTimeout(timeout);
             if (!callbackReceived && response.credential) {
               callbackReceived = true;
               const decoded = parseJwt(response.credential);
@@ -96,7 +94,6 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
             }
           },
           error_callback: () => {
-            clearTimeout(timeout);
             if (!callbackReceived) {
               reject(new Error('Google authentication failed'));
             }
@@ -111,18 +108,10 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
             theme: 'outline',
             size: 'large',
           });
-
-          // Set timeout for user to complete authentication
-          timeout = setTimeout(() => {
-            if (!callbackReceived) {
-              reject(new Error('Google sign-in timeout - please try again'));
-            }
-          }, 60000); // 60 second timeout
         } else {
           reject(new Error('Google button container not found in DOM'));
         }
       } catch (e) {
-        clearTimeout(timeout);
         reject(e);
       }
     });
