@@ -468,8 +468,15 @@ export default function Requests() {
           </div>
         )}
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-center">
+            <p className="text-slate-600">Loading requests...</p>
+          </div>
+        )}
+
         {/* Pending Requests Section */}
-        {pendingRequests.length > 0 && (
+        {!isLoading && pendingRequests.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-blue-100">
               <h2 className="text-xl font-bold text-slate-900">
