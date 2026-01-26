@@ -171,6 +171,8 @@ export default function Requests() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     originator: "",
+    email: "",
+    full_name: "",
     location: "",
     help_type: "",
     evacuation_type: "",
