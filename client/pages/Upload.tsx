@@ -105,9 +105,17 @@ export default function UploadRequests() {
     <Layout>
       <div className="space-y-8">
         {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Upload Requests</h1>
-          <p className="text-slate-600 mt-1">Bulk upload relief requests via CSV</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Upload Requests</h1>
+            <p className="text-slate-600 mt-1">Bulk upload relief requests via CSV</p>
+          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+          >
+            ← Back
+          </button>
         </div>
 
         {/* Upload Area */}
