@@ -134,10 +134,14 @@ export default function Dashboard() {
         {/* Maputo Weather and Alerts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <MaputoWeather />
+            <Suspense fallback={<div className="bg-white rounded-xl p-6 text-center">Loading weather...</div>}>
+              <MaputoWeather />
+            </Suspense>
           </div>
           <div>
-            <Alerts />
+            <Suspense fallback={<div className="bg-white rounded-xl p-6 text-center">Loading alerts...</div>}>
+              <Alerts />
+            </Suspense>
           </div>
         </div>
 
