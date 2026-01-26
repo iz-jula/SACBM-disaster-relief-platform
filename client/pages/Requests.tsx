@@ -120,6 +120,7 @@ export default function Requests() {
       amountSpent: parseInt(formData.amountSpent) || 0,
       source: formData.source,
       category: getRequestCategory(formData.source),
+      status: formData.status,
     };
 
     setRequests([...requests, newRequest]);
@@ -132,6 +133,7 @@ export default function Requests() {
       peopleInvolved: "",
       amountSpent: "",
       source: "INGD",
+      status: "pending",
     });
     setShowForm(false);
   };
