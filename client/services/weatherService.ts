@@ -127,10 +127,20 @@ export async function getCurrentWeather(city: string): Promise<WeatherData | nul
   }
 }
 
+// Forecast cache
+const forecastCache = new Map<string, { data: ForecastDay[] | null; timestamp: number }>();
+const FORECAST_CACHE_DURATION = 60 * 60 * 1000; // 60 minutes
+
 export async function getForecast(city: string): Promise<ForecastDay[] | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
   if (!coords || !API_CONFIG.openWeather.apiKey) {
     return null;
+  }
+
+  // Check cache
+  const cached = forecastCache.get(city);
+  if (cached && Date.now() - cached.timestamp < FORECAST_CACHE_DURATION) {
+    return cached.data;
   }
 
   try {
@@ -165,7 +175,7 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
     });
 
     // Convert to ForecastDay array
-    return Object.entries(dailyForecasts)
+    const forecastData = Object.entries(dailyForecasts)
       .slice(0, 5)
       .map(([_, dayData], index) => {
         const date = new Date(dayData.date);
@@ -181,6 +191,11 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
           rainChance: Math.round(dayData.rain.reduce((a: number, b: number) => a + b) / dayData.rain.length),
         };
       });
+
+    // Cache the result
+    forecastCache.set(city, { data: forecastData, timestamp: Date.now() });
+
+    return forecastData;
   } catch (error) {
     console.error('Error fetching forecast:', error);
     return null;
