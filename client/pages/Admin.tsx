@@ -54,14 +54,23 @@ export default function Admin() {
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
             <p className="text-slate-600 mt-1">Manage SABCM disaster relief operations</p>
+            {user && <p className="text-xs text-slate-500 mt-2">Logged in as: {user.name}</p>}
           </div>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
-            <LogOut size={16} />
-            Back
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              ← Back
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
