@@ -1,44 +1,81 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Cloud, LogOut, CheckCircle, AlertCircle, Loader } from "lucide-react";
+import { signInWithGoogle, signOutGoogle, getStoredGoogleUser, saveGoogleUser, clearStoredGoogleUser, GoogleUser } from "@/services/googleService";
 
 export default function GoogleConnector() {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<GoogleUser | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is already stored
+    const storedUser = getStoredGoogleUser();
+    if (storedUser) {
+      setUser(storedUser);
+      setIsConnected(true);
+    }
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // In a production environment, this would use the Google OAuth flow
-      // For now, simulating the OAuth connection
-      
-      // This is where you would implement actual Google OAuth:
-      // 1. Load Google API library
-      // 2. Initialize Google Sign-In
-      // 3. Handle the sign-in callback
-      // 4. Get access tokens for Drive/Docs
-      
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const googleUser = await signInWithGoogle();
 
-      // Simulate successful connection
-      setIsConnected(true);
-      setUserEmail("user@gmail.com");
+      if (googleUser) {
+        setUser(googleUser);
+        setIsConnected(true);
+        saveGoogleUser(googleUser);
+      } else {
+        setError("Failed to connect to Google. Please try again.");
+      }
     } catch (err) {
-      setError("Failed to connect to Google. Please try again.");
-      setIsConnected(false);
+      setError("Failed to connect to Google. Please check your configuration.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDisconnect = () => {
+    signOutGoogle();
     setIsConnected(false);
-    setUserEmail(null);
+    setUser(null);
     setError(null);
+    clearStoredGoogleUser();
   };
+
+  if (!process.env.VITE_GOOGLE_CLIENT_ID) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 rounded-lg p-3">
+              <Cloud size={24} className="text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Google Drive & Docs</h3>
+              <p className="text-sm text-slate-600">Connect to sync relief request data</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+            <AlertCircle size={18} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-yellow-800">
+              <strong>Setup Required:</strong> To enable Google OAuth, add your Google Client ID to your .env file:
+              <code className="block mt-2 p-2 bg-white rounded text-xs font-mono border border-yellow-200">
+                VITE_GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+              </code>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
@@ -49,7 +86,7 @@ export default function GoogleConnector() {
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900">Google Drive & Docs</h3>
-            <p className="text-sm text-slate-600">Connect to sync relief request data</p>
+            <p className="text-sm text-slate-600">Connect to sync relief request data and calendar alerts</p>
           </div>
         </div>
       </div>
@@ -61,7 +98,7 @@ export default function GoogleConnector() {
             <div>
               <p className="font-semibold text-slate-900">Connection Status</p>
               <p className="text-sm text-slate-600 mt-1">
-                {isConnected ? `Connected as ${userEmail}` : "Not connected"}
+                {isConnected ? `Connected as ${user?.email}` : "Not connected"}
               </p>
             </div>
             <div className={`w-3 h-3 rounded-full ${isConnected ? "bg-green-500" : "bg-slate-300"}`} />
@@ -91,7 +128,7 @@ export default function GoogleConnector() {
             ) : (
               <>
                 <Cloud size={18} />
-                Connect with Google Account
+                Sign In with Google Account
               </>
             )}
           </button>
@@ -101,7 +138,14 @@ export default function GoogleConnector() {
               <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-medium text-green-900">Google account connected</p>
-                <p className="text-sm text-green-700 mt-1">You can now sync data with Google Drive and Docs</p>
+                <p className="text-sm text-green-700 mt-1">
+                  {user?.name} ({user?.email})
+                </p>
+                <p className="text-xs text-green-600 mt-2">
+                  ✓ Drive access enabled
+                  <br />✓ Calendar alerts enabled
+                  <br />✓ Sheets synchronization enabled
+                </p>
               </div>
             </div>
 
@@ -118,24 +162,24 @@ export default function GoogleConnector() {
         {/* Features Available When Connected */}
         {isConnected && (
           <div className="space-y-3 pt-4 border-t border-slate-200">
-            <h4 className="font-semibold text-slate-900">Available Actions</h4>
+            <h4 className="font-semibold text-slate-900">Connected Features</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <button className="p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-left">
-                <p className="font-medium text-slate-900 text-sm">Export to Google Sheets</p>
-                <p className="text-xs text-slate-600 mt-1">Save relief requests as spreadsheets</p>
-              </button>
-              <button className="p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-left">
-                <p className="font-medium text-slate-900 text-sm">Create from Google Sheets</p>
-                <p className="text-xs text-slate-600 mt-1">Import data from your Drive</p>
-              </button>
-              <button className="p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-left">
-                <p className="font-medium text-slate-900 text-sm">Share Google Docs</p>
+              <div className="p-3 rounded-lg border border-green-200 bg-green-50">
+                <p className="font-medium text-slate-900 text-sm">✓ Google Drive</p>
+                <p className="text-xs text-slate-600 mt-1">Export and import data</p>
+              </div>
+              <div className="p-3 rounded-lg border border-green-200 bg-green-50">
+                <p className="font-medium text-slate-900 text-sm">✓ Google Sheets</p>
+                <p className="text-xs text-slate-600 mt-1">Sync spreadsheet data</p>
+              </div>
+              <div className="p-3 rounded-lg border border-green-200 bg-green-50">
+                <p className="font-medium text-slate-900 text-sm">✓ Google Docs</p>
                 <p className="text-xs text-slate-600 mt-1">Collaborate on reports</p>
-              </button>
-              <button className="p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-left">
-                <p className="font-medium text-slate-900 text-sm">Auto-Sync Data</p>
-                <p className="text-xs text-slate-600 mt-1">Keep files updated automatically</p>
-              </button>
+              </div>
+              <div className="p-3 rounded-lg border border-green-200 bg-green-50">
+                <p className="font-medium text-slate-900 text-sm">✓ Google Calendar</p>
+                <p className="text-xs text-slate-600 mt-1">Sync alerts and events</p>
+              </div>
             </div>
           </div>
         )}
@@ -146,19 +190,19 @@ export default function GoogleConnector() {
           <ol className="space-y-2 text-sm text-blue-800">
             <li className="flex gap-2">
               <span className="font-bold flex-shrink-0">1.</span>
-              <span>Click "Connect with Google Account" above</span>
+              <span>Click "Sign In with Google Account" to authenticate</span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold flex-shrink-0">2.</span>
-              <span>Sign in with your Google account</span>
+              <span>Grant access to Google Drive, Sheets, Docs, and Calendar</span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold flex-shrink-0">3.</span>
-              <span>Grant access to Google Drive and Docs</span>
+              <span>Alerts from your Google Calendar will sync automatically</span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold flex-shrink-0">4.</span>
-              <span>Start syncing relief request data</span>
+              <span>Export relief requests to your Google Drive</span>
             </li>
           </ol>
         </div>
