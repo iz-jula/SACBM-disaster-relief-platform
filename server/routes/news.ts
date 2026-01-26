@@ -36,11 +36,11 @@ export async function handleNewsAlerts(req: any, res: any) {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error('NewsAPI error:', response.status, response.statusText);
-      return res.status(response.status).json({
-        error: 'Failed to fetch news from NewsAPI.ai',
+      console.warn('NewsAPI HTTP error:', response.status, response.statusText, '- using fallback alerts');
+      return res.status(200).json({
         articles: [],
-        status: response.status
+        isUsingFallback: true,
+        message: `NewsAPI returned ${response.status} - using fallback alerts`
       });
     }
 
