@@ -6,7 +6,7 @@ const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 
 // Configuration for your Google Sheet
 // You'll need to create a Google Sheet and update this ID
-const RELIEF_REQUESTS_SHEET_ID = process.env.VITE_RELIEF_SHEET_ID || "";
+const RELIEF_REQUESTS_SHEET_ID = import.meta.env.VITE_RELIEF_SHEET_ID || "";
 const RELIEF_SHEET_NAME = "Relief Requests";
 
 interface GoogleSheetValues {
