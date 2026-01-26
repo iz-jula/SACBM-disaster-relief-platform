@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Requests from "./pages/Requests";
 import Upload from "./pages/Upload";
+import Weather from "./pages/Weather";
 import INGDDashboard from "./pages/INGDDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Dashboard />} />
           <Route path="/requests" element={<Requests />} />
           <Route path="/upload" element={<Upload />} />
+          <Route path="/weather" element={<Weather />} />
           <Route path="/ingd-dashboard" element={<INGDDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
