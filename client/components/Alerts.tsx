@@ -166,16 +166,16 @@ export default function Alerts() {
           <div className="flex items-center gap-2">
             <AlertCircle size={24} className="text-red-600" />
             <div>
-              <h2 className="text-xl font-bold text-slate-900">System Alerts</h2>
+              <h2 className="text-xl font-bold text-slate-900">News Alerts</h2>
               <p className="text-sm text-slate-600">
-                {isConnected ? "Synced from Google Calendar" : "Sample alerts"}
+                Latest news about floods, government alerts, and weather events in Mozambique
               </p>
             </div>
           </div>
           {isLoading && (
             <div className="flex items-center gap-2 text-sm text-blue-600">
               <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-              Syncing...
+              Loading...
             </div>
           )}
         </div>
