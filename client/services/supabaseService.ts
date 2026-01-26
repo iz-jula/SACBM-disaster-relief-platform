@@ -131,19 +131,23 @@ export async function getMetrics() {
     const pendingRequests = data?.filter((r: RelieRequest) => r.status === false).length || 0;
     const partiallyMet = 0; // Based on your schema, you may want to add a separate column for this
 
-    // Calculate total people assisted by parsing the 'people' field
-    const totalPeopleAssisted = data?.reduce((sum: number, r: RelieRequest) => {
-      const people = parseInt(r.people || '0', 10);
-      return sum + (isNaN(people) ? 0 : people);
-    }, 0) || 0;
+    // Calculate total people assisted - only from met requests
+    const totalPeopleAssisted = data
+      ?.filter((r: RelieRequest) => r.status === true)
+      .reduce((sum: number, r: RelieRequest) => {
+        const people = parseInt(r.people || '0', 10);
+        return sum + (isNaN(people) ? 0 : people);
+      }, 0) || 0;
 
-    // Calculate total value deployed by parsing the 'value' field
-    const totalValueDeployed = data?.reduce((sum: number, r: RelieRequest) => {
-      const value = parseInt(r.value || '0', 10);
-      return sum + (isNaN(value) ? 0 : value);
-    }, 0) || 0;
+    // Calculate total value deployed - only from met requests
+    const totalValueDeployed = data
+      ?.filter((r: RelieRequest) => r.status === true)
+      .reduce((sum: number, r: RelieRequest) => {
+        const value = parseInt(r.value || '0', 10);
+        return sum + (isNaN(value) ? 0 : value);
+      }, 0) || 0;
 
-    // Calculate average per request
+    // Calculate average per request (based on total requests, not just met)
     const averagePerRequest = totalRequests > 0 ? totalValueDeployed / totalRequests : 0;
 
     return {
