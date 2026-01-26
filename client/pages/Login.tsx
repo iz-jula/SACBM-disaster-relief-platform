@@ -115,6 +115,17 @@ export default function Login() {
           <p className="text-center text-xs text-slate-500 mt-6">
             Protected access. Only authorized personnel allowed.
           </p>
+
+          {/* Skip to Dashboard */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-slate-600 mb-3">Want to explore without logging in?</p>
+            <a
+              href="/"
+              className="text-primary hover:text-orange-600 font-medium transition-colors text-sm"
+            >
+              → Go to Dashboard
+            </a>
+          </div>
         </div>
 
         {/* Additional Info */}
