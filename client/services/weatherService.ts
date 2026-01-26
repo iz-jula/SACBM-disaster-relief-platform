@@ -241,40 +241,42 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
   }
 
   try {
-    // NewsAPI.ai uses a different API format - search articles endpoint
-    const searchQuery = {
+    // NewsAPI.ai search endpoint using GET request
+    const searchParams = new URLSearchParams({
       query: '(Mozambique AND (floods OR weather OR government OR emergency))',
       sortBy: 'publishedAt',
-      maxArticles: 20,
-    };
+      maxArticles: '20',
+      apiKey: apiKey,
+    });
 
-    const response = await fetch('https://api.newsapi.ai/v1/search', {
-      method: 'POST',
+    const response = await fetch(`https://api.newsapi.ai/v1/search?${searchParams}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
       },
-      body: JSON.stringify(searchQuery),
     });
 
     if (!response.ok) {
       console.error('NewsAPI error:', response.status, response.statusText);
-      const errorBody = await response.text();
-      console.error('Error body:', errorBody);
       return [];
     }
 
     const data = await response.json();
-    const articles = data.articles || [];
+    const articles = data.articles || data.data || [];
+
+    if (!articles.length) {
+      console.warn('No articles returned from NewsAPI');
+      return [];
+    }
 
     const alerts: NewsAlert[] = articles.slice(0, 10).map((article: any, index: number) => ({
       id: `news-${index}-${Date.now()}`,
       title: article.title || 'Untitled',
-      description: article.description || article.body || '',
-      source: article.source || 'Unknown Source',
-      url: article.url || '#',
-      publishedAt: article.datePublished || article.publishedAt || new Date().toISOString(),
-      severity: determineSeverity(article.title + ' ' + (article.description || article.body || '')),
+      description: article.description || article.body || article.content || '',
+      source: article.source?.name || article.source || 'Unknown Source',
+      url: article.url || article.link || '#',
+      publishedAt: article.datePublished || article.publishedAt || article.pubDate || new Date().toISOString(),
+      severity: determineSeverity((article.title || '') + ' ' + (article.description || article.body || '')),
     }));
 
     // Sort by severity (high first) and then by recency
