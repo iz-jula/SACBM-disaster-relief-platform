@@ -2,7 +2,7 @@ import { Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { getRequests, createRequest } from "@/services/requestsService";
+import { getRequests, createRequest, updateRequest } from "@/services/requestsService";
 import { RelieRequest } from "@/services/supabaseService";
 
 function getStatusStyles(status: boolean) {
