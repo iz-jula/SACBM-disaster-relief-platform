@@ -86,6 +86,7 @@ export default function Requests() {
     const newRequest: RelieRequest = {
       id: (requests.length + 1).toString(),
       company: formData.company,
+      originator: formData.originator,
       location: formData.location,
       helpType: formData.helpType,
       evacuationType: formData.evacuationType,
@@ -98,6 +99,7 @@ export default function Requests() {
     setRequests([...requests, newRequest]);
     setFormData({
       company: "",
+      originator: "",
       location: "",
       helpType: "",
       evacuationType: "",
