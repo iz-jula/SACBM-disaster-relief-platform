@@ -11,6 +11,17 @@ interface RelieRequest {
   peopleInvolved: number;
   amountSpent: number;
   source: "INGD" | "Chamber";
+  category?: "Category 1" | "Category 2";
+}
+
+function getRequestCategory(source: "INGD" | "Chamber"): "Category 1" | "Category 2" {
+  return source === "Chamber" ? "Category 1" : "Category 2";
+}
+
+function getCategoryStyles(category: "Category 1" | "Category 2") {
+  return category === "Category 1"
+    ? "bg-red-100 text-red-700"
+    : "bg-orange-100 text-orange-700";
 }
 
 export default function Requests() {
