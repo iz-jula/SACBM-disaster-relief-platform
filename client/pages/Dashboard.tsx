@@ -95,7 +95,7 @@ export default function Dashboard() {
                 <TrendingUp size={24} className="text-primary" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">Total investment</p>
+            <p className="text-xs text-slate-500 mt-3">Total funds deployed</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
