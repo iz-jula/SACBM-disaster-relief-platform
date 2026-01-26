@@ -4,15 +4,6 @@ import Layout from "@/components/Layout";
 import WeatherForecast from "@/components/WeatherForecast";
 
 // Sample data for demonstration
-const monthlyData = [
-  { month: "Jan", requests: 4, people: 240, value: 180000 },
-  { month: "Feb", requests: 6, people: 380, value: 250000 },
-  { month: "Mar", requests: 5, people: 220, value: 190000 },
-  { month: "Apr", requests: 8, people: 520, value: 380000 },
-  { month: "May", requests: 12, people: 890, value: 650000 },
-  { month: "Jun", requests: 10, people: 670, value: 520000 },
-];
-
 const recentRequests = [
   {
     id: "1",
