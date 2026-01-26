@@ -54,7 +54,10 @@ export function initializeGoogleAPI(): Promise<void> {
 // Sign in with Google using Google Identity Services
 export async function signInWithGoogle(): Promise<GoogleUser | null> {
   try {
-    await initializeGoogleAPI();
+    // Load the Google API script if not already loaded
+    if (!window.google) {
+      await initializeGoogleAPI();
+    }
 
     if (!window.google || !API_CONFIG.google.clientId) {
       console.error('Google API not initialized or Client ID not configured');
