@@ -183,52 +183,72 @@ export interface NewsAlert {
 }
 
 // Fetch news alerts based on keywords relevant to Mozambique
+// Using a CORS proxy and RSS feeds as they don't require API keys
 export async function getNewsAlerts(): Promise<NewsAlert[]> {
-  const keywords = ['floods mozambique', 'mozambique government', 'mozambique weather alert', 'mozambique emergency'];
-
   try {
     const alerts: NewsAlert[] = [];
 
-    // Fetch news from RSS feeds or use a free news API
-    // For now, using a simple approach that fetches from multiple sources
-    for (const keyword of keywords) {
+    // Try multiple RSS feed sources for Mozambique news
+    const rssFeedUrls = [
+      'https://feeds.bloomberg.com/markets/news.rss', // General news
+      'https://www.bbc.com/news/rss.xml', // BBC News
+    ];
+
+    const keywords = ['floods', 'mozambique', 'government', 'weather', 'alert', 'emergency'];
+
+    for (const feedUrl of rssFeedUrls) {
       try {
-        // Using NewsAPI.org free tier (or you can implement RSS parsing)
-        const response = await fetch(
-          `https://newsapi.org/v2/everything?q=${encodeURIComponent(keyword)}&sortBy=publishedAt&language=en&pageSize=5`,
-          {
-            headers: {
-              'X-API-Key': 'demo' // Using demo key; user should provide their own
-            }
-          }
-        );
+        // Use a CORS proxy to fetch RSS feeds
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+        const response = await fetch(proxyUrl);
 
         if (response.ok) {
           const data = await response.json();
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
 
-          if (data.articles) {
-            data.articles.slice(0, 2).forEach((article: any) => {
-              const severity = determineSeverity(article.title + ' ' + article.description);
-              alerts.push({
-                id: `${keyword}-${article.publishedAt}`,
-                title: article.title,
-                description: article.description || article.content || '',
-                source: article.source.name,
-                url: article.url,
-                publishedAt: article.publishedAt,
-                severity,
-              });
-            });
-          }
+          const items = xmlDoc.querySelectorAll('item');
+          items.forEach((item) => {
+            const title = item.querySelector('title')?.textContent || '';
+            const description = item.querySelector('description')?.textContent || '';
+            const link = item.querySelector('link')?.textContent || '';
+            const pubDate = item.querySelector('pubDate')?.textContent || new Date().toISOString();
+
+            // Only include articles related to our keywords
+            const content = (title + ' ' + description).toLowerCase();
+            if (keywords.some(kw => content.includes(kw))) {
+              const severity = determineSeverity(title + ' ' + description);
+              const alertId = `${feedUrl}-${title}`;
+
+              // Avoid duplicates
+              if (!alerts.find(a => a.id === alertId)) {
+                alerts.push({
+                  id: alertId,
+                  title: title.substring(0, 100),
+                  description: description.substring(0, 200),
+                  source: new URL(feedUrl).hostname.replace('feeds.', '').replace('www.', ''),
+                  url: link || feedUrl,
+                  publishedAt: pubDate,
+                  severity,
+                });
+              }
+            }
+          });
         }
       } catch (error) {
-        console.warn(`Error fetching news for keyword "${keyword}":`, error);
+        console.warn(`Error fetching RSS feed ${feedUrl}:`, error);
       }
     }
 
-    // Return unique alerts, sorted by recency
-    return Array.from(new Map(alerts.map(a => [a.id, a])).values())
-      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    // Sort by severity (high first) and then by recency
+    return alerts
+      .sort((a, b) => {
+        const severityOrder = { high: 0, medium: 1, low: 2 };
+        if (severityOrder[a.severity] !== severityOrder[b.severity]) {
+          return severityOrder[a.severity] - severityOrder[b.severity];
+        }
+        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      })
       .slice(0, 10);
   } catch (error) {
     console.error('Error fetching news alerts:', error);
@@ -237,8 +257,8 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 }
 
 function determineSeverity(text: string): 'high' | 'medium' | 'low' {
-  const highSeverityKeywords = ['flood', 'emergency', 'disaster', 'critical', 'danger', 'warning', 'alert'];
-  const mediumSeverityKeywords = ['weather', 'warning', 'risk', 'event'];
+  const highSeverityKeywords = ['flood', 'emergency', 'disaster', 'critical', 'danger', 'alert', 'warning severe'];
+  const mediumSeverityKeywords = ['weather', 'warning', 'risk', 'event', 'mozambique government'];
 
   const lowerText = text.toLowerCase();
 
