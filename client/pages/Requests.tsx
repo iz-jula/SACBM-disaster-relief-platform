@@ -360,6 +360,9 @@ export default function Requests() {
                     Category
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                     Company
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
