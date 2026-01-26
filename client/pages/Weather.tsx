@@ -492,7 +492,7 @@ export default function Weather() {
 
         {/* Map and Region Display */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left side - Map and Region Info */}
+          {/* Left side - Map */}
           <div className="lg:col-span-1">
             <MozambiqueMap
               selectedRegion={selectedRegion}
@@ -506,16 +506,17 @@ export default function Weather() {
             </div>
           </div>
 
-          {/* Right side - Weather Cards */}
-          <div className="lg:col-span-2">
-            <div className="text-sm text-slate-600 bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200">
-              <p>Select a region on the map to view detailed weather forecast</p>
+          {/* Right side - Help text */}
+          <div className="lg:col-span-2 flex items-center justify-center">
+            <div className="text-center py-12">
+              <Cloud size={48} className="mx-auto text-blue-400 mb-4" />
+              <p className="text-lg text-slate-600">Select a region on the map or search above to view detailed weather forecast</p>
             </div>
           </div>
         </div>
 
         {/* Weather Cards - Full Width */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="space-y-4">
           {weatherData.map((weather, index) => (
             <div
               key={index}
