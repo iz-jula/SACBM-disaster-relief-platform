@@ -1,4 +1,5 @@
-import { Cloud, CloudRain, Sun, Wind, Droplets } from "lucide-react";
+import { Cloud, CloudRain, Sun, Wind, Droplets, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface WeatherDay {
   day: string;
