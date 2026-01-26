@@ -171,3 +171,82 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
     return null;
   }
 }
+
+export interface NewsAlert {
+  id: string;
+  title: string;
+  description: string;
+  source: string;
+  url: string;
+  publishedAt: string;
+  severity: 'high' | 'medium' | 'low';
+}
+
+// Fetch news alerts based on keywords relevant to Mozambique
+export async function getNewsAlerts(): Promise<NewsAlert[]> {
+  const keywords = ['floods mozambique', 'mozambique government', 'mozambique weather alert', 'mozambique emergency'];
+
+  try {
+    const alerts: NewsAlert[] = [];
+
+    // Fetch news from RSS feeds or use a free news API
+    // For now, using a simple approach that fetches from multiple sources
+    for (const keyword of keywords) {
+      try {
+        // Using NewsAPI.org free tier (or you can implement RSS parsing)
+        const response = await fetch(
+          `https://newsapi.org/v2/everything?q=${encodeURIComponent(keyword)}&sortBy=publishedAt&language=en&pageSize=5`,
+          {
+            headers: {
+              'X-API-Key': 'demo' // Using demo key; user should provide their own
+            }
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+
+          if (data.articles) {
+            data.articles.slice(0, 2).forEach((article: any) => {
+              const severity = determineSeverity(article.title + ' ' + article.description);
+              alerts.push({
+                id: `${keyword}-${article.publishedAt}`,
+                title: article.title,
+                description: article.description || article.content || '',
+                source: article.source.name,
+                url: article.url,
+                publishedAt: article.publishedAt,
+                severity,
+              });
+            });
+          }
+        }
+      } catch (error) {
+        console.warn(`Error fetching news for keyword "${keyword}":`, error);
+      }
+    }
+
+    // Return unique alerts, sorted by recency
+    return Array.from(new Map(alerts.map(a => [a.id, a])).values())
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .slice(0, 10);
+  } catch (error) {
+    console.error('Error fetching news alerts:', error);
+    return [];
+  }
+}
+
+function determineSeverity(text: string): 'high' | 'medium' | 'low' {
+  const highSeverityKeywords = ['flood', 'emergency', 'disaster', 'critical', 'danger', 'warning', 'alert'];
+  const mediumSeverityKeywords = ['weather', 'warning', 'risk', 'event'];
+
+  const lowerText = text.toLowerCase();
+
+  if (highSeverityKeywords.some(keyword => lowerText.includes(keyword))) {
+    return 'high';
+  } else if (mediumSeverityKeywords.some(keyword => lowerText.includes(keyword))) {
+    return 'medium';
+  }
+
+  return 'low';
+}
