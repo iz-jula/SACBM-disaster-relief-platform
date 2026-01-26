@@ -8,6 +8,8 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export interface RelieRequest {
   id?: number;
   originator: string;
+  email: string;
+  full_name: string;
   location: string;
   help_type: string;
   evacuation_type: string;
