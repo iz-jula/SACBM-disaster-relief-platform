@@ -266,7 +266,8 @@ export default function Index() {
             </h2>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
@@ -336,6 +337,60 @@ export default function Index() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y divide-slate-200">
+            {requests.map((request) => (
+              <div key={request.id} className="px-6 py-6 hover:bg-blue-50 transition-colors">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start gap-4">
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Company</p>
+                      <p className="text-base font-bold text-slate-900 mt-1">{request.company}</p>
+                    </div>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${
+                        request.source === "INGD"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {request.source}
+                    </span>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Location</p>
+                    <p className="text-sm text-slate-700 mt-1">{request.location}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Help Type</p>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 mt-1">
+                        {request.helpType}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Evacuation</p>
+                      <p className="text-sm text-slate-700 mt-1">{request.evacuationType}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">People</p>
+                      <p className="text-lg font-bold text-slate-900 mt-1">{request.peopleInvolved}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Value (MZN)</p>
+                      <p className="text-lg font-bold text-primary mt-1">{request.amountSpent.toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {requests.length === 0 && (
