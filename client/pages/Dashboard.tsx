@@ -13,6 +13,25 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch data from API
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [requests, metricsData] = await Promise.all([
+          getRecentRequests(5),
+          getMetrics(),
+        ]);
+        setRecentRequests(requests);
+        setMetrics(metricsData);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+
     // Load Tableau API script for INGD dashboard
     const script = document.createElement("script");
     script.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
