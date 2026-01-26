@@ -114,7 +114,7 @@ export default function Alerts() {
   };
 
   const getIcon = (type: string) => {
-    if (type === "weather" || "start" in alerts[0]!) {
+    if (type === "weather") {
       return <Cloud size={20} />;
     }
     return <AlertCircle size={20} />;
