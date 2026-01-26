@@ -3,6 +3,17 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleNewsAlerts } from "./routes/news";
+import {
+  handleGetRequests,
+  handleCreateRequest,
+  handleUpdateRequest,
+  handleGetMetrics,
+} from "./routes/requests";
+import {
+  handleGetUsers,
+  handleAddUser,
+  handleRemoveUser,
+} from "./routes/users";
 
 export function createServer() {
   const app = express();
@@ -22,6 +33,17 @@ export function createServer() {
 
   // News alerts proxy
   app.get("/api/news/alerts", handleNewsAlerts);
+
+  // Requests endpoints
+  app.get("/api/requests", handleGetRequests);
+  app.post("/api/requests", handleCreateRequest);
+  app.put("/api/requests/:id", handleUpdateRequest);
+  app.get("/api/metrics", handleGetMetrics);
+
+  // Users endpoints
+  app.get("/api/users", handleGetUsers);
+  app.post("/api/users", handleAddUser);
+  app.delete("/api/users/:id", handleRemoveUser);
 
   return app;
 }
