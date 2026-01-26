@@ -62,10 +62,13 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
     }
 
     return new Promise((resolve) => {
+      let resolved = false;
+
       window.google.accounts.id.initialize({
         client_id: API_CONFIG.google.clientId,
         callback: (response: any) => {
-          if (response.credential) {
+          if (!resolved && response.credential) {
+            resolved = true;
             const decoded = parseJwt(response.credential);
             const user: GoogleUser = {
               email: decoded.email,
@@ -76,17 +79,36 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
             resolve(user);
           }
         },
-        scope: API_CONFIG.google.scopes.join(' '),
       });
 
-      window.google.accounts.id.renderButton(
-        document.getElementById('google-signin-button'),
-        {
-          theme: 'outline',
-          size: 'large',
-          text: 'signin_with',
-        }
-      );
+      // Request permission for offline access (for accessing Google Drive/Sheets)
+      window.google.accounts.id.requestPermission({
+        scopes: [
+          'https://www.googleapis.com/auth/drive',
+          'https://www.googleapis.com/auth/spreadsheets',
+          'https://www.googleapis.com/auth/calendar.readonly',
+        ],
+      }, () => {
+        // Permission callback - shows the sign-in prompt
+        // This will trigger the callback above when user signs in
+      });
+
+      // Fallback: if requestPermission doesn't trigger, use renderButton
+      const buttonDiv = document.createElement('div');
+      buttonDiv.style.display = 'none';
+      document.body.appendChild(buttonDiv);
+
+      window.google.accounts.id.renderButton(buttonDiv, {
+        theme: 'outline',
+        size: 'large',
+        width: '200',
+      });
+
+      // Simulate a button click to trigger the OAuth flow
+      const button = buttonDiv.querySelector('button');
+      if (button) {
+        setTimeout(() => button.click(), 100);
+      }
     });
   } catch (error) {
     console.error('Error signing in with Google:', error);
