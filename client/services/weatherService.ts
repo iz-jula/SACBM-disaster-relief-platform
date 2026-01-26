@@ -182,74 +182,76 @@ export interface NewsAlert {
   severity: 'high' | 'medium' | 'low';
 }
 
-// Fetch news alerts based on keywords relevant to Mozambique
-// Using a CORS proxy and RSS feeds as they don't require API keys
+// Cache for news alerts and weather data to minimize API calls
+interface CacheEntry {
+  data: NewsAlert[];
+  timestamp: number;
+}
+
+const newsAlertsCache: CacheEntry = {
+  data: [],
+  timestamp: 0,
+};
+
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+// Fetch news alerts using NewsAPI.ai
 export async function getNewsAlerts(): Promise<NewsAlert[]> {
+  const now = Date.now();
+
+  // Return cached data if still valid
+  if (newsAlertsCache.data.length > 0 && now - newsAlertsCache.timestamp < CACHE_DURATION) {
+    return newsAlertsCache.data;
+  }
+
+  const apiKey = import.meta.env.VITE_NEWSAPI_KEY;
+  if (!apiKey) {
+    console.warn('NewsAPI key not configured');
+    return [];
+  }
+
   try {
-    const alerts: NewsAlert[] = [];
+    const query = 'Mozambique (floods OR weather OR government alert OR emergency)';
 
-    // Try multiple RSS feed sources for Mozambique news
-    const rssFeedUrls = [
-      'https://feeds.bloomberg.com/markets/news.rss', // General news
-      'https://www.bbc.com/news/rss.xml', // BBC News
-    ];
+    const response = await fetch(`https://api.newsapi.ai/v1/search?q=${encodeURIComponent(query)}&sortBy=publishedAt&maxArticles=20`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-    const keywords = ['floods', 'mozambique', 'government', 'weather', 'alert', 'emergency'];
-
-    for (const feedUrl of rssFeedUrls) {
-      try {
-        // Use a CORS proxy to fetch RSS feeds
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
-        const response = await fetch(proxyUrl);
-
-        if (response.ok) {
-          const data = await response.json();
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
-
-          const items = xmlDoc.querySelectorAll('item');
-          items.forEach((item) => {
-            const title = item.querySelector('title')?.textContent || '';
-            const description = item.querySelector('description')?.textContent || '';
-            const link = item.querySelector('link')?.textContent || '';
-            const pubDate = item.querySelector('pubDate')?.textContent || new Date().toISOString();
-
-            // Only include articles related to our keywords
-            const content = (title + ' ' + description).toLowerCase();
-            if (keywords.some(kw => content.includes(kw))) {
-              const severity = determineSeverity(title + ' ' + description);
-              const alertId = `${feedUrl}-${title}`;
-
-              // Avoid duplicates
-              if (!alerts.find(a => a.id === alertId)) {
-                alerts.push({
-                  id: alertId,
-                  title: title.substring(0, 100),
-                  description: description.substring(0, 200),
-                  source: new URL(feedUrl).hostname.replace('feeds.', '').replace('www.', ''),
-                  url: link || feedUrl,
-                  publishedAt: pubDate,
-                  severity,
-                });
-              }
-            }
-          });
-        }
-      } catch (error) {
-        console.warn(`Error fetching RSS feed ${feedUrl}:`, error);
-      }
+    if (!response.ok) {
+      console.error('NewsAPI error:', response.status, response.statusText);
+      return [];
     }
 
+    const data = await response.json();
+    const articles = data.articles || [];
+
+    const alerts: NewsAlert[] = articles.slice(0, 10).map((article: any, index: number) => ({
+      id: `news-${index}-${Date.now()}`,
+      title: article.title || 'Untitled',
+      description: article.description || article.summary || '',
+      source: article.source?.name || 'Unknown Source',
+      url: article.url || '#',
+      publishedAt: article.datePublished || article.pubDate || new Date().toISOString(),
+      severity: determineSeverity(article.title + ' ' + (article.description || '')),
+    }));
+
     // Sort by severity (high first) and then by recency
-    return alerts
-      .sort((a, b) => {
-        const severityOrder = { high: 0, medium: 1, low: 2 };
-        if (severityOrder[a.severity] !== severityOrder[b.severity]) {
-          return severityOrder[a.severity] - severityOrder[b.severity];
-        }
-        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-      })
-      .slice(0, 10);
+    const sortedAlerts = alerts.sort((a, b) => {
+      const severityOrder = { high: 0, medium: 1, low: 2 };
+      if (severityOrder[a.severity] !== severityOrder[b.severity]) {
+        return severityOrder[a.severity] - severityOrder[b.severity];
+      }
+      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    });
+
+    // Update cache
+    newsAlertsCache.data = sortedAlerts;
+    newsAlertsCache.timestamp = now;
+
+    return sortedAlerts;
   } catch (error) {
     console.error('Error fetching news alerts:', error);
     return [];
@@ -257,8 +259,8 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 }
 
 function determineSeverity(text: string): 'high' | 'medium' | 'low' {
-  const highSeverityKeywords = ['flood', 'emergency', 'disaster', 'critical', 'danger', 'alert', 'warning severe'];
-  const mediumSeverityKeywords = ['weather', 'warning', 'risk', 'event', 'mozambique government'];
+  const highSeverityKeywords = ['flood', 'emergency', 'disaster', 'critical', 'danger', 'severe', 'warning'];
+  const mediumSeverityKeywords = ['weather', 'alert', 'risk', 'event', 'government'];
 
   const lowerText = text.toLowerCase();
 
