@@ -26,6 +26,7 @@ function getCategoryStyles(category: "Category 1" | "Category 2") {
 }
 
 export default function Requests() {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<RelieRequest[]>([
     {
       id: "1",
