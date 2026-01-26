@@ -8,6 +8,8 @@ export default function Upload() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     originator: "",
+    email: "",
+    full_name: "",
     location: "",
     help_type: "",
     evacuation_type: "",
