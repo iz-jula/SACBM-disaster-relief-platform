@@ -42,7 +42,6 @@ const helpTypeStats = [
 ];
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const totalRequests = 129;
   const totalPeople = 3920;
   const totalValue = 2770000;
