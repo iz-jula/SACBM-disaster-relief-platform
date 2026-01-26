@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Settings, Users, BarChart3, Database, LogOut, Lock, Cloud } from "lucide-react";
+import { Settings, Users, BarChart3, Database, LogOut, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
+import GoogleConnector from "@/components/GoogleConnector";
 import Connectors from "@/components/Connectors";
 
 interface AdminUser {
@@ -16,7 +17,7 @@ interface AdminUser {
 export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "requests" | "users" | "data-repository" | "settings">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "requests" | "users" | "settings">("dashboard");
 
   const handleLogout = () => {
     logout();
