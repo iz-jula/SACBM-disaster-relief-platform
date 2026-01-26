@@ -1,7 +1,9 @@
 import { BarChart3, Users, TrendingUp, Activity } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import Layout from "@/components/Layout";
-import WeatherForecast from "@/components/WeatherForecast";
+import MaputoWeather from "@/components/MaputoWeather";
+import Alerts from "@/components/Alerts";
 
 // Sample data for demonstration
 const recentRequests = [
@@ -39,10 +41,25 @@ const helpTypeStats = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const totalRequests = 129;
   const totalPeople = 3920;
   const totalValue = 2770000;
   const avgValue = Math.round(totalValue / totalRequests);
+
+  useEffect(() => {
+    // Load Tableau API script for INGD dashboard
+    const script = document.createElement("script");
+    script.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
 
   return (
     <Layout>
@@ -114,8 +131,81 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Weather Forecast Section */}
-        <WeatherForecast />
+        {/* Maputo Weather and Alerts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <MaputoWeather />
+          </div>
+          <div>
+            <Alerts />
+          </div>
+        </div>
+
+        {/* Embedded INGD Dashboard */}
+        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">INGD Dashboard</h2>
+              <p className="text-sm text-slate-600">Real-time disaster impact data</p>
+              <p className="text-xs text-slate-500 mt-2">
+                Last updated: {new Date().toLocaleDateString()} at{" "}
+                {new Date().toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="w-full bg-white rounded-lg overflow-hidden">
+            <div
+              className="tableauPlaceholder"
+              id="viz1769418246220"
+              style={{ width: "100%", height: "600px", position: "relative" }}
+            >
+              <noscript>
+                <a href="https://public.tableau.com">
+                  <img
+                    alt="Dashboard"
+                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1.png"
+                  />
+                </a>
+              </noscript>
+              <object
+                className="tableauViz"
+                style={{
+                  display: "none",
+                }}
+              >
+                <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+                <param name="embed_code_version" value="3" />
+                <param name="site_root" value="" />
+                <param
+                  name="name"
+                  value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
+                />
+                <param name="tabs" value="no" />
+                <param name="toolbar" value="yes" />
+                <param
+                  name="static_image"
+                  value="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1.png"
+                />
+                <param name="animate_transition" value="yes" />
+                <param name="display_static_image" value="yes" />
+                <param name="display_spinner" value="yes" />
+                <param name="display_overlay" value="yes" />
+                <param name="display_count" value="yes" />
+                <param name="language" value="en-US" />
+              </object>
+            </div>
+          </div>
+
+          <div className="px-6 py-4 border-t border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50">
+            <Link
+              to="/ingd-dashboard"
+              className="text-primary hover:text-orange-600 font-medium transition-colors"
+            >
+              View full INGD Dashboard →
+            </Link>
+          </div>
+        </div>
 
         {/* Recent Requests */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
