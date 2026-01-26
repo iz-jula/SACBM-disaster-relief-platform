@@ -36,7 +36,7 @@ export default function INGDDashboard() {
             <div
               className="tableauPlaceholder"
               id="viz1769418246220"
-              style={{ position: "relative" }}
+              style={{ position: "relative", width: "100%", height: "100%" }}
             >
               <noscript>
                 <a href="#">
@@ -49,7 +49,7 @@ export default function INGDDashboard() {
               </noscript>
               <object
                 className="tableauViz"
-                style={{ display: "none" }}
+                style={{ width: "100%", height: "100%" }}
               >
                 <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
                 <param name="embed_code_version" value="3" />
