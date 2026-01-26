@@ -54,10 +54,21 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
             {requests.map((request, index) => (
               <tr
                 key={request.id}
-                className={`border-b border-slate-200 transition-colors hover:bg-blue-50 ${
+                className={`border-b border-slate-200 transition-colors hover:bg-blue-50 cursor-pointer ${
                   index % 2 === 0 ? "bg-white" : "bg-slate-50"
                 }`}
               >
+                <td className="px-6 py-4 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedRequests.has(request.id || 0)}
+                    onChange={() => onToggleSelect(request.id || 0)}
+                    className="w-4 h-4 rounded cursor-pointer"
+                  />
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-slate-500">
+                  #{request.id}
+                </td>
                 <td className="px-6 py-4 text-sm font-medium text-slate-900">
                   {request.originator}
                 </td>
@@ -82,18 +93,6 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}>
                     {getStatusLabel(request.status)}
                   </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-center">
-                  <button
-                    onClick={() => onStatusChange(request.id || 0, !request.status)}
-                    className={`px-3 py-1 rounded-lg font-medium text-sm transition-colors ${
-                      request.status
-                        ? "bg-blue-100 hover:bg-blue-200 text-blue-700"
-                        : "bg-green-100 hover:bg-green-200 text-green-700"
-                    }`}
-                  >
-                    {request.status ? "Mark Pending" : "Mark Met"}
-                  </button>
                 </td>
               </tr>
             ))}
