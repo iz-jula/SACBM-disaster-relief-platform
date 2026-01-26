@@ -11,6 +11,7 @@ import Requests from "./pages/Requests";
 import Upload from "./pages/Upload";
 import Weather from "./pages/Weather";
 import INGDDashboard from "./pages/INGDDashboard";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
