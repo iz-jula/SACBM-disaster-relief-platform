@@ -38,6 +38,8 @@ export default function Upload() {
     // Validate required fields
     if (
       !formData.originator ||
+      !formData.email ||
+      !formData.full_name ||
       !formData.location ||
       !formData.help_type ||
       !formData.people ||
