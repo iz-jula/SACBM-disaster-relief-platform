@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Search, Cloud, CloudRain, Sun, Wind, Droplets, Eye, Gauge } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import MozambiqueMap from "@/components/MozambiqueMap";
 
 interface DetailedWeather {
   date: string;
