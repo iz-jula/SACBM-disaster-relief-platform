@@ -241,17 +241,26 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
   }
 
   try {
-    const query = 'Mozambique (floods OR weather OR government alert OR emergency)';
+    // NewsAPI.ai uses a different API format - search articles endpoint
+    const searchQuery = {
+      query: '(Mozambique AND (floods OR weather OR government OR emergency))',
+      sortBy: 'publishedAt',
+      maxArticles: 20,
+    };
 
-    const response = await fetch(`https://api.newsapi.ai/v1/search?q=${encodeURIComponent(query)}&sortBy=publishedAt&maxArticles=20`, {
+    const response = await fetch('https://api.newsapi.ai/v1/search', {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        'x-api-key': apiKey,
       },
+      body: JSON.stringify(searchQuery),
     });
 
     if (!response.ok) {
       console.error('NewsAPI error:', response.status, response.statusText);
+      const errorBody = await response.text();
+      console.error('Error body:', errorBody);
       return [];
     }
 
@@ -261,11 +270,11 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     const alerts: NewsAlert[] = articles.slice(0, 10).map((article: any, index: number) => ({
       id: `news-${index}-${Date.now()}`,
       title: article.title || 'Untitled',
-      description: article.description || article.summary || '',
-      source: article.source?.name || 'Unknown Source',
+      description: article.description || article.body || '',
+      source: article.source || 'Unknown Source',
       url: article.url || '#',
-      publishedAt: article.datePublished || article.pubDate || new Date().toISOString(),
-      severity: determineSeverity(article.title + ' ' + (article.description || '')),
+      publishedAt: article.datePublished || article.publishedAt || new Date().toISOString(),
+      severity: determineSeverity(article.title + ' ' + (article.description || article.body || '')),
     }));
 
     // Sort by severity (high first) and then by recency
