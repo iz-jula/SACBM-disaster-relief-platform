@@ -123,63 +123,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Monthly Trend */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-6">Monthly Trend</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={monthlyData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF8800" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#FF8800" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1e293b",
-                    border: "1px solid #64748b",
-                    borderRadius: "8px",
-                    color: "#f1f5f9",
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#FF8800"
-                  fillOpacity={1}
-                  fill="url(#colorValue)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Help Type Distribution */}
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-6">Help Types</h2>
-            <div className="space-y-4">
-              {helpTypeStats.map((stat) => (
-                <div key={stat.type}>
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-sm font-medium text-slate-700">{stat.type}</p>
-                    <p className="text-sm font-bold text-slate-900">{stat.count}</p>
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2">
-                    <div
-                      className="bg-primary rounded-full h-2 transition-all"
-                      style={{ width: `${stat.percentage}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">{stat.percentage}% of total</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* Weather Forecast Section */}
+        <WeatherForecast />
 
         {/* Recent Requests */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
