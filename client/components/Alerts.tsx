@@ -208,7 +208,9 @@ export default function Alerts() {
                     {getLocation(alert) && (
                       <p className="text-sm opacity-75 flex items-center gap-1 mb-2">
                         {isNews ? (
-                          <span>{getLocation(alert)}</span>
+                          <span>
+                            <strong>Source:</strong> {getLocation(alert)}
+                          </span>
                         ) : (
                           <>
                             <MapPin size={14} />
