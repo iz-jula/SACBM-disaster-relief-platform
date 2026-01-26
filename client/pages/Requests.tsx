@@ -6,6 +6,7 @@ import Layout from "@/components/Layout";
 interface RelieRequest {
   id: string;
   company: string;
+  originator: string;
   location: string;
   helpType: string;
   evacuationType: string;
