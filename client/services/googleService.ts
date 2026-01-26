@@ -66,6 +66,7 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
 
     return new Promise((resolve) => {
       let resolved = false;
+      let buttonClicked = false;
 
       // Initialize the Google Sign-In
       window.google.accounts.id.initialize({
@@ -80,39 +81,41 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
               picture: decoded.picture,
               accessToken: response.credential, // This is the ID token
             };
+            // Clean up containers
+            const containers = document.querySelectorAll('[id^="google-"]');
+            containers.forEach(c => c.remove());
             resolve(user);
           }
         },
       });
 
-      // Create a container for the One Tap sign-in button
-      const oneTapContainer = document.createElement('div');
-      oneTapContainer.id = 'google-oneTap-container';
-      document.body.appendChild(oneTapContainer);
+      // Create a hidden container for the sign-in button
+      const buttonContainer = document.createElement('div');
+      buttonContainer.id = 'google-signin-button-container';
+      buttonContainer.style.display = 'none';
+      document.body.appendChild(buttonContainer);
 
-      // Render the One Tap sign-in prompt
-      window.google.accounts.id.prompt((notification: any) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // If One Tap can't be displayed, render a regular button as fallback
-          const buttonContainer = document.createElement('div');
-          buttonContainer.id = 'google-signin-button';
-          buttonContainer.style.position = 'fixed';
-          buttonContainer.style.top = '0';
-          buttonContainer.style.left = '0';
-          buttonContainer.style.zIndex = '10000';
-          document.body.appendChild(buttonContainer);
+      // Render the button (it will trigger the callback when clicked)
+      try {
+        window.google.accounts.id.renderButton(buttonContainer, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signin_with',
+        });
 
-          window.google.accounts.id.renderButton(buttonContainer, {
-            theme: 'outline',
-            size: 'large',
-          });
-
+        // Find and click the button to start authentication
+        setTimeout(() => {
           const button = buttonContainer.querySelector('button');
-          if (button) {
-            setTimeout(() => button.click(), 100);
+          if (button && !buttonClicked) {
+            buttonClicked = true;
+            button.click();
           }
-        }
-      });
+        }, 100);
+      } catch (e) {
+        console.error('Error rendering Google button:', e);
+        resolve(null);
+      }
     });
   } catch (error) {
     console.error('Error signing in with Google:', error);
