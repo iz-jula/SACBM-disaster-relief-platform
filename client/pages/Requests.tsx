@@ -146,16 +146,13 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
               </div>
 
               <div className="pt-4 border-t border-slate-100">
-                <button
-                  onClick={() => onStatusChange(request.id || 0, !request.status)}
-                  className={`w-full px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
-                    request.status
-                      ? "bg-blue-100 hover:bg-blue-200 text-blue-700"
-                      : "bg-green-100 hover:bg-green-200 text-green-700"
-                  }`}
-                >
-                  {request.status ? "Mark Pending" : "Mark Met"}
-                </button>
+                <input
+                  type="checkbox"
+                  checked={selectedRequests.has(request.id || 0)}
+                  onChange={() => onToggleSelect(request.id || 0)}
+                  className="w-4 h-4 rounded cursor-pointer"
+                />
+                <span className="ml-2 text-sm text-slate-600">Select for actions</span>
               </div>
             </div>
           </div>
