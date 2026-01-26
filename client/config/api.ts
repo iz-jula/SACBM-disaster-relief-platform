@@ -2,6 +2,7 @@
 // Add these environment variables to your .env file:
 // VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 // VITE_OPENWEATHER_API_KEY=your_openweather_api_key
+// VITE_NEWSAPI_KEY=your_newsapi_key
 
 export const API_CONFIG = {
   google: {
@@ -15,6 +16,10 @@ export const API_CONFIG = {
   openWeather: {
     apiKey: import.meta.env.VITE_OPENWEATHER_API_KEY || '',
     baseUrl: 'https://api.openweathermap.org/data/2.5',
+  },
+  newsApi: {
+    apiKey: import.meta.env.VITE_NEWSAPI_KEY || '',
+    baseUrl: 'https://api.newsapi.ai/v1',
   },
 };
 
