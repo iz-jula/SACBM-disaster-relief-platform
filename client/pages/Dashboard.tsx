@@ -1,9 +1,10 @@
 import { BarChart3, Users, TrendingUp, Activity } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useEffect, Suspense, lazy } from "react";
 import Layout from "@/components/Layout";
-import MaputoWeather from "@/components/MaputoWeather";
-import Alerts from "@/components/Alerts";
+
+const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
+const Alerts = lazy(() => import("@/components/Alerts"));
 
 // Sample data for demonstration
 const recentRequests = [
