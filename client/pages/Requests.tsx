@@ -312,6 +312,15 @@ export default function Requests() {
                       index % 2 === 0 ? "bg-white" : "bg-slate-50"
                     }`}
                   >
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getCategoryStyles(
+                          request.category || getRequestCategory(request.source),
+                        )}`}
+                      >
+                        {request.category || getRequestCategory(request.source)}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-sm font-medium text-slate-900">
                       {request.company}
                     </td>
@@ -331,17 +340,6 @@ export default function Requests() {
                     </td>
                     <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
                       {request.amountSpent.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          request.source === "INGD"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
-                      >
-                        {request.source}
-                      </span>
                     </td>
                   </tr>
                 ))}
