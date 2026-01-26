@@ -14,6 +14,7 @@ interface UploadedRequest {
 }
 
 export default function UploadRequests() {
+  const navigate = useNavigate();
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploadedData, setUploadedData] = useState<UploadedRequest[]>([]);
