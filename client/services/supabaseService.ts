@@ -116,8 +116,26 @@ export async function getMetrics() {
     const pendingRequests = data?.filter((r: RelieRequest) => r.status === false).length || 0;
     const partiallyMet = 0; // Based on your schema, you may want to add a separate column for this
 
+    // Calculate total people assisted by parsing the 'people' field
+    const totalPeopleAssisted = data?.reduce((sum: number, r: RelieRequest) => {
+      const people = parseInt(r.people || '0', 10);
+      return sum + (isNaN(people) ? 0 : people);
+    }, 0) || 0;
+
+    // Calculate total value deployed by parsing the 'value' field
+    const totalValueDeployed = data?.reduce((sum: number, r: RelieRequest) => {
+      const value = parseInt(r.value || '0', 10);
+      return sum + (isNaN(value) ? 0 : value);
+    }, 0) || 0;
+
+    // Calculate average per request
+    const averagePerRequest = totalRequests > 0 ? totalValueDeployed / totalRequests : 0;
+
     return {
       totalRequests,
+      totalPeopleAssisted,
+      totalValueDeployed,
+      averagePerRequest,
       metRequests,
       pendingRequests,
       partiallyMet,
@@ -126,6 +144,9 @@ export async function getMetrics() {
     console.error('Error fetching metrics:', error);
     return {
       totalRequests: 0,
+      totalPeopleAssisted: 0,
+      totalValueDeployed: 0,
+      averagePerRequest: 0,
       metRequests: 0,
       pendingRequests: 0,
       partiallyMet: 0,
