@@ -1085,7 +1085,7 @@ const locationData: Record<string, DetailedWeather[]> = {
 
 export default function Weather() {
   const navigate = useNavigate();
-  const [selectedRegion, setSelectedRegion] = useState("Inhambane");
+  const [selectedRegion, setSelectedRegion] = useState("Maputo");
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
