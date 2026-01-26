@@ -17,50 +17,26 @@ export default function GoogleConnector() {
     }
   }, []);
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Initiate the Google Sign-In flow
-      const googleUser = await signInWithGoogle();
-
-      if (googleUser) {
-        setUser(googleUser);
-        setIsConnected(true);
-        saveGoogleUser(googleUser);
-      } else {
-        // If authentication is skipped or cancelled, show helpful message
-        setError("Google sign-in was cancelled. Please try again.");
-      }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      console.error('Google sign-in error:', err);
-
-      if (errorMsg.includes('invalid_client')) {
-        setError("Google Client ID is invalid. Please verify it in your Google Cloud Console.");
-      } else if (errorMsg.includes('popup_blocked')) {
-        setError("Pop-up was blocked. Please allow pop-ups and try again.");
-      } else if (errorMsg.includes('Failed to load Google API')) {
-        setError("Unable to load Google Sign-In. Please check your internet connection.");
-      } else {
-        setError(`Error: ${errorMsg}`);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    // Render Google Sign-In button when component mounts
-    signInWithGoogle().catch((err) => {
-      // This is expected - we're just rendering the button, not completing auth
-      // The error will be handled when user actually clicks the button
-      if (err instanceof Error && !err.message.includes('container not found')) {
-        console.log('GoogleConnector initialized');
+    if (isConnected || isLoading) return;
+
+    // Initialize Google Sign-In button when component mounts and user is not connected
+    const initializeGoogle = async () => {
+      try {
+        await signInWithGoogle();
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        console.error('Google initialization error:', errorMsg);
+
+        // Only set error if it's not a normal auth flow error
+        if (!errorMsg.includes('Google button container not found')) {
+          setError(errorMsg);
+        }
       }
-    });
-  }, []);
+    };
+
+    initializeGoogle();
+  }, [isConnected, isLoading]);
 
   const handleDisconnect = () => {
     signOutGoogle();
