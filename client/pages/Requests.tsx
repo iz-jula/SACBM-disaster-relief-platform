@@ -206,6 +206,22 @@ export default function Requests() {
     }));
   };
 
+  const handleStatusChange = async (id: number, newStatus: boolean) => {
+    try {
+      const updatedRequest = await updateRequest(id, { status: newStatus });
+      if (updatedRequest) {
+        // Update the requests list with the new status
+        setRequests((prevRequests) =>
+          prevRequests.map((req) =>
+            req.id === id ? { ...req, status: newStatus } : req
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error updating request status:", error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -213,6 +229,8 @@ export default function Requests() {
     try {
       const newRequest = await createRequest({
         originator: formData.originator,
+        email: formData.email || "",
+        full_name: formData.full_name || "",
         location: formData.location,
         help_type: formData.help_type,
         evacuation_type: formData.evacuation_type,
