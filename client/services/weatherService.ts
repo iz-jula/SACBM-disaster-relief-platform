@@ -225,8 +225,8 @@ const newsAlertsCache: CacheEntry = {
 
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
-// Fetch news alerts from NewsAPI.ai
-// Fetches real-time news about Mozambique disasters and weather events
+// Fetch news alerts from backend proxy
+// The backend calls NewsAPI.ai to bypass CORS restrictions
 export async function getNewsAlerts(): Promise<NewsAlert[]> {
   const now = Date.now();
 
@@ -236,20 +236,8 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
   }
 
   try {
-    const apiKey = API_CONFIG.newsApi.apiKey;
-
-    if (!apiKey) {
-      // API key not configured - use fallback alerts
-      console.log('NewsAPI key not configured - using fallback alerts');
-      return [];
-    }
-
-    // Fetch from NewsAPI.ai
-    // Using the search endpoint to find Mozambique-related news
-    const query = 'Mozambique AND (floods OR weather OR emergency OR government)';
-    const url = `https://newsapi.ai/api/v1/articleSearch?query=${encodeURIComponent(query)}&sortBy=date&maxArticles=10&apiKey=${apiKey}`;
-
-    const response = await fetch(url, {
+    // Call the backend proxy endpoint instead of calling NewsAPI directly
+    const response = await fetch('/api/news/alerts', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -257,14 +245,14 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     });
 
     if (!response.ok) {
-      console.warn(`NewsAPI returned status ${response.status}`);
+      console.warn(`Backend returned status ${response.status}`);
       return [];
     }
 
     const data = await response.json();
 
     if (!data || !data.articles || data.articles.length === 0) {
-      console.log('No articles found from NewsAPI');
+      console.log('No articles found from backend');
       return [];
     }
 
@@ -293,10 +281,10 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     newsAlertsCache.data = sortedAlerts;
     newsAlertsCache.timestamp = now;
 
-    console.log(`Fetched ${sortedAlerts.length} news alerts from NewsAPI`);
+    console.log(`Fetched ${sortedAlerts.length} news alerts from backend proxy`);
     return sortedAlerts;
   } catch (error) {
-    console.error('Error fetching news alerts from NewsAPI:', error);
+    console.error('Error fetching news alerts from backend:', error);
     // Return empty array to trigger fallback alerts if there's an error
     return [];
   }
