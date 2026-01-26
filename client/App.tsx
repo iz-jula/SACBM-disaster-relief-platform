@@ -28,6 +28,7 @@ const App = () => (
           <Route path="/upload" element={<Upload />} />
           <Route path="/weather" element={<Weather />} />
           <Route path="/ingd-dashboard" element={<INGDDashboard />} />
+          <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
