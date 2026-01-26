@@ -291,8 +291,18 @@ export default function Admin() {
         {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="space-y-6">
+            {/* Google Connector - Prominent */}
+            <GoogleConnector />
+
+            {/* Other Data Connectors */}
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Additional Integrations</h3>
+              <Connectors />
+            </div>
+
+            {/* System Configuration */}
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-6">System Settings</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-6">System Configuration</h3>
 
               <div className="space-y-6">
                 {/* Database Configuration */}
@@ -354,7 +364,7 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Backup & Export */}
+                {/* Data Management */}
                 <div className="p-6 border border-slate-200 rounded-lg">
                   <h4 className="font-semibold text-slate-900 mb-3">Data Management</h4>
                   <div className="space-y-2">
@@ -369,16 +379,18 @@ export default function Admin() {
               </div>
             </div>
 
+            {/* Integration Status */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-6">
               <p className="text-lg font-semibold text-green-900 mb-2">✓ Ready for Backend Integration</p>
               <p className="text-green-800 mb-4">
-                All admin settings are prepared for backend configuration. Once you connect your database and API, you'll be able to:
+                All admin settings are prepared for backend configuration. You can connect integrations with Google Drive, APIs, databases, and more.
               </p>
               <ul className="space-y-1 text-sm text-green-800">
-                <li>✓ Store and retrieve request data</li>
-                <li>✓ Manage user permissions and roles</li>
-                <li>✓ Export data and generate reports</li>
-                <li>✓ Monitor system health and usage</li>
+                <li>✓ Google Drive for automatic file sync</li>
+                <li>✓ Custom APIs and webhooks</li>
+                <li>✓ Direct database connections</li>
+                <li>✓ GitHub repositories for data storage</li>
+                <li>✓ Data export and reporting</li>
               </ul>
             </div>
           </div>
