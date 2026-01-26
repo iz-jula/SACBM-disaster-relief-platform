@@ -95,6 +95,17 @@ export async function updateRequest(
   }
 }
 
+// Delete relief request from Supabase
+export async function deleteRequest(id: number): Promise<boolean> {
+  try {
+    const deleted = await deleteSupabaseRequest(id);
+    return deleted;
+  } catch (error) {
+    console.error("Error deleting request:", error);
+    return false;
+  }
+}
+
 // Fetch metrics (aggregates) from Supabase
 export async function getMetrics(): Promise<Metrics | null> {
   try {
