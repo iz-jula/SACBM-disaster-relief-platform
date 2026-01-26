@@ -30,6 +30,18 @@ export default function Upload() {
     }));
   };
 
+  const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    // Remove all non-digit characters
+    const numbersOnly = value.replace(/\D/g, '');
+    // Format with commas
+    const formatted = numbersOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    setFormData((prev) => ({
+      ...prev,
+      value: formatted,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitStatus("loading");
