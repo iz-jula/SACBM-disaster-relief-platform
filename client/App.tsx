@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Requests from "./pages/Requests";
+import Upload from "./pages/Upload";
 import INGDDashboard from "./pages/INGDDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -22,6 +23,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/requests" element={<Requests />} />
+          <Route path="/upload" element={<Upload />} />
           <Route path="/ingd-dashboard" element={<INGDDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
