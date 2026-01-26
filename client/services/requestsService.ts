@@ -62,7 +62,15 @@ export async function createRequest(
   request: Omit<RelieRequest, "id" | "created_at" | "edited_at">
 ): Promise<RelieRequest | null> {
   try {
-    const newRequest = await createSupabaseRequest(request);
+    const newRequest = await createSupabaseRequest({
+      originator: request.originator,
+      location: request.location,
+      help_type: request.help_type,
+      evacuation_type: request.evacuation_type,
+      people: request.people,
+      value: request.value,
+      status: request.status,
+    });
     return newRequest;
   } catch (error) {
     console.error("Error creating request:", error);
