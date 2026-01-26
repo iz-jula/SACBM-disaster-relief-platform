@@ -14,6 +14,7 @@ interface RelieRequest {
   amountSpent: number;
   source: "INGD" | "Chamber";
   category?: "Category 1" | "Category 2";
+  status: "pending" | "met" | "partially_met";
 }
 
 function getRequestCategory(source: "INGD" | "Chamber"): "Category 1" | "Category 2" {
