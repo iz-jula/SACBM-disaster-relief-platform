@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/upload" element={<Upload />} />
             <Route path="/weather" element={<Weather />} />
             <Route path="/ingd-dashboard" element={<INGDDashboard />} />
+            <Route path="/data-repository" element={<DataRepository />} />
             <Route
               path="/admin"
               element={
