@@ -1,7 +1,7 @@
 import { BarChart3, Users, TrendingUp, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import WeatherForecast from "@/components/WeatherForecast";
 
 // Sample data for demonstration
 const monthlyData = [
