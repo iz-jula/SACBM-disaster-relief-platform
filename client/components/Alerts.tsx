@@ -185,7 +185,8 @@ export default function Alerts() {
         {alerts.length > 0 ? (
           alerts.map((alert) => {
             const severity = getSeverity(alert);
-            const isGoogle = "start" in alert;
+            const isNews = "url" in alert;
+            const url = getUrl(alert);
 
             return (
               <div
@@ -194,11 +195,11 @@ export default function Alerts() {
               >
                 <div className="flex items-start gap-3">
                   <div className={`p-2 rounded-lg flex-shrink-0 ${getSeverityBadgeColor(severity)}`}>
-                    {isGoogle ? <AlertCircle size={20} /> : <Cloud size={20} />}
+                    {isNews ? <AlertCircle size={20} /> : <Cloud size={20} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="font-semibold truncate">{getTitle(alert)}</p>
+                      <p className="font-semibold">{getTitle(alert)}</p>
                       <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getSeverityBadgeColor(severity)}`}>
                         {severity.charAt(0).toUpperCase() + severity.slice(1)}
                       </span>
@@ -206,20 +207,39 @@ export default function Alerts() {
 
                     {getLocation(alert) && (
                       <p className="text-sm opacity-75 flex items-center gap-1 mb-2">
-                        <MapPin size={14} />
-                        {getLocation(alert)}
+                        {isNews ? (
+                          <span>{getLocation(alert)}</span>
+                        ) : (
+                          <>
+                            <MapPin size={14} />
+                            {getLocation(alert)}
+                          </>
+                        )}
                       </p>
                     )}
 
                     {getDescription(alert) && (
-                      <p className="text-sm opacity-90 mb-2">
+                      <p className="text-sm opacity-90 mb-2 line-clamp-2">
                         {getDescription(alert)}
                       </p>
                     )}
 
-                    <p className="text-xs opacity-70">
-                      {getTime(alert)}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs opacity-70">
+                        {getTime(alert)}
+                      </p>
+                      {url && (
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-xs font-medium opacity-75 hover:opacity-100 transition-opacity"
+                        >
+                          Read more
+                          <ExternalLink size={12} />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
