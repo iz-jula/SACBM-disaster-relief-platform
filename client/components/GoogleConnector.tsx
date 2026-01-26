@@ -18,25 +18,38 @@ export default function GoogleConnector() {
   }, []);
 
   useEffect(() => {
-    if (isConnected || isLoading) return;
+    // Register callback handlers
+    registerGoogleCallbacks(
+      (user: GoogleUser) => {
+        setUser(user);
+        setIsConnected(true);
+        saveGoogleUser(user);
+        setError(null);
+        setIsLoading(false);
+      },
+      (error: string) => {
+        console.error('Google sign-in error:', error);
 
-    // Initialize Google Sign-In button when component mounts and user is not connected
-    const initializeGoogle = async () => {
-      try {
-        await signInWithGoogle();
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        console.error('Google initialization error:', errorMsg);
-
-        // Only set error if it's not a normal auth flow error
-        if (!errorMsg.includes('Google button container not found')) {
-          setError(errorMsg);
+        if (error.includes('invalid_client')) {
+          setError("Google Client ID is invalid. Please verify it in your Google Cloud Console.");
+        } else if (error.includes('popup_blocked')) {
+          setError("Pop-up was blocked. Please allow pop-ups and try again.");
+        } else if (error.includes('Failed to load Google API')) {
+          setError("Unable to load Google Sign-In. Please check your internet connection.");
+        } else {
+          setError(`Error: ${error}`);
         }
+        setIsLoading(false);
       }
-    };
+    );
 
-    initializeGoogle();
-  }, [isConnected, isLoading]);
+    // Initialize Google Sign-In button when component mounts
+    if (!isConnected) {
+      signInWithGoogle().catch((err) => {
+        console.error('Failed to initialize Google:', err);
+      });
+    }
+  }, [isConnected]);
 
   const handleDisconnect = () => {
     signOutGoogle();
