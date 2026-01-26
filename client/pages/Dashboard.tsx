@@ -1,51 +1,16 @@
 import { BarChart3, Users, TrendingUp, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, Suspense, lazy } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import Layout from "@/components/Layout";
+import { getRecentRequests, getMetrics, Metrics } from "@/services/requestsService";
 
 const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
 const Alerts = lazy(() => import("@/components/Alerts"));
 
-// Sample data for demonstration
-const recentRequests = [
-  {
-    id: "1",
-    company: "Local Hospital",
-    location: "District 1, Village A",
-    helpType: "Materials",
-    source: "INGD" as const,
-    time: "2 hours ago",
-  },
-  {
-    id: "2",
-    company: "Community Center",
-    location: "District 2, Village B",
-    helpType: "Food",
-    source: "Chamber" as const,
-    time: "5 hours ago",
-  },
-  {
-    id: "3",
-    company: "School Building",
-    location: "District 3, Village C",
-    helpType: "Medical",
-    source: "INGD" as const,
-    time: "1 day ago",
-  },
-];
-
-const helpTypeStats = [
-  { type: "Food", count: 45, percentage: 35 },
-  { type: "Clothing", count: 32, percentage: 25 },
-  { type: "Materials", count: 38, percentage: 30 },
-  { type: "Medical", count: 14, percentage: 10 },
-];
-
 export default function Dashboard() {
-  const totalRequests = 129;
-  const totalPeople = 3920;
-  const totalValue = 2770000;
-  const avgValue = Math.round(totalValue / totalRequests);
+  const [recentRequests, setRecentRequests] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Load Tableau API script for INGD dashboard
