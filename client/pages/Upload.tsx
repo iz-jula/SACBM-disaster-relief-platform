@@ -320,14 +320,13 @@ export default function Upload() {
                     Value Spent in Meticais (MZN) *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="value"
                     value={formData.value}
-                    onChange={handleInputChange}
+                    onChange={handleValueChange}
                     required
-                    min="0"
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Enter approximate amount spent"
+                    placeholder="Enter approximate amount spent (e.g., 1,500,000)"
                   />
                 </div>
               </div>
