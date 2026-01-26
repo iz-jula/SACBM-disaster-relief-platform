@@ -402,6 +402,13 @@ export default function Requests() {
                         {request.category || getRequestCategory(request.source)}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}
+                      >
+                        {getStatusLabel(request.status)}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-sm font-medium text-slate-900">
                       {request.company}
                     </td>
