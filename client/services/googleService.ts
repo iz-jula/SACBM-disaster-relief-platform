@@ -51,44 +51,66 @@ export function initializeGoogleAPI(): Promise<void> {
   });
 }
 
-// Sign in with Google using OAuth 2.0 authorization code flow
+// Sign in with Google using Google Identity Services
 export async function signInWithGoogle(): Promise<GoogleUser | null> {
   try {
-    if (!API_CONFIG.google.clientId) {
-      console.error('Google Client ID not configured');
+    await initializeGoogleAPI();
+
+    if (!window.google || !API_CONFIG.google.clientId) {
+      console.error('Google API not initialized or Client ID not configured');
       return null;
     }
 
-    // Build the OAuth 2.0 authorization URL for accessing Google Drive/Sheets
-    const scopes = [
-      'https://www.googleapis.com/auth/drive',
-      'https://www.googleapis.com/auth/spreadsheets',
-      'https://www.googleapis.com/auth/calendar.readonly',
-      'openid',
-      'email',
-      'profile',
-    ];
+    return new Promise((resolve) => {
+      let resolved = false;
 
-    const redirectUri = window.location.origin;
-    const state = Math.random().toString(36).substring(7);
+      // Initialize the Google Sign-In
+      window.google.accounts.id.initialize({
+        client_id: API_CONFIG.google.clientId,
+        callback: (response: any) => {
+          if (!resolved && response.credential) {
+            resolved = true;
+            const decoded = parseJwt(response.credential);
+            const user: GoogleUser = {
+              email: decoded.email,
+              name: decoded.name,
+              picture: decoded.picture,
+              accessToken: response.credential, // This is the ID token
+            };
+            resolve(user);
+          }
+        },
+      });
 
-    // Store state in session storage for CSRF protection
-    sessionStorage.setItem('google_oauth_state', state);
+      // Create a container for the One Tap sign-in button
+      const oneTapContainer = document.createElement('div');
+      oneTapContainer.id = 'google-oneTap-container';
+      document.body.appendChild(oneTapContainer);
 
-    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-    authUrl.searchParams.append('client_id', API_CONFIG.google.clientId);
-    authUrl.searchParams.append('redirect_uri', redirectUri);
-    authUrl.searchParams.append('response_type', 'code');
-    authUrl.searchParams.append('scope', scopes.join(' '));
-    authUrl.searchParams.append('access_type', 'offline');
-    authUrl.searchParams.append('prompt', 'consent');
-    authUrl.searchParams.append('state', state);
+      // Render the One Tap sign-in prompt
+      window.google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // If One Tap can't be displayed, render a regular button as fallback
+          const buttonContainer = document.createElement('div');
+          buttonContainer.id = 'google-signin-button';
+          buttonContainer.style.position = 'fixed';
+          buttonContainer.style.top = '0';
+          buttonContainer.style.left = '0';
+          buttonContainer.style.zIndex = '10000';
+          document.body.appendChild(buttonContainer);
 
-    // Redirect to Google OAuth
-    window.location.href = authUrl.toString();
+          window.google.accounts.id.renderButton(buttonContainer, {
+            theme: 'outline',
+            size: 'large',
+          });
 
-    // Return null since we're redirecting
-    return null;
+          const button = buttonContainer.querySelector('button');
+          if (button) {
+            setTimeout(() => button.click(), 100);
+          }
+        }
+      });
+    });
   } catch (error) {
     console.error('Error signing in with Google:', error);
     return null;
