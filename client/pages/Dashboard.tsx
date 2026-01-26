@@ -214,9 +214,10 @@ export default function Dashboard() {
               <p className="text-slate-600 text-center py-8">Loading recent requests...</p>
             ) : recentRequests.length > 0 ? (
               recentRequests.map((request) => {
-                const timeAgo = request.createdAt
-                  ? new Date(request.createdAt).toLocaleString()
+                const timeAgo = request.created_at
+                  ? new Date(request.created_at).toLocaleString()
                   : "Unknown";
+                const statusText = request.status === true ? "met" : "pending";
                 return (
                   <div
                     key={request.id}
@@ -227,18 +228,18 @@ export default function Dashboard() {
                       <p className="text-sm text-slate-600 mt-1">{request.location}</p>
                       <div className="flex items-center gap-3 mt-2">
                         <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
-                          {request.helpType}
+                          {request.help_type}
                         </span>
                         <span
                           className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                            request.status === "pending"
+                            statusText === "pending"
                               ? "bg-yellow-100 text-yellow-700"
-                              : request.status === "met"
+                              : statusText === "met"
                               ? "bg-green-100 text-green-700"
                               : "bg-orange-100 text-orange-700"
                           }`}
                         >
-                          {request.status}
+                          {statusText}
                         </span>
                       </div>
                     </div>
