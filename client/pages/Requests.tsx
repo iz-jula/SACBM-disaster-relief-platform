@@ -35,6 +35,7 @@ export default function Requests() {
       peopleInvolved: 150,
       amountSpent: 45000,
       source: "INGD",
+      category: "Category 2",
     },
     {
       id: "2",
@@ -45,6 +46,7 @@ export default function Requests() {
       peopleInvolved: 320,
       amountSpent: 125000,
       source: "Chamber",
+      category: "Category 1",
     },
   ]);
 
