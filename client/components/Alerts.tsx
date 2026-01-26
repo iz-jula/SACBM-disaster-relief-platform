@@ -163,7 +163,7 @@ export default function Alerts() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="font-semibold truncate">{"title" in alert ? alert.title : alert.summary}</p>
+                      <p className="font-semibold truncate">"title" in alert ? alert.title : alert.title</p>
                       <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getSeverityBadgeColor(severity)}`}>
                         {severity.charAt(0).toUpperCase() + severity.slice(1)}
                       </span>
@@ -172,12 +172,12 @@ export default function Alerts() {
                     {isFallback && "location" in alert && (
                       <p className="text-sm opacity-75 flex items-center gap-1 mb-2">
                         <MapPin size={14} />
-                        {alert.location}
+                        {(alert as FallbackAlert).location}
                       </p>
                     )}
 
                     <p className="text-sm opacity-90 mb-2">
-                      {"description" in alert ? alert.description : alert.description}
+                      {"description" in alert ? (alert as FallbackAlert).description : (alert as GoogleAlert).title}
                     </p>
 
                     <p className="text-xs opacity-70">
