@@ -995,7 +995,7 @@ const locationData: Record<string, DetailedWeather[]> = {
     { date: "2024-01-27", day: "Tomorrow", high: 25, low: 19, condition: "rainy", humidity: 75, windSpeed: 15, windDirection: "SE", visibility: 7, pressure: 1010, rainChance: 66, rainTrajectory: "Moderate rain", uvIndex: 5 },
     { date: "2024-01-28", day: "Wed", high: 27, low: 21, condition: "cloudy", humidity: 67, windSpeed: 12, windDirection: "E", visibility: 10, pressure: 1013, rainChance: 36, rainTrajectory: "Clearing", uvIndex: 6 },
     { date: "2024-01-29", day: "Thu", high: 28, low: 22, condition: "sunny", humidity: 62, windSpeed: 10, windDirection: "NE", visibility: 11, pressure: 1015, rainChance: 13, rainTrajectory: "Clear", uvIndex: 7 },
-    { date: "2024-01-30", day: "Fri", high: 29, lo: 23, condition: "sunny", humidity: 57, windSpeed: 9, windDirection: "N", visibility: 12, pressure: 1016, rainChance: 5, rainTrajectory: "Clear", uvIndex: 8 },
+    { date: "2024-01-30", day: "Fri", high: 29, low: 23, condition: "sunny", humidity: 57, windSpeed: 9, windDirection: "N", visibility: 12, pressure: 1016, rainChance: 5, rainTrajectory: "Clear", uvIndex: 8 },
   ],
   Namialo: [
     { date: "2024-01-26", day: "Today", high: 26, low: 20, condition: "cloudy", humidity: 68, windSpeed: 13, windDirection: "E", visibility: 10, pressure: 1012, rainChance: 44, rainTrajectory: "Scattered showers", uvIndex: 6 },
