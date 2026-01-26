@@ -59,57 +59,76 @@ export async function signInWithGoogle(): Promise<GoogleUser | null> {
       await initializeGoogleAPI();
     }
 
-    if (!window.google || !API_CONFIG.google.clientId) {
-      console.error('Google API not initialized or Client ID not configured');
-      return null;
+    if (!window.google) {
+      throw new Error('Google API failed to load');
     }
 
-    return new Promise<GoogleUser | null>((resolve) => {
+    if (!API_CONFIG.google.clientId) {
+      throw new Error('Google Client ID not configured. Please add VITE_GOOGLE_CLIENT_ID to your .env file.');
+    }
+
+    return new Promise<GoogleUser | null>((resolve, reject) => {
       let callbackReceived = false;
+      let timeout: NodeJS.Timeout;
 
-      // Initialize Google Sign-In
-      window.google.accounts.id.initialize({
-        client_id: API_CONFIG.google.clientId,
-        callback: (response: any) => {
-          if (!callbackReceived && response.credential) {
-            callbackReceived = true;
-            const decoded = parseJwt(response.credential);
-            if (decoded && decoded.email) {
-              const user: GoogleUser = {
-                email: decoded.email,
-                name: decoded.name || 'Google User',
-                picture: decoded.picture || '',
-                accessToken: response.credential,
-              };
-              resolve(user);
-            } else {
-              resolve(null);
+      try {
+        // Initialize Google Sign-In
+        window.google.accounts.id.initialize({
+          client_id: API_CONFIG.google.clientId,
+          callback: (response: any) => {
+            clearTimeout(timeout);
+            if (!callbackReceived && response.credential) {
+              callbackReceived = true;
+              const decoded = parseJwt(response.credential);
+              if (decoded && decoded.email) {
+                const user: GoogleUser = {
+                  email: decoded.email,
+                  name: decoded.name || 'Google User',
+                  picture: decoded.picture || '',
+                  accessToken: response.credential,
+                };
+                resolve(user);
+              } else {
+                reject(new Error('Failed to parse Google credentials'));
+              }
+            } else if (response.error) {
+              reject(new Error(response.error));
             }
-          }
-        },
-      });
+          },
+          error_callback: () => {
+            clearTimeout(timeout);
+            if (!callbackReceived) {
+              reject(new Error('Google authentication failed'));
+            }
+          },
+        });
 
-      // Render the button in the existing container
-      const buttonContainer = document.getElementById('google-signin-button');
-      if (buttonContainer) {
-        try {
+        // Render the button in the existing container
+        const buttonContainer = document.getElementById('google-signin-button');
+        if (buttonContainer) {
           window.google.accounts.id.renderButton(buttonContainer, {
             type: 'standard',
             theme: 'outline',
             size: 'large',
           });
-        } catch (e) {
-          console.warn('Error rendering Google button:', e);
-          resolve(null);
+
+          // Set timeout for user to complete authentication
+          timeout = setTimeout(() => {
+            if (!callbackReceived) {
+              reject(new Error('Google sign-in timeout - please try again'));
+            }
+          }, 60000); // 60 second timeout
+        } else {
+          reject(new Error('Google button container not found in DOM'));
         }
-      } else {
-        console.warn('Google button container not found');
-        resolve(null);
+      } catch (e) {
+        clearTimeout(timeout);
+        reject(e);
       }
     });
   } catch (error) {
     console.error('Error signing in with Google:', error);
-    return null;
+    throw error;
   }
 }
 
