@@ -51,65 +51,44 @@ export function initializeGoogleAPI(): Promise<void> {
   });
 }
 
-// Sign in with Google
+// Sign in with Google using OAuth 2.0 authorization code flow
 export async function signInWithGoogle(): Promise<GoogleUser | null> {
   try {
-    await initializeGoogleAPI();
-
-    if (!window.google || !API_CONFIG.google.clientId) {
-      console.error('Google API not initialized or Client ID not configured');
+    if (!API_CONFIG.google.clientId) {
+      console.error('Google Client ID not configured');
       return null;
     }
 
-    return new Promise((resolve) => {
-      let resolved = false;
+    // Build the OAuth 2.0 authorization URL for accessing Google Drive/Sheets
+    const scopes = [
+      'https://www.googleapis.com/auth/drive',
+      'https://www.googleapis.com/auth/spreadsheets',
+      'https://www.googleapis.com/auth/calendar.readonly',
+      'openid',
+      'email',
+      'profile',
+    ];
 
-      window.google.accounts.id.initialize({
-        client_id: API_CONFIG.google.clientId,
-        callback: (response: any) => {
-          if (!resolved && response.credential) {
-            resolved = true;
-            const decoded = parseJwt(response.credential);
-            const user: GoogleUser = {
-              email: decoded.email,
-              name: decoded.name,
-              picture: decoded.picture,
-              accessToken: response.credential,
-            };
-            resolve(user);
-          }
-        },
-      });
+    const redirectUri = window.location.origin;
+    const state = Math.random().toString(36).substring(7);
 
-      // Request permission for offline access (for accessing Google Drive/Sheets)
-      window.google.accounts.id.requestPermission({
-        scopes: [
-          'https://www.googleapis.com/auth/drive',
-          'https://www.googleapis.com/auth/spreadsheets',
-          'https://www.googleapis.com/auth/calendar.readonly',
-        ],
-      }, () => {
-        // Permission callback - shows the sign-in prompt
-        // This will trigger the callback above when user signs in
-      });
+    // Store state in session storage for CSRF protection
+    sessionStorage.setItem('google_oauth_state', state);
 
-      // Fallback: if requestPermission doesn't trigger, use renderButton
-      const buttonDiv = document.createElement('div');
-      buttonDiv.style.display = 'none';
-      document.body.appendChild(buttonDiv);
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.append('client_id', API_CONFIG.google.clientId);
+    authUrl.searchParams.append('redirect_uri', redirectUri);
+    authUrl.searchParams.append('response_type', 'code');
+    authUrl.searchParams.append('scope', scopes.join(' '));
+    authUrl.searchParams.append('access_type', 'offline');
+    authUrl.searchParams.append('prompt', 'consent');
+    authUrl.searchParams.append('state', state);
 
-      window.google.accounts.id.renderButton(buttonDiv, {
-        theme: 'outline',
-        size: 'large',
-        width: '200',
-      });
+    // Redirect to Google OAuth
+    window.location.href = authUrl.toString();
 
-      // Simulate a button click to trigger the OAuth flow
-      const button = buttonDiv.querySelector('button');
-      if (button) {
-        setTimeout(() => button.click(), 100);
-      }
-    });
+    // Return null since we're redirecting
+    return null;
   } catch (error) {
     console.error('Error signing in with Google:', error);
     return null;
