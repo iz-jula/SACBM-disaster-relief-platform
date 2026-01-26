@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useState } from "react";
 import { FileCheck, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
