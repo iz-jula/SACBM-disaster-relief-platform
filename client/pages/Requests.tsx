@@ -282,6 +282,9 @@ export default function Requests() {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                    Category
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                     Company
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
@@ -298,9 +301,6 @@ export default function Requests() {
                   </th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
                     Value (MZN)
-                  </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
-                    Source
                   </th>
                 </tr>
               </thead>
