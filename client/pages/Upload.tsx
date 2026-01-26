@@ -269,12 +269,12 @@ export default function Upload() {
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="">Select evacuation method</option>
-                      <option value="By boat">By boat</option>
-                      <option value="By tractor">By tractor</option>
-                      <option value="By helicopter">By helicopter</option>
-                      <option value="By vehicle">By vehicle</option>
+                      <option value="Boat">Boat</option>
+                      <option value="Tractor">Tractor</option>
+                      <option value="Helicopter">Helicopter</option>
+                      <option value="Vehicle">Vehicle</option>
                       <option value="On foot">On foot</option>
-                      <option value="Other">Other means</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                 )}
