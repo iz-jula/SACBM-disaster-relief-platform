@@ -475,6 +475,15 @@ export default function Requests() {
                       </span>
                     </div>
                     <div>
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Status</p>
+                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium mt-1 ${getStatusStyles(request.status)}`}>
+                        {getStatusLabel(request.status)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Evacuation</p>
                       <p className="text-sm text-slate-700 mt-1">{request.evacuationType}</p>
                     </div>
