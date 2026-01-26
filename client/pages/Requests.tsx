@@ -27,6 +27,28 @@ function getCategoryStyles(category: "Category 1" | "Category 2") {
     : "bg-orange-100 text-orange-700";
 }
 
+function getStatusStyles(status: "pending" | "met" | "partially_met") {
+  switch (status) {
+    case "met":
+      return "bg-green-100 text-green-700 border border-green-300";
+    case "partially_met":
+      return "bg-yellow-100 text-yellow-700 border border-yellow-300";
+    case "pending":
+      return "bg-blue-100 text-blue-700 border border-blue-300";
+  }
+}
+
+function getStatusLabel(status: "pending" | "met" | "partially_met") {
+  switch (status) {
+    case "met":
+      return "✓ Met";
+    case "partially_met":
+      return "◐ Partially Met";
+    case "pending":
+      return "⏳ Pending";
+  }
+}
+
 export default function Requests() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<RelieRequest[]>([
