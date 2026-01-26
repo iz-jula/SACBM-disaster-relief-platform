@@ -132,7 +132,9 @@ export default function Admin() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-slate-600 text-sm font-medium">{stat.label}</p>
-                        <p className="text-3xl font-bold text-slate-900 mt-2">{stat.value}</p>
+                        <p className="text-3xl font-bold text-slate-900 mt-2">
+                          {isLoadingMetrics ? "—" : stat.value}
+                        </p>
                       </div>
                       <div className={`rounded-lg p-3 ${colorClasses[stat.color]}`}>
                         <Icon size={24} />
