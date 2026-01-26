@@ -47,7 +47,7 @@ export default function GoogleConnector() {
     clearStoredGoogleUser();
   };
 
-  if (!process.env.VITE_GOOGLE_CLIENT_ID) {
+  if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     return (
       <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50">
