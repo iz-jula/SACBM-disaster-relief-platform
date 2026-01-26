@@ -48,24 +48,25 @@ export default function INGDDashboard() {
             </p>
           </div>
 
-          <div className="w-full" style={{ height: "900px" }}>
+          <div className="w-full bg-white rounded-lg overflow-hidden">
             <div
               className="tableauPlaceholder"
               id="viz1769418246220"
-              style={{ position: "relative", width: "100%", height: "100%" }}
+              style={{ width: "100%", height: "900px", position: "relative" }}
             >
               <noscript>
-                <a href="#">
+                <a href="https://public.tableau.com">
                   <img
                     alt="Dashboard"
-                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1_rss.png"
-                    style={{ border: "none" }}
+                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1.png"
                   />
                 </a>
               </noscript>
               <object
                 className="tableauViz"
-                style={{ width: "100%", height: "100%" }}
+                style={{
+                  display: "none",
+                }}
               >
                 <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
                 <param name="embed_code_version" value="3" />
@@ -88,20 +89,6 @@ export default function INGDDashboard() {
                 <param name="language" value="en-US" />
               </object>
             </div>
-            <script
-              type="text/javascript"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  var divElement = document.getElementById('viz1769418246220');
-                  var vizElement = divElement.getElementsByTagName('object')[0];
-                  vizElement.style.width='100%';
-                  vizElement.style.height='900px';
-                  var scriptElement = document.createElement('script');
-                  scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-                  vizElement.parentNode.insertBefore(scriptElement, vizElement);
-                `,
-              }}
-            />
           </div>
         </div>
 
