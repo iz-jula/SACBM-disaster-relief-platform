@@ -253,11 +253,9 @@ export default function Alerts() {
         )}
       </div>
 
-      {isConnected && (
-        <div className="px-6 py-3 border-t border-slate-200 bg-green-50 text-xs text-green-700">
-          ✓ Connected to Google Calendar - Alerts will sync automatically
-        </div>
-      )}
+      <div className="px-6 py-3 border-t border-slate-200 bg-blue-50 text-xs text-blue-700">
+        ℹ News alerts are updated automatically from Google News and other news sources
+      </div>
     </div>
   );
 }
