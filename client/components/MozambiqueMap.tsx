@@ -19,12 +19,12 @@ export default function MozambiqueMap({ selectedRegion, onRegionSelect }: Mozamb
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-      <h2 className="text-xl font-bold text-slate-900 mb-6">Mozambique Regions</h2>
+    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-4">
+      <h2 className="text-lg font-bold text-slate-900 mb-4">Mozambique Regions</h2>
 
-      <div className="relative w-full" style={{ paddingBottom: "133%" }}>
+      <div className="relative w-full" style={{ paddingBottom: "125%" }}>
         <svg
-          viewBox="0 0 100 133"
+          viewBox="0 0 100 125"
           className="absolute inset-0 w-full h-full rounded-lg border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100"
         >
           {/* Simplified Mozambique outline */}
