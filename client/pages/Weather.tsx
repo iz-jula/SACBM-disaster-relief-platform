@@ -1072,7 +1072,7 @@ const locationData: Record<string, DetailedWeather[]> = {
     { date: "2024-01-27", day: "Tomorrow", high: 22, low: 16, condition: "rainy", humidity: 64, windSpeed: 11, windDirection: "SE", visibility: 8, pressure: 1014, rainChance: 46, rainTrajectory: "Moderate rain", uvIndex: 3 },
     { date: "2024-01-28", day: "Wed", high: 23, low: 17, condition: "cloudy", humidity: 57, windSpeed: 8, windDirection: "E", visibility: 10, pressure: 1017, rainChance: 21, rainTrajectory: "Clearing", uvIndex: 4 },
     { date: "2024-01-29", day: "Thu", high: 24, low: 18, condition: "sunny", humidity: 52, windSpeed: 7, windDirection: "NE", visibility: 11, pressure: 1018, rainChance: 8, rainTrajectory: "Clear", uvIndex: 5 },
-    { date: "2024-01-30", day: "Fri", high: 25, lo: 19, condition: "sunny", humidity: 49, windSpeed: 6, windDirection: "N", visibility: 12, pressure: 1019, rainChance: 3, rainTrajectory: "Clear", uvIndex: 6 },
+    { date: "2024-01-30", day: "Fri", high: 25, low: 19, condition: "sunny", humidity: 49, windSpeed: 6, windDirection: "N", visibility: 12, pressure: 1019, rainChance: 3, rainTrajectory: "Clear", uvIndex: 6 },
   ],
   Miézi: [
     { date: "2024-01-26", day: "Today", high: 30, low: 24, condition: "sunny", humidity: 56, windSpeed: 11, windDirection: "W", visibility: 12, pressure: 1015, rainChance: 16, rainTrajectory: "No significant rain", uvIndex: 9 },
