@@ -17,7 +17,15 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<"dashboard" | "requests" | "users" | "settings">("dashboard");
-  const [metrics, setMetrics] = useState({ totalRequests: 0, metRequests: 0, pendingRequests: 0, partiallyMet: 0 });
+  const [metrics, setMetrics] = useState({
+    totalRequests: 0,
+    totalPeopleAssisted: 0,
+    totalValueDeployed: 0,
+    averagePerRequest: 0,
+    metRequests: 0,
+    pendingRequests: 0,
+    partiallyMet: 0,
+  });
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
 
   // Load metrics on mount
