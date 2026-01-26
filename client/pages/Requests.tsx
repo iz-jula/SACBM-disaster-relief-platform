@@ -319,6 +319,9 @@ export default function Requests() {
                     Company
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                    Originator
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                     Location
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
