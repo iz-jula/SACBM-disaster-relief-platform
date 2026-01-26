@@ -420,6 +420,7 @@ export default function Weather() {
   );
 
   const weatherData = locationData[selectedRegion] || locationData.Inhambane;
+  const todayWeather = weatherData[0];
 
   const getWeatherIcon = (condition: string) => {
     switch (condition) {
@@ -442,209 +443,253 @@ export default function Weather() {
 
   return (
     <Layout>
-      <div className="space-y-8">
-        {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Weather Forecast</h1>
-            <p className="text-slate-600 mt-1">Detailed weather for Mozambique regions</p>
-          </div>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
-          >
-            ← Back
-          </button>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search by city, region, or district..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
-
-          {/* Search Suggestions */}
-          {showSuggestions && searchTerm && filteredLocations.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-300 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
-              {filteredLocations.map((location) => (
-                <button
-                  key={location}
-                  onClick={() => handleLocationSelect(location)}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-slate-100 last:border-b-0 transition-colors"
-                >
-                  <p className="font-medium text-slate-900">{location}</p>
-                </button>
-              ))}
+      <div className="flex flex-col h-screen -mx-4 -my-8">
+        {/* Header Section - Outside flex */}
+        <div className="px-4 py-8 bg-white border-b border-slate-200">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">Weather Forecast</h1>
+              <p className="text-slate-600 mt-1">Detailed weather for Mozambique regions</p>
             </div>
-          )}
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+            >
+              ← Back
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative max-w-2xl">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search by city, region, or district..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            {/* Search Suggestions */}
+            {showSuggestions && searchTerm && filteredLocations.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-300 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+                {filteredLocations.map((location) => (
+                  <button
+                    key={location}
+                    onClick={() => handleLocationSelect(location)}
+                    className="w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-slate-100 last:border-b-0 transition-colors"
+                  >
+                    <p className="font-medium text-slate-900">{location}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Map and Region Display */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left side - Map */}
-          <div className="lg:col-span-1">
+        {/* Main Content - Flex layout with sidebar */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Fixed Left Sidebar */}
+          <div className="w-96 bg-white border-r border-slate-200 overflow-y-auto flex flex-col gap-4 p-4">
+            {/* Map */}
             <MozambiqueMap
               selectedRegion={selectedRegion}
               onRegionSelect={handleLocationSelect}
             />
 
             {/* Current Region Display */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 mt-6">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6">
               <p className="text-sm opacity-90 mb-2">Currently viewing:</p>
               <h2 className="text-3xl font-bold">{selectedRegion}</h2>
             </div>
-          </div>
 
-          {/* Right side - Help text */}
-          <div className="lg:col-span-2 flex items-center justify-center">
-            <div className="text-center py-12">
-              <Cloud size={48} className="mx-auto text-blue-400 mb-4" />
-              <p className="text-lg text-slate-600">Select a region on the map or search above to view detailed weather forecast</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Weather Cards - Full Width */}
-        <div className="space-y-4">
-          {weatherData.map((weather, index) => (
-            <div
-              key={index}
-              className="bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              {/* Header */}
-              <div className="bg-gradient-to-r from-blue-50 to-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">{weather.day}</h3>
-                  <p className="text-sm text-slate-600">{weather.date}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  {getWeatherIcon(weather.condition)}
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-slate-900">{weather.high}°C</p>
-                    <p className="text-sm text-slate-600">{weather.low}°C low</p>
+            {/* Today's Weather Details */}
+            {todayWeather && (
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 space-y-4">
+                <div className="text-center">
+                  <div className="flex justify-center mb-3">
+                    {getWeatherIcon(todayWeather.condition)}
                   </div>
+                  <h3 className="text-2xl font-bold text-slate-900">{todayWeather.day}</h3>
+                  <p className="text-sm text-slate-600 mt-1">{todayWeather.date}</p>
                 </div>
-              </div>
 
-              {/* Main Details */}
-              <div className="px-6 py-6">
-                {/* Condition and Rain Trajectory */}
-                <div className="mb-6 pb-6 border-b border-slate-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide mb-2">
-                        Condition
-                      </p>
-                      <p className="text-lg font-semibold text-slate-900 capitalize">
-                        {weather.condition}
-                      </p>
+                <div className="border-t border-slate-200 pt-4">
+                  <div className="text-center mb-4">
+                    <p className="text-4xl font-bold text-slate-900">{todayWeather.high}°C</p>
+                    <p className="text-sm text-slate-600">Low: {todayWeather.low}°C</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <p className="text-xs font-medium text-slate-600 uppercase">Condition</p>
+                      <p className="font-semibold text-slate-900 capitalize mt-1">{todayWeather.condition}</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-600 uppercase tracking-wide mb-2">
-                        Rain Probability
-                      </p>
-                      <p className="text-lg font-semibold text-slate-900">{weather.rainChance}%</p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-600 uppercase tracking-wide mb-2">
-                      📍 Rain Trajectory
-                    </p>
-                    <p className="text-base text-slate-800 leading-relaxed">
-                      {weather.rainTrajectory}
-                    </p>
-                  </div>
-                </div>
 
-                {/* Detailed Metrics Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Humidity */}
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Droplets size={18} className="text-blue-600" />
+                    <div className="bg-green-50 rounded-lg p-3">
+                      <p className="text-xs font-medium text-slate-600 uppercase">Rain Chance</p>
+                      <p className="font-semibold text-slate-900 mt-1">{todayWeather.rainChance}%</p>
+                    </div>
+
+                    <div className="bg-purple-50 rounded-lg p-3">
                       <p className="text-xs font-medium text-slate-600 uppercase">Humidity</p>
+                      <p className="font-semibold text-slate-900 mt-1">{todayWeather.humidity}%</p>
                     </div>
-                    <p className="text-2xl font-bold text-slate-900">{weather.humidity}%</p>
-                  </div>
 
-                  {/* Wind */}
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Wind size={18} className="text-green-600" />
+                    <div className="bg-orange-50 rounded-lg p-3">
                       <p className="text-xs font-medium text-slate-600 uppercase">Wind</p>
+                      <p className="font-semibold text-slate-900 mt-1">{todayWeather.windSpeed} km/h {todayWeather.windDirection}</p>
                     </div>
-                    <p className="text-2xl font-bold text-slate-900">{weather.windSpeed} km/h</p>
-                    <p className="text-xs text-slate-600 mt-1">{weather.windDirection}</p>
-                  </div>
 
-                  {/* Visibility */}
-                  <div className="bg-purple-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Eye size={18} className="text-purple-600" />
-                      <p className="text-xs font-medium text-slate-600 uppercase">Visibility</p>
-                    </div>
-                    <p className="text-2xl font-bold text-slate-900">{weather.visibility} km</p>
-                  </div>
-
-                  {/* Pressure */}
-                  <div className="bg-orange-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Gauge size={18} className="text-orange-600" />
-                      <p className="text-xs font-medium text-slate-600 uppercase">Pressure</p>
-                    </div>
-                    <p className="text-2xl font-bold text-slate-900">{weather.pressure} mb</p>
-                  </div>
-
-                  {/* UV Index */}
-                  <div className="bg-yellow-50 rounded-lg p-4 md:col-span-2">
-                    <p className="text-xs font-medium text-slate-600 uppercase mb-2">UV Index</p>
-                    <div className="flex items-center gap-3">
-                      <p className="text-2xl font-bold text-slate-900">{weather.uvIndex}</p>
-                      <div className="flex-1 bg-slate-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full transition-all ${
-                            weather.uvIndex >= 8
-                              ? "bg-red-500"
-                              : weather.uvIndex >= 6
-                                ? "bg-orange-500"
-                                : "bg-yellow-500"
-                          }`}
-                          style={{ width: `${(weather.uvIndex / 11) * 100}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-slate-600">
-                        {weather.uvIndex >= 8
-                          ? "High"
-                          : weather.uvIndex >= 6
-                            ? "Moderate"
-                            : "Low"}
-                      </p>
+                    <div className="bg-slate-50 rounded-lg p-3">
+                      <p className="text-xs font-medium text-slate-600 uppercase">📍 Rain Trajectory</p>
+                      <p className="text-sm text-slate-800 mt-1 leading-relaxed">{todayWeather.rainTrajectory}</p>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
 
-        {/* Weather Alert */}
-        <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-          <p className="text-lg font-semibold text-orange-900 mb-2">⚠️ Regional Alert</p>
-          <p className="text-orange-800">
-            Heavy rainfall is expected in southern and central regions. Please ensure disaster
-            relief operations account for difficult road conditions and increased risk of flooding.
-          </p>
+          {/* Right Side - Weather Forecast Cards */}
+          <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-br from-slate-50 to-blue-50">
+            <div className="space-y-4 max-w-4xl mx-auto pb-8">
+              {weatherData.map((weather, index) => (
+                <div
+                  key={index}
+                  className="bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                >
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-blue-50 to-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">{weather.day}</h3>
+                      <p className="text-sm text-slate-600">{weather.date}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {getWeatherIcon(weather.condition)}
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-slate-900">{weather.high}°C</p>
+                        <p className="text-sm text-slate-600">{weather.low}°C low</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Details */}
+                  <div className="px-6 py-6">
+                    {/* Condition and Rain Trajectory */}
+                    <div className="mb-6 pb-6 border-b border-slate-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <p className="text-sm font-medium text-slate-600 uppercase tracking-wide mb-2">
+                            Condition
+                          </p>
+                          <p className="text-lg font-semibold text-slate-900 capitalize">
+                            {weather.condition}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-600 uppercase tracking-wide mb-2">
+                            Rain Probability
+                          </p>
+                          <p className="text-lg font-semibold text-slate-900">{weather.rainChance}%</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-slate-600 uppercase tracking-wide mb-2">
+                          📍 Rain Trajectory
+                        </p>
+                        <p className="text-base text-slate-800 leading-relaxed">
+                          {weather.rainTrajectory}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Detailed Metrics Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {/* Humidity */}
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Droplets size={18} className="text-blue-600" />
+                          <p className="text-xs font-medium text-slate-600 uppercase">Humidity</p>
+                        </div>
+                        <p className="text-2xl font-bold text-slate-900">{weather.humidity}%</p>
+                      </div>
+
+                      {/* Wind */}
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Wind size={18} className="text-green-600" />
+                          <p className="text-xs font-medium text-slate-600 uppercase">Wind</p>
+                        </div>
+                        <p className="text-2xl font-bold text-slate-900">{weather.windSpeed} km/h</p>
+                        <p className="text-xs text-slate-600 mt-1">{weather.windDirection}</p>
+                      </div>
+
+                      {/* Visibility */}
+                      <div className="bg-purple-50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Eye size={18} className="text-purple-600" />
+                          <p className="text-xs font-medium text-slate-600 uppercase">Visibility</p>
+                        </div>
+                        <p className="text-2xl font-bold text-slate-900">{weather.visibility} km</p>
+                      </div>
+
+                      {/* Pressure */}
+                      <div className="bg-orange-50 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Gauge size={18} className="text-orange-600" />
+                          <p className="text-xs font-medium text-slate-600 uppercase">Pressure</p>
+                        </div>
+                        <p className="text-2xl font-bold text-slate-900">{weather.pressure} mb</p>
+                      </div>
+
+                      {/* UV Index */}
+                      <div className="bg-yellow-50 rounded-lg p-4 md:col-span-2">
+                        <p className="text-xs font-medium text-slate-600 uppercase mb-2">UV Index</p>
+                        <div className="flex items-center gap-3">
+                          <p className="text-2xl font-bold text-slate-900">{weather.uvIndex}</p>
+                          <div className="flex-1 bg-slate-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full transition-all ${
+                                weather.uvIndex >= 8
+                                  ? "bg-red-500"
+                                  : weather.uvIndex >= 6
+                                    ? "bg-orange-500"
+                                    : "bg-yellow-500"
+                              }`}
+                              style={{ width: `${(weather.uvIndex / 11) * 100}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-slate-600">
+                            {weather.uvIndex >= 8
+                              ? "High"
+                              : weather.uvIndex >= 6
+                                ? "Moderate"
+                                : "Low"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Weather Alert */}
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
+                <p className="text-lg font-semibold text-orange-900 mb-2">⚠️ Regional Alert</p>
+                <p className="text-orange-800">
+                  Heavy rainfall is expected in southern and central regions. Please ensure disaster
+                  relief operations account for difficult road conditions and increased risk of flooding.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>
