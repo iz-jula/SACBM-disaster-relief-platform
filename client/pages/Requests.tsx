@@ -359,6 +359,9 @@ export default function Requests() {
                       {request.company}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">
+                      {request.originator}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600">
                       {request.location}
                     </td>
                     <td className="px-6 py-4 text-sm">
