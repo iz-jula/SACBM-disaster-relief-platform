@@ -9,9 +9,12 @@ import {
 
 export interface Metrics {
   totalRequests: number;
-  metRequests: number;
-  pendingRequests: number;
-  partiallyMet: number;
+  totalPeopleAssisted: number;
+  totalValueDeployed: number;
+  averagePerRequest: number;
+  metRequests?: number;
+  pendingRequests?: number;
+  partiallyMet?: number;
 }
 
 // Fetch all requests from Supabase
