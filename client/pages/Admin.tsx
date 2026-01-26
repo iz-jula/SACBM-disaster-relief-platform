@@ -288,6 +288,19 @@ export default function Admin() {
           </div>
         )}
 
+        {/* Data Repository Tab */}
+        {activeTab === "data-repository" && (
+          <div className="space-y-6">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+              <p className="text-lg font-semibold text-green-900 mb-2">🔒 Admin Only</p>
+              <p className="text-green-800">
+                This section is protected and only accessible to authorized administrators. Here you can manage data connectors to external services and repositories.
+              </p>
+            </div>
+            <Connectors />
+          </div>
+        )}
+
         {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="space-y-6">
