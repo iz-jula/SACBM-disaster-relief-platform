@@ -210,6 +210,43 @@ export default function Requests() {
     }));
   };
 
+  const toggleSelectRequest = (id: number) => {
+    const newSelected = new Set(selectedRequests);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedRequests(newSelected);
+  };
+
+  const handleResolveSelected = async () => {
+    for (const id of selectedRequests) {
+      await updateRequest(id, { status: true });
+    }
+    setRequests((prevRequests) =>
+      prevRequests.map((req) =>
+        selectedRequests.has(req.id!) ? { ...req, status: true } : req
+      )
+    );
+    setSelectedRequests(new Set());
+    setShowActionDropdown(false);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (!window.confirm(`Delete ${selectedRequests.size} request(s)? This cannot be undone.`)) {
+      return;
+    }
+    for (const id of selectedRequests) {
+      await deleteRequest(id);
+    }
+    setRequests((prevRequests) =>
+      prevRequests.filter((req) => !selectedRequests.has(req.id!))
+    );
+    setSelectedRequests(new Set());
+    setShowActionDropdown(false);
+  };
+
   const handleStatusChange = async (id: number, newStatus: boolean) => {
     try {
       const updatedRequest = await updateRequest(id, { status: newStatus });
