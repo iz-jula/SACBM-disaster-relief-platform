@@ -58,6 +58,7 @@ export default function Requests() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     company: "",
+    originator: "",
     location: "",
     helpType: "",
     evacuationType: "",
