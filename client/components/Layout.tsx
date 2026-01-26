@@ -23,47 +23,68 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
       {/* Sidebar */}
       <aside
-        className={`fixed md:static left-0 top-0 h-full w-64 bg-white border-r border-slate-200 shadow-lg md:shadow-none transform transition-transform duration-300 z-40 ${
+        className={`fixed md:static left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 shadow-lg md:shadow-none transform transition-all duration-300 z-40 flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+        } ${sidebarCollapsed ? "md:w-20" : ""}`}
       >
-        <div className="p-6">
-          {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center gap-3 mb-8"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <div className="bg-gradient-to-br from-primary to-orange-600 rounded-lg p-2">
-              <BarChart3 size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900">SABCM</h1>
-              <p className="text-xs text-slate-600">Disaster Relief</p>
-            </div>
-          </Link>
+        {/* Sidebar Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className={`p-6 ${sidebarCollapsed ? "md:p-3" : ""}`}>
+            {/* Logo */}
+            <Link
+              to="/"
+              className="flex items-center gap-3 mb-8"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <div className="bg-gradient-to-br from-primary to-orange-600 rounded-lg p-2 flex-shrink-0">
+                <BarChart3 size={24} className="text-white" />
+              </div>
+              {!sidebarCollapsed && (
+                <div>
+                  <h1 className="text-xl font-bold text-slate-900">SABCM</h1>
+                  <p className="text-xs text-slate-600">Disaster Relief</p>
+                </div>
+              )}
+            </Link>
 
-          {/* Navigation */}
-          <nav className="space-y-2">
-            {navItems.map(({ href, label, icon: Icon }) => {
-              const isActive = location.pathname === href;
-              return (
-                <Link
-                  key={href}
-                  to={href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                    isActive
-                      ? "bg-primary text-white shadow-md"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  <Icon size={20} />
-                  <span>{label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+            {/* Navigation */}
+            <nav className="space-y-2">
+              {navItems.map(({ href, label, icon: Icon }) => {
+                const isActive = location.pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    to={href}
+                    onClick={() => setSidebarOpen(false)}
+                    title={sidebarCollapsed ? label : ""}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                      isActive
+                        ? "bg-primary text-white shadow-md"
+                        : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <Icon size={20} className="flex-shrink-0" />
+                    {!sidebarCollapsed && <span>{label}</span>}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Collapse Button - Bottom of Sidebar */}
+        <div className={`border-t border-slate-200 p-4 ${sidebarCollapsed ? "md:p-2" : ""}`}>
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden md:flex items-center justify-center w-full px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors"
+            title={sidebarCollapsed ? "Expand" : "Collapse"}
+          >
+            <ChevronLeft
+              size={20}
+              className={`transition-transform ${sidebarCollapsed ? "rotate-180" : ""}`}
+            />
+            {!sidebarCollapsed && <span className="ml-2">Collapse</span>}
+          </button>
         </div>
       </aside>
 
