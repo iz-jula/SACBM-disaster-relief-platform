@@ -86,6 +86,7 @@ export default function Requests() {
       peopleInvolved: parseInt(formData.peopleInvolved) || 0,
       amountSpent: parseInt(formData.amountSpent) || 0,
       source: formData.source,
+      category: getRequestCategory(formData.source),
     };
 
     setRequests([...requests, newRequest]);
