@@ -12,7 +12,10 @@ import Upload from "./pages/Upload";
 import Weather from "./pages/Weather";
 import INGDDashboard from "./pages/INGDDashboard";
 import Admin from "./pages/Admin";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
