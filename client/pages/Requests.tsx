@@ -176,31 +176,9 @@ function RequestsTable({ requests }: { requests: RelieRequest[] }) {
 
 export default function Requests() {
   const navigate = useNavigate();
-  const [requests, setRequests] = useState<RelieRequest[]>([
-    {
-      id: "1",
-      originator: "Ministry of Health",
-      location: "District 1, Village A",
-      helpType: "Materials",
-      evacuationType: "By boat",
-      peopleInvolved: 150,
-      amountSpent: 45000,
-      category: "Category 2",
-      status: "met",
-    },
-    {
-      id: "2",
-      originator: "Local Government",
-      location: "District 2, Village B",
-      helpType: "Food",
-      evacuationType: "By tractor",
-      peopleInvolved: 320,
-      amountSpent: 125000,
-      category: "Category 1",
-      status: "pending",
-    },
-  ]);
-
+  const [requests, setRequests] = useState<RelieRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     originator: "",
@@ -212,6 +190,23 @@ export default function Requests() {
     category: "Category 1" as "Category 1" | "Category 2" | "Category 3",
     status: "pending" as "pending" | "met" | "partially_met",
   });
+
+  // Load requests on mount
+  useEffect(() => {
+    const loadRequests = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getRequests();
+        setRequests(data);
+      } catch (error) {
+        console.error("Error loading requests:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadRequests();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
