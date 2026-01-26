@@ -13,7 +13,7 @@ function getStatusLabel(status: boolean) {
   return status ? "✓ Met" : "⏳ Pending";
 }
 
-function RequestsTable({ requests }: { requests: RelieRequest[] }) {
+function RequestsTable({ requests, onStatusChange }: { requests: RelieRequest[], onStatusChange: (id: number, newStatus: boolean) => void }) {
   return (
     <>
       {/* Desktop Table View */}
@@ -41,6 +41,9 @@ function RequestsTable({ requests }: { requests: RelieRequest[] }) {
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                 Status
+              </th>
+              <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                Action
               </th>
             </tr>
           </thead>
