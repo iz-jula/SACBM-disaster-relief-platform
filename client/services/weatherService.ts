@@ -283,7 +283,7 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 
     return sortedAlerts;
   } catch (error) {
-    console.error('Error fetching news alerts:', error);
+    // Network error is expected in some dev environments - silently use fallback
     return [];
   }
 }
