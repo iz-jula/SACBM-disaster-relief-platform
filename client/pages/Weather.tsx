@@ -490,16 +490,28 @@ export default function Weather() {
           )}
         </div>
 
-        {/* Map Component */}
-        <MozambiqueMap
-          selectedRegion={selectedRegion}
-          onRegionSelect={handleLocationSelect}
-        />
+        {/* Map and Region Display */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left side - Map and Region Info */}
+          <div className="lg:col-span-1">
+            <MozambiqueMap
+              selectedRegion={selectedRegion}
+              onRegionSelect={handleLocationSelect}
+            />
 
-        {/* Current Region Display */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6">
-          <p className="text-sm opacity-90 mb-2">Currently viewing:</p>
-          <h2 className="text-4xl font-bold">{selectedRegion}</h2>
+            {/* Current Region Display */}
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 mt-6">
+              <p className="text-sm opacity-90 mb-2">Currently viewing:</p>
+              <h2 className="text-3xl font-bold">{selectedRegion}</h2>
+            </div>
+          </div>
+
+          {/* Right side - Weather Cards */}
+          <div className="lg:col-span-2">
+            <div className="text-sm text-slate-600 bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200">
+              <p>Select a region on the map to view detailed weather forecast</p>
+            </div>
+          </div>
         </div>
 
         {/* Weather Cards */}
