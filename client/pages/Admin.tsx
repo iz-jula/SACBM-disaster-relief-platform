@@ -17,12 +17,27 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<"dashboard" | "requests" | "users" | "settings">("dashboard");
+  const [metrics, setMetrics] = useState({ totalRequests: 0, metRequests: 0, pendingRequests: 0, partiallyMet: 0 });
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
 
-  const handleLogout = () => {
-    logout();
+  // Load metrics on mount
+  useEffect(() => {
+    const loadMetrics = async () => {
+      const data = await getMetrics();
+      if (data) {
+        setMetrics(data);
+      }
+      setIsLoadingMetrics(false);
+    };
+    loadMetrics();
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
-  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([
+
+  const [adminUsers] = useState<AdminUser[]>([
     {
       id: "1",
       name: "Admin User",
@@ -39,12 +54,12 @@ export default function Admin() {
     },
   ]);
 
-  // Admin Statistics
+  // Admin Statistics from Supabase
   const stats = [
-    { label: "Total Requests", value: "129", icon: BarChart3, color: "blue" },
-    { label: "Met Requests", value: "45", icon: Lock, color: "green" },
-    { label: "Pending Requests", value: "64", icon: Settings, color: "yellow" },
-    { label: "Partially Met", value: "20", icon: Users, color: "orange" },
+    { label: "Total Requests", value: metrics.totalRequests, icon: BarChart3, color: "blue" },
+    { label: "Met Requests", value: metrics.metRequests, icon: Lock, color: "green" },
+    { label: "Pending Requests", value: metrics.pendingRequests, icon: Settings, color: "yellow" },
+    { label: "Partially Met", value: metrics.partiallyMet, icon: Users, color: "orange" },
   ];
 
   return (
