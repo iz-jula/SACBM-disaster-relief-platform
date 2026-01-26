@@ -76,7 +76,7 @@ function getWindDirection(degrees: number): string {
 
 // Weather cache to minimize API calls (OpenWeatherMap has 1000 requests/day limit)
 const weatherCache = new Map<string, { data: WeatherData | null; timestamp: number }>();
-const WEATHER_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+const WEATHER_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
 export async function getCurrentWeather(city: string): Promise<WeatherData | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
