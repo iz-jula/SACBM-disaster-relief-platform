@@ -2,12 +2,14 @@ export async function handleNewsAlerts(req: any, res: any) {
   const apiKey = process.env.NEWSAPI_KEY;
 
   if (!apiKey) {
-    console.warn('NewsAPI key not configured');
+    console.warn('NewsAPI key not configured. Available env keys:', Object.keys(process.env).filter(k => k.includes('NEWS') || k.includes('API')));
     return res.status(500).json({
       error: 'NewsAPI key not configured',
       articles: []
     });
   }
+
+  console.log('NewsAPI key configured:', apiKey ? '✓' : '✗');
 
   try {
     const query = '(Mozambique AND (floods OR weather OR government OR emergency))';
