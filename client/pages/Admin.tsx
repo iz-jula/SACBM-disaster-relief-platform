@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { Settings, Users, BarChart3, Database, LogOut, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings, Users, BarChart3, Database, LogOut, Lock, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
-import GoogleConnector from "@/components/GoogleConnector";
-import Connectors from "@/components/Connectors";
+import { getMetrics } from "@/services/requestsService";
 
 interface AdminUser {
   id: string;
