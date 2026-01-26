@@ -1,5 +1,5 @@
 // Mock data - will be replaced with Supabase queries
-const MOCK_REQUESTS = [
+const MOCK_REQUESTS: RelieRequest[] = [
   {
     id: "1",
     originator: "Ministry of Health",
@@ -8,8 +8,8 @@ const MOCK_REQUESTS = [
     evacuationType: "By boat",
     peopleInvolved: 150,
     amountSpent: 45000,
-    category: "Category 2" as const,
-    status: "met" as const,
+    category: "Category 2",
+    status: "met",
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -20,8 +20,8 @@ const MOCK_REQUESTS = [
     evacuationType: "By tractor",
     peopleInvolved: 320,
     amountSpent: 125000,
-    category: "Category 1" as const,
-    status: "pending" as const,
+    category: "Category 1",
+    status: "pending",
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -32,8 +32,8 @@ const MOCK_REQUESTS = [
     evacuationType: "By truck",
     peopleInvolved: 89,
     amountSpent: 67500,
-    category: "Category 3" as const,
-    status: "partially_met" as const,
+    category: "Category 3",
+    status: "partially_met",
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -44,8 +44,8 @@ const MOCK_REQUESTS = [
     evacuationType: "By bus",
     peopleInvolved: 210,
     amountSpent: 89000,
-    category: "Category 1" as const,
-    status: "met" as const,
+    category: "Category 1",
+    status: "met",
     createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -56,8 +56,8 @@ const MOCK_REQUESTS = [
     evacuationType: "By foot",
     peopleInvolved: 450,
     amountSpent: 156000,
-    category: "Category 2" as const,
-    status: "pending" as const,
+    category: "Category 2",
+    status: "pending",
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
   },
 ];
