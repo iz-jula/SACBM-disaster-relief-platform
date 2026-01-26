@@ -47,10 +47,10 @@ export default function Upload() {
       return;
     }
 
-    // Validate evacuation type if evacuation is needed
-    if (needsEvacuation && !formData.evacuation_type) {
+    // Validate evacuation type if evacuation is selected as help type
+    if (formData.help_type === "Evacuation" && !formData.evacuation_type) {
       setSubmitStatus("error");
-      setErrorMessage("Please select evacuation type");
+      setErrorMessage("Please select evacuation method");
       setTimeout(() => setSubmitStatus("idle"), 3000);
       return;
     }
