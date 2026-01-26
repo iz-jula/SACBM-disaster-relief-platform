@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Settings, Users, BarChart3, Database, LogOut, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
+import { useAuth } from "@/context/AuthContext";
 
 interface AdminUser {
   id: string;
