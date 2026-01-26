@@ -64,6 +64,8 @@ export async function createRequest(
   try {
     const newRequest = await createSupabaseRequest({
       originator: request.originator,
+      email: request.email,
+      full_name: request.full_name,
       location: request.location,
       help_type: request.help_type,
       evacuation_type: request.evacuation_type,
