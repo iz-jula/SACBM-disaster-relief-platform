@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Table2, Map, Upload, Menu, X } from "lucide-react";
+import { BarChart3, Table2, Map, Upload, Menu, X, Cloud, ChevronLeft } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,11 +9,13 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: BarChart3 },
     { href: "/requests", label: "Relief Requests", icon: Table2 },
     { href: "/upload", label: "Upload Requests", icon: Upload },
+    { href: "/weather", label: "Weather Forecast", icon: Cloud },
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
   ];
 
