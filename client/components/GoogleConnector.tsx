@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Cloud, LogOut, CheckCircle, AlertCircle, Loader } from "lucide-react";
-import { signInWithGoogle, signOutGoogle, getStoredGoogleUser, saveGoogleUser, clearStoredGoogleUser, GoogleUser } from "@/services/googleService";
+import { signInWithGoogle, registerGoogleCallbacks, signOutGoogle, getStoredGoogleUser, saveGoogleUser, clearStoredGoogleUser, GoogleUser } from "@/services/googleService";
 
 export default function GoogleConnector() {
   const [isConnected, setIsConnected] = useState(false);
