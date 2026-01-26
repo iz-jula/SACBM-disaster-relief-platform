@@ -22,8 +22,7 @@ export default function GoogleConnector() {
     setError(null);
 
     try {
-      // For now, we'll use a simplified approach with the ID token from GSI
-      // A more complete implementation would require a backend OAuth handler
+      // Attempt to sign in with Google
       const googleUser = await signInWithGoogle();
 
       if (googleUser) {
@@ -31,14 +30,19 @@ export default function GoogleConnector() {
         setIsConnected(true);
         saveGoogleUser(googleUser);
       } else {
-        // If authentication is skipped or cancelled
-        setError(null);
+        // If authentication is skipped or cancelled, show helpful message
+        setError("Google sign-in was cancelled. Please verify your Google Client ID is correctly configured in the Google Cloud Console.");
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      if (!errorMsg.includes('requestPermission')) {
-        setError("Failed to connect to Google. Please try again.");
-        console.error(err);
+      console.error('Google sign-in error:', err);
+
+      if (errorMsg.includes('invalid_client')) {
+        setError("Google Client ID is invalid. Please verify it in your Google Cloud Console and ensure this application URL is authorized.");
+      } else if (errorMsg.includes('popup_blocked')) {
+        setError("Pop-up was blocked. Please allow pop-ups and try again.");
+      } else {
+        setError("Failed to connect to Google. Please check your configuration and try again.");
       }
     } finally {
       setIsLoading(false);
