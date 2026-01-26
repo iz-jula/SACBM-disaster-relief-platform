@@ -57,34 +57,28 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
 export default function Alerts() {
   const [alerts, setAlerts] = useState<AlertType[]>(FALLBACK_ALERTS);
   const [isLoading, setIsLoading] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     loadAlerts();
+    // Refresh alerts every 30 minutes
+    const interval = setInterval(loadAlerts, 30 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadAlerts = async () => {
-    const googleUser = getStoredGoogleUser();
-
-    if (googleUser?.accessToken) {
-      setIsConnected(true);
-      setIsLoading(true);
-      try {
-        const googleAlerts = await getGoogleCalendarAlerts(googleUser.accessToken);
-        if (googleAlerts.length > 0) {
-          setAlerts(googleAlerts);
-        } else {
-          setAlerts(FALLBACK_ALERTS);
-        }
-      } catch (error) {
-        console.error("Error loading Google Calendar alerts:", error);
+    setIsLoading(true);
+    try {
+      const newsAlerts = await getNewsAlerts();
+      if (newsAlerts.length > 0) {
+        setAlerts(newsAlerts);
+      } else {
         setAlerts(FALLBACK_ALERTS);
-      } finally {
-        setIsLoading(false);
       }
-    } else {
-      setIsConnected(false);
+    } catch (error) {
+      console.error("Error loading news alerts:", error);
       setAlerts(FALLBACK_ALERTS);
+    } finally {
+      setIsLoading(false);
     }
   };
 
