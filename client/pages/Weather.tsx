@@ -495,12 +495,26 @@ export default function Weather() {
         {/* Main Content - Flex layout with sidebar */}
         <div className="flex flex-1 overflow-hidden">
           {/* Fixed Left Sidebar */}
-          <div className="w-96 bg-white border-r border-slate-200 overflow-y-auto flex flex-col gap-4 p-4">
-            {/* Map */}
-            <MozambiqueMap
-              selectedRegion={selectedRegion}
-              onRegionSelect={handleLocationSelect}
-            />
+          <div className="w-80 bg-white border-r border-slate-200 overflow-y-auto flex flex-col gap-4 p-4">
+            {/* Region Selection Buttons */}
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 mb-4">Regions</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.keys(locationData).map((region) => (
+                  <button
+                    key={region}
+                    onClick={() => handleLocationSelect(region)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedRegion === region
+                        ? "bg-primary text-white shadow-md"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    {region}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Current Region Display */}
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6">
