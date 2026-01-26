@@ -519,6 +519,13 @@ export default function Requests() {
             </p>
           </div>
         )}
+
+        {/* No Requests Message */}
+        {!isLoading && requests.length === 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-center">
+            <p className="text-slate-600">No relief requests yet. Click "New Request" to create one.</p>
+          </div>
+        )}
       </div>
     </Layout>
   );
