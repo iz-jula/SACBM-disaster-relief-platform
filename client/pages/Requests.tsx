@@ -80,6 +80,18 @@ function RequestsTable({ requests, onStatusChange }: { requests: RelieRequest[],
                     {getStatusLabel(request.status)}
                   </span>
                 </td>
+                <td className="px-6 py-4 text-sm text-center">
+                  <button
+                    onClick={() => onStatusChange(request.id || 0, !request.status)}
+                    className={`px-3 py-1 rounded-lg font-medium text-sm transition-colors ${
+                      request.status
+                        ? "bg-blue-100 hover:bg-blue-200 text-blue-700"
+                        : "bg-green-100 hover:bg-green-200 text-green-700"
+                    }`}
+                  >
+                    {request.status ? "Mark Pending" : "Mark Met"}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
