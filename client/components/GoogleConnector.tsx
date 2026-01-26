@@ -114,26 +114,18 @@ export default function GoogleConnector() {
 
         {/* Connection Button */}
         {!isConnected ? (
-          <div>
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <>
-                  <Loader size={18} className="animate-spin" />
-                  Connecting to Google...
-                </>
-              ) : (
-                <>
-                  <Cloud size={18} />
-                  Sign In with Google Account
-                </>
-              )}
-            </button>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600 text-center">Click the Google button below to sign in:</p>
             {/* Google Sign-In button container - rendered by GSI library */}
-            <div id="google-signin-button" className="mt-4 flex justify-center"></div>
+            <div id="google-signin-button" className="flex justify-center"></div>
+
+            {/* Loading state */}
+            {isLoading && (
+              <div className="flex items-center justify-center gap-2 py-2">
+                <Loader size={18} className="animate-spin text-blue-600" />
+                <span className="text-sm text-slate-600">Authenticating...</span>
+              </div>
+            )}
           </div>
         ) : (
           <>
