@@ -306,6 +306,22 @@ export default function Requests() {
                     <option value="Chamber">Chamber Members</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Request Status *
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="partially_met">Partially Met</option>
+                    <option value="met">Met</option>
+                  </select>
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4">
