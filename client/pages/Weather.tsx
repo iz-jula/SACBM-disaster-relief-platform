@@ -514,8 +514,8 @@ export default function Weather() {
           </div>
         </div>
 
-        {/* Weather Cards */}
-        <div className="space-y-4">
+        {/* Weather Cards - Full Width */}
+        <div className="lg:col-span-3 space-y-4">
           {weatherData.map((weather, index) => (
             <div
               key={index}
