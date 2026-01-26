@@ -243,21 +243,18 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('News API error:', response.status, response.statusText, errorData);
+    const data = await response.json();
 
-      if (errorData.isNetworkError) {
-        console.warn('Network error connecting to NewsAPI. Using fallback alerts.');
-      }
+    // If backend returned no articles (fallback mode), return empty array to trigger fallback UI
+    if (!response.ok || data.isUsingFallback) {
+      // Silently use fallback alerts without logging errors
       return [];
     }
 
-    const data = await response.json();
     const articles = data.articles || [];
 
     if (!articles.length) {
-      console.warn('No articles returned from news service');
+      // No articles found, let UI show fallback alerts
       return [];
     }
 
