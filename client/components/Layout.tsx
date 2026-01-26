@@ -19,6 +19,10 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
   ];
 
+  const adminItems = [
+    { href: "/admin", label: "Admin Panel", icon: Lock },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
       {/* Sidebar */}
