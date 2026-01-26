@@ -1,32 +1,22 @@
 import { useState } from "react";
-import { Upload as UploadIcon, FileCheck, AlertCircle, X } from "lucide-react";
+import { FileCheck, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-
-interface SubmittedRequest {
-  company: string;
-  location: string;
-  helpType: string;
-  evacuationType: string;
-  peopleInvolved: string;
-  amountSpent: string;
-  attachments: File[];
-}
+import { createRequest } from "@/services/requestsService";
 
 export default function Upload() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    company: "",
+    originator: "",
     location: "",
-    helpType: "",
-    evacuationType: "",
-    peopleInvolved: "",
-    amountSpent: "",
+    help_type: "",
+    evacuation_type: "",
+    people: "",
+    value: "",
   });
 
-  const [attachments, setAttachments] = useState<File[]>([]);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
-  const [dragActive, setDragActive] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -38,77 +28,61 @@ export default function Upload() {
     }));
   };
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    const files = e.dataTransfer.files;
-    if (files) {
-      addFiles(Array.from(files));
-    }
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      addFiles(Array.from(e.target.files));
-    }
-  };
-
-  const addFiles = (newFiles: File[]) => {
-    setAttachments((prev) => [...prev, ...newFiles].slice(0, 5)); // Max 5 files
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    setSubmitStatus("loading");
+    setErrorMessage("");
 
     // Validate required fields
     if (
-      !formData.company ||
+      !formData.originator ||
       !formData.location ||
-      !formData.helpType ||
-      !formData.evacuationType ||
-      !formData.peopleInvolved ||
-      !formData.amountSpent
+      !formData.help_type ||
+      !formData.evacuation_type ||
+      !formData.people ||
+      !formData.value
     ) {
       setSubmitStatus("error");
+      setErrorMessage("Please fill in all required fields");
       setTimeout(() => setSubmitStatus("idle"), 3000);
       return;
     }
 
-    // Simulate submission
-    console.log("Submitting request:", {
-      ...formData,
-      attachments: attachments.map((f) => f.name),
-    });
-
-    setSubmitStatus("success");
-    setTimeout(() => {
-      setFormData({
-        company: "",
-        location: "",
-        helpType: "",
-        evacuationType: "",
-        peopleInvolved: "",
-        amountSpent: "",
+    try {
+      // Save to Supabase
+      const newRequest = await createRequest({
+        originator: formData.originator,
+        location: formData.location,
+        help_type: formData.help_type,
+        evacuation_type: formData.evacuation_type,
+        people: formData.people,
+        value: formData.value,
+        status: false, // New requests start as pending
       });
-      setAttachments([]);
-      setSubmitStatus("idle");
-    }, 2000);
+
+      if (newRequest) {
+        setSubmitStatus("success");
+        setFormData({
+          originator: "",
+          location: "",
+          help_type: "",
+          evacuation_type: "",
+          people: "",
+          value: "",
+        });
+        
+        // Redirect to requests page after 2 seconds
+        setTimeout(() => {
+          navigate("/requests");
+        }, 2000);
+      } else {
+        throw new Error("Failed to create request");
+      }
+    } catch (error) {
+      setSubmitStatus("error");
+      setErrorMessage(error instanceof Error ? error.message : "Failed to submit request");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+    }
   };
 
   return (
@@ -137,7 +111,7 @@ export default function Upload() {
             <div>
               <p className="font-semibold text-green-900">Request Submitted Successfully!</p>
               <p className="text-sm text-green-800 mt-1">
-                Your relief request has been recorded in the system.
+                Your relief request has been saved to the system. Redirecting...
               </p>
             </div>
           </div>
@@ -149,7 +123,7 @@ export default function Upload() {
             <div>
               <p className="font-semibold text-red-900">Error Submitting Request</p>
               <p className="text-sm text-red-800 mt-1">
-                Please fill in all required fields before submitting.
+                {errorMessage || "Please try again."}
               </p>
             </div>
           </div>
@@ -162,15 +136,15 @@ export default function Upload() {
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-6">Basic Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Company Name */}
+                {/* Originator / Company Name */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Name of Company / Organization *
                   </label>
                   <input
                     type="text"
-                    name="company"
-                    value={formData.company}
+                    name="originator"
+                    value={formData.originator}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -206,8 +180,8 @@ export default function Upload() {
                     Type of Help *
                   </label>
                   <select
-                    name="helpType"
-                    value={formData.helpType}
+                    name="help_type"
+                    value={formData.help_type}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -229,8 +203,8 @@ export default function Upload() {
                     Type of Evacuation *
                   </label>
                   <select
-                    name="evacuationType"
-                    value={formData.evacuationType}
+                    name="evacuation_type"
+                    value={formData.evacuation_type}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -258,8 +232,8 @@ export default function Upload() {
                   </label>
                   <input
                     type="number"
-                    name="peopleInvolved"
-                    value={formData.peopleInvolved}
+                    name="people"
+                    value={formData.people}
                     onChange={handleInputChange}
                     required
                     min="0"
@@ -275,8 +249,8 @@ export default function Upload() {
                   </label>
                   <input
                     type="number"
-                    name="amountSpent"
-                    value={formData.amountSpent}
+                    name="value"
+                    value={formData.value}
                     onChange={handleInputChange}
                     required
                     min="0"
@@ -287,103 +261,20 @@ export default function Upload() {
               </div>
             </div>
 
-            {/* Attachments Section */}
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Attachments</h2>
-              <p className="text-sm text-slate-600 mb-4">
-                Upload supporting documents or images (Optional). Maximum 5 files.
-              </p>
-
-              {/* Drag and Drop Area */}
-              <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-all mb-4 ${
-                  dragActive
-                    ? "border-primary bg-orange-50"
-                    : "border-slate-300 bg-slate-50 hover:bg-slate-100"
-                }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                <UploadIcon
-                  size={48}
-                  className={`mx-auto mb-4 ${dragActive ? "text-primary" : "text-slate-400"}`}
-                />
-                <p className="text-lg font-semibold text-slate-900 mb-2">
-                  Drag and drop files here
-                </p>
-                <p className="text-slate-600 mb-4">or</p>
-                <label className="inline-block">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={handleFileInput}
-                    className="hidden"
-                    accept="image/*,.pdf,.doc,.docx"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => document.querySelector('input[type="file"]')?.click()}
-                    className="bg-primary hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer"
-                  >
-                    Browse Files
-                  </button>
-                </label>
-                <p className="text-sm text-slate-500 mt-4">
-                  Accepted formats: Images, PDF, Word documents (Max 5 files, 10MB each)
-                </p>
-              </div>
-
-              {/* Attachments List */}
-              {attachments.length > 0 && (
-                <div className="bg-slate-50 rounded-lg p-4">
-                  <p className="text-sm font-medium text-slate-700 mb-3">
-                    Attached Files ({attachments.length}/5)
-                  </p>
-                  <div className="space-y-2">
-                    {attachments.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between bg-white rounded p-3 border border-slate-200"
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <UploadIcon size={18} className="text-primary flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-slate-900 truncate">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeAttachment(index)}
-                          className="text-slate-400 hover:text-red-600 transition-colors flex-shrink-0 ml-2"
-                        >
-                          <X size={20} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Submit Buttons */}
             <div className="flex gap-4 pt-6 border-t border-slate-200">
               <button
                 type="submit"
-                className="flex-1 bg-primary hover:bg-orange-600 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                disabled={submitStatus === "loading"}
+                className="flex-1 bg-primary hover:bg-orange-600 disabled:bg-orange-400 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
               >
-                Submit Request
+                {submitStatus === "loading" ? "Submitting..." : "Submit Request"}
               </button>
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 rounded-lg font-medium transition-colors"
+                disabled={submitStatus === "loading"}
+                className="flex-1 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 text-slate-800 py-3 rounded-lg font-medium transition-colors"
               >
                 Cancel
               </button>
