@@ -32,6 +32,7 @@ export default function Requests() {
     {
       id: "1",
       company: "Local Hospital",
+      originator: "Ministry of Health",
       location: "District 1, Village A",
       helpType: "Materials",
       evacuationType: "By boat",
@@ -43,6 +44,7 @@ export default function Requests() {
     {
       id: "2",
       company: "Community Center",
+      originator: "Local Government",
       location: "District 2, Village B",
       helpType: "Food",
       evacuationType: "By tractor",
