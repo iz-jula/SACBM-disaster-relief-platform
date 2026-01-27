@@ -39,14 +39,17 @@ export default function Layout({ children }: LayoutProps) {
               to="/"
               className="flex items-center gap-3 mb-8"
               onClick={() => setSidebarOpen(false)}
+              title="SACBM - South African Chamber of Business in Mozambique"
             >
-              <div className="bg-gradient-to-br from-primary to-orange-600 rounded-lg p-2 flex-shrink-0">
-                <BarChart3 size={24} className="text-white" />
-              </div>
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
+                alt="SACBM Logo"
+                className={`flex-shrink-0 ${sidebarCollapsed ? "md:h-10" : "h-12"}`}
+              />
               {!sidebarCollapsed && (
                 <div>
-                  <h1 className="text-xl font-bold text-slate-900">SABCM</h1>
-                  <p className="text-xs text-slate-600">Disaster Relief</p>
+                  <h1 className="text-sm font-bold text-slate-900">Disaster Relief</h1>
+                  <p className="text-xs text-slate-500">Operations</p>
                 </div>
               )}
             </Link>
