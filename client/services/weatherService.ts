@@ -309,30 +309,52 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 
     const data = await response.json();
 
-    if (!data || !data.articles || data.articles.length === 0) {
+    // Handle both EventRegistry format (events with nested articles) and flat articles format
+    let articles: any[] = [];
+
+    if (data.events && Array.isArray(data.events)) {
+      // EventRegistry format: flatten events' articles into a single array
+      articles = data.events
+        .flatMap((event: any) => event.articles || [])
+        .slice(0, 20);
+      console.log("Parsed EventRegistry format:", articles.length, "articles from events");
+    } else if (data.articles && Array.isArray(data.articles)) {
+      // Flat articles format
+      articles = data.articles.slice(0, 20);
+      console.log("Parsed flat articles format:", articles.length, "articles");
+    }
+
+    if (articles.length === 0) {
       console.log("No articles found from backend");
       return [];
     }
-
-    const articles = data.articles;
 
     const alerts: NewsAlert[] = articles
       .slice(0, 10)
       .map((article: any, index: number) => ({
         id: `news-${index}-${Date.now()}`,
-        title: article.title || "Untitled",
+        title: article.title || article.name || "Untitled",
         description:
-          article.body || article.summary || article.description || "",
-        source: article.source?.title || article.source || "Unknown Source",
-        url: article.url || "#",
+          article.body ||
+          article.summary ||
+          article.description ||
+          article.content ||
+          "",
+        source: article.source?.title || article.source?.name || article.source || "Unknown Source",
+        url: article.url || article.uri || "#",
         publishedAt:
           article.datePublished ||
           article.publishedAt ||
+          article.date ||
           new Date().toISOString(),
         severity: determineSeverity(
-          (article.title || "") +
+          (article.title || article.name || "") +
             " " +
-            (article.body || article.summary || article.description || ""),
+            (article.body ||
+              article.summary ||
+              article.description ||
+              article.content ||
+              ""),
         ),
       }));
 
