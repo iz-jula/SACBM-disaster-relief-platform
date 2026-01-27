@@ -52,7 +52,7 @@ export default function INGDDashboard() {
             <div
               className="tableauPlaceholder"
               id="viz1769418246220"
-              style={{ width: "100%", height: "900px", position: "relative" }}
+              style={{ width: "100%", height: "1200px", position: "relative" }}
             >
               <noscript>
                 <a href="https://public.tableau.com">
