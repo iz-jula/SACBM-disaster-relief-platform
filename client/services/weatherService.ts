@@ -192,8 +192,10 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
         };
       });
 
-    // Cache the result
-    forecastCache.set(city, { data: forecastData, timestamp: Date.now() });
+    // Cache the result in both caches
+    const now = Date.now();
+    forecastCache.set(city, { data: forecastData, timestamp: now });
+    weatherCache2.set(city, { data: forecastData, timestamp: now });
 
     return forecastData;
   } catch (error) {
