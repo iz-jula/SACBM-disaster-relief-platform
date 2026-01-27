@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Settings, Users, BarChart3, Database, LogOut, Lock, AlertCircle } from "lucide-react";
+import { Settings, Users, BarChart3, Database, LogOut, Lock, AlertCircle, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
-import { getMetrics } from "@/services/requestsService";
+import { getMetrics, getAllRequests } from "@/services/requestsService";
+import type { RelieRequest } from "@/services/supabaseService";
 
 interface AdminUser {
   id: string;
