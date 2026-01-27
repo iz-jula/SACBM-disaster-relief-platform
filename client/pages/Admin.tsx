@@ -28,6 +28,8 @@ export default function Admin() {
     partiallyMet: 0,
   });
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
+  const [allRequests, setAllRequests] = useState<RelieRequest[]>([]);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(false);
 
   // Load metrics on mount
   useEffect(() => {
@@ -40,6 +42,68 @@ export default function Admin() {
     };
     loadMetrics();
   }, []);
+
+  // Load all requests when requests tab is activated
+  useEffect(() => {
+    if (activeTab === "requests" && allRequests.length === 0) {
+      loadAllRequests();
+    }
+  }, [activeTab]);
+
+  const loadAllRequests = async () => {
+    setIsLoadingRequests(true);
+    try {
+      const requests = await getAllRequests();
+      setAllRequests(requests || []);
+    } catch (error) {
+      console.error("Error loading requests:", error);
+      setAllRequests([]);
+    } finally {
+      setIsLoadingRequests(false);
+    }
+  };
+
+  const exportToCSV = () => {
+    if (allRequests.length === 0) {
+      alert("No requests to export");
+      return;
+    }
+
+    // Define CSV headers
+    const headers = ["ID", "Originator", "Full Name", "Email", "Location", "Help Type", "Evacuation Type", "People", "Value", "Status", "Date"];
+
+    // Convert requests to CSV rows
+    const rows = allRequests.map((req) => [
+      req.id || "",
+      req.originator || "",
+      req.full_name || "",
+      req.email || "",
+      req.location || "",
+      req.help_type || "",
+      req.evacuation_type || "",
+      req.people || "",
+      req.value || "",
+      req.status ? "Met" : "Pending",
+      req.created_at ? new Date(req.created_at).toLocaleDateString() : "",
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    ].join("\n");
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relief-requests-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   const handleLogout = async () => {
     await logout();
