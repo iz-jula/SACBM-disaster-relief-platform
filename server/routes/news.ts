@@ -44,21 +44,14 @@ export async function handleNewsAlerts(req: any, res: any) {
     console.log(`Successfully fetched ${articles.length} articles from NewsAPI.ai`);
 
     // Return the articles directly
-    res.json({ articles, success: true });
+    return res.json({ articles, success: true });
   } catch (error: any) {
-    const isNetworkError = error?.code === 'ENOTFOUND' || error?.name === 'AbortError' || error?.message?.includes('fetch failed');
-
-    if (isNetworkError) {
-      console.debug('News API - Network unavailable (expected in isolated dev environments) - using fallback alerts');
-    } else {
-      console.error('Error fetching news alerts:', error?.message || error);
-    }
+    console.error('Error fetching news alerts:', error?.message || error);
 
     // Return 200 with empty articles to trigger fallback on frontend
-    res.status(200).json({
+    return res.status(200).json({
       articles: [],
       isUsingFallback: true,
-      isNetworkError: isNetworkError,
       message: 'News API unavailable - using fallback alerts'
     });
   }
