@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { getRequests, createRequest, updateRequest, deleteRequest } from "@/services/requestsService";
 import { RelieRequest } from "@/services/supabaseService";
+import { Lock, AlertCircle } from "lucide-react";
 
 function getStatusStyles(status: boolean) {
   return status ? "bg-green-100 text-green-700 border border-green-300" : "bg-blue-100 text-blue-700 border border-blue-300";
