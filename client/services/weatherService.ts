@@ -309,19 +309,14 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 
     const data = await response.json();
 
-    // Handle both EventRegistry format (events with nested articles) and flat articles format
+    // Handle articles from backend (already converted from EventRegistry events)
     let articles: any[] = [];
 
-    if (data.events && Array.isArray(data.events)) {
-      // EventRegistry format: flatten events' articles into a single array
-      articles = data.events
-        .flatMap((event: any) => event.articles || [])
-        .slice(0, 20);
-      console.log("Parsed EventRegistry format:", articles.length, "articles from events");
-    } else if (data.articles && Array.isArray(data.articles)) {
-      // Flat articles format
+    if (data.articles && Array.isArray(data.articles)) {
       articles = data.articles.slice(0, 20);
-      console.log("Parsed flat articles format:", articles.length, "articles");
+      console.log("Received", articles.length, "articles from backend");
+    } else {
+      console.log("No articles in response, data keys:", data);
     }
 
     if (articles.length === 0) {
