@@ -130,6 +130,8 @@ export default function Upload() {
           people: "",
           value: "",
         });
+        setMultipleItems([]);
+        setNewItem("");
 
         // Redirect to requests page after 2 seconds
         setTimeout(() => {
