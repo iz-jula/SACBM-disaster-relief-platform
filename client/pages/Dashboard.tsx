@@ -32,13 +32,52 @@ export default function Dashboard() {
 
     loadData();
 
+    // Set up Tableau visualization on dashboard with responsive sizing
+    const resizeDashboardViz = () => {
+      const divElement = document.getElementById("viz1769532767397_dashboard");
+      if (divElement) {
+        const vizElement = divElement.getElementsByTagName("object")[0];
+        if (vizElement) {
+          // Responsive sizing for dashboard card
+          const container = divElement.closest("[style*='minHeight']") || divElement.parentElement;
+          let width = 900; // Max width for dashboard
+          let height = 500; // Compact height
+
+          if (container) {
+            const availableWidth = container.clientWidth - 20;
+            if (availableWidth < 900) {
+              const scale = availableWidth / 900;
+              width = availableWidth;
+              height = Math.round(500 * scale);
+            }
+          }
+
+          vizElement.style.width = width + "px";
+          vizElement.style.height = height + "px";
+        }
+      }
+    };
+
+    // Initial sizing
+    resizeDashboardViz();
+    window.addEventListener("resize", resizeDashboardViz);
+
     // Load Tableau API script for INGD dashboard
     const script = document.createElement("script");
     script.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
     script.async = true;
-    document.body.appendChild(script);
+    script.type = "text/javascript";
+
+    const divElement = document.getElementById("viz1769532767397_dashboard");
+    if (divElement) {
+      const vizElement = divElement.getElementsByTagName("object")[0];
+      if (vizElement && vizElement.parentNode) {
+        vizElement.parentNode.insertBefore(script, vizElement);
+      }
+    }
 
     return () => {
+      window.removeEventListener("resize", resizeDashboardViz);
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
