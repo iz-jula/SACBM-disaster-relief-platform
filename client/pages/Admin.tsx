@@ -304,16 +304,66 @@ export default function Admin() {
 
         {/* Requests Tab */}
         {activeTab === "requests" && (
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">All Relief Requests</h3>
-            <p className="text-slate-600 mb-6">
-              This section will display all requests from the database. Backend connection required to fetch live data.
-            </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                <strong>Backend Ready:</strong> This component is prepared to receive request data from your API. Connect your backend and this table will automatically populate.
-              </p>
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">All Relief Requests</h3>
+                <p className="text-sm text-slate-600 mt-1">Manage all relief requests from the database</p>
+              </div>
+              <button
+                onClick={loadAllRequests}
+                className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+              >
+                {isLoadingRequests ? "Loading..." : "Refresh"}
+              </button>
             </div>
+
+            {isLoadingRequests ? (
+              <div className="p-6 text-center text-slate-600">Loading requests...</div>
+            ) : allRequests.length === 0 ? (
+              <div className="p-6 text-center text-slate-600">No requests found</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">#Ref</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Originator</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Location</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Help Type</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">People</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Value</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allRequests.map((req) => (
+                      <tr key={req.id} className="border-b border-slate-200 hover:bg-blue-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">#{req.id}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{req.originator}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{req.location}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{req.help_type}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{req.people}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{req.value} MZN</td>
+                        <td className="px-6 py-4 text-sm">
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                              req.status ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {req.status ? "Met" : "Pending"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.created_at ? new Date(req.created_at).toLocaleDateString() : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
