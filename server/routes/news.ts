@@ -22,18 +22,12 @@ export async function handleNewsAlerts(req: any, res: any) {
     const url = `https://api.newsapi.ai/v1/search?${searchParams}`;
     console.log('Fetching news from:', url.replace(apiKey, 'XXX'));
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      signal: controller.signal,
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.warn('NewsAPI HTTP error:', response.status, response.statusText, '- using fallback alerts');
