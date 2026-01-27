@@ -117,8 +117,10 @@ export async function getCurrentWeather(city: string): Promise<WeatherData | nul
       description: data.weather[0].description,
     };
 
-    // Cache the result
-    weatherCache.set(city, { data: weatherData, timestamp: Date.now() });
+    // Cache the result in both caches
+    const now = Date.now();
+    weatherCache.set(city, { data: weatherData, timestamp: now });
+    weatherCache2.set(city, { data: weatherData, timestamp: now });
 
     return weatherData;
   } catch (error) {
