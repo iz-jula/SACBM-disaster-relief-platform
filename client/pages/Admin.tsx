@@ -513,8 +513,20 @@ export default function Admin() {
                 <div className="p-6 border border-slate-200 rounded-lg">
                   <h4 className="font-semibold text-slate-900 mb-3">Data Management</h4>
                   <div className="space-y-2">
-                    <button className="w-full px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors">
-                      Export All Data
+                    <button
+                      onClick={() => {
+                        if (allRequests.length === 0) {
+                          loadAllRequests().then(() => {
+                            setTimeout(exportToCSV, 500);
+                          });
+                        } else {
+                          exportToCSV();
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Download size={18} />
+                      Export All Data (CSV)
                     </button>
                     <button className="w-full px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors">
                       Backup Database
