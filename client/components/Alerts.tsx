@@ -57,6 +57,7 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
 export default function Alerts() {
   const [alerts, setAlerts] = useState<AlertType[]>(FALLBACK_ALERTS);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
     loadAlerts();
@@ -69,6 +70,9 @@ export default function Alerts() {
     setIsLoading(true);
     try {
       const newsAlerts = await getNewsAlerts();
+      const updateTime = getNewsAlertsLastUpdate();
+      setLastUpdate(updateTime);
+
       if (newsAlerts.length > 0) {
         setAlerts(newsAlerts);
       } else {
@@ -80,6 +84,20 @@ export default function Alerts() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatLastUpdate = (date: Date | null): string => {
+    if (!date) return "Never";
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
   };
 
   const getSeverityColor = (severity: string) => {
