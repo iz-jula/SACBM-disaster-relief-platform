@@ -1012,13 +1012,36 @@ export default function Weather() {
   const [selectedRegion, setSelectedRegion] = useState("Maputo");
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [realForecast, setRealForecast] = useState<any[]| null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState(false);
+
+  // Fetch real forecast data when selected region changes
+  useEffect(() => {
+    const loadForecast = async () => {
+      setIsLoading(true);
+      setApiError(false);
+      const forecast = await getForecast(selectedRegion);
+      if (forecast && forecast.length > 0) {
+        setRealForecast(forecast);
+      } else {
+        setRealForecast(null);
+        if (!forecast) {
+          setApiError(true);
+        }
+      }
+      setIsLoading(false);
+    };
+    loadForecast();
+  }, [selectedRegion]);
 
   const allLocations = Object.keys(locationData);
   const filteredLocations = allLocations.filter((location) =>
     location.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const weatherData = locationData[selectedRegion] || locationData.Inhambane;
+  // Use real forecast if available, otherwise fall back to mock data
+  const weatherData = realForecast || locationData[selectedRegion] || locationData.Inhambane;
   const todayWeather = weatherData[0];
 
   const getWeatherIcon = (condition: string) => {
