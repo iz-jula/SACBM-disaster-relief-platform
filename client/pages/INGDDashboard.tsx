@@ -6,11 +6,29 @@ export default function INGDDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Set up Tableau visualization with proper dimensions
+    const divElement = document.getElementById("viz1769532767397");
+    if (divElement) {
+      const vizElement = divElement.getElementsByTagName("object")[0];
+      if (vizElement) {
+        vizElement.style.width = "1400px";
+        vizElement.style.height = "937px";
+      }
+    }
+
     // Load Tableau API script
     const script = document.createElement("script");
     script.src = "https://public.tableau.com/javascripts/api/viz_v1.js";
     script.async = true;
-    document.body.appendChild(script);
+    script.type = "text/javascript";
+
+    const divElement2 = document.getElementById("viz1769532767397");
+    if (divElement2) {
+      const vizElement2 = divElement2.getElementsByTagName("object")[0];
+      if (vizElement2 && vizElement2.parentNode) {
+        vizElement2.parentNode.insertBefore(script, vizElement2);
+      }
+    }
 
     return () => {
       // Cleanup
