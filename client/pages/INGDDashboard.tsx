@@ -48,33 +48,26 @@ export default function INGDDashboard() {
             </p>
           </div>
 
-          <div className="w-full bg-white">
+          <div className="w-full bg-white overflow-x-auto">
             <div
               className="tableauPlaceholder"
-              id="viz1769418246220"
-              style={{ width: "100%", height: "750px", position: "relative" }}
+              id="viz1769532767397"
+              style={{ position: "relative" }}
             >
               <noscript>
-                <a href="https://public.tableau.com">
+                <a href="#">
                   <img
                     alt="Dashboard"
-                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1.png"
+                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1_rss.png"
+                    style={{ border: "none" }}
                   />
                 </a>
               </noscript>
-              <object
-                className="tableauViz"
-                style={{
-                  display: "none",
-                }}
-              >
+              <object className="tableauViz" style={{ display: "none" }}>
                 <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
                 <param name="embed_code_version" value="3" />
                 <param name="site_root" value="" />
-                <param
-                  name="name"
-                  value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
-                />
+                <param name="name" value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard" />
                 <param name="tabs" value="no" />
                 <param name="toolbar" value="yes" />
                 <param
