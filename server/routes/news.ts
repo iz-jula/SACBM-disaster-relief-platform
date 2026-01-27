@@ -16,8 +16,16 @@ export async function handleNewsAlerts(req: any, res: any) {
       return;
     }
 
-    const query = '(Mozambique AND (floods OR weather OR government OR emergency))';
-    const url = `https://api.newsapi.ai/v1/search?query=${encodeURIComponent(query)}&sortBy=publishedAt&maxArticles=20&apiKey=${apiKey}`;
+    // Build request for EventRegistry API
+    const keyword = 'Mozambique floods emergency weather';
+    const params = new URLSearchParams({
+      apiKey: apiKey,
+      keyword: keyword,
+      eventsCount: '20',
+      eventsSortBy: 'date', // date, rel, size, or socialScore
+      resultType: 'events',
+    });
+    const url = `https://eventregistry.org/api/v1/event/getEvents?${params.toString()}`;
 
     console.log('[NEWS] Fetching from API');
 
