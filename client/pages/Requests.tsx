@@ -29,6 +29,12 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
                 #Ref
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Name
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Email
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                 Originator
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
