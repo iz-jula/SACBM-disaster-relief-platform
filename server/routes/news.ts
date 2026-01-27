@@ -1,66 +1,55 @@
 export async function handleNewsAlerts(req: any, res: any) {
+  console.log('[NEWS] Handler called');
+
   try {
     const apiKey = process.env.NEWSAPI_KEY;
-
-    console.log('News alerts handler called, apiKey exists:', !!apiKey);
+    console.log('[NEWS] API Key configured:', !!apiKey);
 
     if (!apiKey) {
-      console.warn('NewsAPI key not configured');
+      console.log('[NEWS] No API key, returning empty');
       res.setHeader('Content-Type', 'application/json');
-      return res.status(200).send(JSON.stringify({
+      res.status(200).json({
         articles: [],
         isUsingFallback: true,
-        message: 'NewsAPI key not configured'
-      }));
+        message: 'No API key'
+      });
+      return;
     }
 
     const query = '(Mozambique AND (floods OR weather OR government OR emergency))';
-    const searchParams = new URLSearchParams({
-      query: query,
-      sortBy: 'publishedAt',
-      maxArticles: '20',
-      apiKey: apiKey,
-    });
+    const url = `https://api.newsapi.ai/v1/search?query=${encodeURIComponent(query)}&sortBy=publishedAt&maxArticles=20&apiKey=${apiKey}`;
 
-    const url = `https://api.newsapi.ai/v1/search?${searchParams}`;
-    console.log('Fetching from NewsAPI.ai');
+    console.log('[NEWS] Fetching from API');
 
-    const apiResponse = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const apiResponse = await fetch(url);
 
     if (!apiResponse.ok) {
-      console.warn('NewsAPI HTTP error:', apiResponse.status);
+      console.log('[NEWS] API returned status:', apiResponse.status);
       res.setHeader('Content-Type', 'application/json');
-      return res.status(200).send(JSON.stringify({
+      res.status(200).json({
         articles: [],
-        isUsingFallback: true,
-        message: `NewsAPI error: ${apiResponse.status}`
-      }));
+        error: `API status ${apiResponse.status}`
+      });
+      return;
     }
 
     const data = await apiResponse.json();
-    const articles = data.articles || data.data || [];
+    const articles = (data.articles || data.data || []).slice(0, 20);
 
-    console.log(`Successfully fetched ${articles.length} news articles`);
+    console.log('[NEWS] Fetched', articles.length, 'articles');
 
     res.setHeader('Content-Type', 'application/json');
-    return res.status(200).send(JSON.stringify({
+    res.status(200).json({
       articles: articles,
-      success: true,
-      count: articles.length
-    }));
+      success: true
+    });
   } catch (error: any) {
-    console.error('News handler error:', error?.message || error);
+    console.error('[NEWS] Handler error:', error?.message);
 
     res.setHeader('Content-Type', 'application/json');
-    return res.status(200).send(JSON.stringify({
+    res.status(200).json({
       articles: [],
-      isUsingFallback: true,
       error: error?.message || 'Unknown error'
-    }));
+    });
   }
 }
