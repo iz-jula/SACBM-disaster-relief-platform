@@ -326,32 +326,30 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 
     const alerts: NewsAlert[] = articles
       .slice(0, 10)
-      .map((article: any, index: number) => ({
-        id: `news-${index}-${Date.now()}`,
-        title: article.title || article.name || "Untitled",
-        description:
+      .map((article: any, index: number) => {
+        const title = article.title || article.name || "Untitled Event";
+        const description =
           article.body ||
           article.summary ||
           article.description ||
           article.content ||
-          "",
-        source: article.source?.title || article.source?.name || article.source || "Unknown Source",
-        url: article.url || article.uri || "#",
-        publishedAt:
-          article.datePublished ||
-          article.publishedAt ||
-          article.date ||
-          new Date().toISOString(),
-        severity: determineSeverity(
-          (article.title || article.name || "") +
-            " " +
-            (article.body ||
-              article.summary ||
-              article.description ||
-              article.content ||
-              ""),
-        ),
-      }));
+          "";
+        const fullText = `${title} ${description}`;
+
+        return {
+          id: `news-${index}-${Date.now()}`,
+          title: title,
+          description: description,
+          source: article.source || article.location?.label || "EventRegistry",
+          url: article.url || article.uri || "#",
+          publishedAt:
+            article.publishedAt ||
+            article.date ||
+            article.datePublished ||
+            new Date().toISOString(),
+          severity: determineSeverity(fullText),
+        };
+      });
 
     // Sort by severity (high first) and then by recency
     const sortedAlerts = alerts.sort((a, b) => {
