@@ -66,7 +66,7 @@ export default function INGDDashboard() {
             </p>
           </div>
 
-          <div className="w-full bg-white overflow-x-auto">
+          <div className="w-full bg-white overflow-x-auto" style={{ minHeight: "1000px" }}>
             <div
               className="tableauPlaceholder"
               id="viz1769532767397"
