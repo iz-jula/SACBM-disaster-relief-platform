@@ -48,11 +48,11 @@ export default function INGDDashboard() {
             </p>
           </div>
 
-          <div className="w-full bg-white rounded-lg overflow-hidden">
+          <div className="w-full bg-white overflow-x-auto">
             <div
               className="tableauPlaceholder"
               id="viz1769418246220"
-              style={{ width: "100%", minHeight: "800px", height: "auto", position: "relative" }}
+              style={{ width: "100%", height: "600px", position: "relative", display: "block" }}
             >
               <noscript>
                 <a href="https://public.tableau.com">
