@@ -77,6 +77,12 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
                   #{request.id}
                 </td>
                 <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                  {request.full_name}
+                </td>
+                <td className="px-6 py-4 text-sm text-slate-600">
+                  {request.email}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium text-slate-900">
                   {request.originator}
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-600">
