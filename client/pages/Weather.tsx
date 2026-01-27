@@ -1089,14 +1089,20 @@ export default function Weather() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-slate-900">Weather Forecast</h1>
-              <p className="text-slate-600 mt-1">Detailed weather for Mozambique regions</p>
+              <p className="text-slate-600 mt-1">Detailed weather for Mozambique cities</p>
             </div>
-            <button
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
-            >
-              ← Back
-            </button>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-sm text-slate-600">Selected City</p>
+                <p className="text-2xl font-bold text-slate-900">{selectedRegion}</p>
+              </div>
+              <button
+                onClick={() => navigate(-1)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+              >
+                ← Back
+              </button>
+            </div>
           </div>
 
           {/* Search Bar */}
