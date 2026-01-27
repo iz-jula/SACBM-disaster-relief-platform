@@ -73,10 +73,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Fallback to demo credentials for testing
+      // Fallback to authorized credentials
       const DEMO_CREDENTIALS = [
-        { email: "admin@sabcm.org", password: "admin123", name: "Admin User" },
-        { email: "manager@sabcm.org", password: "manager123", name: "Manager User" },
+        { email: "admin@sacbm.co.mz", password: "vilankulos2025", name: "Admin User" },
+        { email: "management@sacbm.co.mz", password: "vilankulos2025", name: "Management User" },
       ];
 
       const foundUser = DEMO_CREDENTIALS.find(
