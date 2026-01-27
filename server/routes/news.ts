@@ -42,9 +42,11 @@ export async function handleNewsAlerts(req: any, res: any) {
     }
 
     const data = await apiResponse.json();
-    const articles = (data.articles || data.data || []).slice(0, 20);
 
-    console.log('[NEWS] Fetched', articles.length, 'articles');
+    // EventRegistry returns events in 'events' array
+    const articles = (data.events || data.articles || data.data || []).slice(0, 20);
+
+    console.log('[NEWS] Fetched', articles.length, 'events from EventRegistry');
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
