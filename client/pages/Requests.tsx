@@ -120,12 +120,22 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
             <div className="space-y-4">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Originator</p>
-                  <p className="text-base font-bold text-slate-900 mt-1 break-words">{request.originator}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Full Name</p>
+                  <p className="text-base font-bold text-slate-900 mt-1 break-words">{request.full_name}</p>
                 </div>
                 <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap flex-shrink-0 ${getStatusStyles(request.status)}`}>
                   {getStatusLabel(request.status)}
                 </span>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Email</p>
+                <p className="text-sm text-slate-700 mt-1 break-words">{request.email}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Originator</p>
+                <p className="text-sm text-slate-700 mt-1 break-words">{request.originator}</p>
               </div>
 
               <div>
