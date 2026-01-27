@@ -218,29 +218,6 @@ export default function Admin() {
               })}
             </div>
 
-            {/* Data Connection Status */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-              <p className="text-lg font-semibold text-yellow-900 mb-2">📊 Backend Configuration</p>
-              <p className="text-yellow-800 mb-4">
-                The admin dashboard is ready for backend integration. You can now connect it to:
-              </p>
-              <ul className="space-y-2 text-sm text-yellow-800">
-                <li>✓ Supabase PostgreSQL database</li>
-                <li>✓ REST API endpoints for requests data</li>
-                <li>✓ Real-time data synchronization</li>
-                <li>✓ User authentication and permissions</li>
-              </ul>
-              <div className="mt-4 p-4 bg-white rounded-lg border border-yellow-300">
-                <p className="text-xs font-mono text-slate-600">
-                  Backend connection points are prepared for:
-                  <br />• GET /api/requests - List all requests
-                  <br />• POST /api/requests - Create new request
-                  <br />• PUT /api/requests/:id - Update request
-                  <br />• DELETE /api/requests/:id - Delete request
-                  <br />• GET /api/users - List admin users
-                </p>
-              </div>
-            </div>
 
             {/* Quick Stats Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
