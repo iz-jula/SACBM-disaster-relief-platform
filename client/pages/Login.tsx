@@ -54,12 +54,12 @@ export default function Login() {
             </div>
           )}
 
-          {/* Demo Credentials Info */}
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs font-medium text-blue-900 mb-2">Demo Credentials:</p>
-            <ul className="text-xs text-blue-800 space-y-1">
-              <li>👤 <strong>admin@sabcm.org</strong> / admin123</li>
-              <li>👤 <strong>manager@sabcm.org</strong> / manager123</li>
+          {/* Credentials Info */}
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-xs font-medium text-green-900 mb-2">Authorized Users:</p>
+            <ul className="text-xs text-green-800 space-y-1">
+              <li>👤 <strong>admin@sacbm.co.mz</strong></li>
+              <li>👤 <strong>management@sacbm.co.mz</strong></li>
             </ul>
           </div>
 
