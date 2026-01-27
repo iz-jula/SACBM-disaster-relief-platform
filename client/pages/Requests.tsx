@@ -171,6 +171,12 @@ export default function Requests() {
   const [showForm, setShowForm] = useState(false);
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
   const [showActionDropdown, setShowActionDropdown] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [pendingAction, setPendingAction] = useState<{
+    type: "resolve" | "pending" | "delete";
+  } | null>(null);
   const [formData, setFormData] = useState({
     originator: "",
     email: "",
