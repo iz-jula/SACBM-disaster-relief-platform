@@ -180,17 +180,20 @@ export default function Alerts() {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
       <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-red-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertCircle size={24} className="text-red-600" />
-            <div>
+        <div className="flex items-start justify-between gap-6">
+          {/* Left side - Title and Description */}
+          <div className="flex items-start gap-3 flex-1">
+            <AlertCircle size={24} className="text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
               <h2 className="text-xl font-bold text-slate-900">News Alerts</h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 mt-1">
                 Latest news about floods, government alerts, and weather events in Mozambique
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 flex-shrink-0">
+
+          {/* Right side - Last updated status */}
+          <div className="border-l border-slate-300 pl-6 flex-shrink-0">
             {isLoading && (
               <div className="flex items-center gap-2 text-sm text-blue-600 whitespace-nowrap">
                 <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
