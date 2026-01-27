@@ -16,14 +16,18 @@ export async function handleNewsAlerts(req: any, res: any) {
       return;
     }
 
-    // Build request for EventRegistry API
-    const keyword = 'Mozambique floods emergency weather';
+    // Build request for EventRegistry API with multiple keywords
+    // Using keyword OR operator to find events about Mozambique AND (floods OR weather OR emergency)
     const params = new URLSearchParams({
       apiKey: apiKey,
-      keyword: keyword,
-      eventsCount: '20',
-      eventsSortBy: 'date', // date, rel, size, or socialScore
+      keyword: 'Mozambique', // Primary location filter
+      conceptUri: 'http://en.wikipedia.org/wiki/Flood', // Filter for flood events
+      eventsCount: '50', // Max results per page
+      eventsSortBy: 'date', // Sort by most recent
+      eventsSortByAsc: 'false', // Descending (newest first)
       resultType: 'events',
+      lang: 'eng', // English language articles
+      minArticlesInEvent: '1', // At least 1 article
     });
     const url = `https://eventregistry.org/api/v1/event/getEvents?${params.toString()}`;
 
