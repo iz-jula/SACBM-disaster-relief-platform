@@ -223,7 +223,25 @@ const newsAlertsCache: CacheEntry = {
   timestamp: 0,
 };
 
+const weatherCache2 = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+// Get the last time news alerts were updated
+export function getNewsAlertsLastUpdate(): Date | null {
+  if (newsAlertsCache.timestamp === 0) {
+    return null;
+  }
+  return new Date(newsAlertsCache.timestamp);
+}
+
+// Get the last time weather was updated for a city
+export function getWeatherLastUpdate(city: string): Date | null {
+  const cached = weatherCache2.get(city);
+  if (!cached || cached.timestamp === 0) {
+    return null;
+  }
+  return new Date(cached.timestamp);
+}
 
 // Fetch news alerts from backend proxy
 // The backend calls NewsAPI.ai to bypass CORS restrictions
