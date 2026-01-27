@@ -306,6 +306,8 @@ export default function Admin() {
                     <tr className="border-b border-slate-200 bg-slate-50">
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">#Ref</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Originator</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Full Name</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Email</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Location</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Help Type</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">People</th>
@@ -319,6 +321,8 @@ export default function Admin() {
                       <tr key={req.id} className="border-b border-slate-200 hover:bg-blue-50 transition-colors">
                         <td className="px-6 py-4 text-sm font-medium text-slate-900">#{req.id}</td>
                         <td className="px-6 py-4 text-sm text-slate-600">{req.originator}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{req.full_name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{req.email}</td>
                         <td className="px-6 py-4 text-sm text-slate-600">{req.location}</td>
                         <td className="px-6 py-4 text-sm text-slate-600">{req.help_type}</td>
                         <td className="px-6 py-4 text-sm text-slate-600">{req.people}</td>
