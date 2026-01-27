@@ -240,18 +240,70 @@ export default function Requests() {
     setAuthError("");
   };
 
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (!window.confirm(`Delete ${selectedRequests.size} request(s)? This cannot be undone.`)) {
       return;
     }
-    for (const id of selectedRequests) {
-      await deleteRequest(id);
+    setPendingAction({ type: "delete" });
+    setShowAuthModal(true);
+    setAuthPassword("");
+    setAuthError("");
+  };
+
+  const verifyAuthAndExecute = async () => {
+    const adminPassword = "vilankulos2025";
+    const isAdmin = authPassword === adminPassword;
+
+    // For non-admin, check if password matches any of the selected requests' originator names
+    if (!isAdmin && selectedRequests.size > 0) {
+      const firstRequest = requests.find((r) => r.id === Array.from(selectedRequests)[0]);
+      if (firstRequest && authPassword !== firstRequest.full_name) {
+        setAuthError("Invalid password. Use the originator's full name or admin password.");
+        return;
+      }
+    } else if (!isAdmin) {
+      setAuthError("Invalid password");
+      return;
     }
-    setRequests((prevRequests) =>
-      prevRequests.filter((req) => !selectedRequests.has(req.id!))
-    );
-    setSelectedRequests(new Set());
-    setShowActionDropdown(false);
+
+    // Execute pending action
+    try {
+      if (pendingAction?.type === "resolve") {
+        for (const id of selectedRequests) {
+          await updateRequest(id, { status: true });
+        }
+        setRequests((prevRequests) =>
+          prevRequests.map((req) =>
+            selectedRequests.has(req.id!) ? { ...req, status: true } : req
+          )
+        );
+      } else if (pendingAction?.type === "pending") {
+        for (const id of selectedRequests) {
+          await updateRequest(id, { status: false });
+        }
+        setRequests((prevRequests) =>
+          prevRequests.map((req) =>
+            selectedRequests.has(req.id!) ? { ...req, status: false } : req
+          )
+        );
+      } else if (pendingAction?.type === "delete") {
+        for (const id of selectedRequests) {
+          await deleteRequest(id);
+        }
+        setRequests((prevRequests) =>
+          prevRequests.filter((req) => !selectedRequests.has(req.id!))
+        );
+      }
+
+      setSelectedRequests(new Set());
+      setShowActionDropdown(false);
+      setShowAuthModal(false);
+      setAuthPassword("");
+      setPendingAction(null);
+    } catch (error) {
+      setAuthError("Action failed. Please try again.");
+      console.error("Error executing action:", error);
+    }
   };
 
   const handleStatusChange = async (id: number, newStatus: boolean) => {
