@@ -133,44 +133,39 @@ export default function Dashboard() {
 
         {/* Embedded INGD Dashboard */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+          <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">INGD Dashboard</h2>
-              <p className="text-sm text-slate-600">Real-time disaster impact data</p>
-              <p className="text-xs text-slate-500 mt-2">
-                Last updated: {new Date().toLocaleDateString()} at{" "}
-                {new Date().toLocaleTimeString()}
-              </p>
+              <h2 className="text-lg font-bold text-slate-900">INGD Disaster Impact</h2>
+              <p className="text-xs text-slate-600 mt-1">Real-time impact data from INGD</p>
             </div>
+            <Link
+              to="/ingd-dashboard"
+              className="text-primary hover:text-orange-600 text-sm font-medium transition-colors whitespace-nowrap ml-4"
+            >
+              View Full →
+            </Link>
           </div>
 
-          <div className="w-full bg-white rounded-lg overflow-hidden">
+          <div className="w-full bg-white overflow-x-auto" style={{ minHeight: "400px" }}>
             <div
               className="tableauPlaceholder"
-              id="viz1769418246220"
-              style={{ width: "100%", height: "600px", position: "relative" }}
+              id="viz1769532767397_dashboard"
+              style={{ position: "relative" }}
             >
               <noscript>
-                <a href="https://public.tableau.com">
+                <a href="#">
                   <img
                     alt="Dashboard"
-                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1.png"
+                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1_rss.png"
+                    style={{ border: "none" }}
                   />
                 </a>
               </noscript>
-              <object
-                className="tableauViz"
-                style={{
-                  display: "none",
-                }}
-              >
+              <object className="tableauViz" style={{ display: "none" }}>
                 <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
                 <param name="embed_code_version" value="3" />
                 <param name="site_root" value="" />
-                <param
-                  name="name"
-                  value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
-                />
+                <param name="name" value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard" />
                 <param name="tabs" value="no" />
                 <param name="toolbar" value="yes" />
                 <param
@@ -185,15 +180,6 @@ export default function Dashboard() {
                 <param name="language" value="en-US" />
               </object>
             </div>
-          </div>
-
-          <div className="px-6 py-4 border-t border-slate-200 bg-gradient-to-r from-blue-50 to-slate-50">
-            <Link
-              to="/ingd-dashboard"
-              className="text-primary hover:text-orange-600 font-medium transition-colors"
-            >
-              View full INGD Dashboard →
-            </Link>
           </div>
         </div>
 
