@@ -6,15 +6,39 @@ export default function INGDDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up Tableau visualization with proper dimensions
-    const divElement = document.getElementById("viz1769532767397");
-    if (divElement) {
-      const vizElement = divElement.getElementsByTagName("object")[0];
-      if (vizElement) {
-        vizElement.style.width = "1400px";
-        vizElement.style.height = "937px";
+    // Set up Tableau visualization with responsive dimensions
+    const resizeDashboard = () => {
+      const divElement = document.getElementById("viz1769532767397");
+      if (divElement) {
+        const vizElement = divElement.getElementsByTagName("object")[0];
+        if (vizElement) {
+          // Original dimensions: 1400x937
+          // Calculate responsive width (use available width, max 1400px)
+          const container = divElement.closest(".overflow-x-auto") || divElement.parentElement;
+          let width = 1400;
+          let height = 937;
+
+          if (container) {
+            const availableWidth = container.clientWidth - 20; // Account for padding
+            if (availableWidth < 1400) {
+              // Scale proportionally if less space available
+              const scale = availableWidth / 1400;
+              width = availableWidth;
+              height = Math.round(937 * scale);
+            }
+          }
+
+          vizElement.style.width = width + "px";
+          vizElement.style.height = height + "px";
+        }
       }
-    }
+    };
+
+    // Initial sizing
+    resizeDashboard();
+
+    // Resize on window resize
+    window.addEventListener("resize", resizeDashboard);
 
     // Load Tableau API script
     const script = document.createElement("script");
@@ -22,16 +46,17 @@ export default function INGDDashboard() {
     script.async = true;
     script.type = "text/javascript";
 
-    const divElement2 = document.getElementById("viz1769532767397");
-    if (divElement2) {
-      const vizElement2 = divElement2.getElementsByTagName("object")[0];
-      if (vizElement2 && vizElement2.parentNode) {
-        vizElement2.parentNode.insertBefore(script, vizElement2);
+    const divElement = document.getElementById("viz1769532767397");
+    if (divElement) {
+      const vizElement = divElement.getElementsByTagName("object")[0];
+      if (vizElement && vizElement.parentNode) {
+        vizElement.parentNode.insertBefore(script, vizElement);
       }
     }
 
     return () => {
       // Cleanup
+      window.removeEventListener("resize", resizeDashboard);
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
