@@ -1111,7 +1111,7 @@ export default function Weather() {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
               <input
                 type="text"
-                placeholder="Search by city, region, or district..."
+                placeholder="Search by city or district..."
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
