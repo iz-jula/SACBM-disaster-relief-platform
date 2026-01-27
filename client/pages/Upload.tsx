@@ -415,21 +415,23 @@ export default function Upload() {
                   />
                 </div>
 
-                {/* Amount Spent */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Value Spent in Meticais (MZN) *
-                  </label>
-                  <input
-                    type="text"
-                    name="value"
-                    value={formData.value}
-                    onChange={handleValueChange}
-                    required
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Enter approximate amount spent (e.g., 1,500,000)"
-                  />
-                </div>
+                {/* Amount Spent - Hidden for Multiple type */}
+                {formData.help_type !== "Multiple" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Value Spent in Meticais (MZN) *
+                    </label>
+                    <input
+                      type="text"
+                      name="value"
+                      value={formData.value}
+                      onChange={handleValueChange}
+                      required={formData.help_type !== "Multiple"}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Enter approximate amount spent (e.g., 1,500,000)"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
