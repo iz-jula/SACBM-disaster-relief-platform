@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Search, Cloud, CloudRain, Sun, Wind, Droplets, Eye, Gauge } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Cloud, CloudRain, Sun, Wind, Droplets, Eye, Gauge, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
+import { getForecast } from "@/services/weatherService";
 
 interface DetailedWeather {
   date: string;
