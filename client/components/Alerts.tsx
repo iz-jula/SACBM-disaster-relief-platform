@@ -190,17 +190,19 @@ export default function Alerts() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-shrink-0">
             {isLoading && (
-              <div className="flex items-center gap-2 text-sm text-blue-600">
+              <div className="flex items-center gap-2 text-sm text-blue-600 whitespace-nowrap">
                 <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
                 Loading...
               </div>
             )}
-            <div className="text-right">
-              <p className="text-xs text-slate-600">Last updated</p>
-              <p className="text-sm font-medium text-slate-900">{formatLastUpdate(lastUpdate)}</p>
-            </div>
+            {!isLoading && (
+              <div className="text-right whitespace-nowrap">
+                <p className="text-xs text-slate-600">Last updated</p>
+                <p className="text-sm font-medium text-slate-900">{formatLastUpdate(lastUpdate)}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
