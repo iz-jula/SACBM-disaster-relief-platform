@@ -5,8 +5,9 @@
 
 
 [functions]
-  external_node_modules = ["express"]
+  external_node_modules = ["express", "cors", "serverless-http", "dotenv"]
   node_bundler = "esbuild"
+  directory = "netlify/functions"
   
 [[redirects]]
   force = true
