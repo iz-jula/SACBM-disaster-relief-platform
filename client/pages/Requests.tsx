@@ -226,17 +226,18 @@ export default function Requests() {
     setSelectedRequests(newSelected);
   };
 
-  const handleResolveSelected = async () => {
-    for (const id of selectedRequests) {
-      await updateRequest(id, { status: true });
-    }
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        selectedRequests.has(req.id!) ? { ...req, status: true } : req
-      )
-    );
-    setSelectedRequests(new Set());
-    setShowActionDropdown(false);
+  const handleResolveSelected = () => {
+    setPendingAction({ type: "resolve" });
+    setShowAuthModal(true);
+    setAuthPassword("");
+    setAuthError("");
+  };
+
+  const handleReturnToPending = () => {
+    setPendingAction({ type: "pending" });
+    setShowAuthModal(true);
+    setAuthPassword("");
+    setAuthError("");
   };
 
   const handleDeleteSelected = async () => {
