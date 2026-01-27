@@ -287,6 +287,13 @@ export default function Upload() {
                           evacuation_type: "",
                         }));
                       }
+                      // Clear value field for Multiple type since it will be populated with items
+                      if (e.target.value === "Multiple") {
+                        setFormData((prev) => ({
+                          ...prev,
+                          value: "",
+                        }));
+                      }
                     }}
                     required
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -299,7 +306,7 @@ export default function Upload() {
                     <option value="Shelter">Shelter</option>
                     <option value="Water">Water & Sanitation</option>
                     <option value="Evacuation">Evacuation</option>
-                    <option value="Other">Other</option>
+                    <option value="Multiple">Multiple Items</option>
                   </select>
                 </div>
 
@@ -323,6 +330,65 @@ export default function Upload() {
                       <option value="On foot">On foot</option>
                       <option value="Other">Other</option>
                     </select>
+                  </div>
+                )}
+
+                {/* Multiple Items Form - Only shows if Multiple is selected */}
+                {formData.help_type === "Multiple" && (
+                  <div className="col-span-1 md:col-span-2 border-t pt-6">
+                    <label className="block text-sm font-medium text-slate-700 mb-4">
+                      Add Items (e.g., diapers, milk, clothes) *
+                    </label>
+                    <div className="space-y-4">
+                      {/* Item Input */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newItem}
+                          onChange={(e) => setNewItem(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addItem();
+                            }
+                          }}
+                          placeholder="e.g., Diapers, Milk, Clothes"
+                          className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        />
+                        <button
+                          type="button"
+                          onClick={addItem}
+                          className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center gap-2"
+                        >
+                          <Plus size={18} />
+                          Add
+                        </button>
+                      </div>
+
+                      {/* Items List */}
+                      {multipleItems.length > 0 && (
+                        <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                          <p className="text-sm font-medium text-slate-700 mb-3">Items Added:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {multipleItems.map((item, index) => (
+                              <div
+                                key={index}
+                                className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                              >
+                                {item}
+                                <button
+                                  type="button"
+                                  onClick={() => removeItem(index)}
+                                  className="hover:opacity-80 transition-opacity"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
