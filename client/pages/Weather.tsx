@@ -1181,9 +1181,15 @@ export default function Weather() {
 
             {/* Showing Real Data Indicator */}
             {realForecast && !isLoading && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full" />
-                <p className="text-xs text-green-700 font-medium">Live data from OpenWeatherMap</p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full mt-1 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-green-700 font-medium">Live data from OpenWeatherMap</p>
+                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                    <Clock size={12} />
+                    Updated {formatTimeAgo(lastWeatherUpdate)}
+                  </p>
+                </div>
               </div>
             )}
 
