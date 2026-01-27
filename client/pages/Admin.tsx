@@ -224,55 +224,90 @@ export default function Admin() {
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
                 <h3 className="text-lg font-bold text-slate-900 mb-4">Request Status Breakdown</h3>
                 <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="text-sm font-medium text-slate-700">Met</p>
-                      <p className="text-sm font-bold text-green-600">35%</p>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div className="bg-green-500 h-2 rounded-full" style={{ width: "35%" }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="text-sm font-medium text-slate-700">Pending</p>
-                      <p className="text-sm font-bold text-blue-600">50%</p>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: "50%" }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="text-sm font-medium text-slate-700">Partially Met</p>
-                      <p className="text-sm font-bold text-yellow-600">15%</p>
-                    </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
-                      <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "15%" }} />
-                    </div>
-                  </div>
+                  {isLoadingMetrics ? (
+                    <p className="text-slate-500 text-sm">Loading...</p>
+                  ) : (
+                    <>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-sm font-medium text-slate-700">Met</p>
+                          <p className="text-sm font-bold text-green-600">
+                            {metrics.totalRequests > 0
+                              ? Math.round((metrics.metRequests / metrics.totalRequests) * 100)
+                              : 0}%
+                          </p>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2">
+                          <div
+                            className="bg-green-500 h-2 rounded-full"
+                            style={{
+                              width:
+                                metrics.totalRequests > 0
+                                  ? `${Math.round((metrics.metRequests / metrics.totalRequests) * 100)}%`
+                                  : "0%",
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-sm font-medium text-slate-700">Pending</p>
+                          <p className="text-sm font-bold text-blue-600">
+                            {metrics.totalRequests > 0
+                              ? Math.round((metrics.pendingRequests / metrics.totalRequests) * 100)
+                              : 0}%
+                          </p>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2">
+                          <div
+                            className="bg-blue-500 h-2 rounded-full"
+                            style={{
+                              width:
+                                metrics.totalRequests > 0
+                                  ? `${Math.round((metrics.pendingRequests / metrics.totalRequests) * 100)}%`
+                                  : "0%",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
                 <h3 className="text-lg font-bold text-slate-900 mb-4">Data Summary</h3>
                 <div className="space-y-3">
-                  <div className="flex justify-between py-2 border-b border-slate-100">
-                    <p className="text-slate-600">Total People Assisted</p>
-                    <p className="font-bold text-slate-900">3,920</p>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-slate-100">
-                    <p className="text-slate-600">Total Funds Deployed</p>
-                    <p className="font-bold text-slate-900">2.77M MZN</p>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-slate-100">
-                    <p className="text-slate-600">Average per Request</p>
-                    <p className="font-bold text-slate-900">21K MZN</p>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <p className="text-slate-600">Active Regions</p>
-                    <p className="font-bold text-slate-900">11</p>
-                  </div>
+                  {isLoadingMetrics ? (
+                    <p className="text-slate-500 text-sm">Loading...</p>
+                  ) : (
+                    <>
+                      <div className="flex justify-between py-2 border-b border-slate-100">
+                        <p className="text-slate-600">Total People Assisted</p>
+                        <p className="font-bold text-slate-900">{metrics.totalPeopleAssisted.toLocaleString()}</p>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-slate-100">
+                        <p className="text-slate-600">Total Funds Deployed</p>
+                        <p className="font-bold text-slate-900">
+                          {((metrics.totalValueDeployed || 0) / 1000000).toFixed(2)}M MZN
+                        </p>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-slate-100">
+                        <p className="text-slate-600">Average per Request</p>
+                        <p className="font-bold text-slate-900">
+                          {((metrics.averagePerRequest || 0) / 1000).toFixed(0)}K MZN
+                        </p>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <p className="text-slate-600">Active Cities</p>
+                        <p className="font-bold text-slate-900">
+                          {allRequests && allRequests.length > 0
+                            ? new Set(allRequests.map((r) => r.location)).size
+                            : 0}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
