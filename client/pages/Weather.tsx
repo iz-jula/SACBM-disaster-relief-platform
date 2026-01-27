@@ -1015,6 +1015,7 @@ export default function Weather() {
   const [realForecast, setRealForecast] = useState<any[]| null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
+  const [lastWeatherUpdate, setLastWeatherUpdate] = useState<Date | null>(null);
 
   // Fetch real forecast data when selected region changes
   useEffect(() => {
@@ -1022,6 +1023,9 @@ export default function Weather() {
       setIsLoading(true);
       setApiError(false);
       const forecast = await getForecast(selectedRegion);
+      const updateTime = getWeatherLastUpdate(selectedRegion);
+      setLastWeatherUpdate(updateTime);
+
       if (forecast && forecast.length > 0) {
         setRealForecast(forecast);
       } else {
@@ -1034,6 +1038,20 @@ export default function Weather() {
     };
     loadForecast();
   }, [selectedRegion]);
+
+  const formatTimeAgo = (date: Date | null): string => {
+    if (!date) return "Unknown";
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
 
   const allLocations = Object.keys(locationData);
   const filteredLocations = allLocations.filter((location) =>
