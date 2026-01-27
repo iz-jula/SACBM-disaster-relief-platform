@@ -44,6 +44,17 @@ export default function Upload() {
     }));
   };
 
+  const addItem = () => {
+    if (newItem.trim()) {
+      setMultipleItems((prev) => [...prev, newItem.trim()]);
+      setNewItem("");
+    }
+  };
+
+  const removeItem = (index: number) => {
+    setMultipleItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitStatus("loading");
