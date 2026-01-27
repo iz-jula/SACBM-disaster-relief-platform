@@ -67,8 +67,7 @@ export default function Upload() {
       !formData.full_name ||
       !formData.location ||
       !formData.help_type ||
-      !formData.people ||
-      !formData.value
+      !formData.people
     ) {
       setSubmitStatus("error");
       setErrorMessage("Please fill in all required fields");
@@ -84,7 +83,28 @@ export default function Upload() {
       return;
     }
 
+    // Validate multiple items if selected
+    if (formData.help_type === "Multiple") {
+      if (multipleItems.length === 0) {
+        setSubmitStatus("error");
+        setErrorMessage("Please add at least one item for Multiple help type");
+        setTimeout(() => setSubmitStatus("idle"), 3000);
+        return;
+      }
+    } else if (!formData.value) {
+      // Regular value field required for non-Multiple types
+      setSubmitStatus("error");
+      setErrorMessage("Please enter the value amount");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+      return;
+    }
+
     try {
+      // For Multiple help type, concatenate items into value field
+      const submitValue = formData.help_type === "Multiple"
+        ? multipleItems.join(", ")
+        : formData.value.replace(/,/g, '');
+
       // Save to Supabase
       const newRequest = await createRequest({
         originator: formData.originator,
@@ -94,7 +114,7 @@ export default function Upload() {
         help_type: formData.help_type,
         evacuation_type: formData.evacuation_type,
         people: formData.people,
-        value: formData.value.replace(/,/g, ''), // Remove commas before saving
+        value: submitValue,
         status: false, // New requests start as pending
       });
 
