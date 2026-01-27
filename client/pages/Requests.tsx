@@ -621,6 +621,82 @@ export default function Requests() {
             </p>
           </div>
         )}
+
+        {/* Authentication Modal */}
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Lock size={28} className="text-primary" />
+                <h3 className="text-2xl font-bold text-slate-900">Authorization Required</h3>
+              </div>
+
+              <p className="text-slate-600 mb-6 text-sm">
+                {pendingAction?.type === "delete"
+                  ? "Confirm deletion of selected requests"
+                  : pendingAction?.type === "pending"
+                  ? "Return selected requests to pending status"
+                  : "Mark selected requests as resolved"}
+              </p>
+
+              {authError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
+                  <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-800">{authError}</p>
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="auth-password" className="block text-sm font-medium text-slate-700 mb-2">
+                  {selectedRequests.size === 1 && requests.some((r) => r.id === Array.from(selectedRequests)[0])
+                    ? `Originator's Full Name or Admin Password`
+                    : "Admin Password"}
+                </label>
+                <input
+                  id="auth-password"
+                  type="password"
+                  value={authPassword}
+                  onChange={(e) => {
+                    setAuthPassword(e.target.value);
+                    setAuthError("");
+                  }}
+                  placeholder="Enter password"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      verifyAuthAndExecute();
+                    }
+                  }}
+                />
+              </div>
+
+              <p className="text-xs text-slate-500 mt-3">
+                Use the originator's full name or enter the admin password
+              </p>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    setAuthPassword("");
+                    setAuthError("");
+                    setPendingAction(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={verifyAuthAndExecute}
+                  disabled={!authPassword}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-orange-600 disabled:bg-slate-300 text-white rounded-lg font-medium transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
