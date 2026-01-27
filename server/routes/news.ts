@@ -16,9 +16,9 @@ export async function handleNewsAlerts(req: any, res: any) {
       return;
     }
 
-    // Build request for EventRegistry API with multiple keywords
-    // Using keyword OR operator to find events about Mozambique AND (floods OR weather OR emergency)
+    // Build request for EventRegistry API
     const params = new URLSearchParams({
+      // Search filters
       apiKey: apiKey,
       keyword: 'Mozambique', // Primary location filter
       conceptUri: 'http://en.wikipedia.org/wiki/Flood', // Filter for flood events
@@ -28,6 +28,19 @@ export async function handleNewsAlerts(req: any, res: any) {
       resultType: 'events',
       lang: 'eng', // English language articles
       minArticlesInEvent: '1', // At least 1 article
+
+      // Response format - what to include
+      includeEventTitle: 'true', // Event title
+      includeEventSummary: 'true', // Event summary
+      includeEventLocation: 'true', // Where the event occurred
+      includeEventDate: 'true', // When the event occurred
+      includeEventArticleCounts: 'true', // Number of articles
+      includeEventConcepts: 'true', // Related concepts
+      includeEventCategories: 'true', // Event categories
+      includeStoryTitle: 'true', // Story title from articles
+      includeStoryDate: 'true', // Article publication date
+      includeStoryLocation: 'true', // Story location
+      includeStoryMedoidArticle: 'true', // Representative article
     });
     const url = `https://eventregistry.org/api/v1/event/getEvents?${params.toString()}`;
 
