@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileCheck, AlertCircle } from "lucide-react";
+import { FileCheck, AlertCircle, Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { createRequest } from "@/services/requestsService";
@@ -17,6 +17,8 @@ export default function Upload() {
     value: "",
   });
 
+  const [multipleItems, setMultipleItems] = useState<string[]>([]);
+  const [newItem, setNewItem] = useState("");
   const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
