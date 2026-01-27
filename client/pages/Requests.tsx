@@ -402,6 +402,12 @@ export default function Requests() {
                       ✓ Resolved
                     </button>
                     <button
+                      onClick={handleReturnToPending}
+                      className="w-full text-left px-4 py-3 hover:bg-yellow-50 text-slate-900 font-medium transition-colors border-b border-slate-200"
+                    >
+                      ⏳ Return to Pending
+                    </button>
+                    <button
                       onClick={handleDeleteSelected}
                       className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-700 font-medium transition-colors inline-flex items-center gap-2"
                     >
