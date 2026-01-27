@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, Cloud, MapPin, TrendingUp, ExternalLink } from "lucide-react";
-import { getNewsAlerts, NewsAlert } from "@/services/weatherService";
+import { AlertCircle, Cloud, MapPin, TrendingUp, ExternalLink, RefreshCw } from "lucide-react";
+import { getNewsAlerts, getNewsAlertsLastUpdate, NewsAlert } from "@/services/weatherService";
 
 interface FallbackAlert {
   id: string;
