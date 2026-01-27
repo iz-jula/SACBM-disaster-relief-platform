@@ -44,6 +44,17 @@ export async function getRequests(
   }
 }
 
+// Fetch all requests without limit (for admin/export)
+export async function getAllRequests(): Promise<RelieRequest[]> {
+  try {
+    const requests = await getSupabaseRequests();
+    return requests;
+  } catch (error) {
+    console.error("Error fetching all requests:", error);
+    return [];
+  }
+}
+
 // Fetch recent requests (limited)
 export async function getRecentRequests(limit = 5): Promise<RelieRequest[]> {
   return getSupabaseRecentRequests(limit);
