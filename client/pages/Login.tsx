@@ -31,13 +31,15 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <div className="bg-gradient-to-br from-primary to-orange-600 rounded-2xl p-4">
-              <Lock size={48} className="text-white" />
-            </div>
+          <div className="flex justify-center mb-4">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
+              alt="SACBM Logo"
+              className="h-16"
+            />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">SABCM</h1>
-          <p className="text-blue-200">Admin Panel Login</p>
+          <h1 className="text-3xl font-bold text-white mb-1">Disaster Relief</h1>
+          <p className="text-blue-200 text-sm">Admin Panel Login</p>
         </div>
 
         {/* Login Card */}
