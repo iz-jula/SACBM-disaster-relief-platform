@@ -2,7 +2,11 @@ import { BarChart3, Users, TrendingUp, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState, Suspense, lazy } from "react";
 import Layout from "@/components/Layout";
-import { getRecentRequests, getMetrics, Metrics } from "@/services/requestsService";
+import {
+  getRecentRequests,
+  getMetrics,
+  Metrics,
+} from "@/services/requestsService";
 
 const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
 const Alerts = lazy(() => import("@/components/Alerts"));
@@ -39,7 +43,9 @@ export default function Dashboard() {
         const vizElement = divElement.getElementsByTagName("object")[0];
         if (vizElement) {
           // Responsive sizing for dashboard card
-          const container = divElement.closest("[style*='minHeight']") || divElement.parentElement;
+          const container =
+            divElement.closest("[style*='minHeight']") ||
+            divElement.parentElement;
           let width = 900; // Max width for dashboard
           let height = 500; // Compact height
 
@@ -90,7 +96,9 @@ export default function Dashboard() {
         {/* Page Header */}
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-600 mt-1">Overview of disaster relief operations</p>
+          <p className="text-slate-600 mt-1">
+            Overview of disaster relief operations
+          </p>
         </div>
 
         {/* Key Metrics */}
@@ -98,7 +106,9 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium">Total Requests</p>
+                <p className="text-slate-600 text-sm font-medium">
+                  Total Requests
+                </p>
                 <p className="text-3xl font-bold text-slate-900 mt-2">
                   {metrics?.totalRequests || 0}
                 </p>
@@ -107,13 +117,17 @@ export default function Dashboard() {
                 <BarChart3 size={24} className="text-blue-600" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">Active relief operations</p>
+            <p className="text-xs text-slate-500 mt-3">
+              Active relief operations
+            </p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium">People Assisted</p>
+                <p className="text-slate-600 text-sm font-medium">
+                  People Assisted
+                </p>
                 <p className="text-3xl font-bold text-slate-900 mt-2">
                   {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
                 </p>
@@ -128,9 +142,12 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium">Total Value</p>
+                <p className="text-slate-600 text-sm font-medium">
+                  Total Value
+                </p>
                 <p className="text-2xl font-bold text-primary mt-2">
-                  {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M MZN
+                  {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M
+                  MZN
                 </p>
               </div>
               <div className="bg-orange-100 rounded-lg p-3">
@@ -143,7 +160,9 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium">Avg. Per Request</p>
+                <p className="text-slate-600 text-sm font-medium">
+                  Avg. Per Request
+                </p>
                 <p className="text-3xl font-bold text-slate-900 mt-2">
                   {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
                 </p>
@@ -159,12 +178,24 @@ export default function Dashboard() {
         {/* Maputo Weather and Alerts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Suspense fallback={<div className="bg-white rounded-xl p-6 text-center">Loading weather...</div>}>
+            <Suspense
+              fallback={
+                <div className="bg-white rounded-xl p-6 text-center">
+                  Loading weather...
+                </div>
+              }
+            >
               <MaputoWeather />
             </Suspense>
           </div>
           <div>
-            <Suspense fallback={<div className="bg-white rounded-xl p-6 text-center">Loading alerts...</div>}>
+            <Suspense
+              fallback={
+                <div className="bg-white rounded-xl p-6 text-center">
+                  Loading alerts...
+                </div>
+              }
+            >
               <Alerts />
             </Suspense>
           </div>
@@ -174,8 +205,12 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">INGD Disaster Impact</h2>
-              <p className="text-xs text-slate-600 mt-1">Real-time impact data from INGD</p>
+              <h2 className="text-lg font-bold text-slate-900">
+                INGD Disaster Impact
+              </h2>
+              <p className="text-xs text-slate-600 mt-1">
+                Real-time impact data from INGD
+              </p>
             </div>
             <Link
               to="/ingd-dashboard"
@@ -185,7 +220,10 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          <div className="w-full bg-white overflow-x-auto" style={{ minHeight: "400px" }}>
+          <div
+            className="w-full bg-white overflow-x-auto"
+            style={{ minHeight: "400px" }}
+          >
             <div
               className="tableauPlaceholder"
               id="viz1769532767397_dashboard"
@@ -201,10 +239,16 @@ export default function Dashboard() {
                 </a>
               </noscript>
               <object className="tableauViz" style={{ display: "none" }}>
-                <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+                <param
+                  name="host_url"
+                  value="https%3A%2F%2Fpublic.tableau.com%2F"
+                />
                 <param name="embed_code_version" value="3" />
                 <param name="site_root" value="" />
-                <param name="name" value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard" />
+                <param
+                  name="name"
+                  value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
+                />
                 <param name="tabs" value="no" />
                 <param name="toolbar" value="yes" />
                 <param
@@ -225,7 +269,9 @@ export default function Dashboard() {
         {/* Recent Requests */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-slate-900">Recent Requests</h2>
+            <h2 className="text-lg font-bold text-slate-900">
+              Recent Requests
+            </h2>
             <Link
               to="/requests"
               className="text-primary hover:text-orange-600 text-sm font-medium transition-colors"
@@ -236,7 +282,9 @@ export default function Dashboard() {
 
           <div className="space-y-4">
             {isLoading ? (
-              <p className="text-slate-600 text-center py-8">Loading recent requests...</p>
+              <p className="text-slate-600 text-center py-8">
+                Loading recent requests...
+              </p>
             ) : recentRequests.length > 0 ? (
               recentRequests.map((request) => {
                 const timeAgo = request.created_at
@@ -249,8 +297,12 @@ export default function Dashboard() {
                     className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-blue-50 transition-colors"
                   >
                     <div className="flex-1">
-                      <p className="font-medium text-slate-900">{request.originator}</p>
-                      <p className="text-sm text-slate-600 mt-1">{request.location}</p>
+                      <p className="font-medium text-slate-900">
+                        {request.originator}
+                      </p>
+                      <p className="text-sm text-slate-600 mt-1">
+                        {request.location}
+                      </p>
                       <div className="flex items-center gap-3 mt-2">
                         <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
                           {request.help_type}
@@ -260,8 +312,8 @@ export default function Dashboard() {
                             statusText === "pending"
                               ? "bg-yellow-100 text-yellow-700"
                               : statusText === "met"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-orange-100 text-orange-700"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-orange-100 text-orange-700"
                           }`}
                         >
                           {statusText}
@@ -273,7 +325,9 @@ export default function Dashboard() {
                 );
               })
             ) : (
-              <p className="text-slate-600 text-center py-8">No recent requests</p>
+              <p className="text-slate-600 text-center py-8">
+                No recent requests
+              </p>
             )}
           </div>
         </div>

@@ -2,19 +2,36 @@ import { Plus, X, Trash2, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { getRequests, createRequest, updateRequest, deleteRequest } from "@/services/requestsService";
+import {
+  getRequests,
+  createRequest,
+  updateRequest,
+  deleteRequest,
+} from "@/services/requestsService";
 import { RelieRequest } from "@/services/supabaseService";
 import { Lock, AlertCircle } from "lucide-react";
 
 function getStatusStyles(status: boolean) {
-  return status ? "bg-green-100 text-green-700 border border-green-300" : "bg-blue-100 text-blue-700 border border-blue-300";
+  return status
+    ? "bg-green-100 text-green-700 border border-green-300"
+    : "bg-blue-100 text-blue-700 border border-blue-300";
 }
 
 function getStatusLabel(status: boolean) {
   return status ? "✓ Met" : "⏳ Pending";
 }
 
-function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSelect }: { requests: RelieRequest[], onStatusChange: (id: number, newStatus: boolean) => void, selectedRequests: Set<number>, onToggleSelect: (id: number) => void }) {
+function RequestsTable({
+  requests,
+  onStatusChange,
+  selectedRequests,
+  onToggleSelect,
+}: {
+  requests: RelieRequest[];
+  onStatusChange: (id: number, newStatus: boolean) => void;
+  selectedRequests: Set<number>;
+  onToggleSelect: (id: number) => void;
+}) {
   return (
     <>
       {/* Desktop Table View */}
@@ -100,10 +117,12 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
                   {request.people}
                 </td>
                 <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
-                  {parseInt(request.value || '0').toLocaleString()}
+                  {parseInt(request.value || "0").toLocaleString()}
                 </td>
                 <td className="px-6 py-4 text-sm">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}>
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}
+                  >
                     {getStatusLabel(request.status)}
                   </span>
                 </td>
@@ -116,36 +135,59 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
       {/* Mobile Card View */}
       <div className="md:hidden divide-y divide-slate-200">
         {requests.map((request) => (
-          <div key={request.id} className="px-6 py-6 hover:bg-blue-50 transition-colors">
+          <div
+            key={request.id}
+            className="px-6 py-6 hover:bg-blue-50 transition-colors"
+          >
             <div className="space-y-4">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Full Name</p>
-                  <p className="text-base font-bold text-slate-900 mt-1 break-words">{request.full_name}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    Full Name
+                  </p>
+                  <p className="text-base font-bold text-slate-900 mt-1 break-words">
+                    {request.full_name}
+                  </p>
                 </div>
-                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap flex-shrink-0 ${getStatusStyles(request.status)}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold whitespace-nowrap flex-shrink-0 ${getStatusStyles(request.status)}`}
+                >
                   {getStatusLabel(request.status)}
                 </span>
               </div>
 
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Email</p>
-                <p className="text-sm text-slate-700 mt-1 break-words">{request.email}</p>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Email
+                </p>
+                <p className="text-sm text-slate-700 mt-1 break-words">
+                  {request.email}
+                </p>
               </div>
 
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Originator</p>
-                <p className="text-sm text-slate-700 mt-1 break-words">{request.originator}</p>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Originator
+                </p>
+                <p className="text-sm text-slate-700 mt-1 break-words">
+                  {request.originator}
+                </p>
               </div>
 
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Location</p>
-                <p className="text-sm text-slate-700 mt-1 break-words">{request.location}</p>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Location
+                </p>
+                <p className="text-sm text-slate-700 mt-1 break-words">
+                  {request.location}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Help Type</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    Help Type
+                  </p>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 mt-1">
                     {request.help_type}
                   </span>
@@ -153,18 +195,30 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
               </div>
 
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Evacuation Type</p>
-                <p className="text-sm text-slate-700 mt-1 break-words">{request.evacuation_type}</p>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Evacuation Type
+                </p>
+                <p className="text-sm text-slate-700 mt-1 break-words">
+                  {request.evacuation_type}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
                 <div>
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">People</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">{request.people}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    People
+                  </p>
+                  <p className="text-lg font-bold text-slate-900 mt-1">
+                    {request.people}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Value (MZN)</p>
-                  <p className="text-lg font-bold text-primary mt-1">{parseInt(request.value || '0').toLocaleString()}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    Value (MZN)
+                  </p>
+                  <p className="text-lg font-bold text-primary mt-1">
+                    {parseInt(request.value || "0").toLocaleString()}
+                  </p>
                 </div>
               </div>
 
@@ -175,7 +229,9 @@ function RequestsTable({ requests, onStatusChange, selectedRequests, onToggleSel
                   onChange={() => onToggleSelect(request.id || 0)}
                   className="w-4 h-4 rounded cursor-pointer"
                 />
-                <span className="ml-2 text-sm text-slate-600">Select for actions</span>
+                <span className="ml-2 text-sm text-slate-600">
+                  Select for actions
+                </span>
               </div>
             </div>
           </div>
@@ -191,7 +247,9 @@ export default function Requests() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
+  const [selectedRequests, setSelectedRequests] = useState<Set<number>>(
+    new Set(),
+  );
   const [showActionDropdown, setShowActionDropdown] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authPassword, setAuthPassword] = useState("");
@@ -263,7 +321,11 @@ export default function Requests() {
   };
 
   const handleDeleteSelected = () => {
-    if (!window.confirm(`Delete ${selectedRequests.size} request(s)? This cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Delete ${selectedRequests.size} request(s)? This cannot be undone.`,
+      )
+    ) {
       return;
     }
     setPendingAction({ type: "delete" });
@@ -278,9 +340,13 @@ export default function Requests() {
 
     // For non-admin, check if password matches any of the selected requests' originator names
     if (!isAdmin && selectedRequests.size > 0) {
-      const firstRequest = requests.find((r) => r.id === Array.from(selectedRequests)[0]);
+      const firstRequest = requests.find(
+        (r) => r.id === Array.from(selectedRequests)[0],
+      );
       if (firstRequest && authPassword !== firstRequest.full_name) {
-        setAuthError("Invalid password. Use the originator's full name or admin password.");
+        setAuthError(
+          "Invalid password. Use the originator's full name or admin password.",
+        );
         return;
       }
     } else if (!isAdmin) {
@@ -296,8 +362,8 @@ export default function Requests() {
         }
         setRequests((prevRequests) =>
           prevRequests.map((req) =>
-            selectedRequests.has(req.id!) ? { ...req, status: true } : req
-          )
+            selectedRequests.has(req.id!) ? { ...req, status: true } : req,
+          ),
         );
       } else if (pendingAction?.type === "pending") {
         for (const id of selectedRequests) {
@@ -305,15 +371,15 @@ export default function Requests() {
         }
         setRequests((prevRequests) =>
           prevRequests.map((req) =>
-            selectedRequests.has(req.id!) ? { ...req, status: false } : req
-          )
+            selectedRequests.has(req.id!) ? { ...req, status: false } : req,
+          ),
         );
       } else if (pendingAction?.type === "delete") {
         for (const id of selectedRequests) {
           await deleteRequest(id);
         }
         setRequests((prevRequests) =>
-          prevRequests.filter((req) => !selectedRequests.has(req.id!))
+          prevRequests.filter((req) => !selectedRequests.has(req.id!)),
         );
       }
 
@@ -335,8 +401,8 @@ export default function Requests() {
         // Update the requests list with the new status
         setRequests((prevRequests) =>
           prevRequests.map((req) =>
-            req.id === id ? { ...req, status: newStatus } : req
-          )
+            req.id === id ? { ...req, status: newStatus } : req,
+          ),
         );
       }
     } catch (error) {
@@ -393,8 +459,12 @@ export default function Requests() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Relief Requests</h1>
-            <p className="text-slate-600 mt-1">Manage all disaster relief requests</p>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Relief Requests
+            </h1>
+            <p className="text-slate-600 mt-1">
+              Manage all disaster relief requests
+            </p>
           </div>
           <div className="flex gap-3">
             <button
@@ -455,7 +525,9 @@ export default function Requests() {
         {showForm && (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-900">Add New Relief Request</h2>
+              <h2 className="text-2xl font-bold text-slate-900">
+                Add New Relief Request
+              </h2>
               <button
                 onClick={() => setShowForm(false)}
                 className="text-slate-400 hover:text-slate-600 transition-colors"
@@ -570,11 +642,13 @@ export default function Requests() {
                   </label>
                   <select
                     name="status"
-                    value={formData.status ? 'true' : 'false'}
-                    onChange={(e) => setFormData((prev) => ({
-                      ...prev,
-                      status: e.target.value === 'true',
-                    }))}
+                    value={formData.status ? "true" : "false"}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        status: e.target.value === "true",
+                      }))
+                    }
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="false">Pending</option>
@@ -619,7 +693,12 @@ export default function Requests() {
                 ⏳ Pending Requests ({pendingRequests.length})
               </h2>
             </div>
-            <RequestsTable requests={pendingRequests} onStatusChange={handleStatusChange} selectedRequests={selectedRequests} onToggleSelect={toggleSelectRequest} />
+            <RequestsTable
+              requests={pendingRequests}
+              onStatusChange={handleStatusChange}
+              selectedRequests={selectedRequests}
+              onToggleSelect={toggleSelectRequest}
+            />
           </div>
         )}
 
@@ -631,7 +710,12 @@ export default function Requests() {
                 ✓ Completed Requests ({metRequests.length})
               </h2>
             </div>
-            <RequestsTable requests={metRequests} onStatusChange={handleStatusChange} selectedRequests={selectedRequests} onToggleSelect={toggleSelectRequest} />
+            <RequestsTable
+              requests={metRequests}
+              onStatusChange={handleStatusChange}
+              selectedRequests={selectedRequests}
+              onToggleSelect={toggleSelectRequest}
+            />
           </div>
         )}
 
@@ -650,27 +734,36 @@ export default function Requests() {
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Lock size={28} className="text-primary" />
-                <h3 className="text-2xl font-bold text-slate-900">Authorization Required</h3>
+                <h3 className="text-2xl font-bold text-slate-900">
+                  Authorization Required
+                </h3>
               </div>
 
               <p className="text-slate-600 mb-6 text-sm">
                 {pendingAction?.type === "delete"
                   ? "Confirm deletion of selected requests"
                   : pendingAction?.type === "pending"
-                  ? "Return selected requests to pending status"
-                  : "Mark selected requests as resolved"}
+                    ? "Return selected requests to pending status"
+                    : "Mark selected requests as resolved"}
               </p>
 
               {authError && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
-                  <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
+                  <AlertCircle
+                    size={18}
+                    className="text-red-600 flex-shrink-0 mt-0.5"
+                  />
                   <p className="text-sm text-red-800">{authError}</p>
                 </div>
               )}
 
               <div>
-                <label htmlFor="auth-password" className="block text-sm font-medium text-slate-700 mb-2">
-                  {selectedRequests.size === 1 && requests.some((r) => r.id === Array.from(selectedRequests)[0])
+                <label
+                  htmlFor="auth-password"
+                  className="block text-sm font-medium text-slate-700 mb-2"
+                >
+                  {selectedRequests.size === 1 &&
+                  requests.some((r) => r.id === Array.from(selectedRequests)[0])
                     ? `Originator's Full Name or Admin Password`
                     : "Admin Password"}
                 </label>

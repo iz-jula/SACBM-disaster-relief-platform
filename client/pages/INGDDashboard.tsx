@@ -14,7 +14,8 @@ export default function INGDDashboard() {
         if (vizElement) {
           // Original dimensions: 1400x937
           // Calculate responsive width (use available width, max 1400px)
-          const container = divElement.closest(".overflow-x-auto") || divElement.parentElement;
+          const container =
+            divElement.closest(".overflow-x-auto") || divElement.parentElement;
           let width = 1400;
           let height = 937;
 
@@ -69,7 +70,9 @@ export default function INGDDashboard() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">INGD Dashboard</h1>
+            <h1 className="text-3xl font-bold text-slate-900">
+              INGD Dashboard
+            </h1>
             <p className="text-slate-600 mt-1">
               Real-time data from INGD's official disaster impact dashboard
             </p>
@@ -91,7 +94,10 @@ export default function INGDDashboard() {
             </p>
           </div>
 
-          <div className="w-full bg-white overflow-x-auto" style={{ minHeight: "1000px" }}>
+          <div
+            className="w-full bg-white overflow-x-auto"
+            style={{ minHeight: "1000px" }}
+          >
             <div
               className="tableauPlaceholder"
               id="viz1769532767397"
@@ -107,10 +113,16 @@ export default function INGDDashboard() {
                 </a>
               </noscript>
               <object className="tableauViz" style={{ display: "none" }}>
-                <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+                <param
+                  name="host_url"
+                  value="https%3A%2F%2Fpublic.tableau.com%2F"
+                />
                 <param name="embed_code_version" value="3" />
                 <param name="site_root" value="" />
-                <param name="name" value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard" />
+                <param
+                  name="name"
+                  value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
+                />
                 <param name="tabs" value="no" />
                 <param name="toolbar" value="yes" />
                 <param
@@ -133,17 +145,19 @@ export default function INGDDashboard() {
           <div className="bg-blue-50 rounded-xl border border-blue-200 p-6">
             <h3 className="font-bold text-blue-900 mb-2">About INGD</h3>
             <p className="text-sm text-blue-800">
-              The National Institute for Disaster Management (INGD) provides official
-              disaster impact statistics and coordination for disaster relief efforts
-              in Mozambique.
+              The National Institute for Disaster Management (INGD) provides
+              official disaster impact statistics and coordination for disaster
+              relief efforts in Mozambique.
             </p>
           </div>
 
           <div className="bg-orange-50 rounded-xl border border-orange-200 p-6">
-            <h3 className="font-bold text-orange-900 mb-2">Data Synchronization</h3>
+            <h3 className="font-bold text-orange-900 mb-2">
+              Data Synchronization
+            </h3>
             <p className="text-sm text-orange-800">
-              This dashboard displays live data from INGD's official systems. Refresh
-              the page to see the latest updates.
+              This dashboard displays live data from INGD's official systems.
+              Refresh the page to see the latest updates.
             </p>
           </div>
         </div>

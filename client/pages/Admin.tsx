@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Settings, Users, BarChart3, Database, LogOut, Lock, AlertCircle, Download } from "lucide-react";
+import {
+  Settings,
+  Users,
+  BarChart3,
+  Database,
+  LogOut,
+  Lock,
+  AlertCircle,
+  Download,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
@@ -17,7 +26,9 @@ interface AdminUser {
 export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "requests" | "users" | "settings">("dashboard");
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "requests" | "users" | "settings"
+  >("dashboard");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
     totalPeopleAssisted: 0,
@@ -70,7 +81,19 @@ export default function Admin() {
     }
 
     // Define CSV headers
-    const headers = ["ID", "Originator", "Full Name", "Email", "Location", "Help Type", "Evacuation Type", "People", "Value", "Status", "Date"];
+    const headers = [
+      "ID",
+      "Originator",
+      "Full Name",
+      "Email",
+      "Location",
+      "Help Type",
+      "Evacuation Type",
+      "People",
+      "Value",
+      "Status",
+      "Date",
+    ];
 
     // Convert requests to CSV rows
     const rows = allRequests.map((req) => [
@@ -129,10 +152,30 @@ export default function Admin() {
 
   // Admin Statistics from Supabase
   const stats = [
-    { label: "Total Requests", value: metrics.totalRequests, icon: BarChart3, color: "blue" },
-    { label: "Met Requests", value: metrics.metRequests, icon: Lock, color: "green" },
-    { label: "Pending Requests", value: metrics.pendingRequests, icon: Settings, color: "yellow" },
-    { label: "Partially Met", value: metrics.partiallyMet, icon: Users, color: "orange" },
+    {
+      label: "Total Requests",
+      value: metrics.totalRequests,
+      icon: BarChart3,
+      color: "blue",
+    },
+    {
+      label: "Met Requests",
+      value: metrics.metRequests,
+      icon: Lock,
+      color: "green",
+    },
+    {
+      label: "Pending Requests",
+      value: metrics.pendingRequests,
+      icon: Settings,
+      color: "yellow",
+    },
+    {
+      label: "Partially Met",
+      value: metrics.partiallyMet,
+      icon: Users,
+      color: "orange",
+    },
   ];
 
   return (
@@ -141,9 +184,17 @@ export default function Admin() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
-            <p className="text-slate-600 mt-1">Manage SABCM disaster relief operations</p>
-            {user && <p className="text-xs text-slate-500 mt-2">Logged in as: {user.name}</p>}
+            <h1 className="text-3xl font-bold text-slate-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-slate-600 mt-1">
+              Manage SABCM disaster relief operations
+            </p>
+            {user && (
+              <p className="text-xs text-slate-500 mt-2">
+                Logged in as: {user.name}
+              </p>
+            )}
           </div>
           <div className="flex gap-3">
             <button
@@ -201,15 +252,22 @@ export default function Admin() {
                   orange: "bg-orange-100 text-orange-600",
                 };
                 return (
-                  <div key={idx} className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
+                  <div
+                    key={idx}
+                    className="bg-white rounded-xl shadow-md p-6 border border-slate-200"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-slate-600 text-sm font-medium">{stat.label}</p>
+                        <p className="text-slate-600 text-sm font-medium">
+                          {stat.label}
+                        </p>
                         <p className="text-3xl font-bold text-slate-900 mt-2">
                           {isLoadingMetrics ? "—" : stat.value}
                         </p>
                       </div>
-                      <div className={`rounded-lg p-3 ${colorClasses[stat.color]}`}>
+                      <div
+                        className={`rounded-lg p-3 ${colorClasses[stat.color]}`}
+                      >
                         <Icon size={24} />
                       </div>
                     </div>
@@ -218,11 +276,12 @@ export default function Admin() {
               })}
             </div>
 
-
             {/* Quick Stats Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Request Status Breakdown</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-4">
+                  Request Status Breakdown
+                </h3>
                 <div className="space-y-4">
                   {isLoadingMetrics ? (
                     <p className="text-slate-500 text-sm">Loading...</p>
@@ -230,11 +289,18 @@ export default function Admin() {
                     <>
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <p className="text-sm font-medium text-slate-700">Met</p>
+                          <p className="text-sm font-medium text-slate-700">
+                            Met
+                          </p>
                           <p className="text-sm font-bold text-green-600">
                             {metrics.totalRequests > 0
-                              ? Math.round((metrics.metRequests / metrics.totalRequests) * 100)
-                              : 0}%
+                              ? Math.round(
+                                  (metrics.metRequests /
+                                    metrics.totalRequests) *
+                                    100,
+                                )
+                              : 0}
+                            %
                           </p>
                         </div>
                         <div className="w-full bg-slate-200 rounded-full h-2">
@@ -251,11 +317,18 @@ export default function Admin() {
                       </div>
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <p className="text-sm font-medium text-slate-700">Pending</p>
+                          <p className="text-sm font-medium text-slate-700">
+                            Pending
+                          </p>
                           <p className="text-sm font-bold text-blue-600">
                             {metrics.totalRequests > 0
-                              ? Math.round((metrics.pendingRequests / metrics.totalRequests) * 100)
-                              : 0}%
+                              ? Math.round(
+                                  (metrics.pendingRequests /
+                                    metrics.totalRequests) *
+                                    100,
+                                )
+                              : 0}
+                            %
                           </p>
                         </div>
                         <div className="w-full bg-slate-200 rounded-full h-2">
@@ -276,7 +349,9 @@ export default function Admin() {
               </div>
 
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Data Summary</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-4">
+                  Data Summary
+                </h3>
                 <div className="space-y-3">
                   {isLoadingMetrics ? (
                     <p className="text-slate-500 text-sm">Loading...</p>
@@ -284,18 +359,24 @@ export default function Admin() {
                     <>
                       <div className="flex justify-between py-2 border-b border-slate-100">
                         <p className="text-slate-600">Total People Assisted</p>
-                        <p className="font-bold text-slate-900">{metrics.totalPeopleAssisted.toLocaleString()}</p>
+                        <p className="font-bold text-slate-900">
+                          {metrics.totalPeopleAssisted.toLocaleString()}
+                        </p>
                       </div>
                       <div className="flex justify-between py-2 border-b border-slate-100">
                         <p className="text-slate-600">Total Funds Deployed</p>
                         <p className="font-bold text-slate-900">
-                          {((metrics.totalValueDeployed || 0) / 1000000).toFixed(2)}M MZN
+                          {(
+                            (metrics.totalValueDeployed || 0) / 1000000
+                          ).toFixed(2)}
+                          M MZN
                         </p>
                       </div>
                       <div className="flex justify-between py-2 border-b border-slate-100">
                         <p className="text-slate-600">Average per Request</p>
                         <p className="font-bold text-slate-900">
-                          {((metrics.averagePerRequest || 0) / 1000).toFixed(0)}K MZN
+                          {((metrics.averagePerRequest || 0) / 1000).toFixed(0)}
+                          K MZN
                         </p>
                       </div>
                       <div className="flex justify-between py-2">
@@ -319,8 +400,12 @@ export default function Admin() {
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">All Relief Requests</h3>
-                <p className="text-sm text-slate-600 mt-1">Manage all relief requests from the database</p>
+                <h3 className="text-lg font-bold text-slate-900">
+                  All Relief Requests
+                </h3>
+                <p className="text-sm text-slate-600 mt-1">
+                  Manage all relief requests from the database
+                </p>
               </div>
               <button
                 onClick={loadAllRequests}
@@ -331,48 +416,95 @@ export default function Admin() {
             </div>
 
             {isLoadingRequests ? (
-              <div className="p-6 text-center text-slate-600">Loading requests...</div>
+              <div className="p-6 text-center text-slate-600">
+                Loading requests...
+              </div>
             ) : allRequests.length === 0 ? (
-              <div className="p-6 text-center text-slate-600">No requests found</div>
+              <div className="p-6 text-center text-slate-600">
+                No requests found
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">#Ref</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Originator</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Full Name</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Email</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Location</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Help Type</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">People</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Value</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Date</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        #Ref
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Originator
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Full Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Location
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Help Type
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        People
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Value
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Date
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {allRequests.map((req) => (
-                      <tr key={req.id} className="border-b border-slate-200 hover:bg-blue-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">#{req.id}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{req.originator}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{req.full_name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{req.email}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{req.location}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{req.help_type}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{req.people}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{req.value} MZN</td>
+                      <tr
+                        key={req.id}
+                        className="border-b border-slate-200 hover:bg-blue-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                          #{req.id}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.originator}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.full_name}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.email}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.location}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.help_type}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.people}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {req.value} MZN
+                        </td>
                         <td className="px-6 py-4 text-sm">
                           <span
                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                              req.status ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                              req.status
+                                ? "bg-green-100 text-green-700"
+                                : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
                             {req.status ? "Met" : "Pending"}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-600">
-                          {req.created_at ? new Date(req.created_at).toLocaleDateString() : "—"}
+                          {req.created_at
+                            ? new Date(req.created_at).toLocaleDateString()
+                            : "—"}
                         </td>
                       </tr>
                     ))}
@@ -388,26 +520,47 @@ export default function Admin() {
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-                <h3 className="text-lg font-bold text-slate-900">Admin Users</h3>
-                <p className="text-sm text-slate-600 mt-1">Manage user access and permissions</p>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Admin Users
+                </h3>
+                <p className="text-sm text-slate-600 mt-1">
+                  Manage user access and permissions
+                </p>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Name</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Email</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Role</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Last Login</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Actions</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Role
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Last Login
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {adminUsers.map((user) => (
-                      <tr key={user.id} className="border-b border-slate-200 hover:bg-blue-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{user.name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{user.email}</td>
+                      <tr
+                        key={user.id}
+                        className="border-b border-slate-200 hover:bg-blue-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                          {user.name}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {user.email}
+                        </td>
                         <td className="px-6 py-4 text-sm">
                           <span
                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
@@ -418,10 +571,13 @@ export default function Admin() {
                                   : "bg-blue-100 text-blue-700"
                             }`}
                           >
-                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                            {user.role.charAt(0).toUpperCase() +
+                              user.role.slice(1)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{user.lastLogin}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">
+                          {user.lastLogin}
+                        </td>
                         <td className="px-6 py-4 text-sm">
                           <button className="text-primary hover:text-orange-600 font-medium transition-colors">
                             Edit
@@ -435,9 +591,13 @@ export default function Admin() {
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-              <p className="text-lg font-semibold text-blue-900 mb-2">👥 User Management</p>
+              <p className="text-lg font-semibold text-blue-900 mb-2">
+                👥 User Management
+              </p>
               <p className="text-blue-800">
-                Backend connection will enable: user authentication, role-based access control (RBAC), activity logging, and permission management.
+                Backend connection will enable: user authentication, role-based
+                access control (RBAC), activity logging, and permission
+                management.
               </p>
             </div>
           </div>
@@ -453,9 +613,12 @@ export default function Admin() {
                   <BarChart3 size={24} className="text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-green-900 mb-1">Supabase Connected</h3>
+                  <h3 className="text-lg font-bold text-green-900 mb-1">
+                    Supabase Connected
+                  </h3>
                   <p className="text-green-800 mb-3">
-                    Your app is connected to Supabase PostgreSQL database for reliable data management.
+                    Your app is connected to Supabase PostgreSQL database for
+                    reliable data management.
                   </p>
                   <ul className="space-y-1 text-sm text-green-700">
                     <li>✓ Real-time data synchronization</li>
@@ -469,7 +632,9 @@ export default function Admin() {
 
             {/* System Configuration */}
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-6">System Configuration</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-6">
+                System Configuration
+              </h3>
 
               <div className="space-y-6">
                 {/* Database Configuration */}
@@ -481,7 +646,9 @@ export default function Admin() {
                   <div className="space-y-3">
                     <div className="p-3 bg-white rounded-lg border border-green-200">
                       <p className="text-sm text-green-800">
-                        <span className="font-semibold">✓ Connected to Supabase</span>
+                        <span className="font-semibold">
+                          ✓ Connected to Supabase
+                        </span>
                         <br />
                         Project: SACBM
                         <br />
@@ -491,7 +658,8 @@ export default function Admin() {
                       </p>
                     </div>
                     <p className="text-xs text-green-700">
-                      Your database is configured and ready to use. All relief requests are automatically synced to Supabase.
+                      Your database is configured and ready to use. All relief
+                      requests are automatically synced to Supabase.
                     </p>
                   </div>
                 </div>
@@ -504,7 +672,9 @@ export default function Admin() {
                   </h4>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">API Base URL</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        API Base URL
+                      </label>
                       <input
                         type="text"
                         placeholder="https://api.yourdomain.com"
@@ -512,7 +682,9 @@ export default function Admin() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">API Key</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        API Key
+                      </label>
                       <input
                         type="password"
                         placeholder="Paste your API key here"
@@ -527,7 +699,9 @@ export default function Admin() {
 
                 {/* Data Management */}
                 <div className="p-6 border border-slate-200 rounded-lg">
-                  <h4 className="font-semibold text-slate-900 mb-3">Data Management</h4>
+                  <h4 className="font-semibold text-slate-900 mb-3">
+                    Data Management
+                  </h4>
                   <div className="space-y-2">
                     <button
                       onClick={() => {
@@ -554,9 +728,12 @@ export default function Admin() {
 
             {/* Integration Status */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-              <p className="text-lg font-semibold text-green-900 mb-2">✓ System Fully Configured</p>
+              <p className="text-lg font-semibold text-green-900 mb-2">
+                ✓ System Fully Configured
+              </p>
               <p className="text-green-800 mb-4">
-                Your disaster relief management system is connected to Supabase and ready for production use.
+                Your disaster relief management system is connected to Supabase
+                and ready for production use.
               </p>
               <ul className="space-y-1 text-sm text-green-800">
                 <li>✓ Supabase PostgreSQL database</li>

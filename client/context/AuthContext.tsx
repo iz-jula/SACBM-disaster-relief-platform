@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
 import { supabase } from "@/services/supabaseService";
 
 interface AuthContextType {
@@ -13,7 +19,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ email: string; name?: string } | null>(null);
+  const [user, setUser] = useState<{ email: string; name?: string } | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing session on mount
@@ -75,12 +83,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Fallback to authorized credentials
       const DEMO_CREDENTIALS = [
-        { email: "admin@sacbm.co.mz", password: "vilankulos2025", name: "Admin User" },
-        { email: "management@sacbm.co.mz", password: "vilankulos2025", name: "Management User" },
+        {
+          email: "admin@sacbm.co.mz",
+          password: "vilankulos2025",
+          name: "Admin User",
+        },
+        {
+          email: "management@sacbm.co.mz",
+          password: "vilankulos2025",
+          name: "Management User",
+        },
       ];
 
       const foundUser = DEMO_CREDENTIALS.find(
-        (cred) => cred.email === email && cred.password === password
+        (cred) => cred.email === email && cred.password === password,
       );
 
       if (foundUser) {
@@ -113,7 +129,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, login, logout, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

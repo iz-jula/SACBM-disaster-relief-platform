@@ -1,6 +1,17 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BarChart3, Table2, Map, Upload, Menu, X, Cloud, ChevronLeft, Lock, Database } from "lucide-react";
+import {
+  BarChart3,
+  Table2,
+  Map,
+  Upload,
+  Menu,
+  X,
+  Cloud,
+  ChevronLeft,
+  Lock,
+  Database,
+} from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,9 +30,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
   ];
 
-  const adminItems = [
-    { href: "/admin", label: "Admin Panel", icon: Lock },
-  ];
+  const adminItems = [{ href: "/admin", label: "Admin Panel", icon: Lock }];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
@@ -48,8 +57,12 @@ export default function Layout({ children }: LayoutProps) {
               />
               {!sidebarCollapsed && (
                 <div className="text-center">
-                  <h1 className="text-xs font-bold text-slate-900 leading-tight">Disaster Relief</h1>
-                  <p className="text-xs text-slate-500 leading-tight">Operations</p>
+                  <h1 className="text-xs font-bold text-slate-900 leading-tight">
+                    Disaster Relief
+                  </h1>
+                  <p className="text-xs text-slate-500 leading-tight">
+                    Operations
+                  </p>
                 </div>
               )}
             </Link>
@@ -104,7 +117,9 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
         {/* Collapse Button - Bottom of Sidebar */}
-        <div className={`border-t border-slate-200 p-4 ${sidebarCollapsed ? "md:p-2" : ""}`}>
+        <div
+          className={`border-t border-slate-200 p-4 ${sidebarCollapsed ? "md:p-2" : ""}`}
+        >
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className="hidden md:flex items-center justify-center w-full px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors"

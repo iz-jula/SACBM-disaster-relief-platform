@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, Cloud, MapPin, TrendingUp, ExternalLink, RefreshCw } from "lucide-react";
-import { getNewsAlerts, getNewsAlertsLastUpdate, NewsAlert } from "@/services/weatherService";
+import {
+  AlertCircle,
+  Cloud,
+  MapPin,
+  TrendingUp,
+  ExternalLink,
+  RefreshCw,
+} from "lucide-react";
+import {
+  getNewsAlerts,
+  getNewsAlertsLastUpdate,
+  NewsAlert,
+} from "@/services/weatherService";
 
 interface FallbackAlert {
   id: string;
@@ -22,7 +33,8 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
     severity: "high",
     title: "Heavy Rainfall Expected",
     location: "Sofala Province",
-    description: "Heavy rainfall warning for the Sofala province. Scattered showers expected from 2 PM today.",
+    description:
+      "Heavy rainfall warning for the Sofala province. Scattered showers expected from 2 PM today.",
     time: "2 hours ago",
   },
   {
@@ -31,7 +43,8 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
     severity: "medium",
     title: "Thunderstorm Alert",
     location: "Inhambane District",
-    description: "Isolated thunderstorms possible in the Inhambane district throughout the afternoon.",
+    description:
+      "Isolated thunderstorms possible in the Inhambane district throughout the afternoon.",
     time: "1 hour ago",
   },
   {
@@ -40,7 +53,8 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
     severity: "high",
     title: "Flood Risk Alert",
     location: "Gaza Province",
-    description: "Water levels rising in Gaza province. Emergency teams have been mobilized.",
+    description:
+      "Water levels rising in Gaza province. Emergency teams have been mobilized.",
     time: "30 minutes ago",
   },
   {
@@ -49,7 +63,8 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
     severity: "low",
     title: "Wind Advisory",
     location: "Coastal Areas",
-    description: "Strong winds expected along the coastal areas. Speed up to 35 km/h.",
+    description:
+      "Strong winds expected along the coastal areas. Speed up to 35 km/h.",
     time: "20 minutes ago",
   },
 ];
@@ -146,11 +161,11 @@ export default function Alerts() {
       const diffDays = Math.floor(diffHours / 24);
 
       if (diffDays > 0) {
-        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
       } else if (diffHours > 0) {
-        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
       } else {
-        return 'Just now';
+        return "Just now";
       }
     }
     return "";
@@ -183,11 +198,15 @@ export default function Alerts() {
         <div className="flex items-start justify-between gap-6">
           {/* Left side - Title and Description */}
           <div className="flex items-start gap-3 flex-1">
-            <AlertCircle size={24} className="text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle
+              size={24}
+              className="text-red-600 flex-shrink-0 mt-0.5"
+            />
             <div className="flex-1 min-w-0">
               <h2 className="text-xl font-bold text-slate-900">News Alerts</h2>
               <p className="text-sm text-slate-600 mt-1">
-                Latest news about floods, government alerts, and weather events in Mozambique
+                Latest news about floods, government alerts, and weather events
+                in Mozambique
               </p>
             </div>
           </div>
@@ -203,7 +222,9 @@ export default function Alerts() {
             {!isLoading && (
               <div className="text-right whitespace-nowrap">
                 <p className="text-xs text-slate-600">Last updated</p>
-                <p className="text-sm font-medium text-slate-900">{formatLastUpdate(lastUpdate)}</p>
+                <p className="text-sm font-medium text-slate-900">
+                  {formatLastUpdate(lastUpdate)}
+                </p>
               </div>
             )}
           </div>
@@ -223,13 +244,17 @@ export default function Alerts() {
                 className={`border rounded-lg p-4 transition-all hover:shadow-md ${getSeverityColor(severity)}`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg flex-shrink-0 ${getSeverityBadgeColor(severity)}`}>
+                  <div
+                    className={`p-2 rounded-lg flex-shrink-0 ${getSeverityBadgeColor(severity)}`}
+                  >
                     {isNews ? <AlertCircle size={20} /> : <Cloud size={20} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <p className="font-semibold">{getTitle(alert)}</p>
-                      <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getSeverityBadgeColor(severity)}`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getSeverityBadgeColor(severity)}`}
+                      >
                         {severity.charAt(0).toUpperCase() + severity.slice(1)}
                       </span>
                     </div>
@@ -256,9 +281,7 @@ export default function Alerts() {
                     )}
 
                     <div className="flex items-center justify-between">
-                      <p className="text-xs opacity-70">
-                        {getTime(alert)}
-                      </p>
+                      <p className="text-xs opacity-70">{getTime(alert)}</p>
                       {url && (
                         <a
                           href={url}
@@ -278,14 +301,18 @@ export default function Alerts() {
           })
         ) : (
           <div className="text-center py-8">
-            <TrendingUp size={32} className="mx-auto text-green-600 mb-2 opacity-50" />
+            <TrendingUp
+              size={32}
+              className="mx-auto text-green-600 mb-2 opacity-50"
+            />
             <p className="text-slate-600">No active alerts at this time</p>
           </div>
         )}
       </div>
 
       <div className="px-6 py-3 border-t border-slate-200 bg-blue-50 text-xs text-blue-700">
-        ℹ News alerts are updated automatically from Google News and other news sources
+        ℹ News alerts are updated automatically from Google News and other news
+        sources
       </div>
     </div>
   );

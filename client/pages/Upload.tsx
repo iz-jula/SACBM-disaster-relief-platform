@@ -19,7 +19,9 @@ export default function Upload() {
 
   const [multipleItems, setMultipleItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState("");
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleInputChange = (
@@ -35,9 +37,9 @@ export default function Upload() {
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     // Remove all non-digit characters
-    const numbersOnly = value.replace(/\D/g, '');
+    const numbersOnly = value.replace(/\D/g, "");
     // Format with commas
-    const formatted = numbersOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const formatted = numbersOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     setFormData((prev) => ({
       ...prev,
       value: formatted,
@@ -101,9 +103,10 @@ export default function Upload() {
 
     try {
       // For Multiple help type, concatenate items into value field
-      const submitValue = formData.help_type === "Multiple"
-        ? multipleItems.join(", ")
-        : formData.value.replace(/,/g, '');
+      const submitValue =
+        formData.help_type === "Multiple"
+          ? multipleItems.join(", ")
+          : formData.value.replace(/,/g, "");
 
       // Save to Supabase
       const newRequest = await createRequest({
@@ -142,7 +145,10 @@ export default function Upload() {
       }
     } catch (error) {
       setSubmitStatus("error");
-      const msg = error instanceof Error ? error.message : "Failed to submit request. Please try again.";
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Failed to submit request. Please try again.";
       setErrorMessage(msg);
       console.error("Submit error:", error);
       setTimeout(() => setSubmitStatus("idle"), 4000);
@@ -155,7 +161,9 @@ export default function Upload() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Submit Relief Request</h1>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Submit Relief Request
+            </h1>
             <p className="text-slate-600 mt-1">
               Report a new disaster relief operation or request
             </p>
@@ -171,9 +179,14 @@ export default function Upload() {
         {/* Status Messages */}
         {submitStatus === "success" && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-            <FileCheck className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
+            <FileCheck
+              className="text-green-600 flex-shrink-0 mt-0.5"
+              size={20}
+            />
             <div>
-              <p className="font-semibold text-green-900">Request Submitted Successfully!</p>
+              <p className="font-semibold text-green-900">
+                Request Submitted Successfully!
+              </p>
               <p className="text-sm text-green-800 mt-1">
                 Your relief request has been saved to the system. Redirecting...
               </p>
@@ -183,9 +196,14 @@ export default function Upload() {
 
         {submitStatus === "error" && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+            <AlertCircle
+              className="text-red-600 flex-shrink-0 mt-0.5"
+              size={20}
+            />
             <div>
-              <p className="font-semibold text-red-900">Error Submitting Request</p>
+              <p className="font-semibold text-red-900">
+                Error Submitting Request
+              </p>
               <p className="text-sm text-red-800 mt-1">
                 {errorMessage || "Please try again."}
               </p>
@@ -198,7 +216,9 @@ export default function Upload() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Information Section */}
             <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Basic Information</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-6">
+                Basic Information
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Originator / Company Name */}
                 <div>
@@ -268,7 +288,9 @@ export default function Upload() {
 
             {/* Relief Details Section */}
             <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Relief Details</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-6">
+                Relief Details
+              </h2>
               <div className="space-y-6">
                 {/* Type of Help */}
                 <div>
@@ -368,7 +390,9 @@ export default function Upload() {
                       {/* Items List */}
                       {multipleItems.length > 0 && (
                         <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                          <p className="text-sm font-medium text-slate-700 mb-3">Items Added:</p>
+                          <p className="text-sm font-medium text-slate-700 mb-3">
+                            Items Added:
+                          </p>
                           <div className="flex flex-wrap gap-2">
                             {multipleItems.map((item, index) => (
                               <div
@@ -396,7 +420,9 @@ export default function Upload() {
 
             {/* Numbers Section */}
             <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Impact & Resources</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-6">
+                Impact & Resources
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Number of People */}
                 <div>
@@ -442,7 +468,9 @@ export default function Upload() {
                 disabled={submitStatus === "loading"}
                 className="flex-1 bg-primary hover:bg-orange-600 disabled:bg-orange-400 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
               >
-                {submitStatus === "loading" ? "Submitting..." : "Submit Request"}
+                {submitStatus === "loading"
+                  ? "Submitting..."
+                  : "Submit Request"}
               </button>
               <button
                 type="button"
@@ -459,9 +487,10 @@ export default function Upload() {
         {/* Info Box */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
           <p className="text-sm text-blue-900">
-            <span className="font-semibold">Note:</span> All relief requests submitted through
-            this form are recorded in the system and made available to authorized users. Ensure
-            you provide accurate information about the relief operation.
+            <span className="font-semibold">Note:</span> All relief requests
+            submitted through this form are recorded in the system and made
+            available to authorized users. Ensure you provide accurate
+            information about the relief operation.
           </p>
         </div>
       </div>

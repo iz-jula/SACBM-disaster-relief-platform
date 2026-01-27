@@ -21,7 +21,7 @@ export interface Metrics {
 // Fetch all requests from Supabase
 export async function getRequests(
   status?: string,
-  limit?: number
+  limit?: number,
 ): Promise<RelieRequest[]> {
   try {
     let requests = await getSupabaseRequests();
@@ -62,7 +62,7 @@ export async function getRecentRequests(limit = 5): Promise<RelieRequest[]> {
 
 // Fetch requests by status
 export async function getRequestsByStatus(
-  status: "pending" | "met"
+  status: "pending" | "met",
 ): Promise<RelieRequest[]> {
   const statusBool = status === "met";
   const allRequests = await getSupabaseRequests();
@@ -71,7 +71,7 @@ export async function getRequestsByStatus(
 
 // Create a new request in Supabase
 export async function createRequest(
-  request: Omit<RelieRequest, "id" | "created_at" | "edited_at">
+  request: Omit<RelieRequest, "id" | "created_at" | "edited_at">,
 ): Promise<RelieRequest | null> {
   try {
     const newRequest = await createSupabaseRequest({
@@ -95,7 +95,7 @@ export async function createRequest(
 // Update relief request in Supabase
 export async function updateRequest(
   id: number,
-  updates: Partial<RelieRequest>
+  updates: Partial<RelieRequest>,
 ): Promise<RelieRequest | null> {
   try {
     const updated = await updateSupabaseRequest(id, updates);

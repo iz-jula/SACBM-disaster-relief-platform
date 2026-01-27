@@ -38,7 +38,9 @@ export default function Login() {
               className="h-16"
             />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-1">Disaster Relief</h1>
+          <h1 className="text-3xl font-bold text-white mb-1">
+            Disaster Relief
+          </h1>
           <p className="text-blue-200 text-sm">Admin Panel Login</p>
         </div>
 
@@ -56,17 +58,26 @@ export default function Login() {
 
           {/* Credentials Info */}
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-xs font-medium text-green-900 mb-2">Authorized Users:</p>
+            <p className="text-xs font-medium text-green-900 mb-2">
+              Authorized Users:
+            </p>
             <ul className="text-xs text-green-800 space-y-1">
-              <li>👤 <strong>admin@sacbm.co.mz</strong></li>
-              <li>👤 <strong>management@sacbm.co.mz</strong></li>
+              <li>
+                👤 <strong>admin@sacbm.co.mz</strong>
+              </li>
+              <li>
+                👤 <strong>management@sacbm.co.mz</strong>
+              </li>
             </ul>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Email Address
               </label>
               <input
@@ -82,7 +93,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Password
               </label>
               <input
@@ -120,7 +134,9 @@ export default function Login() {
 
           {/* Skip to Dashboard */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-slate-600 mb-3">Want to explore without logging in?</p>
+            <p className="text-xs text-slate-600 mb-3">
+              Want to explore without logging in?
+            </p>
             <a
               href="/"
               className="text-primary hover:text-orange-600 font-medium transition-colors text-sm"
