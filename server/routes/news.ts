@@ -60,15 +60,39 @@ export async function handleNewsAlerts(req: any, res: any) {
 
     const data = await apiResponse.json();
 
-    // EventRegistry returns events in 'events' array
-    const articles = (data.events || data.articles || data.data || []).slice(0, 20);
+    // Extract events from EventRegistry response
+    let articles: any[] = [];
 
-    console.log('[NEWS] Fetched', articles.length, 'events from EventRegistry');
+    if (data.events && Array.isArray(data.events)) {
+      // Convert events to article format for frontend compatibility
+      articles = data.events
+        .slice(0, 20)
+        .map((event: any) => ({
+          // Use event data as primary
+          title: event.title || 'Untitled Event',
+          description: event.summary || event.description || '',
+          body: event.summary || '',
+          url: event.uri || event.url || '#',
+          date: event.date?.date || new Date().toISOString(),
+          publishedAt: event.date?.date || new Date().toISOString(),
+          source: event.location?.label || 'EventRegistry',
+          // Store raw event for reference
+          _event: event,
+          // Include story/article data if available
+          stories: event.stories || [],
+        }));
+
+      console.log('[NEWS] Converted', articles.length, 'events to articles');
+    } else {
+      console.log('[NEWS] No events found in response');
+      console.log('[NEWS] Response keys:', Object.keys(data));
+    }
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
       articles: articles,
-      success: true
+      success: articles.length > 0,
+      count: articles.length
     });
   } catch (error: any) {
     console.error('[NEWS] Handler error:', error?.message);
