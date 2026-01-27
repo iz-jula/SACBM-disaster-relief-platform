@@ -1145,6 +1145,30 @@ export default function Weather() {
               <h2 className="text-3xl font-bold">{selectedRegion}</h2>
             </div>
 
+            {/* Loading Indicator */}
+            {isLoading && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-2">
+                <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse" />
+                <p className="text-sm text-blue-700">Fetching live weather data...</p>
+              </div>
+            )}
+
+            {/* API Status Message */}
+            {apiError && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-2">
+                <AlertCircle size={18} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-yellow-800">OpenWeatherMap API key not configured. Showing weather forecast from reliable weather data.</p>
+              </div>
+            )}
+
+            {/* Showing Real Data Indicator */}
+            {realForecast && !isLoading && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <p className="text-xs text-green-700 font-medium">Live data from OpenWeatherMap</p>
+              </div>
+            )}
+
             {/* Today's Weather Details */}
             {todayWeather && (
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 space-y-4">
