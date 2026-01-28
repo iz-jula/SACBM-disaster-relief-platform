@@ -137,12 +137,28 @@ export default function Alerts() {
     }
   };
 
+  // Helper to safely convert values to strings
+  const safeString = (value: any): string => {
+    if (typeof value === "string") return value;
+    if (!value) return "";
+    if (typeof value === "object") {
+      // Try to extract English label for EventRegistry objects
+      if (value.eng) return value.eng;
+      if (value.label?.eng) return value.label.eng;
+      // Try any available language
+      const firstValue = Object.values(value)[0];
+      if (typeof firstValue === "string") return firstValue;
+      return "";
+    }
+    return String(value);
+  };
+
   const getTitle = (alert: AlertType): string => {
-    return alert.title || "Alert";
+    return safeString(alert.title) || "Alert";
   };
 
   const getDescription = (alert: AlertType): string => {
-    return alert.description || "";
+    return safeString(alert.description) || "";
   };
 
   const getTime = (alert: AlertType): string => {
