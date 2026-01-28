@@ -63,6 +63,10 @@ export async function handleNewsAlerts(req: any, res: any) {
     // Extract events from EventRegistry response
     let articles: any[] = [];
 
+    console.log("[NEWS] Response data.events type:", typeof data.events);
+    console.log("[NEWS] Response data.events is array:", Array.isArray(data.events));
+    console.log("[NEWS] Response data.events:", JSON.stringify(data.events).substring(0, 500));
+
     if (data.events && Array.isArray(data.events)) {
       // Convert events to article format for frontend compatibility
       articles = data.events.slice(0, 20).map((event: any) => ({
