@@ -318,9 +318,16 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 
     if (data.articles && Array.isArray(data.articles)) {
       articles = data.articles.slice(0, 20);
-      console.log("[ALERTS] Received", articles.length, "articles from backend");
+      console.log(
+        "[ALERTS] Received",
+        articles.length,
+        "articles from backend",
+      );
     } else {
-      console.log("[ALERTS] No articles in response, data keys:", Object.keys(data));
+      console.log(
+        "[ALERTS] No articles in response, data keys:",
+        Object.keys(data),
+      );
     }
 
     if (articles.length === 0) {
