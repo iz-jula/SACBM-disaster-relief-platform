@@ -311,15 +311,16 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     }
 
     const data = await response.json();
+    console.log("[ALERTS] Response data:", data);
 
     // Handle articles from backend (already converted from EventRegistry events)
     let articles: any[] = [];
 
     if (data.articles && Array.isArray(data.articles)) {
       articles = data.articles.slice(0, 20);
-      console.log("Received", articles.length, "articles from backend");
+      console.log("[ALERTS] Received", articles.length, "articles from backend");
     } else {
-      console.log("No articles in response, data keys:", data);
+      console.log("[ALERTS] No articles in response, data keys:", Object.keys(data));
     }
 
     if (articles.length === 0) {
