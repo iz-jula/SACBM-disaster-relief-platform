@@ -189,10 +189,10 @@ export default function Alerts() {
 
   const getLocation = (alert: AlertType): string => {
     if ("location" in alert) {
-      return alert.location;
+      return safeString(alert.location);
     }
     if ("source" in alert) {
-      return `Source: ${alert.source}`;
+      return `Source: ${safeString(alert.source)}`;
     }
     return "";
   };
