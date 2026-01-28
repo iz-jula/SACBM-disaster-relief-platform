@@ -1,11 +1,23 @@
 // Helper function to extract string from EventRegistry label objects
 function extractLabel(label: any): string {
   if (typeof label === "string") return label;
-  if (label && typeof label === "object") {
-    // Try to get English label, fallback to any available language
-    return label.eng || Object.values(label)[0] || "Unknown";
+  if (!label) return "";
+  if (typeof label !== "object") return String(label);
+
+  // Try to get English label first
+  if (label.eng) return String(label.eng);
+
+  // Try to find first string value in the object
+  for (const value of Object.values(label)) {
+    if (typeof value === "string") return value;
+    // If value is an object, try to extract from it recursively
+    if (typeof value === "object" && value !== null) {
+      const nested = extractLabel(value);
+      if (nested) return nested;
+    }
   }
-  return "Unknown";
+
+  return "";
 }
 
 export async function handleNewsAlerts(req: any, res: any) {
