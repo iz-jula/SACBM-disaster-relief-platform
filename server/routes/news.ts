@@ -1,3 +1,13 @@
+// Helper function to extract string from EventRegistry label objects
+function extractLabel(label: any): string {
+  if (typeof label === "string") return label;
+  if (label && typeof label === "object") {
+    // Try to get English label, fallback to any available language
+    return label.eng || Object.values(label)[0] || "Unknown";
+  }
+  return "Unknown";
+}
+
 export async function handleNewsAlerts(req: any, res: any) {
   console.log("[NEWS] Handler called");
 
