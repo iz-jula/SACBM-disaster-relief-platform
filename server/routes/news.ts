@@ -84,13 +84,13 @@ export async function handleNewsAlerts(req: any, res: any) {
       // Convert events to article format for frontend compatibility
       articles = eventsList.slice(0, 20).map((event: any) => ({
         // Use event data as primary
-        title: event.title || event.name || "Untitled Event",
-        description: event.summary || event.description || event.body || "",
-        body: event.summary || event.description || "",
+        title: extractLabel(event.title) || extractLabel(event.name) || "Untitled Event",
+        description: extractLabel(event.summary) || extractLabel(event.description) || extractLabel(event.body) || "",
+        body: extractLabel(event.summary) || extractLabel(event.description) || "",
         url: event.uri || event.url || event.link || "#",
         date: event.date?.date || event.publishDate || new Date().toISOString(),
         publishedAt: event.date?.date || event.publishDate || new Date().toISOString(),
-        source: event.location?.label || "EventRegistry",
+        source: extractLabel(event.location?.label) || "EventRegistry",
         // Store raw event for reference
         _event: event,
         // Include story/article data if available
