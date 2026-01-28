@@ -70,7 +70,7 @@ const FALLBACK_ALERTS: FallbackAlert[] = [
 ];
 
 export default function Alerts() {
-  const [alerts, setAlerts] = useState<AlertType[]>(FALLBACK_ALERTS);
+  const [alerts, setAlerts] = useState<AlertType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
@@ -88,14 +88,10 @@ export default function Alerts() {
       const updateTime = getNewsAlertsLastUpdate();
       setLastUpdate(updateTime);
 
-      if (newsAlerts.length > 0) {
-        setAlerts(newsAlerts);
-      } else {
-        setAlerts(FALLBACK_ALERTS);
-      }
+      setAlerts(newsAlerts);
     } catch (error) {
       console.error("Error loading news alerts:", error);
-      setAlerts(FALLBACK_ALERTS);
+      setAlerts([]);
     } finally {
       setIsLoading(false);
     }
