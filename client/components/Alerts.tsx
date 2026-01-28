@@ -163,21 +163,28 @@ export default function Alerts() {
 
   const getTime = (alert: AlertType): string => {
     if ("time" in alert) {
-      return alert.time;
+      return safeString(alert.time);
     }
     if ("publishedAt" in alert) {
-      const date = new Date(alert.publishedAt);
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffHours / 24);
+      const publishedAtStr = safeString(alert.publishedAt);
+      if (!publishedAtStr) return "";
 
-      if (diffDays > 0) {
-        return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-      } else if (diffHours > 0) {
-        return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-      } else {
-        return "Just now";
+      try {
+        const date = new Date(publishedAtStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffDays > 0) {
+          return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+        } else if (diffHours > 0) {
+          return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+        } else {
+          return "Just now";
+        }
+      } catch {
+        return "Recently";
       }
     }
     return "";
