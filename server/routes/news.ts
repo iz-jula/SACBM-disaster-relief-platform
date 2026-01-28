@@ -63,26 +63,23 @@ export async function handleNewsAlerts(req: any, res: any) {
     // Extract events from EventRegistry response
     let articles: any[] = [];
 
-    console.log("[NEWS] Response data.events type:", typeof data.events);
-    console.log(
-      "[NEWS] Response data.events is array:",
-      Array.isArray(data.events),
-    );
-    console.log(
-      "[NEWS] Response data.events:",
-      JSON.stringify(data.events).substring(0, 500),
-    );
+    // EventRegistry returns events as an object with a 'results' array inside
+    const eventsList = data.events?.results || data.events || [];
 
-    if (data.events && Array.isArray(data.events)) {
+    console.log("[NEWS] Events list type:", typeof eventsList);
+    console.log("[NEWS] Events list is array:", Array.isArray(eventsList));
+    console.log("[NEWS] Events list length:", eventsList.length);
+
+    if (Array.isArray(eventsList) && eventsList.length > 0) {
       // Convert events to article format for frontend compatibility
-      articles = data.events.slice(0, 20).map((event: any) => ({
+      articles = eventsList.slice(0, 20).map((event: any) => ({
         // Use event data as primary
-        title: event.title || "Untitled Event",
-        description: event.summary || event.description || "",
-        body: event.summary || "",
-        url: event.uri || event.url || "#",
-        date: event.date?.date || new Date().toISOString(),
-        publishedAt: event.date?.date || new Date().toISOString(),
+        title: event.title || event.name || "Untitled Event",
+        description: event.summary || event.description || event.body || "",
+        body: event.summary || event.description || "",
+        url: event.uri || event.url || event.link || "#",
+        date: event.date?.date || event.publishDate || new Date().toISOString(),
+        publishedAt: event.date?.date || event.publishDate || new Date().toISOString(),
         source: event.location?.label || "EventRegistry",
         // Store raw event for reference
         _event: event,
@@ -93,7 +90,7 @@ export async function handleNewsAlerts(req: any, res: any) {
       console.log("[NEWS] Converted", articles.length, "events to articles");
     } else {
       console.log("[NEWS] No events found in response");
-      console.log("[NEWS] Response keys:", Object.keys(data));
+      console.log("[NEWS] Events list is empty or not an array");
     }
 
     res.setHeader("Content-Type", "application/json");
