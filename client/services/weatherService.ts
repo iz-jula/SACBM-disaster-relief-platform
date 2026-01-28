@@ -375,7 +375,11 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
     );
     return sortedAlerts;
   } catch (error) {
-    console.error("Error fetching news alerts from backend:", error);
+    console.error("[ALERTS] Error fetching news alerts from backend:", error);
+    if (error instanceof Error) {
+      console.error("[ALERTS] Error message:", error.message);
+      console.error("[ALERTS] Error stack:", error.stack);
+    }
     // Return empty array to trigger fallback alerts if there's an error
     return [];
   }
