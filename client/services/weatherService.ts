@@ -294,6 +294,7 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
   }
 
   try {
+    console.log("[ALERTS] Fetching from /api/news/alerts");
     // Call the backend proxy endpoint instead of calling NewsAPI directly
     const response = await fetch("/api/news/alerts", {
       method: "GET",
@@ -301,6 +302,8 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
         "Content-Type": "application/json",
       },
     });
+
+    console.log("[ALERTS] Response status:", response.status);
 
     if (!response.ok) {
       console.warn(`Backend returned status ${response.status}`);
