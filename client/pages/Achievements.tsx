@@ -33,11 +33,18 @@ const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-50 border-yellow-200 text-yellow-900",
 };
 
-const STATUS_ICONS: Record<string, JSX.Element> = {
-  completed: <CheckCircle size={16} className="text-green-600" />,
-  in_progress: <Clock size={16} className="text-blue-600" />,
-  pending: <Clock size={16} className="text-yellow-600" />,
-};
+function getStatusIcon(status: string) {
+  switch (status) {
+    case "completed":
+      return <CheckCircle size={16} className="text-green-600" />;
+    case "in_progress":
+      return <Clock size={16} className="text-blue-600" />;
+    case "pending":
+      return <Clock size={16} className="text-yellow-600" />;
+    default:
+      return null;
+  }
+}
 
 export default function Achievements() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
