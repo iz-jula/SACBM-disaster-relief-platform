@@ -92,51 +92,51 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-600 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm sm:text-base text-slate-600 mt-1">
             Overview of disaster relief operations
           </p>
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+            <div className="flex items-start sm:items-center justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
                   Total Requests
                 </p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
                   {metrics?.totalRequests || 0}
                 </p>
               </div>
-              <div className="bg-blue-100 rounded-lg p-3">
-                <BarChart3 size={24} className="text-blue-600" />
+              <div className="bg-blue-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                <BarChart3 size={20} className="text-blue-600 sm:w-6 sm:h-6" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">
+            <p className="text-xs text-slate-500 mt-2 sm:mt-3">
               Active relief operations
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+            <div className="flex items-start sm:items-center justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
                   People Assisted
                 </p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
                   {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
                 </p>
               </div>
-              <div className="bg-green-100 rounded-lg p-3">
-                <Users size={24} className="text-green-600" />
+              <div className="bg-green-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                <Users size={20} className="text-green-600 sm:w-6 sm:h-6" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">Across all districts</p>
+            <p className="text-xs text-slate-500 mt-2 sm:mt-3">Across all districts</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
