@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   Lock,
   Database,
+  Award,
 } from "lucide-react";
 
 interface LayoutProps {
