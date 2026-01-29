@@ -47,6 +47,7 @@ export function createServer() {
 
   // Achievements endpoints
   app.get("/api/achievements", handleGetAchievements);
+  app.post("/api/achievements", handleCreateAchievement);
   app.get("/api/achievements/metrics", handleAchievementsMetrics);
 
   // Users endpoints
