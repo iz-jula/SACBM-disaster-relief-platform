@@ -7,6 +7,10 @@ import {
   getMetrics,
   Metrics,
 } from "@/services/requestsService";
+import {
+  getAchievementsMetrics,
+  AchievementsMetrics,
+} from "@/services/achievementsService";
 
 const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
 const Alerts = lazy(() => import("@/components/Alerts"));
