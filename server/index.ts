@@ -12,6 +12,7 @@ import {
 import {
   handleGetAchievements,
   handleAchievementsMetrics,
+  handleCreateAchievement,
 } from "./routes/achievements";
 import {
   handleGetUsers,
