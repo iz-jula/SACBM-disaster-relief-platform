@@ -182,6 +182,94 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Achievements Summary */}
+        {achievementsMetrics && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                  Member Achievements
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  Community work and contributions
+                </p>
+              </div>
+              <Link
+                to="/achievements"
+                className="text-xs sm:text-sm text-primary font-medium hover:text-primary/80 transition-colors"
+              >
+                View All →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                      Total Achievements
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
+                      {achievementsMetrics.totalAchievements}
+                    </p>
+                  </div>
+                  <div className="bg-blue-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                    <BarChart3 size={20} className="text-blue-600 sm:w-6 sm:h-6" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                      People Impacted
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
+                      {(achievementsMetrics.totalPeopleImpacted || 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="bg-green-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                    <Users size={20} className="text-green-600 sm:w-6 sm:h-6" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                      Total Contribution
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
+                      {((achievementsMetrics.totalContributed || 0) / 1000).toFixed(1)}K MZN
+                    </p>
+                  </div>
+                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                    <TrendingUp size={20} className="text-primary sm:w-6 sm:h-6" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                      In Progress
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
+                      {achievementsMetrics.inProgressAchievements}
+                    </p>
+                  </div>
+                  <div className="bg-purple-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                    <Activity size={20} className="text-purple-600 sm:w-6 sm:h-6" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Maputo Weather and Alerts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
