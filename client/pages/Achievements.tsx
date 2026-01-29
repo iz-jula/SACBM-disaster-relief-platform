@@ -572,7 +572,7 @@ export default function Achievements() {
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
                     <div className="flex items-start gap-3 flex-1">
-                      <div className="mt-0.5">{STATUS_ICONS[achievement.status]}</div>
+                      <div className="mt-0.5">{getStatusIcon(achievement.status)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start gap-2 mb-1 flex-wrap">
                           <div className="flex-1">
