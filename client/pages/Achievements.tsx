@@ -7,12 +7,14 @@ import {
   CheckCircle,
   Clock,
   MapPin,
-  ExternalLink,
-  Filter,
+  ImagePlus,
+  X,
+  Plus,
 } from "lucide-react";
 import {
   getAchievements,
   getAchievementsMetrics,
+  createAchievement,
   Achievement,
   AchievementsMetrics,
 } from "@/services/achievementsService";
