@@ -14,6 +14,7 @@ import INGDDashboard from "./pages/INGDDashboard";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import DataRepository from "./pages/DataRepository";
+import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
