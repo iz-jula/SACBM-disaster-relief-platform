@@ -5,16 +5,17 @@ import { MOZAMBIQUE_CITIES } from "@/config/api";
 
 const allCities = Object.keys(MOZAMBIQUE_CITIES);
 
-function getWeatherIcon(condition: string) {
+function getWeatherIcon(condition: string, size: number = 12) {
+  const sizeClass = `w-${size} h-${size}`;
   switch (condition) {
     case "sunny":
-      return <Sun className="w-12 h-12 text-yellow-400" />;
+      return <Sun className={`${sizeClass} text-yellow-400`} />;
     case "cloudy":
-      return <Cloud className="w-12 h-12 text-slate-400" />;
+      return <Cloud className={`${sizeClass} text-slate-400`} />;
     case "rainy":
-      return <CloudRain className="w-12 h-12 text-blue-400" />;
+      return <CloudRain className={`${sizeClass} text-blue-400`} />;
     default:
-      return <Cloud className="w-12 h-12 text-slate-400" />;
+      return <Cloud className={`${sizeClass} text-slate-400`} />;
   }
 }
 
