@@ -44,6 +44,10 @@ export function createServer() {
   app.put("/api/requests/:id", handleUpdateRequest);
   app.get("/api/metrics", handleGetMetrics);
 
+  // Achievements endpoints
+  app.get("/api/achievements", handleGetAchievements);
+  app.get("/api/achievements/metrics", handleAchievementsMetrics);
+
   // Users endpoints
   app.get("/api/users", handleGetUsers);
   app.post("/api/users", handleAddUser);
