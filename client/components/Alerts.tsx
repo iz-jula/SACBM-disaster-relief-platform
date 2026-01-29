@@ -264,17 +264,17 @@ export default function Alerts() {
             return (
               <div
                 key={alert.id}
-                className={`border rounded-lg p-4 transition-all hover:shadow-md ${getSeverityColor(severity)}`}
+                className={`border rounded-lg p-3 sm:p-4 transition-all hover:shadow-md ${getSeverityColor(severity)}`}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2 sm:gap-3">
                   <div
                     className={`p-2 rounded-lg flex-shrink-0 ${getSeverityBadgeColor(severity)}`}
                   >
-                    {isNews ? <AlertCircle size={20} /> : <Cloud size={20} />}
+                    {isNews ? <AlertCircle size={18} className="sm:w-5 sm:h-5" /> : <Cloud size={18} className="sm:w-5 sm:h-5" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="font-semibold">{getTitle(alert)}</p>
+                    <div className="flex items-start justify-between gap-2 mb-1 flex-wrap">
+                      <p className="font-semibold text-sm sm:text-base">{getTitle(alert)}</p>
                       <span
                         className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getSeverityBadgeColor(severity)}`}
                       >
@@ -283,37 +283,37 @@ export default function Alerts() {
                     </div>
 
                     {getLocation(alert) && (
-                      <p className="text-sm opacity-75 flex items-center gap-1 mb-2">
+                      <p className="text-xs sm:text-sm opacity-75 flex items-start gap-1 mb-2">
                         {isNews ? (
                           <span>
                             <strong>Source:</strong> {getLocation(alert)}
                           </span>
                         ) : (
                           <>
-                            <MapPin size={14} />
-                            {getLocation(alert)}
+                            <MapPin size={12} className="flex-shrink-0 mt-0.5 sm:w-3.5 sm:h-3.5" />
+                            <span>{getLocation(alert)}</span>
                           </>
                         )}
                       </p>
                     )}
 
                     {getDescription(alert) && (
-                      <p className="text-sm opacity-90 mb-2 line-clamp-2">
+                      <p className="text-xs sm:text-sm opacity-90 mb-2 line-clamp-2">
                         {getDescription(alert)}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs opacity-70">{getTime(alert)}</p>
+                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
+                      <p className="opacity-70">{getTime(alert)}</p>
                       {url && (
                         <a
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs font-medium opacity-75 hover:opacity-100 transition-opacity"
+                          className="flex items-center gap-1 font-medium opacity-75 hover:opacity-100 transition-opacity whitespace-nowrap"
                         >
                           Read more
-                          <ExternalLink size={12} />
+                          <ExternalLink size={12} className="sm:w-3 sm:h-3" />
                         </a>
                       )}
                     </div>
