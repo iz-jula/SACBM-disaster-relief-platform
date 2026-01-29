@@ -172,22 +172,24 @@ export default function MaputoWeather() {
             {/* 5-Day Forecast */}
             {forecast && (
               <div>
-                <h3 className="font-semibold text-slate-900 mb-3">5-Day Forecast</h3>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <h3 className="font-semibold text-sm sm:text-base text-slate-900 mb-3">5-Day Forecast</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                   {forecast.map((day, index) => (
                     <div
                       key={index}
-                      className="p-3 rounded-lg border border-slate-200 hover:border-primary hover:shadow-md transition-all text-center"
+                      className="p-2 sm:p-3 rounded-lg border border-slate-200 hover:border-primary hover:shadow-md transition-all text-center"
                     >
-                      <p className="text-sm font-semibold text-slate-900">{day.day}</p>
-                      <div className="flex justify-center my-2">
-                        {getWeatherIcon(day.condition)}
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900">{day.day}</p>
+                      <div className="flex justify-center my-1 sm:my-2">
+                        {day.condition === 'sunny' && <Sun className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400" />}
+                        {day.condition === 'cloudy' && <Cloud className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />}
+                        {day.condition === 'rainy' && <CloudRain className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />}
                       </div>
                       <p className="text-xs text-slate-600">{day.date}</p>
-                      <p className="text-sm font-bold text-slate-900 mt-2">{day.high}°</p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-900 mt-1">{day.high}°</p>
                       <p className="text-xs text-slate-600">{day.low}°</p>
-                      <p className="text-xs text-blue-600 mt-1 flex items-center justify-center gap-1">
-                        <Droplets size={12} />
+                      <p className="text-xs text-blue-600 mt-0.5 sm:mt-1 flex items-center justify-center gap-0.5">
+                        <Droplets size={10} className="sm:w-3 sm:h-3" />
                         {day.rainChance}%
                       </p>
                     </div>
@@ -197,7 +199,7 @@ export default function MaputoWeather() {
             )}
 
             {/* Weather Details */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <p className="text-xs text-slate-600 uppercase tracking-wide">Wind Direction</p>
                 <p className="text-lg font-bold text-slate-900 mt-2">{currentWeather.windDirection}</p>
