@@ -118,3 +118,33 @@ export async function getAchievementsMetrics(): Promise<AchievementsMetrics | nu
     return null;
   }
 }
+
+export async function createAchievement(achievement: Omit<Achievement, 'id' | 'createdAt'>): Promise<Achievement | null> {
+  try {
+    const response = await fetch("/api/achievements", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(achievement),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to create achievement:", response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+
+    // Invalidate cache so fresh data is fetched
+    achievementsCache.achievements = [];
+    achievementsCache.metrics = null;
+    achievementsCache.timestamp = 0;
+
+    console.log("Achievement created successfully");
+    return data.achievement || null;
+  } catch (error) {
+    console.error("Error creating achievement:", error);
+    return null;
+  }
+}
