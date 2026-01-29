@@ -77,6 +77,57 @@ export default function Achievements() {
     }
   };
 
+  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setUploadedMedia([...uploadedMedia, ...Array.from(files)]);
+    }
+  };
+
+  const removeMedia = (index: number) => {
+    setUploadedMedia(uploadedMedia.filter((_, i) => i !== index));
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Create new achievement
+      const newAchievement: Achievement = {
+        id: `ach-${Date.now()}`,
+        memberName: formData.memberName,
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        location: formData.location,
+        peopleImpacted: parseInt(formData.peopleImpacted) || 0,
+        amountContributed: parseInt(formData.amountContributed) || 0,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+      };
+
+      // TODO: Upload media to Supabase storage and attach to achievement
+      // For now, we'll just add the achievement to the list
+
+      // Reset form
+      setFormData({
+        memberName: "",
+        title: "",
+        description: "",
+        category: "Training",
+        location: "",
+        peopleImpacted: "",
+        amountContributed: "",
+      });
+      setUploadedMedia([]);
+      setShowForm(false);
+
+      // Reload data
+      await loadData();
+    } catch (error) {
+      console.error("Error submitting achievement:", error);
+    }
+  };
+
   const categories = [
     "Training",
     "Community Work",
