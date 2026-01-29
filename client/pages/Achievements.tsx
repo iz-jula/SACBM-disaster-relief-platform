@@ -235,6 +235,235 @@ export default function Achievements() {
           </div>
         )}
 
+        {/* Submit Achievement Form */}
+        <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="w-full flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5 bg-gradient-to-r from-blue-50 to-primary/5 hover:from-blue-100 hover:to-primary/10 transition-all border-b border-slate-200"
+          >
+            <div className="flex items-center gap-3">
+              <Plus size={20} className="text-primary" />
+              <h3 className="font-semibold text-slate-900">Submit Your Achievement</h3>
+            </div>
+            <span className="text-slate-600">{showForm ? "−" : "+"}</span>
+          </button>
+
+          {showForm && (
+            <form onSubmit={handleFormSubmit} className="p-4 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Member Name */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Your Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.memberName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, memberName: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Achievement Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Community Training Program"
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Category *
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        category: e.target.value as any,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option>Training</option>
+                    <option>Community Work</option>
+                    <option>Infrastructure</option>
+                    <option>Advocacy</option>
+                    <option>Research</option>
+                  </select>
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Location *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.location}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Sofala Province"
+                  />
+                </div>
+
+                {/* People Impacted */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    People Impacted *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.peopleImpacted}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        peopleImpacted: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="120"
+                  />
+                </div>
+
+                {/* Amount Contributed */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Amount Contributed (MZN) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.amountContributed}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        amountContributed: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="8500"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Description *
+                </label>
+                <textarea
+                  required
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Describe your achievement and impact..."
+                  rows={3}
+                />
+              </div>
+
+              {/* Media Upload */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Upload Media (Photos, Documents)
+                </label>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4">
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleMediaUpload}
+                    className="hidden"
+                    id="media-upload"
+                    accept="image/*,.pdf,.doc,.docx"
+                  />
+                  <label
+                    htmlFor="media-upload"
+                    className="flex items-center justify-center gap-2 cursor-pointer hover:text-primary transition-colors"
+                  >
+                    <ImagePlus size={20} className="text-slate-600" />
+                    <span className="text-sm text-slate-600">
+                      Click to upload media
+                    </span>
+                  </label>
+                </div>
+
+                {/* Uploaded Media Preview */}
+                {uploadedMedia.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {uploadedMedia.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200"
+                      >
+                        <span className="text-sm text-slate-700 truncate">
+                          {file.name}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(index)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Form Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Submit Achievement
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setUploadedMedia([]);
+                    setFormData({
+                      memberName: "",
+                      title: "",
+                      description: "",
+                      category: "Training",
+                      location: "",
+                      peopleImpacted: "",
+                      amountContributed: "",
+                    });
+                  }}
+                  className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
           <div className="flex items-center gap-2 mb-4">
