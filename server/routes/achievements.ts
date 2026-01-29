@@ -160,3 +160,40 @@ export async function handleAchievementsMetrics(req: any, res: any) {
     res.status(500).json({ error: "Failed to calculate metrics" });
   }
 }
+
+export async function handleCreateAchievement(req: any, res: any) {
+  try {
+    const { memberName, title, description, category, location, peopleImpacted, amountContributed } = req.body;
+
+    // Validate required fields
+    if (!memberName || !title || !description || !category || !location) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Create new achievement
+    const newAchievement: Achievement = {
+      id: `ach-${Date.now()}`,
+      memberName,
+      title,
+      description,
+      category,
+      location,
+      peopleImpacted: parseInt(peopleImpacted) || 0,
+      amountContributed: parseInt(amountContributed) || 0,
+      status: "pending", // New submissions start as pending
+      createdAt: new Date().toISOString(),
+    };
+
+    // Add to mock achievements (in production, this would save to database)
+    MOCK_ACHIEVEMENTS.push(newAchievement);
+
+    res.status(201).json({
+      success: true,
+      message: "Achievement submitted successfully",
+      achievement: newAchievement,
+    });
+  } catch (error) {
+    console.error("Error creating achievement:", error);
+    res.status(500).json({ error: "Failed to create achievement" });
+  }
+}
