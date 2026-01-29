@@ -45,6 +45,17 @@ export default function Achievements() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
+  const [formData, setFormData] = useState({
+    memberName: "",
+    title: "",
+    description: "",
+    category: "Training" as const,
+    location: "",
+    peopleImpacted: "",
+    amountContributed: "",
+  });
 
   useEffect(() => {
     loadData();
