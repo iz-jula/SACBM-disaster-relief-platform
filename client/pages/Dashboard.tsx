@@ -18,6 +18,7 @@ const Alerts = lazy(() => import("@/components/Alerts"));
 export default function Dashboard() {
   const [recentRequests, setRecentRequests] = useState<any[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [achievementsMetrics, setAchievementsMetrics] = useState<AchievementsMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -25,12 +26,14 @@ export default function Dashboard() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [requests, metricsData] = await Promise.all([
+        const [requests, metricsData, achievementsData] = await Promise.all([
           getRecentRequests(5),
           getMetrics(),
+          getAchievementsMetrics(),
         ]);
         setRecentRequests(requests);
         setMetrics(metricsData);
+        setAchievementsMetrics(achievementsData);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
