@@ -1,0 +1,120 @@
+export interface Achievement {
+  id: string;
+  memberName: string;
+  title: string;
+  description: string;
+  category: "Training" | "Community Work" | "Infrastructure" | "Advocacy" | "Research";
+  location: string;
+  peopleImpacted: number;
+  amountContributed: number;
+  status: "completed" | "in_progress" | "pending";
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface AchievementsMetrics {
+  totalAchievements: number;
+  completedAchievements: number;
+  inProgressAchievements: number;
+  totalPeopleImpacted: number;
+  totalContributed: number;
+  averageImpact: number;
+}
+
+// Cache achievements to minimize API calls
+interface AchievementsCache {
+  achievements: Achievement[];
+  metrics: AchievementsMetrics | null;
+  timestamp: number;
+}
+
+const achievementsCache: AchievementsCache = {
+  achievements: [],
+  metrics: null,
+  timestamp: 0,
+};
+
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+export async function getAchievements(
+  status?: string,
+  category?: string
+): Promise<Achievement[]> {
+  const now = Date.now();
+
+  // Return cached data if still valid
+  if (
+    achievementsCache.achievements.length > 0 &&
+    now - achievementsCache.timestamp < CACHE_DURATION
+  ) {
+    let filtered = [...achievementsCache.achievements];
+    if (status) {
+      filtered = filtered.filter((a) => a.status === status);
+    }
+    if (category) {
+      filtered = filtered.filter((a) => a.category === category);
+    }
+    return filtered;
+  }
+
+  try {
+    const params = new URLSearchParams();
+    if (status) params.append("status", status);
+    if (category) params.append("category", category);
+
+    const queryString = params.toString();
+    const url = `/api/achievements${queryString ? "?" + queryString : ""}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error("Failed to fetch achievements:", response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+
+    // Update cache
+    achievementsCache.achievements = data.achievements || [];
+    achievementsCache.timestamp = now;
+
+    console.log("Fetched", data.achievements?.length || 0, "achievements");
+    return data.achievements || [];
+  } catch (error) {
+    console.error("Error fetching achievements:", error);
+    return [];
+  }
+}
+
+export async function getAchievementsMetrics(): Promise<AchievementsMetrics | null> {
+  const now = Date.now();
+
+  // Return cached data if still valid
+  if (
+    achievementsCache.metrics &&
+    now - achievementsCache.timestamp < CACHE_DURATION
+  ) {
+    return achievementsCache.metrics;
+  }
+
+  try {
+    const response = await fetch("/api/achievements/metrics");
+
+    if (!response.ok) {
+      console.error("Failed to fetch achievement metrics:", response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+
+    // Update cache
+    achievementsCache.metrics = data;
+    achievementsCache.timestamp = now;
+
+    console.log("Fetched achievement metrics");
+    return data;
+  } catch (error) {
+    console.error("Error fetching achievement metrics:", error);
+    return null;
+  }
+}
