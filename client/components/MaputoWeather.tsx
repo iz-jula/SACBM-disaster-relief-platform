@@ -99,13 +99,13 @@ export default function MaputoWeather() {
 
         {/* Error Message */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-            <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-red-900">{error}</p>
-              <p className="text-sm text-red-700 mt-1">
+          <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 sm:gap-3">
+            <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5 sm:w-5 sm:h-5" />
+            <div className="min-w-0">
+              <p className="font-medium text-red-900 text-sm sm:text-base">{error}</p>
+              <p className="text-xs sm:text-sm text-red-700 mt-1">
                 To enable real-time weather, add your OpenWeatherMap API key to .env:
-                <code className="block mt-1 text-xs bg-white p-1 rounded font-mono">
+                <code className="block mt-1 text-xs bg-white p-1 rounded font-mono overflow-x-auto">
                   VITE_OPENWEATHER_API_KEY=your_api_key
                 </code>
               </p>
