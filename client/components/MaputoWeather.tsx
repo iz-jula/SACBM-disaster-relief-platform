@@ -123,41 +123,48 @@ export default function MaputoWeather() {
         {/* Current Weather Card */}
         {currentWeather && !isLoading && (
           <>
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-              <div className="flex items-start justify-between mb-4">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 sm:p-6 border border-blue-200">
+              <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
-                  <p className="text-slate-600 text-sm">Today</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                  <p className="text-slate-600 text-xs sm:text-sm">Today</p>
+                  <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
                     {currentWeather.temp}°C
                   </p>
-                  <p className="text-sm text-slate-600 mt-1">Low: {currentWeather.low}°C</p>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1">Low: {currentWeather.low}°C</p>
                 </div>
-                <div className="text-right">
-                  {getWeatherIcon(currentWeather.condition)}
-                  <p className="text-sm font-semibold text-slate-900 mt-2 capitalize">
+                <div className="text-right flex-shrink-0">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
+                    {currentWeather.condition === 'sunny' && <Sun className="w-10 h-10 sm:w-14 sm:h-14 text-yellow-400" />}
+                    {currentWeather.condition === 'cloudy' && <Cloud className="w-10 h-10 sm:w-14 sm:h-14 text-slate-400" />}
+                    {currentWeather.condition === 'rainy' && <CloudRain className="w-10 h-10 sm:w-14 sm:h-14 text-blue-400" />}
+                  </div>
+                  <p className="text-xs sm:text-sm font-semibold text-slate-900 mt-2 capitalize">
                     {currentWeather.description}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-blue-200">
-                <div>
-                  <p className="text-xs text-slate-600 uppercase tracking-wide">Humidity</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">{currentWeather.humidity}%</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-4 border-t border-blue-200">
+                <div className="text-center">
+                  <Droplets className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
+                  <p className="text-xs text-slate-600 uppercase tracking-tight">Humidity</p>
+                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">{currentWeather.humidity}%</p>
                 </div>
-                <div>
-                  <p className="text-xs text-slate-600 uppercase tracking-wide">Wind</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">{currentWeather.windSpeed} km/h</p>
+                <div className="text-center">
+                  <Wind className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
+                  <p className="text-xs text-slate-600 uppercase tracking-tight">Wind</p>
+                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">{currentWeather.windSpeed} km/h</p>
                 </div>
-                <div>
-                  <p className="text-xs text-slate-600 uppercase tracking-wide">Rain</p>
-                  <p className="text-lg font-bold text-slate-900 mt-1">{currentWeather.rainChance}%</p>
+                <div className="text-center">
+                  <CloudRain className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
+                  <p className="text-xs text-slate-600 uppercase tracking-tight">Rain</p>
+                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">{currentWeather.rainChance}%</p>
                 </div>
               </div>
 
-              <div className="mt-4 p-3 bg-white rounded-lg">
-                <p className="text-sm font-semibold text-slate-900">
-                  Pressure: {currentWeather.pressure} mb | Visibility: {currentWeather.visibility} km
+              <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white rounded-lg">
+                <p className="text-xs sm:text-sm text-slate-700">
+                  <span className="font-semibold">Pressure:</span> {currentWeather.pressure} mb | <span className="font-semibold">Visibility:</span> {currentWeather.visibility} km
                 </p>
               </div>
             </div>
