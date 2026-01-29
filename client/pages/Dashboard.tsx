@@ -139,44 +139,44 @@ export default function Dashboard() {
             <p className="text-xs text-slate-500 mt-2 sm:mt-3">Across all districts</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+            <div className="flex items-start sm:items-center justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
                   Total Value
                 </p>
-                <p className="text-2xl font-bold text-primary mt-2">
+                <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
                   {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M
                   MZN
                 </p>
               </div>
-              <div className="bg-orange-100 rounded-lg p-3">
-                <TrendingUp size={24} className="text-primary" />
+              <div className="bg-orange-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                <TrendingUp size={20} className="text-primary sm:w-6 sm:h-6" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">Total funds deployed</p>
+            <p className="text-xs text-slate-500 mt-2 sm:mt-3">Total funds deployed</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
+            <div className="flex items-start sm:items-center justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
                   Avg. Per Request
                 </p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
                   {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
                 </p>
               </div>
-              <div className="bg-purple-100 rounded-lg p-3">
-                <Activity size={24} className="text-purple-600" />
+              <div className="bg-purple-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
+                <Activity size={20} className="text-purple-600 sm:w-6 sm:h-6" />
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-3">Meticais</p>
+            <p className="text-xs text-slate-500 mt-2 sm:mt-3">Meticais</p>
           </div>
         </div>
 
         {/* Maputo Weather and Alerts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
             <Suspense
               fallback={
