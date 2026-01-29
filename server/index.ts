@@ -10,6 +10,10 @@ import {
   handleGetMetrics,
 } from "./routes/requests";
 import {
+  handleGetAchievements,
+  handleAchievementsMetrics,
+} from "./routes/achievements";
+import {
   handleGetUsers,
   handleAddUser,
   handleRemoveUser,
