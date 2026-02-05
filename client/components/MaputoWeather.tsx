@@ -350,41 +350,6 @@ export default function MaputoWeather() {
               </div>
             )}
 
-            {/* Weather Details */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-              <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">
-                  Wind Dir
-                </p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  {currentWeather.windDirection}
-                </p>
-              </div>
-              <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">
-                  Visibility
-                </p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  {currentWeather.visibility} km
-                </p>
-              </div>
-              <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">
-                  Pressure
-                </p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  {currentWeather.pressure} mb
-                </p>
-              </div>
-              <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">
-                  High
-                </p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  {currentWeather.high}°C
-                </p>
-              </div>
-            </div>
           </>
         )}
 
