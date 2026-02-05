@@ -216,8 +216,8 @@ export default function Alerts() {
   };
 
   return (
-    <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden flex flex-col h-full">
-      <div className="px-6 sm:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-red-50/50 to-transparent">
+    <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden flex flex-col max-h-96">
+      <div className="px-6 sm:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-red-50/50 to-transparent flex-shrink-0">
         <div className="flex items-start justify-between gap-4">
           {/* Left side - Title and Description */}
           <div className="flex-1">
@@ -252,7 +252,7 @@ export default function Alerts() {
         </div>
       </div>
 
-      <div className="space-y-2 p-6 overflow-y-auto flex-1">
+      <div className="space-y-2 p-6 overflow-y-auto flex-1 min-h-0">
         {alerts.length > 0 ? (
           alerts.map((alert) => {
             const severity = getSeverity(alert);
