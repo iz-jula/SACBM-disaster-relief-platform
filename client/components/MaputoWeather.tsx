@@ -312,9 +312,10 @@ export default function MaputoWeather() {
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {forecast.map((day, index) => (
-                    <div
+                    <button
                       key={index}
-                      className="p-3 sm:p-4 rounded-lg border border-slate-200 bg-gradient-to-br from-white to-slate-50 hover:border-blue-300 hover:shadow-md transition-all"
+                      onClick={() => setSelectedDay(day)}
+                      className="p-3 sm:p-4 rounded-lg border border-slate-200 bg-gradient-to-br from-white to-slate-50 hover:border-blue-400 hover:shadow-lg hover:scale-105 transition-all cursor-pointer text-left"
                     >
                       <p className="text-xs sm:text-sm font-bold text-slate-900 mb-2">
                         {day.day}
@@ -347,7 +348,7 @@ export default function MaputoWeather() {
                           })}
                         </p>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
