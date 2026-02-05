@@ -216,7 +216,7 @@ export default function Alerts() {
   };
 
   return (
-    <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden flex flex-col max-h-96">
+    <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden flex flex-col max-h-[600px]">
       <div className="px-6 sm:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-red-50/50 to-transparent flex-shrink-0">
         <div className="flex items-start justify-between gap-4">
           {/* Left side - Title and Description */}
