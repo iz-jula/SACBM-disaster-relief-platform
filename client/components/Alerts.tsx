@@ -216,36 +216,34 @@ export default function Alerts() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-      <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-red-50">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
+    <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden flex flex-col h-full">
+      <div className="px-6 sm:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-red-50/50 to-transparent">
+        <div className="flex items-start justify-between gap-4">
           {/* Left side - Title and Description */}
-          <div className="flex items-start gap-2 sm:gap-3 flex-1">
-            <AlertCircle
-              size={20}
-              className="text-red-600 flex-shrink-0 mt-0.5 sm:w-6 sm:h-6"
-            />
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900">News Alerts</h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                Latest news about floods, government alerts, and weather events
-                in Mozambique
-              </p>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-red-100 rounded-lg p-2">
+                <AlertCircle size={20} className="text-red-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">Live Alerts</h2>
             </div>
+            <p className="text-slate-600 text-sm">
+              Real-time news about floods, weather & emergencies
+            </p>
           </div>
 
           {/* Right side - Last updated status */}
-          <div className="border-t sm:border-t-0 sm:border-l border-slate-300 pt-3 sm:pt-0 sm:pl-4 flex-shrink-0 text-right sm:text-right">
+          <div className="flex-shrink-0 text-right min-w-fit">
             {isLoading && (
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-600 justify-end">
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                Loading...
+              <div className="flex items-center gap-2 text-xs text-blue-600">
+                <RefreshCw size={14} className="animate-spin" />
+                <span>Updating...</span>
               </div>
             )}
             {!isLoading && (
-              <div>
-                <p className="text-xs text-slate-600">Last updated</p>
-                <p className="text-xs sm:text-sm font-medium text-slate-900">
+              <div className="text-xs">
+                <p className="text-slate-600">Updated</p>
+                <p className="font-medium text-slate-900">
                   {formatLastUpdate(lastUpdate)}
                 </p>
               </div>
@@ -254,7 +252,7 @@ export default function Alerts() {
         </div>
       </div>
 
-      <div className="space-y-2 sm:space-y-3 p-4 sm:p-6">
+      <div className="space-y-2 p-6 overflow-y-auto flex-1">
         {alerts.length > 0 ? (
           alerts.map((alert) => {
             const severity = getSeverity(alert);
