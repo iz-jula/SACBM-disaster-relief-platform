@@ -23,49 +23,80 @@ export interface ForecastDay {
   rainChance: number;
 }
 
+// WMO Weather codes mapping (Open-Meteo)
 const weatherCodeMap: Record<number, "sunny" | "cloudy" | "rainy"> = {
-  // Clear
-  800: "sunny",
-  // Clouds
-  801: "cloudy",
-  802: "cloudy",
-  803: "cloudy",
-  804: "cloudy",
+  // Clear sky
+  0: "sunny",
+  // Mainly clear, partly cloudy
+  1: "sunny",
+  2: "cloudy",
+  // Overcast
+  3: "cloudy",
+  // Fog
+  45: "cloudy",
+  48: "cloudy",
+  // Drizzle/Light Rain
+  51: "rainy",
+  53: "rainy",
+  55: "rainy",
   // Rain
-  300: "rainy",
-  301: "rainy",
-  302: "rainy",
-  310: "rainy",
-  311: "rainy",
-  312: "rainy",
-  313: "rainy",
-  314: "rainy",
-  321: "rainy",
-  500: "rainy",
-  501: "rainy",
-  502: "rainy",
-  503: "rainy",
-  504: "rainy",
-  511: "rainy",
-  520: "rainy",
-  521: "rainy",
-  522: "rainy",
-  531: "rainy",
-  // Thunder
-  200: "rainy",
-  201: "rainy",
-  202: "rainy",
-  210: "rainy",
-  211: "rainy",
-  212: "rainy",
-  221: "rainy",
-  230: "rainy",
-  231: "rainy",
-  232: "rainy",
+  61: "rainy",
+  63: "rainy",
+  65: "rainy",
+  // Freezing rain
+  66: "rainy",
+  67: "rainy",
+  // Showers
+  71: "rainy",
+  73: "rainy",
+  75: "rainy",
+  77: "rainy",
+  // Snow
+  80: "rainy",
+  81: "rainy",
+  82: "rainy",
+  // Thunderstorm
+  85: "rainy",
+  86: "rainy",
+  95: "rainy",
+  96: "rainy",
+  99: "rainy",
 };
 
 function getWeatherCondition(code: number): "sunny" | "cloudy" | "rainy" {
   return weatherCodeMap[code] || "cloudy";
+}
+
+function getWeatherDescription(code: number): string {
+  const descriptions: Record<number, string> = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Foggy",
+    48: "Foggy with rime",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    61: "Slight rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    66: "Light freezing rain",
+    67: "Heavy freezing rain",
+    71: "Slight snow",
+    73: "Moderate snow",
+    75: "Heavy snow",
+    77: "Snow grains",
+    80: "Slight rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    85: "Slight snow showers",
+    86: "Heavy snow showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with slight hail",
+    99: "Thunderstorm with heavy hail",
+  };
+  return descriptions[code] || "Unknown";
 }
 
 function getWindDirection(degrees: number): string {
