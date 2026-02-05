@@ -160,14 +160,14 @@ export async function getCurrentWeather(
 
   try {
     console.log(`[WEATHER] Fetching fresh weather data for ${city}`);
-    // Open-Meteo API format
+    // Open-Meteo API format - requesting extended data for paid tier
     const params = new URLSearchParams({
       latitude: coords.lat.toString(),
       longitude: coords.lon.toString(),
       current:
-        "temperature_2m,weather_code,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,visibility",
+        "temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,visibility,cloud_cover,precipitation",
       daily:
-        "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+        "temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,weather_code",
       temperature_unit: "celsius",
       wind_speed_unit: "kmh",
       timezone: "Africa/Johannesburg",
