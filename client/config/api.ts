@@ -1,7 +1,7 @@
 // API Configuration
 // Add these environment variables to your .env file:
 // VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-// VITE_OPENWEATHER_API_KEY=your_openweather_api_key
+// VITE_OPENMETEO_API_KEY=your_openmeteo_api_key
 // VITE_NEWSAPI_KEY=your_newsapi_key
 
 export const API_CONFIG = {
@@ -13,9 +13,9 @@ export const API_CONFIG = {
       'https://www.googleapis.com/auth/spreadsheets',
     ],
   },
-  openWeather: {
-    apiKey: import.meta.env.VITE_OPENWEATHER_API_KEY || '',
-    baseUrl: 'https://api.openweathermap.org/data/2.5',
+  openMeteo: {
+    apiKey: import.meta.env.VITE_OPENMETEO_API_KEY || '',
+    baseUrl: 'https://customer-api.open-meteo.com',
   },
   newsApi: {
     apiKey: import.meta.env.VITE_NEWSAPI_KEY || '',
