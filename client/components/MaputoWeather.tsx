@@ -21,7 +21,6 @@ import {
   WeatherData,
   ForecastDay,
   getWeatherIconInfo,
-  getWeatherIconInfo as getWeatherDetails,
 } from "@/services/weatherService";
 import { MOZAMBIQUE_CITIES } from "@/config/api";
 
