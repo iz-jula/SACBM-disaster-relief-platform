@@ -66,7 +66,9 @@ export default function Achievements() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
-  const [editingAchievementId, setEditingAchievementId] = useState<string | null>(null);
+  const [editingAchievementId, setEditingAchievementId] = useState<
+    string | null
+  >(null);
   const [pendingAction, setPendingAction] = useState<{
     type: "delete" | "edit";
     achievementId: string;
@@ -190,9 +192,7 @@ export default function Achievements() {
   };
 
   const handleDeleteAchievement = (achievementId: string) => {
-    if (
-      !window.confirm("Delete this achievement? This cannot be undone.")
-    ) {
+    if (!window.confirm("Delete this achievement? This cannot be undone.")) {
       return;
     }
     setPendingAction({ type: "delete", achievementId });
@@ -210,7 +210,9 @@ export default function Achievements() {
       return;
     }
 
-    const achievement = achievements.find((a) => a.id === pendingAction.achievementId);
+    const achievement = achievements.find(
+      (a) => a.id === pendingAction.achievementId,
+    );
 
     // For non-admin, check if password matches the member name
     if (!isAdmin && achievement) {
@@ -231,7 +233,9 @@ export default function Achievements() {
         const success = await deleteAchievement(pendingAction.achievementId);
         if (success) {
           setAchievements((prevAchievements) =>
-            prevAchievements.filter((a) => a.id !== pendingAction.achievementId),
+            prevAchievements.filter(
+              (a) => a.id !== pendingAction.achievementId,
+            ),
           );
           setShowAuthModal(false);
           setAuthPassword("");
@@ -262,7 +266,10 @@ export default function Achievements() {
           status: formData.status,
         };
 
-        const result = await updateAchievement(pendingAction.achievementId, updateData);
+        const result = await updateAchievement(
+          pendingAction.achievementId,
+          updateData,
+        );
         if (result) {
           setEditingAchievementId(null);
           setFormData({
@@ -426,7 +433,9 @@ export default function Achievements() {
             <div className="flex items-center gap-3">
               <Plus size={20} className="text-primary" />
               <h3 className="font-semibold text-slate-900">
-                {editingAchievementId ? "Edit Achievement" : "Submit Your Achievement"}
+                {editingAchievementId
+                  ? "Edit Achievement"
+                  : "Submit Your Achievement"}
               </h3>
             </div>
             <span className="text-slate-600">{showForm ? "−" : "+"}</span>
@@ -591,7 +600,10 @@ export default function Achievements() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        status: e.target.value as "completed" | "in_progress" | "pending",
+                        status: e.target.value as
+                          | "completed"
+                          | "in_progress"
+                          | "pending",
                       })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
