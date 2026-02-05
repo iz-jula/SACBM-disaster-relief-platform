@@ -347,12 +347,31 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
           "";
         const fullText = `${title} ${description}`;
 
+        // Get URL - prefer stories' medoidArticle URL first, then article URL
+        let url: string | undefined;
+        if (article.stories && Array.isArray(article.stories) && article.stories.length > 0) {
+          const firstStory = article.stories[0];
+          if (firstStory.medoidArticle?.url) {
+            url = firstStory.medoidArticle.url;
+          } else if (firstStory.url) {
+            url = firstStory.url;
+          }
+        }
+        // Fallback to article-level URLs
+        if (!url) {
+          url = article.url || article.uri;
+        }
+        // Only use URL if it's a valid HTTP(S) URL
+        if (url && !url.startsWith("http")) {
+          url = undefined;
+        }
+
         return {
           id: `news-${index}-${Date.now()}`,
           title: title,
           description: description,
           source: article.source || article.location?.label || "EventRegistry",
-          url: article.url || article.uri || "#",
+          url: url, // Will be undefined if no valid URL found
           publishedAt:
             article.publishedAt ||
             article.date ||
