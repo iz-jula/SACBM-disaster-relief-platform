@@ -377,21 +377,27 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Requests */}
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-slate-900">
-              Recent Requests
-            </h2>
-            <Link
-              to="/requests"
-              className="text-primary hover:text-orange-600 text-sm font-medium transition-colors"
-            >
-              View all →
-            </Link>
+        {/* Recent Requests - Modern Section */}
+        <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+          <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Recent Relief Requests
+                </h2>
+                <p className="text-slate-600 mt-1">Latest operations from the field</p>
+              </div>
+              <Link
+                to="/requests"
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
+              >
+                View All
+                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
+            </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="px-8 py-6 space-y-3">
             {isLoading ? (
               <p className="text-slate-600 text-center py-8">
                 Loading recent requests...
@@ -405,33 +411,40 @@ export default function Dashboard() {
                 return (
                   <div
                     key={request.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-blue-50 transition-colors"
+                    className="group p-5 rounded-xl border border-slate-200/50 hover:border-slate-300 hover:bg-slate-50/50 transition-all duration-300 hover:shadow-md cursor-pointer"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-900">
-                        {request.originator}
-                      </p>
-                      <p className="text-sm text-slate-600 mt-1">
-                        {request.location}
-                      </p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
-                          {request.help_type}
-                        </span>
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                            statusText === "pending"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : statusText === "met"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-orange-100 text-orange-700"
-                          }`}
-                        >
-                          {statusText}
-                        </span>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className="font-semibold text-slate-900 truncate">
+                            {request.originator}
+                          </p>
+                          <span
+                            className={`shrink-0 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                              statusText === "pending"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : statusText === "met"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-orange-100 text-orange-700"
+                            }`}
+                          >
+                            {statusText === "pending" ? "⏳" : "✓"} {statusText}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600 mb-3">{request.location}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-100/80 text-blue-700 backdrop-blur">
+                            {request.help_type}
+                          </span>
+                          {request.partner_organisation && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-purple-100/80 text-purple-700 backdrop-blur">
+                              {request.partner_organisation}
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <p className="text-xs text-slate-500 shrink-0 whitespace-nowrap">{timeAgo}</p>
                     </div>
-                    <p className="text-sm text-slate-500">{timeAgo}</p>
                   </div>
                 );
               })
