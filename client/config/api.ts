@@ -6,20 +6,20 @@
 
 export const API_CONFIG = {
   google: {
-    clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+    clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || "",
     scopes: [
-      'https://www.googleapis.com/auth/calendar.readonly',
-      'https://www.googleapis.com/auth/drive',
-      'https://www.googleapis.com/auth/spreadsheets',
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/spreadsheets",
     ],
   },
   openMeteo: {
-    apiKey: import.meta.env.VITE_OPENMETEO_API_KEY || '',
-    baseUrl: 'https://customer-api.open-meteo.com',
+    apiKey: import.meta.env.VITE_OPENMETEO_API_KEY || "",
+    baseUrl: "https://customer-api.open-meteo.com",
   },
   newsApi: {
-    apiKey: import.meta.env.VITE_NEWSAPI_KEY || '',
-    baseUrl: 'https://api.newsapi.ai/v1',
+    apiKey: import.meta.env.VITE_NEWSAPI_KEY || "",
+    baseUrl: "https://api.newsapi.ai/v1",
   },
 };
 

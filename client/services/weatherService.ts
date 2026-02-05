@@ -160,11 +160,13 @@ export async function getCurrentWeather(
     const params = new URLSearchParams({
       latitude: coords.lat.toString(),
       longitude: coords.lon.toString(),
-      current: 'temperature_2m,weather_code,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,visibility',
-      daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max',
-      temperature_unit: 'celsius',
-      wind_speed_unit: 'kmh',
-      timezone: 'Africa/Johannesburg',
+      current:
+        "temperature_2m,weather_code,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,visibility",
+      daily:
+        "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+      temperature_unit: "celsius",
+      wind_speed_unit: "kmh",
+      timezone: "Africa/Johannesburg",
       apikey: API_CONFIG.openMeteo.apiKey,
     });
 
@@ -234,9 +236,10 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
     const params = new URLSearchParams({
       latitude: coords.lat.toString(),
       longitude: coords.lon.toString(),
-      daily: 'temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max',
-      temperature_unit: 'celsius',
-      timezone: 'Africa/Johannesburg',
+      daily:
+        "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max",
+      temperature_unit: "celsius",
+      timezone: "Africa/Johannesburg",
       apikey: API_CONFIG.openMeteo.apiKey,
     });
 

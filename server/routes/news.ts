@@ -51,20 +51,26 @@ export async function handleNewsAlerts(req: any, res: any) {
     // Convert NewsAPI articles to our format
     let articles: any[] = [];
 
-    if (data.articles && Array.isArray(data.articles) && data.articles.length > 0) {
-      articles = data.articles.slice(0, 20).map((article: any, index: number) => {
-        return {
-          title: article.title || "Untitled",
-          description: article.description || "",
-          body: article.content || "",
-          url: article.url, // NewsAPI provides actual article URLs
-          source: article.source?.name || "NewsAPI",
-          image: article.urlToImage,
-          date: article.publishedAt || new Date().toISOString(),
-          publishedAt: article.publishedAt || new Date().toISOString(),
-          author: article.author,
-        };
-      });
+    if (
+      data.articles &&
+      Array.isArray(data.articles) &&
+      data.articles.length > 0
+    ) {
+      articles = data.articles
+        .slice(0, 20)
+        .map((article: any, index: number) => {
+          return {
+            title: article.title || "Untitled",
+            description: article.description || "",
+            body: article.content || "",
+            url: article.url, // NewsAPI provides actual article URLs
+            source: article.source?.name || "NewsAPI",
+            image: article.urlToImage,
+            date: article.publishedAt || new Date().toISOString(),
+            publishedAt: article.publishedAt || new Date().toISOString(),
+            author: article.author,
+          };
+        });
 
       console.log("[NEWS] Converted", articles.length, "articles from NewsAPI");
     } else {
