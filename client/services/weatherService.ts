@@ -25,6 +25,8 @@ export interface ForecastDay {
   low: number;
   condition: "sunny" | "cloudy" | "rainy";
   rainChance: number;
+  precipitation?: number;
+  weatherCode: number;
 }
 
 // WMO Weather codes mapping (Open-Meteo)
