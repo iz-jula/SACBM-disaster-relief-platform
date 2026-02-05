@@ -66,8 +66,9 @@ export default function Achievements() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
+  const [editingAchievementId, setEditingAchievementId] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<{
-    type: "delete";
+    type: "delete" | "edit";
     achievementId: string;
   } | null>(null);
   const [formData, setFormData] = useState({
@@ -79,6 +80,7 @@ export default function Achievements() {
     partnerOrganisation: "",
     peopleImpacted: "",
     amountContributed: "",
+    status: "pending" as "completed" | "in_progress" | "pending",
   });
 
   useEffect(() => {
