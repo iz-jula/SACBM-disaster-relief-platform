@@ -799,7 +799,7 @@ export default function Achievements() {
           </div>
         </div>
 
-        {/* Authentication Modal for Delete */}
+        {/* Authentication Modal for Edit/Delete */}
         {showAuthModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
@@ -809,6 +809,11 @@ export default function Achievements() {
                   Verify Permission
                 </h3>
               </div>
+              <p className="text-sm text-slate-600 mb-4">
+                {pendingAction?.type === "edit"
+                  ? "To save changes, confirm your identity"
+                  : "To delete this achievement, confirm your identity"}
+              </p>
 
               {authError && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
