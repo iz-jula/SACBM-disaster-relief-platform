@@ -1,70 +1,92 @@
-import { Cloud, CloudRain, Sun, Wind, Droplets, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Cloud,
+  CloudRain,
+  Sun,
+  Wind,
+  Droplets,
+  ArrowRight,
+  Loader,
+  CloudSnow,
+  Zap,
+  CloudFog,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-
-interface WeatherDay {
-  day: string;
-  high: number;
-  low: number;
-  condition: "sunny" | "cloudy" | "rainy";
-  humidity: number;
-  windSpeed: number;
-}
+import {
+  getCurrentWeather,
+  getForecast,
+  WeatherData,
+  ForecastDay,
+  getWeatherIconInfo,
+} from "@/services/weatherService";
 
 export default function WeatherForecast() {
-  // Sample weather data for Mozambique
-  const weatherData: WeatherDay[] = [
-    {
-      day: "Today",
-      high: 28,
-      low: 22,
-      condition: "rainy",
-      humidity: 75,
-      windSpeed: 15,
-    },
-    {
-      day: "Tomorrow",
-      high: 26,
-      low: 20,
-      condition: "rainy",
-      humidity: 80,
-      windSpeed: 18,
-    },
-    {
-      day: "Wed",
-      high: 27,
-      low: 21,
-      condition: "cloudy",
-      humidity: 65,
-      windSpeed: 12,
-    },
-    {
-      day: "Thu",
-      high: 29,
-      low: 23,
-      condition: "sunny",
-      humidity: 55,
-      windSpeed: 10,
-    },
-    {
-      day: "Fri",
-      high: 30,
-      low: 24,
-      condition: "sunny",
-      humidity: 50,
-      windSpeed: 8,
-    },
-  ];
+  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
+  const [forecast, setForecast] = useState<ForecastDay[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadWeatherData();
+  }, []);
+
+  const loadWeatherData = async () => {
+    setIsLoading(true);
+    try {
+      const [weather, forecastData] = await Promise.all([
+        getCurrentWeather("Maputo"),
+        getForecast("Maputo"),
+      ]);
+
+      if (weather) {
+        setCurrentWeather(weather);
+      }
+
+      if (forecastData) {
+        setForecast(forecastData);
+      }
+    } catch (error) {
+      console.error("Error loading weather:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getWeatherIcon = (condition: string) => {
     switch (condition) {
       case "sunny":
-        return <Sun size={32} className="text-yellow-500" />;
+        return <Sun size={32} className="text-amber-400" />;
       case "cloudy":
         return <Cloud size={32} className="text-slate-400" />;
       case "rainy":
         return <CloudRain size={32} className="text-blue-500" />;
+      case "snow":
+        return <CloudSnow size={32} className="text-slate-300" />;
+      case "storm":
+        return <Zap size={32} className="text-orange-500" />;
+      case "fog":
+        return <CloudFog size={32} className="text-slate-500" />;
       default:
-        return <Sun size={32} className="text-yellow-500" />;
+        return <Cloud size={32} className="text-slate-400" />;
+    }
+  };
+
+  const getLargeWeatherIcon = (code: number) => {
+    const iconInfo = getWeatherIconInfo(code);
+    switch (iconInfo.condition) {
+      case "sunny":
+        return <Sun size={48} className="text-amber-400" />;
+      case "cloudy":
+        return <Cloud size={48} className="text-slate-400" />;
+      case "rainy":
+        return <CloudRain size={48} className="text-blue-500" />;
+      case "snow":
+        return <CloudSnow size={48} className="text-slate-300" />;
+      case "storm":
+        return <Zap size={48} className="text-orange-500" />;
+      case "fog":
+        return <CloudFog size={48} className="text-slate-500" />;
+      default:
+        return <Cloud size={48} className="text-slate-400" />;
     }
   };
 
