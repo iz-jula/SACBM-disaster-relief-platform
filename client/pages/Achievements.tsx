@@ -621,41 +621,52 @@ export default function Achievements() {
                   key={achievement.id}
                   className={`p-4 sm:p-6 ${STATUS_COLORS[achievement.status]}`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5">
-                      {getStatusIcon(achievement.status)}
+                  <div className="flex items-start gap-3 justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="mt-0.5">
+                        {getStatusIcon(achievement.status)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <h3 className="font-semibold text-sm sm:text-base">
+                            {achievement.title}
+                          </h3>
+                          <span
+                            className={`px-2 py-1 text-xs rounded font-medium ${CATEGORY_COLORS[achievement.category]}`}
+                          >
+                            {achievement.category}
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-700 mb-2">
+                          by {achievement.memberName}
+                        </p>
+                        <p className="text-xs sm:text-sm opacity-90 mb-3">
+                          {achievement.description}
+                        </p>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="flex items-center gap-1">
+                            <MapPin size={14} />
+                            {achievement.location}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users size={14} />
+                            {achievement.peopleImpacted.toLocaleString()}
+                          </div>
+                          <div className="font-semibold text-primary">
+                            {(achievement.amountContributed / 1000).toFixed(1)}K
+                            MZN
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <h3 className="font-semibold text-sm sm:text-base">
-                          {achievement.title}
-                        </h3>
-                        <span
-                          className={`px-2 py-1 text-xs rounded font-medium ${CATEGORY_COLORS[achievement.category]}`}
-                        >
-                          {achievement.category}
-                        </span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-slate-700 mb-2">
-                        by {achievement.memberName}
-                      </p>
-                      <p className="text-xs sm:text-sm opacity-90 mb-3">
-                        {achievement.description}
-                      </p>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div className="flex items-center gap-1">
-                          <MapPin size={14} />
-                          {achievement.location}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users size={14} />
-                          {achievement.peopleImpacted.toLocaleString()}
-                        </div>
-                        <div className="font-semibold text-primary">
-                          {(achievement.amountContributed / 1000).toFixed(1)}K
-                          MZN
-                        </div>
-                      </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleDeleteAchievement(achievement.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete achievement"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
                   </div>
                 </div>
