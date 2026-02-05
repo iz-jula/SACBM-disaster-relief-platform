@@ -63,6 +63,13 @@ export default function Achievements() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [pendingAction, setPendingAction] = useState<{
+    type: "delete";
+    achievementId: string;
+  } | null>(null);
   const [formData, setFormData] = useState({
     memberName: "",
     title: "",
