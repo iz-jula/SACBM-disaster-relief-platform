@@ -162,3 +162,63 @@ export async function createAchievement(
     return null;
   }
 }
+
+export async function updateAchievement(
+  id: string,
+  updates: Partial<Omit<Achievement, "id" | "createdAt">>,
+): Promise<Achievement | null> {
+  try {
+    const response = await fetch(`/api/achievements/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updates),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to update achievement:", response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+
+    // Invalidate cache so fresh data is fetched
+    achievementsCache.achievements = [];
+    achievementsCache.metrics = null;
+    achievementsCache.timestamp = 0;
+
+    console.log("Achievement updated successfully");
+    return data.achievement || null;
+  } catch (error) {
+    console.error("Error updating achievement:", error);
+    return null;
+  }
+}
+
+export async function deleteAchievement(id: string): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/achievements/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to delete achievement:", response.statusText);
+      return false;
+    }
+
+    // Invalidate cache so fresh data is fetched
+    achievementsCache.achievements = [];
+    achievementsCache.metrics = null;
+    achievementsCache.timestamp = 0;
+
+    console.log("Achievement deleted successfully");
+    return true;
+  } catch (error) {
+    console.error("Error deleting achievement:", error);
+    return false;
+  }
+}
