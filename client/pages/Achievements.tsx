@@ -162,6 +162,22 @@ export default function Achievements() {
     }
   };
 
+  const handleEditAchievement = (achievement: Achievement) => {
+    setEditingAchievementId(achievement.id);
+    setFormData({
+      memberName: achievement.memberName,
+      title: achievement.title,
+      description: achievement.description,
+      category: achievement.category,
+      location: achievement.location,
+      partnerOrganisation: achievement.partnerOrganisation || "",
+      peopleImpacted: achievement.peopleImpacted.toString(),
+      amountContributed: achievement.amountContributed.toString(),
+      status: achievement.status,
+    });
+    setShowForm(true);
+  };
+
   const handleDeleteAchievement = (achievementId: string) => {
     if (
       !window.confirm("Delete this achievement? This cannot be undone.")
