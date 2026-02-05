@@ -139,8 +139,7 @@ export function getWeatherIconInfo(code: number): WeatherIconInfo {
     };
   } else if (code >= 51 && code <= 67) {
     // Drizzle and rain
-    const intensity =
-      code <= 55 ? "light" : code <= 63 ? "moderate" : "heavy";
+    const intensity = code <= 55 ? "light" : code <= 63 ? "moderate" : "heavy";
     return {
       condition: "rainy",
       description: getWeatherDescription(code),
@@ -148,8 +147,7 @@ export function getWeatherIconInfo(code: number): WeatherIconInfo {
     };
   } else if (code >= 71 && code <= 86) {
     // Snow and snow showers
-    const intensity =
-      code <= 73 ? "light" : code <= 77 ? "moderate" : "heavy";
+    const intensity = code <= 73 ? "light" : code <= 77 ? "moderate" : "heavy";
     return {
       condition: "snow",
       description: getWeatherDescription(code),

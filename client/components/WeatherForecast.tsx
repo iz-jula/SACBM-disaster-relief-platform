@@ -21,7 +21,9 @@ import {
 } from "@/services/weatherService";
 
 export default function WeatherForecast() {
-  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
+  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(
+    null,
+  );
   const [forecast, setForecast] = useState<ForecastDay[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

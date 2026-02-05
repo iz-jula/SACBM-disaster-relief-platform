@@ -53,19 +53,13 @@ function getLargeWeatherIcon(code: number) {
     case "cloudy":
       return <Cloud className="w-16 h-16 sm:w-20 sm:h-20 text-slate-400" />;
     case "rainy":
-      return (
-        <CloudRain className="w-16 h-16 sm:w-20 sm:h-20 text-blue-500" />
-      );
+      return <CloudRain className="w-16 h-16 sm:w-20 sm:h-20 text-blue-500" />;
     case "snow":
-      return (
-        <CloudSnow className="w-16 h-16 sm:w-20 sm:h-20 text-slate-300" />
-      );
+      return <CloudSnow className="w-16 h-16 sm:w-20 sm:h-20 text-slate-300" />;
     case "storm":
       return <Zap className="w-16 h-16 sm:w-20 sm:h-20 text-orange-500" />;
     case "fog":
-      return (
-        <CloudFog className="w-16 h-16 sm:w-20 sm:h-20 text-slate-500" />
-      );
+      return <CloudFog className="w-16 h-16 sm:w-20 sm:h-20 text-slate-500" />;
     default:
       return <Cloud className="w-16 h-16 sm:w-20 sm:h-20 text-slate-400" />;
   }
@@ -203,10 +197,16 @@ export default function MaputoWeather() {
                   </p>
                   <div className="flex gap-4 mt-3 text-xs">
                     <span className="text-slate-600">
-                      H: <span className="font-bold text-slate-900">{currentWeather.high}°C</span>
+                      H:{" "}
+                      <span className="font-bold text-slate-900">
+                        {currentWeather.high}°C
+                      </span>
                     </span>
                     <span className="text-slate-600">
-                      L: <span className="font-bold text-slate-900">{currentWeather.low}°C</span>
+                      L:{" "}
+                      <span className="font-bold text-slate-900">
+                        {currentWeather.low}°C
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -331,12 +331,13 @@ export default function MaputoWeather() {
                           <CloudRain size={12} className="text-blue-500" />
                           <span>{day.rainChance}%</span>
                         </div>
-                        {day.precipitation !== undefined && day.precipitation > 0 && (
-                          <div className="flex items-center justify-center gap-1 text-slate-600">
-                            <Droplets size={12} className="text-blue-600" />
-                            <span>{day.precipitation.toFixed(1)} mm</span>
-                          </div>
-                        )}
+                        {day.precipitation !== undefined &&
+                          day.precipitation > 0 && (
+                            <div className="flex items-center justify-center gap-1 text-slate-600">
+                              <Droplets size={12} className="text-blue-600" />
+                              <span>{day.precipitation.toFixed(1)} mm</span>
+                            </div>
+                          )}
                         <p className="text-slate-600">
                           {new Date(day.date).toLocaleDateString("en-US", {
                             month: "short",
@@ -349,7 +350,6 @@ export default function MaputoWeather() {
                 </div>
               </div>
             )}
-
           </>
         )}
 
