@@ -284,6 +284,21 @@ export default function Upload() {
                     placeholder="e.g., john@example.com"
                   />
                 </div>
+
+                {/* Partner Organisation */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Partner Organisation (if applicable)
+                  </label>
+                  <input
+                    type="text"
+                    name="partner_organisation"
+                    value={formData.partner_organisation}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="e.g., UNICEF, Red Cross, WHO"
+                  />
+                </div>
               </div>
             </div>
 
