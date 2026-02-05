@@ -3,7 +3,7 @@ export interface Achievement {
   memberName: string;
   title: string;
   description: string;
-  category: "Training" | "Community Work" | "Infrastructure" | "Advocacy" | "Research";
+  category: "Food" | "Clothing" | "Materials" | "Medical" | "Shelter" | "Water" | "Evacuation" | "Multiple";
   location: string;
   peopleImpacted: number;
   amountContributed: number;
@@ -17,9 +17,9 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach1",
     memberName: "Maria Dos Santos",
-    title: "Community Flood Awareness Training",
-    description: "Conducted flood preparedness workshop for 120 residents in Sofala Province",
-    category: "Training",
+    title: "Community Food Distribution",
+    description: "Distributed emergency food packages to 120 residents in Sofala Province",
+    category: "Food",
     location: "Sofala Province",
     peopleImpacted: 120,
     amountContributed: 8500,
@@ -30,9 +30,9 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach2",
     memberName: "João Silva",
-    title: "Early Warning System Installation",
-    description: "Installed 5 weather monitoring stations across Gaza Province for flood early warning",
-    category: "Infrastructure",
+    title: "Emergency Shelter Construction",
+    description: "Built temporary shelters across Gaza Province for displaced families",
+    category: "Shelter",
     location: "Gaza Province",
     peopleImpacted: 850,
     amountContributed: 45000,
@@ -43,9 +43,9 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach3",
     memberName: "Amara Mokhtar",
-    title: "Water Safety Documentation Project",
-    description: "Documented best practices for water system maintenance in rural areas",
-    category: "Research",
+    title: "Water Supply Installation",
+    description: "Installed water systems and sanitation facilities in rural areas",
+    category: "Water",
     location: "Multiple Districts",
     peopleImpacted: 2500,
     amountContributed: 12000,
@@ -56,9 +56,9 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach4",
     memberName: "Carlos Mendes",
-    title: "Advocacy Campaign for Climate Adaptation",
-    description: "Led community advocacy initiative resulting in 3 new government climate policies",
-    category: "Advocacy",
+    title: "Medical Supply Distribution",
+    description: "Delivered medical supplies and vaccines to 3 districts",
+    category: "Medical",
     location: "Maputo City",
     peopleImpacted: 3200,
     amountContributed: 22000,
@@ -69,9 +69,9 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach5",
     memberName: "Fatima Ahmed",
-    title: "Community Sanitation Program",
-    description: "Established sustainable sanitation practices in 8 villages, benefiting 450+ households",
-    category: "Community Work",
+    title: "Emergency Clothing Campaign",
+    description: "Collected and distributed clothing to 450+ households affected by floods",
+    category: "Clothing",
     location: "Inhambane District",
     peopleImpacted: 1800,
     amountContributed: 18500,
@@ -81,9 +81,9 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
   {
     id: "ach6",
     memberName: "Daniel Ferreira",
-    title: "Disaster Risk Mapping Study",
-    description: "Comprehensive flood and drought risk mapping for 5 districts",
-    category: "Research",
+    title: "Multiple Aid Materials Collection",
+    description: "Coordinated collection of various relief materials for 5 districts",
+    category: "Multiple",
     location: "Southern Region",
     peopleImpacted: 5600,
     amountContributed: 35000,
