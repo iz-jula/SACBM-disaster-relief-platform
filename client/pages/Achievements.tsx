@@ -119,46 +119,57 @@ export default function Achievements() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const newAchievementData = {
-        memberName: formData.memberName,
-        title: formData.title,
-        description: formData.description,
-        category: formData.category as
-          | "Food"
-          | "Clothing"
-          | "Materials"
-          | "Medical"
-          | "Shelter"
-          | "Water"
-          | "Evacuation"
-          | "Multiple",
-        location: formData.location,
-        partnerOrganisation: formData.partnerOrganisation || null,
-        peopleImpacted: parseInt(formData.peopleImpacted) || 0,
-        amountContributed: parseInt(formData.amountContributed) || 0,
-        status: "pending" as const,
-      };
 
-      const result = await createAchievement(newAchievementData);
+    if (editingAchievementId) {
+      // For editing, check permissions
+      setPendingAction({ type: "edit", achievementId: editingAchievementId });
+      setShowAuthModal(true);
+      setAuthPassword("");
+      setAuthError("");
+    } else {
+      // For creating new achievements, directly submit
+      try {
+        const newAchievementData = {
+          memberName: formData.memberName,
+          title: formData.title,
+          description: formData.description,
+          category: formData.category as
+            | "Food"
+            | "Clothing"
+            | "Materials"
+            | "Medical"
+            | "Shelter"
+            | "Water"
+            | "Evacuation"
+            | "Multiple",
+          location: formData.location,
+          partnerOrganisation: formData.partnerOrganisation || null,
+          peopleImpacted: parseInt(formData.peopleImpacted) || 0,
+          amountContributed: parseInt(formData.amountContributed) || 0,
+          status: "pending" as const,
+        };
 
-      if (result) {
-        setFormData({
-          memberName: "",
-          title: "",
-          description: "",
-          category: "Food",
-          location: "",
-          partnerOrganisation: "",
-          peopleImpacted: "",
-          amountContributed: "",
-        });
-        setUploadedMedia([]);
-        setShowForm(false);
-        await loadData();
+        const result = await createAchievement(newAchievementData);
+
+        if (result) {
+          setFormData({
+            memberName: "",
+            title: "",
+            description: "",
+            category: "Food",
+            location: "",
+            partnerOrganisation: "",
+            peopleImpacted: "",
+            amountContributed: "",
+            status: "pending",
+          });
+          setUploadedMedia([]);
+          setShowForm(false);
+          await loadData();
+        }
+      } catch (error) {
+        console.error("Error submitting achievement:", error);
       }
-    } catch (error) {
-      console.error("Error submitting achievement:", error);
     }
   };
 
