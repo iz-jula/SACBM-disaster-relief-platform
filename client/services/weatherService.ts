@@ -196,12 +196,18 @@ export async function getCurrentWeather(
       low: Math.round(daily.temperature_2m_min[0]),
       humidity: current.relative_humidity_2m,
       windSpeed: Math.round(current.wind_speed_10m),
+      windGust: current.wind_gusts_10m
+        ? Math.round(current.wind_gusts_10m)
+        : undefined,
       windDirection: getWindDirection(current.wind_direction_10m || 0),
       condition: condition,
       rainChance: daily.precipitation_probability_max[0],
-      visibility: 10, // Open-Meteo doesn't provide visibility in free tier
+      precipitation: current.precipitation || 0,
+      cloudCover: current.cloud_cover || 0,
+      visibility: Math.round((current.visibility || 10000) / 1000), // Convert to km
       pressure: Math.round(current.pressure_msl),
       description: getWeatherDescription(current.weather_code),
+      weatherCode: current.weather_code,
     };
 
     // Cache the result in both caches
