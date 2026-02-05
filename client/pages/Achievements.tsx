@@ -20,11 +20,14 @@ import {
 } from "@/services/achievementsService";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Training: "bg-blue-100 text-blue-800",
-  "Community Work": "bg-green-100 text-green-800",
-  Infrastructure: "bg-orange-100 text-orange-800",
-  Advocacy: "bg-purple-100 text-purple-800",
-  Research: "bg-pink-100 text-pink-800",
+  Food: "bg-blue-100 text-blue-800",
+  Clothing: "bg-green-100 text-green-800",
+  Materials: "bg-orange-100 text-orange-800",
+  Medical: "bg-red-100 text-red-800",
+  Shelter: "bg-purple-100 text-purple-800",
+  Water: "bg-cyan-100 text-cyan-800",
+  Evacuation: "bg-yellow-100 text-yellow-800",
+  Multiple: "bg-pink-100 text-pink-800",
 };
 
 const STATUS_COLORS: Record<string, string> = {
