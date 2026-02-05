@@ -10,6 +10,7 @@ import {
   CloudSnow,
   Zap,
   CloudFog,
+  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
