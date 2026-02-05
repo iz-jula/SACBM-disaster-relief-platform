@@ -3,18 +3,23 @@ import {
   Search,
   Cloud,
   CloudRain,
+  CloudSnow,
   Sun,
+  CloudDrizzle,
   Droplets,
   Wind,
   Eye,
   AlertCircle,
   Loader,
+  Zap,
+  CloudFog,
 } from "lucide-react";
 import {
   getCurrentWeather,
   getForecast,
   WeatherData,
   ForecastDay,
+  getWeatherIconInfo,
 } from "@/services/weatherService";
 import { MOZAMBIQUE_CITIES } from "@/config/api";
 
@@ -24,13 +29,45 @@ function getWeatherIcon(condition: string, size: number = 12) {
   const sizeClass = `w-${size} h-${size}`;
   switch (condition) {
     case "sunny":
-      return <Sun className={`${sizeClass} text-yellow-400`} />;
+      return <Sun className={`${sizeClass} text-amber-400`} />;
     case "cloudy":
       return <Cloud className={`${sizeClass} text-slate-400`} />;
     case "rainy":
-      return <CloudRain className={`${sizeClass} text-blue-400`} />;
+      return <CloudRain className={`${sizeClass} text-blue-500`} />;
+    case "snow":
+      return <CloudSnow className={`${sizeClass} text-slate-300`} />;
+    case "storm":
+      return <Zap className={`${sizeClass} text-orange-500`} />;
+    case "fog":
+      return <CloudFog className={`${sizeClass} text-slate-500`} />;
     default:
       return <Cloud className={`${sizeClass} text-slate-400`} />;
+  }
+}
+
+function getLargeWeatherIcon(code: number) {
+  const iconInfo = getWeatherIconInfo(code);
+  switch (iconInfo.condition) {
+    case "sunny":
+      return <Sun className="w-16 h-16 sm:w-20 sm:h-20 text-amber-400" />;
+    case "cloudy":
+      return <Cloud className="w-16 h-16 sm:w-20 sm:h-20 text-slate-400" />;
+    case "rainy":
+      return (
+        <CloudRain className="w-16 h-16 sm:w-20 sm:h-20 text-blue-500" />
+      );
+    case "snow":
+      return (
+        <CloudSnow className="w-16 h-16 sm:w-20 sm:h-20 text-slate-300" />
+      );
+    case "storm":
+      return <Zap className="w-16 h-16 sm:w-20 sm:h-20 text-orange-500" />;
+    case "fog":
+      return (
+        <CloudFog className="w-16 h-16 sm:w-20 sm:h-20 text-slate-500" />
+      );
+    default:
+      return <Cloud className="w-16 h-16 sm:w-20 sm:h-20 text-slate-400" />;
   }
 }
 
