@@ -285,6 +285,8 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
           low: Math.round(data.daily.temperature_2m_min[index]),
           condition: getWeatherCondition(data.daily.weather_code[index]),
           rainChance: data.daily.precipitation_probability_max[index],
+          precipitation: data.daily.precipitation_sum?.[index] || 0,
+          weatherCode: data.daily.weather_code[index],
         };
       });
 
