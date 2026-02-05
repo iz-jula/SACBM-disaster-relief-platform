@@ -246,7 +246,6 @@ export default function Requests() {
   const [requests, setRequests] = useState<RelieRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(
     new Set(),
   );
@@ -257,17 +256,6 @@ export default function Requests() {
   const [pendingAction, setPendingAction] = useState<{
     type: "resolve" | "pending" | "delete";
   } | null>(null);
-  const [formData, setFormData] = useState({
-    originator: "",
-    email: "",
-    full_name: "",
-    location: "",
-    help_type: "",
-    evacuation_type: "",
-    people: "",
-    value: "",
-    status: false, // false = pending, true = met
-  });
 
   // Load requests on mount
   useEffect(() => {
