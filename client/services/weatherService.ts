@@ -208,7 +208,7 @@ const FORECAST_CACHE_DURATION = 60 * 60 * 1000; // 60 minutes
 
 export async function getForecast(city: string): Promise<ForecastDay[] | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
-  if (!coords || !API_CONFIG.openMeteo.apiKey) {
+  if (!coords || !API_CONFIG?.openMeteo?.apiKey) {
     return null;
   }
 
