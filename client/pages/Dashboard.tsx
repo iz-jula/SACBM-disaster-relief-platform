@@ -227,66 +227,58 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-                <div className="flex items-start sm:items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                      Total Achievements
-                    </p>
-                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                      {achievementsMetrics.totalAchievements}
-                    </p>
-                  </div>
-                  <div className="bg-blue-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                    <BarChart3 size={20} className="text-blue-600 sm:w-6 sm:h-6" />
+              {/* Total Achievements */}
+              <div className="group relative bg-gradient-to-br from-indigo-50 to-indigo-50/30 rounded-2xl p-6 border border-indigo-200/50 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-100">
+                <div className="relative">
+                  <p className="text-indigo-600/70 text-xs font-semibold uppercase tracking-wider">Total Achievements</p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.totalAchievements}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-slate-600">Community work</p>
+                    <div className="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg p-2 shadow-lg">
+                      <BarChart3 size={18} className="text-white" />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-                <div className="flex items-start sm:items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                      People Impacted
-                    </p>
-                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                      {(achievementsMetrics.totalPeopleImpacted || 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-green-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                    <Users size={20} className="text-green-600 sm:w-6 sm:h-6" />
+              {/* People Impacted */}
+              <div className="group relative bg-gradient-to-br from-emerald-50 to-emerald-50/30 rounded-2xl p-6 border border-emerald-200/50 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100">
+                <div className="relative">
+                  <p className="text-emerald-600/70 text-xs font-semibold uppercase tracking-wider">People Impacted</p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">{(achievementsMetrics.totalPeopleImpacted || 0).toLocaleString()}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-slate-600">Direct impact</p>
+                    <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg p-2 shadow-lg">
+                      <Users size={18} className="text-white" />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-                <div className="flex items-start sm:items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                      Total Contribution
-                    </p>
-                    <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
-                      {((achievementsMetrics.totalContributed || 0) / 1000).toFixed(1)}K MZN
-                    </p>
-                  </div>
-                  <div className="bg-orange-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                    <TrendingUp size={20} className="text-primary sm:w-6 sm:h-6" />
+              {/* Total Contribution */}
+              <div className="group relative bg-gradient-to-br from-amber-50 to-amber-50/30 rounded-2xl p-6 border border-amber-200/50 hover:border-amber-300 transition-all duration-300 hover:shadow-lg hover:shadow-amber-100">
+                <div className="relative">
+                  <p className="text-amber-600/70 text-xs font-semibold uppercase tracking-wider">Total Contribution</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-3">{((achievementsMetrics.totalContributed || 0) / 1000).toFixed(1)}K</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-slate-600">MZN invested</p>
+                    <div className="bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg p-2 shadow-lg">
+                      <TrendingUp size={18} className="text-white" />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-                <div className="flex items-start sm:items-center justify-between gap-3">
-                  <div className="flex-1">
-                    <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                      In Progress
-                    </p>
-                    <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                      {achievementsMetrics.inProgressAchievements}
-                    </p>
-                  </div>
-                  <div className="bg-purple-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                    <Activity size={20} className="text-purple-600 sm:w-6 sm:h-6" />
+              {/* In Progress */}
+              <div className="group relative bg-gradient-to-br from-cyan-50 to-cyan-50/30 rounded-2xl p-6 border border-cyan-200/50 hover:border-cyan-300 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-100">
+                <div className="relative">
+                  <p className="text-cyan-600/70 text-xs font-semibold uppercase tracking-wider">In Progress</p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.inProgressAchievements}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-slate-600">Ongoing work</p>
+                    <div className="bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-lg p-2 shadow-lg">
+                      <Activity size={18} className="text-white" />
+                    </div>
                   </div>
                 </div>
               </div>
