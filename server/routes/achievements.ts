@@ -5,6 +5,7 @@ export interface Achievement {
   description: string;
   category: "Food" | "Clothing" | "Materials" | "Medical" | "Shelter" | "Water" | "Evacuation" | "Multiple";
   location: string;
+  partnerOrganisation?: string | null;
   peopleImpacted: number;
   amountContributed: number;
   status: "completed" | "in_progress" | "pending";
