@@ -75,6 +75,7 @@ export default function MaputoWeather() {
   const [forecast, setForecast] = useState<ForecastDay[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<ForecastDay | null>(null);
 
   const filteredCities = allCities.filter((city) =>
     city.toLowerCase().includes(searchInput.toLowerCase()),
