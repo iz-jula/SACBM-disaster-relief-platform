@@ -331,7 +331,7 @@ export default function Alerts() {
         )}
       </div>
 
-      <div className="px-6 py-4 border-t border-slate-200/50 bg-blue-50/30 text-xs text-blue-700 flex items-center gap-2">
+      <div className="px-6 py-4 border-t border-slate-200/50 bg-blue-50/30 text-xs text-blue-700 flex items-center gap-2 flex-shrink-0">
         <AlertCircle size={14} className="flex-shrink-0" />
         <span>Updated automatically from news sources</span>
       </div>
