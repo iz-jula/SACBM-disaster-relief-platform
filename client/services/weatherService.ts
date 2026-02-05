@@ -349,7 +349,11 @@ export async function getNewsAlerts(): Promise<NewsAlert[]> {
 
         // Get URL - prefer stories' medoidArticle URL first, then article URL
         let url: string | undefined;
-        if (article.stories && Array.isArray(article.stories) && article.stories.length > 0) {
+        if (
+          article.stories &&
+          Array.isArray(article.stories) &&
+          article.stories.length > 0
+        ) {
           const firstStory = article.stories[0];
           if (firstStory.medoidArticle?.url) {
             url = firstStory.medoidArticle.url;

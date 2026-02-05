@@ -97,7 +97,11 @@ export async function handleNewsAlerts(req: any, res: any) {
       articles = eventsList.slice(0, 20).map((event: any) => {
         // Extract URL from stories' medoidArticle first (most reliable source)
         let url: string | undefined;
-        if (event.stories && Array.isArray(event.stories) && event.stories.length > 0) {
+        if (
+          event.stories &&
+          Array.isArray(event.stories) &&
+          event.stories.length > 0
+        ) {
           const firstStory = event.stories[0];
           if (firstStory.medoidArticle?.url) {
             url = firstStory.medoidArticle.url;
@@ -122,9 +126,12 @@ export async function handleNewsAlerts(req: any, res: any) {
             extractLabel(event.body) ||
             "",
           body:
-            extractLabel(event.summary) || extractLabel(event.description) || "",
+            extractLabel(event.summary) ||
+            extractLabel(event.description) ||
+            "",
           url: url, // Will be undefined if no valid URL found
-          date: event.date?.date || event.publishDate || new Date().toISOString(),
+          date:
+            event.date?.date || event.publishDate || new Date().toISOString(),
           publishedAt:
             event.date?.date || event.publishDate || new Date().toISOString(),
           source: extractLabel(event.location?.label) || "EventRegistry",
