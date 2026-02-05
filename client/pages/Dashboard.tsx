@@ -234,7 +234,7 @@ export default function Dashboard() {
                   <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.totalAchievements}</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Community work</p>
-                    <div className="bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg p-2 shadow-lg">
+                    <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg p-2 shadow-lg">
                       <BarChart3 size={18} className="text-white" />
                     </div>
                   </div>
@@ -248,7 +248,7 @@ export default function Dashboard() {
                   <p className="text-4xl font-bold text-slate-900 mt-3">{(achievementsMetrics.totalPeopleImpacted || 0).toLocaleString()}</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Direct impact</p>
-                    <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg p-2 shadow-lg">
+                    <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg p-2 shadow-lg">
                       <Users size={18} className="text-white" />
                     </div>
                   </div>
@@ -262,7 +262,7 @@ export default function Dashboard() {
                   <p className="text-3xl font-bold text-slate-900 mt-3">{((achievementsMetrics.totalContributed || 0) / 1000).toFixed(1)}K</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">MZN invested</p>
-                    <div className="bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg p-2 shadow-lg">
+                    <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg p-2 shadow-lg">
                       <TrendingUp size={18} className="text-white" />
                     </div>
                   </div>
@@ -276,7 +276,7 @@ export default function Dashboard() {
                   <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.inProgressAchievements}</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Ongoing work</p>
-                    <div className="bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-lg p-2 shadow-lg">
+                    <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg p-2 shadow-lg">
                       <Activity size={18} className="text-white" />
                     </div>
                   </div>
