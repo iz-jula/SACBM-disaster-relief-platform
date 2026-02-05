@@ -265,7 +265,10 @@ export default function WeatherForecast() {
                     <div className="flex flex-col items-center gap-3 py-4 border-b border-slate-200">
                       {getLargeWeatherIcon(selectedDay.weatherCode)}
                       <p className="text-base font-semibold text-slate-900">
-                        {getWeatherIconInfo(selectedDay.weatherCode).description}
+                        {
+                          getWeatherIconInfo(selectedDay.weatherCode)
+                            .description
+                        }
                       </p>
                     </div>
 
