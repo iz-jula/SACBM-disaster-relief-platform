@@ -313,21 +313,22 @@ export default function Dashboard() {
         </div>
 
         {/* Embedded INGD Dashboard */}
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 flex items-center justify-between">
+        <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+          <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                INGD Disaster Impact
+              <h2 className="text-2xl font-bold text-slate-900">
+                INGD Disaster Impact Analytics
               </h2>
-              <p className="text-xs text-slate-600 mt-1">
-                Real-time impact data from INGD
+              <p className="text-slate-600 mt-1">
+                Real-time impact data and insights from INGD
               </p>
             </div>
             <Link
               to="/ingd-dashboard"
-              className="text-primary hover:text-orange-600 text-sm font-medium transition-colors whitespace-nowrap ml-4"
+              className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
             >
-              View Full →
+              View Full
+              <span className="transform group-hover:translate-x-1 transition-transform">→</span>
             </Link>
           </div>
 
