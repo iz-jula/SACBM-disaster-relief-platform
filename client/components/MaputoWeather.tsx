@@ -63,12 +63,13 @@ export default function MaputoWeather() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-      <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-        <h2 className="text-lg sm:text-xl font-bold text-slate-900">Weather - {selectedCity}</h2>
+    <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+      <div className="px-6 sm:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-cyan-50/50 to-transparent">
+        <h2 className="text-2xl font-bold text-slate-900">Weather Forecast</h2>
+        <p className="text-slate-600 mt-1">{selectedCity}</p>
       </div>
 
-      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="p-6 sm:p-8 space-y-6">
         {/* City Search */}
         <div className="relative">
           <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
