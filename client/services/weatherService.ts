@@ -133,7 +133,7 @@ export async function getCurrentWeather(
   city: string,
 ): Promise<WeatherData | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
-  if (!coords || !API_CONFIG.openMeteo.apiKey) {
+  if (!coords || !API_CONFIG?.openMeteo?.apiKey) {
     console.warn(`City ${city} not found or API key not configured`);
     return null;
   }
