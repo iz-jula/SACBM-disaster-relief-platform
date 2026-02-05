@@ -268,11 +268,17 @@ export default function Alerts() {
                   <div
                     className={`p-2 rounded-lg flex-shrink-0 ${getSeverityBadgeColor(severity)}`}
                   >
-                    {isNews ? <AlertCircle size={18} className="sm:w-5 sm:h-5" /> : <Cloud size={18} className="sm:w-5 sm:h-5" />}
+                    {isNews ? (
+                      <AlertCircle size={18} className="sm:w-5 sm:h-5" />
+                    ) : (
+                      <Cloud size={18} className="sm:w-5 sm:h-5" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-1 flex-wrap">
-                      <p className="font-semibold text-sm sm:text-base">{getTitle(alert)}</p>
+                      <p className="font-semibold text-sm sm:text-base">
+                        {getTitle(alert)}
+                      </p>
                       <span
                         className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${getSeverityBadgeColor(severity)}`}
                       >
@@ -288,7 +294,10 @@ export default function Alerts() {
                           </span>
                         ) : (
                           <>
-                            <MapPin size={12} className="flex-shrink-0 mt-0.5 sm:w-3.5 sm:h-3.5" />
+                            <MapPin
+                              size={12}
+                              className="flex-shrink-0 mt-0.5 sm:w-3.5 sm:h-3.5"
+                            />
                             <span>{getLocation(alert)}</span>
                           </>
                         )}

@@ -3,7 +3,15 @@ export interface Achievement {
   memberName: string;
   title: string;
   description: string;
-  category: "Food" | "Clothing" | "Materials" | "Medical" | "Shelter" | "Water" | "Evacuation" | "Multiple";
+  category:
+    | "Food"
+    | "Clothing"
+    | "Materials"
+    | "Medical"
+    | "Shelter"
+    | "Water"
+    | "Evacuation"
+    | "Multiple";
   location: string;
   partnerOrganisation?: string | null;
   peopleImpacted: number;
@@ -39,7 +47,7 @@ const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
 export async function getAchievements(
   status?: string,
-  category?: string
+  category?: string,
 ): Promise<Achievement[]> {
   const now = Date.now();
 
@@ -102,7 +110,10 @@ export async function getAchievementsMetrics(): Promise<AchievementsMetrics | nu
     const response = await fetch("/api/achievements/metrics");
 
     if (!response.ok) {
-      console.error("Failed to fetch achievement metrics:", response.statusText);
+      console.error(
+        "Failed to fetch achievement metrics:",
+        response.statusText,
+      );
       return null;
     }
 
@@ -120,7 +131,9 @@ export async function getAchievementsMetrics(): Promise<AchievementsMetrics | nu
   }
 }
 
-export async function createAchievement(achievement: Omit<Achievement, 'id' | 'createdAt'>): Promise<Achievement | null> {
+export async function createAchievement(
+  achievement: Omit<Achievement, "id" | "createdAt">,
+): Promise<Achievement | null> {
   try {
     const response = await fetch("/api/achievements", {
       method: "POST",

@@ -18,7 +18,8 @@ const Alerts = lazy(() => import("@/components/Alerts"));
 export default function Dashboard() {
   const [recentRequests, setRecentRequests] = useState<any[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
-  const [achievementsMetrics, setAchievementsMetrics] = useState<AchievementsMetrics | null>(null);
+  const [achievementsMetrics, setAchievementsMetrics] =
+    useState<AchievementsMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -110,7 +111,8 @@ export default function Dashboard() {
                   Relief Dashboard
                 </h1>
                 <p className="text-base sm:text-lg text-slate-600 mt-2 max-w-2xl">
-                  Real-time overview of disaster relief operations and community impact
+                  Real-time overview of disaster relief operations and community
+                  impact
                 </p>
               </div>
             </div>
@@ -222,7 +224,9 @@ export default function Dashboard() {
                 className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
               >
                 View All
-                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                <span className="transform group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
               </Link>
             </div>
 
@@ -230,8 +234,12 @@ export default function Dashboard() {
               {/* Total Achievements */}
               <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
                 <div className="relative">
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">Total Achievements</p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.totalAchievements}</p>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Total Achievements
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {achievementsMetrics.totalAchievements}
+                  </p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Community work</p>
                     <div className="bg-gradient-to-br from-primary to-orange-600 rounded-lg p-2 shadow-lg">
@@ -244,8 +252,14 @@ export default function Dashboard() {
               {/* People Impacted */}
               <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
                 <div className="relative">
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">People Impacted</p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">{(achievementsMetrics.totalPeopleImpacted || 0).toLocaleString()}</p>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    People Impacted
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {(
+                      achievementsMetrics.totalPeopleImpacted || 0
+                    ).toLocaleString()}
+                  </p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Direct impact</p>
                     <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-lg p-2 shadow-lg">
@@ -258,8 +272,15 @@ export default function Dashboard() {
               {/* Total Contribution */}
               <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
                 <div className="relative">
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">Total Contribution</p>
-                  <p className="text-3xl font-bold text-slate-900 mt-3">{((achievementsMetrics.totalContributed || 0) / 1000).toFixed(1)}K</p>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Total Contribution
+                  </p>
+                  <p className="text-3xl font-bold text-slate-900 mt-3">
+                    {(
+                      (achievementsMetrics.totalContributed || 0) / 1000
+                    ).toFixed(1)}
+                    K
+                  </p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">MZN invested</p>
                     <div className="bg-gradient-to-br from-primary to-orange-600 rounded-lg p-2 shadow-lg">
@@ -272,8 +293,12 @@ export default function Dashboard() {
               {/* In Progress */}
               <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
                 <div className="relative">
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">In Progress</p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.inProgressAchievements}</p>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    In Progress
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {achievementsMetrics.inProgressAchievements}
+                  </p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Ongoing work</p>
                     <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-lg p-2 shadow-lg">
@@ -328,7 +353,9 @@ export default function Dashboard() {
               className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
             >
               View Full
-              <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+              <span className="transform group-hover:translate-x-1 transition-transform">
+                →
+              </span>
             </Link>
           </div>
 
@@ -386,14 +413,18 @@ export default function Dashboard() {
                 <h2 className="text-2xl font-bold text-slate-900">
                   Recent Relief Requests
                 </h2>
-                <p className="text-slate-600 mt-1">Latest operations from the field</p>
+                <p className="text-slate-600 mt-1">
+                  Latest operations from the field
+                </p>
               </div>
               <Link
                 to="/requests"
                 className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
               >
                 View All
-                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                <span className="transform group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
               </Link>
             </div>
           </div>
@@ -432,7 +463,9 @@ export default function Dashboard() {
                             {statusText === "pending" ? "⏳" : "✓"} {statusText}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-600 mb-3">{request.location}</p>
+                        <p className="text-sm text-slate-600 mb-3">
+                          {request.location}
+                        </p>
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-100/80 text-blue-700 backdrop-blur">
                             {request.help_type}
@@ -444,7 +477,9 @@ export default function Dashboard() {
                           )}
                         </div>
                       </div>
-                      <p className="text-xs text-slate-500 shrink-0 whitespace-nowrap">{timeAgo}</p>
+                      <p className="text-xs text-slate-500 shrink-0 whitespace-nowrap">
+                        {timeAgo}
+                      </p>
                     </div>
                   </div>
                 );

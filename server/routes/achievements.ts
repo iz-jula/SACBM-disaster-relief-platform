@@ -3,7 +3,15 @@ export interface Achievement {
   memberName: string;
   title: string;
   description: string;
-  category: "Food" | "Clothing" | "Materials" | "Medical" | "Shelter" | "Water" | "Evacuation" | "Multiple";
+  category:
+    | "Food"
+    | "Clothing"
+    | "Materials"
+    | "Medical"
+    | "Shelter"
+    | "Water"
+    | "Evacuation"
+    | "Multiple";
   location: string;
   partnerOrganisation?: string | null;
   peopleImpacted: number;
@@ -19,7 +27,8 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     id: "ach1",
     memberName: "Maria Dos Santos",
     title: "Community Food Distribution",
-    description: "Distributed emergency food packages to 120 residents in Sofala Province",
+    description:
+      "Distributed emergency food packages to 120 residents in Sofala Province",
     category: "Food",
     location: "Sofala Province",
     peopleImpacted: 120,
@@ -32,7 +41,8 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     id: "ach2",
     memberName: "João Silva",
     title: "Emergency Shelter Construction",
-    description: "Built temporary shelters across Gaza Province for displaced families",
+    description:
+      "Built temporary shelters across Gaza Province for displaced families",
     category: "Shelter",
     location: "Gaza Province",
     peopleImpacted: 850,
@@ -45,7 +55,8 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     id: "ach3",
     memberName: "Amara Mokhtar",
     title: "Water Supply Installation",
-    description: "Installed water systems and sanitation facilities in rural areas",
+    description:
+      "Installed water systems and sanitation facilities in rural areas",
     category: "Water",
     location: "Multiple Districts",
     peopleImpacted: 2500,
@@ -71,7 +82,8 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     id: "ach5",
     memberName: "Fatima Ahmed",
     title: "Emergency Clothing Campaign",
-    description: "Collected and distributed clothing to 450+ households affected by floods",
+    description:
+      "Collected and distributed clothing to 450+ households affected by floods",
     category: "Clothing",
     location: "Inhambane District",
     peopleImpacted: 1800,
@@ -83,7 +95,8 @@ const MOCK_ACHIEVEMENTS: Achievement[] = [
     id: "ach6",
     memberName: "Daniel Ferreira",
     title: "Multiple Aid Materials Collection",
-    description: "Coordinated collection of various relief materials for 5 districts",
+    description:
+      "Coordinated collection of various relief materials for 5 districts",
     category: "Multiple",
     location: "Southern Region",
     peopleImpacted: 5600,
@@ -114,7 +127,7 @@ export async function handleGetAchievements(req: any, res: any) {
     // Sort by creation date (newest first)
     achievements.sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     // Apply limit if provided
@@ -132,22 +145,22 @@ export async function handleGetAchievements(req: any, res: any) {
 export async function handleAchievementsMetrics(req: any, res: any) {
   try {
     const completedAchievements = MOCK_ACHIEVEMENTS.filter(
-      (a) => a.status === "completed"
+      (a) => a.status === "completed",
     );
     const totalPeopleImpacted = MOCK_ACHIEVEMENTS.reduce(
       (sum, a) => sum + a.peopleImpacted,
-      0
+      0,
     );
     const totalContributed = MOCK_ACHIEVEMENTS.reduce(
       (sum, a) => sum + a.amountContributed,
-      0
+      0,
     );
 
     res.json({
       totalAchievements: MOCK_ACHIEVEMENTS.length,
       completedAchievements: completedAchievements.length,
       inProgressAchievements: MOCK_ACHIEVEMENTS.filter(
-        (a) => a.status === "in_progress"
+        (a) => a.status === "in_progress",
       ).length,
       totalPeopleImpacted,
       totalContributed,
@@ -164,7 +177,15 @@ export async function handleAchievementsMetrics(req: any, res: any) {
 
 export async function handleCreateAchievement(req: any, res: any) {
   try {
-    const { memberName, title, description, category, location, peopleImpacted, amountContributed } = req.body;
+    const {
+      memberName,
+      title,
+      description,
+      category,
+      location,
+      peopleImpacted,
+      amountContributed,
+    } = req.body;
 
     // Validate required fields
     if (!memberName || !title || !description || !category || !location) {

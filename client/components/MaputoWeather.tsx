@@ -1,6 +1,21 @@
 import { useState, useEffect } from "react";
-import { Search, Cloud, CloudRain, Sun, Droplets, Wind, Eye, AlertCircle, Loader } from "lucide-react";
-import { getCurrentWeather, getForecast, WeatherData, ForecastDay } from "@/services/weatherService";
+import {
+  Search,
+  Cloud,
+  CloudRain,
+  Sun,
+  Droplets,
+  Wind,
+  Eye,
+  AlertCircle,
+  Loader,
+} from "lucide-react";
+import {
+  getCurrentWeather,
+  getForecast,
+  WeatherData,
+  ForecastDay,
+} from "@/services/weatherService";
 import { MOZAMBIQUE_CITIES } from "@/config/api";
 
 const allCities = Object.keys(MOZAMBIQUE_CITIES);
@@ -22,13 +37,15 @@ function getWeatherIcon(condition: string, size: number = 12) {
 export default function MaputoWeather() {
   const [selectedCity, setSelectedCity] = useState("Maputo");
   const [searchInput, setSearchInput] = useState("");
-  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
+  const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(
+    null,
+  );
   const [forecast, setForecast] = useState<ForecastDay[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const filteredCities = allCities.filter((city) =>
-    city.toLowerCase().includes(searchInput.toLowerCase())
+    city.toLowerCase().includes(searchInput.toLowerCase()),
   );
 
   useEffect(() => {
@@ -48,7 +65,9 @@ export default function MaputoWeather() {
       if (weather) {
         setCurrentWeather(weather);
       } else {
-        setError("Unable to load weather data. Please check your OpenWeatherMap API key.");
+        setError(
+          "Unable to load weather data. Please check your OpenWeatherMap API key.",
+        );
       }
 
       if (forecastData) {
@@ -72,7 +91,10 @@ export default function MaputoWeather() {
       <div className="p-6 sm:p-8 space-y-6">
         {/* City Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
+          <Search
+            className="absolute left-3 top-2.5 text-slate-400"
+            size={18}
+          />
           <input
             type="text"
             placeholder="Search by city..."
@@ -101,11 +123,17 @@ export default function MaputoWeather() {
         {/* Error Message */}
         {error && (
           <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 sm:gap-3">
-            <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5 sm:w-5 sm:h-5" />
+            <AlertCircle
+              size={18}
+              className="text-red-600 flex-shrink-0 mt-0.5 sm:w-5 sm:h-5"
+            />
             <div className="min-w-0">
-              <p className="font-medium text-red-900 text-sm sm:text-base">{error}</p>
+              <p className="font-medium text-red-900 text-sm sm:text-base">
+                {error}
+              </p>
               <p className="text-xs sm:text-sm text-red-700 mt-1">
-                To enable real-time weather, add your OpenWeatherMap API key to .env:
+                To enable real-time weather, add your OpenWeatherMap API key to
+                .env:
                 <code className="block mt-1 text-xs bg-white p-1 rounded font-mono overflow-x-auto">
                   VITE_OPENWEATHER_API_KEY=your_api_key
                 </code>
@@ -131,13 +159,21 @@ export default function MaputoWeather() {
                   <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
                     {currentWeather.temp}°C
                   </p>
-                  <p className="text-xs sm:text-sm text-slate-600 mt-1">Low: {currentWeather.low}°C</p>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                    Low: {currentWeather.low}°C
+                  </p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
-                    {currentWeather.condition === 'sunny' && <Sun className="w-10 h-10 sm:w-14 sm:h-14 text-yellow-400" />}
-                    {currentWeather.condition === 'cloudy' && <Cloud className="w-10 h-10 sm:w-14 sm:h-14 text-slate-400" />}
-                    {currentWeather.condition === 'rainy' && <CloudRain className="w-10 h-10 sm:w-14 sm:h-14 text-blue-400" />}
+                    {currentWeather.condition === "sunny" && (
+                      <Sun className="w-10 h-10 sm:w-14 sm:h-14 text-yellow-400" />
+                    )}
+                    {currentWeather.condition === "cloudy" && (
+                      <Cloud className="w-10 h-10 sm:w-14 sm:h-14 text-slate-400" />
+                    )}
+                    {currentWeather.condition === "rainy" && (
+                      <CloudRain className="w-10 h-10 sm:w-14 sm:h-14 text-blue-400" />
+                    )}
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-slate-900 mt-2 capitalize">
                     {currentWeather.description}
@@ -148,24 +184,39 @@ export default function MaputoWeather() {
               <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-4 border-t border-blue-200">
                 <div className="text-center">
                   <Droplets className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
-                  <p className="text-xs text-slate-600 uppercase tracking-tight">Humidity</p>
-                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">{currentWeather.humidity}%</p>
+                  <p className="text-xs text-slate-600 uppercase tracking-tight">
+                    Humidity
+                  </p>
+                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">
+                    {currentWeather.humidity}%
+                  </p>
                 </div>
                 <div className="text-center">
                   <Wind className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
-                  <p className="text-xs text-slate-600 uppercase tracking-tight">Wind</p>
-                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">{currentWeather.windSpeed} km/h</p>
+                  <p className="text-xs text-slate-600 uppercase tracking-tight">
+                    Wind
+                  </p>
+                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">
+                    {currentWeather.windSpeed} km/h
+                  </p>
                 </div>
                 <div className="text-center">
                   <CloudRain className="w-4 h-4 sm:w-5 sm:h-5 mx-auto text-blue-600 mb-1" />
-                  <p className="text-xs text-slate-600 uppercase tracking-tight">Rain</p>
-                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">{currentWeather.rainChance}%</p>
+                  <p className="text-xs text-slate-600 uppercase tracking-tight">
+                    Rain
+                  </p>
+                  <p className="text-sm sm:text-lg font-bold text-slate-900 mt-0.5">
+                    {currentWeather.rainChance}%
+                  </p>
                 </div>
               </div>
 
               <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white rounded-lg">
                 <p className="text-xs sm:text-sm text-slate-700">
-                  <span className="font-semibold">Pressure:</span> {currentWeather.pressure} mb | <span className="font-semibold">Visibility:</span> {currentWeather.visibility} km
+                  <span className="font-semibold">Pressure:</span>{" "}
+                  {currentWeather.pressure} mb |{" "}
+                  <span className="font-semibold">Visibility:</span>{" "}
+                  {currentWeather.visibility} km
                 </p>
               </div>
             </div>
@@ -173,21 +224,33 @@ export default function MaputoWeather() {
             {/* 5-Day Forecast */}
             {forecast && (
               <div>
-                <h3 className="font-semibold text-sm sm:text-base text-slate-900 mb-3">5-Day Forecast</h3>
+                <h3 className="font-semibold text-sm sm:text-base text-slate-900 mb-3">
+                  5-Day Forecast
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                   {forecast.map((day, index) => (
                     <div
                       key={index}
                       className="p-2 sm:p-3 rounded-lg border border-slate-200 hover:border-primary hover:shadow-md transition-all text-center"
                     >
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">{day.day}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                        {day.day}
+                      </p>
                       <div className="flex justify-center my-1 sm:my-2">
-                        {day.condition === 'sunny' && <Sun className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400" />}
-                        {day.condition === 'cloudy' && <Cloud className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />}
-                        {day.condition === 'rainy' && <CloudRain className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />}
+                        {day.condition === "sunny" && (
+                          <Sun className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400" />
+                        )}
+                        {day.condition === "cloudy" && (
+                          <Cloud className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
+                        )}
+                        {day.condition === "rainy" && (
+                          <CloudRain className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
+                        )}
                       </div>
                       <p className="text-xs text-slate-600">{day.date}</p>
-                      <p className="text-xs sm:text-sm font-bold text-slate-900 mt-1">{day.high}°</p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-900 mt-1">
+                        {day.high}°
+                      </p>
                       <p className="text-xs text-slate-600">{day.low}°</p>
                       <p className="text-xs text-blue-600 mt-0.5 sm:mt-1 flex items-center justify-center gap-0.5">
                         <Droplets size={10} className="sm:w-3 sm:h-3" />
@@ -202,20 +265,36 @@ export default function MaputoWeather() {
             {/* Weather Details */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">Wind Dir</p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">{currentWeather.windDirection}</p>
+                <p className="text-xs text-slate-600 uppercase tracking-tight">
+                  Wind Dir
+                </p>
+                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
+                  {currentWeather.windDirection}
+                </p>
               </div>
               <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">Visibility</p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">{currentWeather.visibility} km</p>
+                <p className="text-xs text-slate-600 uppercase tracking-tight">
+                  Visibility
+                </p>
+                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
+                  {currentWeather.visibility} km
+                </p>
               </div>
               <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">Pressure</p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">{currentWeather.pressure} mb</p>
+                <p className="text-xs text-slate-600 uppercase tracking-tight">
+                  Pressure
+                </p>
+                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
+                  {currentWeather.pressure} mb
+                </p>
               </div>
               <div className="p-2 sm:p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 uppercase tracking-tight">High</p>
-                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">{currentWeather.high}°C</p>
+                <p className="text-xs text-slate-600 uppercase tracking-tight">
+                  High
+                </p>
+                <p className="text-base sm:text-lg font-bold text-slate-900 mt-1">
+                  {currentWeather.high}°C
+                </p>
               </div>
             </div>
           </>
@@ -225,9 +304,12 @@ export default function MaputoWeather() {
         {!currentWeather && !isLoading && (
           <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg text-center">
             <AlertCircle size={32} className="mx-auto text-blue-600 mb-3" />
-            <p className="font-medium text-blue-900">Real-Time Weather Data Not Configured</p>
+            <p className="font-medium text-blue-900">
+              Real-Time Weather Data Not Configured
+            </p>
             <p className="text-sm text-blue-700 mt-2">
-              To enable live weather data from OpenWeatherMap, add your API key to your .env file
+              To enable live weather data from OpenWeatherMap, add your API key
+              to your .env file
             </p>
           </div>
         )}

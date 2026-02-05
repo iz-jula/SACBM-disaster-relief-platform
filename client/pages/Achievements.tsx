@@ -76,7 +76,10 @@ export default function Achievements() {
     setIsLoading(true);
     try {
       const [achievementsData, metricsData] = await Promise.all([
-        getAchievements(selectedStatus || undefined, selectedCategory || undefined),
+        getAchievements(
+          selectedStatus || undefined,
+          selectedCategory || undefined,
+        ),
         getAchievementsMetrics(),
       ]);
       setAchievements(achievementsData);
@@ -106,7 +109,15 @@ export default function Achievements() {
         memberName: formData.memberName,
         title: formData.title,
         description: formData.description,
-        category: formData.category as "Food" | "Clothing" | "Materials" | "Medical" | "Shelter" | "Water" | "Evacuation" | "Multiple",
+        category: formData.category as
+          | "Food"
+          | "Clothing"
+          | "Materials"
+          | "Medical"
+          | "Shelter"
+          | "Water"
+          | "Evacuation"
+          | "Multiple",
         location: formData.location,
         partnerOrganisation: formData.partnerOrganisation || null,
         peopleImpacted: parseInt(formData.peopleImpacted) || 0,
@@ -115,7 +126,7 @@ export default function Achievements() {
       };
 
       const result = await createAchievement(newAchievementData);
-      
+
       if (result) {
         setFormData({
           memberName: "",
@@ -135,7 +146,16 @@ export default function Achievements() {
     }
   };
 
-  const categories = ["Food", "Clothing", "Materials", "Medical", "Shelter", "Water", "Evacuation", "Multiple"];
+  const categories = [
+    "Food",
+    "Clothing",
+    "Materials",
+    "Medical",
+    "Shelter",
+    "Water",
+    "Evacuation",
+    "Multiple",
+  ];
   const statuses = [
     { value: "completed", label: "Completed" },
     { value: "in_progress", label: "In Progress" },
@@ -161,7 +181,9 @@ export default function Achievements() {
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
               <div className="flex items-start sm:items-center justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">Total Achievements</p>
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                    Total Achievements
+                  </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
                     {metrics.totalAchievements}
                   </p>
@@ -170,13 +192,17 @@ export default function Achievements() {
                   <Award size={20} className="text-blue-600" />
                 </div>
               </div>
-              <p className="text-xs text-slate-500 mt-2 sm:mt-3">Member contributions</p>
+              <p className="text-xs text-slate-500 mt-2 sm:mt-3">
+                Member contributions
+              </p>
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
               <div className="flex items-start sm:items-center justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">People Impacted</p>
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                    People Impacted
+                  </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
                     {(metrics.totalPeopleImpacted || 0).toLocaleString()}
                   </p>
@@ -185,13 +211,17 @@ export default function Achievements() {
                   <Users size={20} className="text-green-600" />
                 </div>
               </div>
-              <p className="text-xs text-slate-500 mt-2 sm:mt-3">Direct impact</p>
+              <p className="text-xs text-slate-500 mt-2 sm:mt-3">
+                Direct impact
+              </p>
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
               <div className="flex items-start sm:items-center justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">Total Contribution</p>
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                    Total Contribution
+                  </p>
                   <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
                     {((metrics.totalContributed || 0) / 1000).toFixed(1)}K MZN
                   </p>
@@ -200,13 +230,17 @@ export default function Achievements() {
                   <TrendingUp size={20} className="text-primary" />
                 </div>
               </div>
-              <p className="text-xs text-slate-500 mt-2 sm:mt-3">Funds invested</p>
+              <p className="text-xs text-slate-500 mt-2 sm:mt-3">
+                Funds invested
+              </p>
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
               <div className="flex items-start sm:items-center justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">Completed</p>
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                    Completed
+                  </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
                     {metrics.completedAchievements}
                   </p>
@@ -215,7 +249,9 @@ export default function Achievements() {
                   <CheckCircle size={20} className="text-purple-600" />
                 </div>
               </div>
-              <p className="text-xs text-slate-500 mt-2 sm:mt-3">Successfully done</p>
+              <p className="text-xs text-slate-500 mt-2 sm:mt-3">
+                Successfully done
+              </p>
             </div>
           </div>
         )}
@@ -228,7 +264,9 @@ export default function Achievements() {
           >
             <div className="flex items-center gap-3">
               <Plus size={20} className="text-primary" />
-              <h3 className="font-semibold text-slate-900">Submit Your Achievement</h3>
+              <h3 className="font-semibold text-slate-900">
+                Submit Your Achievement
+              </h3>
             </div>
             <span className="text-slate-600">{showForm ? "−" : "+"}</span>
           </button>
@@ -237,34 +275,49 @@ export default function Achievements() {
             <form onSubmit={handleFormSubmit} className="p-4 sm:p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Your Name *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Your Name *
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.memberName}
-                    onChange={(e) => setFormData({ ...formData, memberName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, memberName: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="John Doe"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Achievement Title *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Achievement Title *
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Community Training Program"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Category *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Category *
+                  </label>
                   <select
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        category: e.target.value as any,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option>Food</option>
@@ -279,47 +332,72 @@ export default function Achievements() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Location *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Location *
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Sofala Province"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Partner Organisation (if applicable)</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Partner Organisation (if applicable)
+                  </label>
                   <input
                     type="text"
                     value={formData.partnerOrganisation}
-                    onChange={(e) => setFormData({ ...formData, partnerOrganisation: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        partnerOrganisation: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="e.g., UNICEF, Red Cross"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">People Impacted *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    People Impacted *
+                  </label>
                   <input
                     type="number"
                     required
                     value={formData.peopleImpacted}
-                    onChange={(e) => setFormData({ ...formData, peopleImpacted: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        peopleImpacted: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="120"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Amount (MZN) *</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Amount (MZN) *
+                  </label>
                   <input
                     type="number"
                     required
                     value={formData.amountContributed}
-                    onChange={(e) => setFormData({ ...formData, amountContributed: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        amountContributed: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="8500"
                   />
@@ -327,11 +405,15 @@ export default function Achievements() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Description *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Description *
+                </label>
                 <textarea
                   required
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Describe your achievement..."
                   rows={3}
@@ -339,7 +421,9 @@ export default function Achievements() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Upload Media</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Upload Media
+                </label>
                 <div className="border-2 border-dashed border-slate-300 rounded-lg p-4">
                   <input
                     type="file"
@@ -349,17 +433,27 @@ export default function Achievements() {
                     id="media-upload"
                     accept="image/*,.pdf"
                   />
-                  <label htmlFor="media-upload" className="flex items-center justify-center gap-2 cursor-pointer">
+                  <label
+                    htmlFor="media-upload"
+                    className="flex items-center justify-center gap-2 cursor-pointer"
+                  >
                     <ImagePlus size={20} className="text-slate-600" />
-                    <span className="text-sm text-slate-600">Click to upload</span>
+                    <span className="text-sm text-slate-600">
+                      Click to upload
+                    </span>
                   </label>
                 </div>
 
                 {uploadedMedia.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {uploadedMedia.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                        <span className="text-sm text-slate-700">{file.name}</span>
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-slate-50 rounded"
+                      >
+                        <span className="text-sm text-slate-700">
+                          {file.name}
+                        </span>
                         <button
                           type="button"
                           onClick={() => removeMedia(index)}
@@ -410,7 +504,9 @@ export default function Achievements() {
           <h3 className="font-semibold text-slate-900 mb-4">Filters</h3>
           <div className="space-y-3">
             <div>
-              <p className="text-sm font-medium text-slate-700 mb-2">Category</p>
+              <p className="text-sm font-medium text-slate-700 mb-2">
+                Category
+              </p>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedCategory(null)}
@@ -435,9 +531,12 @@ export default function Achievements() {
         {/* Member Work List */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900">Member Work</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+              Member Work
+            </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              {achievements.length} achievement{achievements.length !== 1 ? "s" : ""}
+              {achievements.length} achievement
+              {achievements.length !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -446,18 +545,31 @@ export default function Achievements() {
               <div className="p-6 text-center text-slate-600">Loading...</div>
             ) : achievements.length > 0 ? (
               achievements.map((achievement) => (
-                <div key={achievement.id} className={`p-4 sm:p-6 ${STATUS_COLORS[achievement.status]}`}>
+                <div
+                  key={achievement.id}
+                  className={`p-4 sm:p-6 ${STATUS_COLORS[achievement.status]}`}
+                >
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5">{getStatusIcon(achievement.status)}</div>
+                    <div className="mt-0.5">
+                      {getStatusIcon(achievement.status)}
+                    </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <h3 className="font-semibold text-sm sm:text-base">{achievement.title}</h3>
-                        <span className={`px-2 py-1 text-xs rounded font-medium ${CATEGORY_COLORS[achievement.category]}`}>
+                        <h3 className="font-semibold text-sm sm:text-base">
+                          {achievement.title}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 text-xs rounded font-medium ${CATEGORY_COLORS[achievement.category]}`}
+                        >
                           {achievement.category}
                         </span>
                       </div>
-                      <p className="text-xs sm:text-sm text-slate-700 mb-2">by {achievement.memberName}</p>
-                      <p className="text-xs sm:text-sm opacity-90 mb-3">{achievement.description}</p>
+                      <p className="text-xs sm:text-sm text-slate-700 mb-2">
+                        by {achievement.memberName}
+                      </p>
+                      <p className="text-xs sm:text-sm opacity-90 mb-3">
+                        {achievement.description}
+                      </p>
                       <div className="grid grid-cols-3 gap-2 text-xs">
                         <div className="flex items-center gap-1">
                           <MapPin size={14} />
@@ -468,7 +580,8 @@ export default function Achievements() {
                           {achievement.peopleImpacted.toLocaleString()}
                         </div>
                         <div className="font-semibold text-primary">
-                          {(achievement.amountContributed / 1000).toFixed(1)}K MZN
+                          {(achievement.amountContributed / 1000).toFixed(1)}K
+                          MZN
                         </div>
                       </div>
                     </div>
@@ -476,7 +589,9 @@ export default function Achievements() {
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center text-slate-600">No achievements found</div>
+              <div className="p-6 text-center text-slate-600">
+                No achievements found
+              </div>
             )}
           </div>
         </div>
