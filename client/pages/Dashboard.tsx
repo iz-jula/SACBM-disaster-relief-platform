@@ -205,27 +205,28 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Achievements Summary */}
+        {/* Achievements Summary - Modern Section */}
         {achievementsMetrics && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-                  Member Achievements
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Community Achievements
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                  Community work and contributions
+                <p className="text-slate-600 mt-2">
+                  Member work and contributions beyond relief requests
                 </p>
               </div>
               <Link
                 to="/achievements"
-                className="text-xs sm:text-sm text-primary font-medium hover:text-primary/80 transition-colors"
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
               >
-                View All →
+                View All
+                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
                 <div className="flex items-start sm:items-center justify-between gap-3">
                   <div className="flex-1">
