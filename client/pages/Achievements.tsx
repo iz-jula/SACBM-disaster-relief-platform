@@ -290,6 +290,17 @@ export default function Achievements() {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Partner Organisation (if applicable)</label>
+                  <input
+                    type="text"
+                    value={formData.partnerOrganisation}
+                    onChange={(e) => setFormData({ ...formData, partnerOrganisation: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="e.g., UNICEF, Red Cross"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">People Impacted *</label>
                   <input
                     type="number"
