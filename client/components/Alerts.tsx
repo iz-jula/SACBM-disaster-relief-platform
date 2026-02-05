@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AlertCircle,
   Cloud,
   MapPin,
   TrendingUp,
-  ExternalLink,
   RefreshCw,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   getNewsAlerts,
   getNewsAlertsLastUpdate,
   NewsAlert,
 } from "@/services/weatherService";
+import { useEffect } from "react";
 
 interface FallbackAlert {
   id: string;
@@ -73,6 +75,7 @@ export default function Alerts() {
   const [alerts, setAlerts] = useState<AlertType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     loadAlerts();
@@ -165,6 +168,13 @@ export default function Alerts() {
     return safeString(alert.description) || "";
   };
 
+  const getBody = (alert: AlertType): string => {
+    if ("body" in alert) {
+      return safeString(alert.body) || "";
+    }
+    return "";
+  };
+
   const getTime = (alert: AlertType): string => {
     if ("time" in alert) {
       return safeString(alert.time);
@@ -208,13 +218,6 @@ export default function Alerts() {
     return "";
   };
 
-  const getUrl = (alert: AlertType): string | undefined => {
-    if ("url" in alert) {
-      return alert.url;
-    }
-    return undefined;
-  };
-
   return (
     <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden flex flex-col max-h-[600px]">
       <div className="px-6 sm:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-red-50/50 to-transparent flex-shrink-0">
@@ -228,7 +231,7 @@ export default function Alerts() {
               <h2 className="text-2xl font-bold text-slate-900">Live Alerts</h2>
             </div>
             <p className="text-slate-600 text-sm">
-              Real-time news about floods, weather & emergencies
+              Latest news from Mozambique (last 3 days)
             </p>
           </div>
 
@@ -256,8 +259,9 @@ export default function Alerts() {
         {alerts.length > 0 ? (
           alerts.map((alert) => {
             const severity = getSeverity(alert);
-            const isNews = "url" in alert;
-            const url = getUrl(alert);
+            const isNews = "source" in alert;
+            const isExpanded = expandedId === alert.id;
+            const fullText = getBody(alert);
 
             return (
               <div
@@ -305,23 +309,40 @@ export default function Alerts() {
                     )}
 
                     {getDescription(alert) && (
-                      <p className="text-xs sm:text-sm opacity-90 mb-2 line-clamp-2">
+                      <p
+                        className={`text-xs sm:text-sm opacity-90 mb-2 ${
+                          isExpanded ? "" : "line-clamp-2"
+                        }`}
+                      >
                         {getDescription(alert)}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
+                    {/* Expanded full article text */}
+                    {isExpanded && fullText && (
+                      <div className="mt-3 p-3 bg-white/40 rounded-lg text-xs sm:text-sm">
+                        <p className="text-slate-700 leading-relaxed">
+                          {fullText}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-xs sm:text-sm gap-2 mt-2">
                       <p className="opacity-70">{getTime(alert)}</p>
-                      {url && (
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                      {fullText && (
+                        <button
+                          onClick={() =>
+                            setExpandedId(isExpanded ? null : alert.id)
+                          }
                           className="flex items-center gap-1 font-medium opacity-75 hover:opacity-100 transition-opacity whitespace-nowrap"
                         >
-                          Read more
-                          <ExternalLink size={12} className="sm:w-3 sm:h-3" />
-                        </a>
+                          {isExpanded ? "Show less" : "Read more"}
+                          {isExpanded ? (
+                            <ChevronUp size={14} className="sm:w-4 sm:h-4" />
+                          ) : (
+                            <ChevronDown size={14} className="sm:w-4 sm:h-4" />
+                          )}
+                        </button>
                       )}
                     </div>
                   </div>
@@ -342,7 +363,7 @@ export default function Alerts() {
 
       <div className="px-6 py-4 border-t border-slate-200/50 bg-blue-50/30 text-xs text-blue-700 flex items-center gap-2 flex-shrink-0">
         <AlertCircle size={14} className="flex-shrink-0" />
-        <span>Updated automatically from news sources</span>
+        <span>Updated automatically from news sources (last 3 days)</span>
       </div>
     </div>
   );
