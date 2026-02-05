@@ -404,13 +404,29 @@ export default function Achievements() {
         {/* Submit Achievement Form */}
         <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => {
+              if (editingAchievementId) {
+                setEditingAchievementId(null);
+                setFormData({
+                  memberName: "",
+                  title: "",
+                  description: "",
+                  category: "Food",
+                  location: "",
+                  partnerOrganisation: "",
+                  peopleImpacted: "",
+                  amountContributed: "",
+                  status: "pending",
+                });
+              }
+              setShowForm(!showForm);
+            }}
             className="w-full flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5 bg-gradient-to-r from-blue-50 to-primary/5 hover:from-blue-100 hover:to-primary/10 transition-all border-b border-slate-200"
           >
             <div className="flex items-center gap-3">
               <Plus size={20} className="text-primary" />
               <h3 className="font-semibold text-slate-900">
-                Submit Your Achievement
+                {editingAchievementId ? "Edit Achievement" : "Submit Your Achievement"}
               </h3>
             </div>
             <span className="text-slate-600">{showForm ? "−" : "+"}</span>
