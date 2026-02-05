@@ -388,45 +388,6 @@ export default function Requests() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const newRequest = await createRequest({
-        originator: formData.originator,
-        email: formData.email || "",
-        full_name: formData.full_name || "",
-        location: formData.location,
-        help_type: formData.help_type,
-        evacuation_type: formData.evacuation_type,
-        people: formData.people,
-        value: formData.value,
-        status: formData.status,
-      });
-
-      if (newRequest) {
-        setRequests([newRequest, ...requests]);
-        setFormData({
-          originator: "",
-          email: "",
-          full_name: "",
-          location: "",
-          help_type: "",
-          evacuation_type: "",
-          people: "",
-          value: "",
-          status: false,
-        });
-        setShowForm(false);
-      }
-    } catch (error) {
-      console.error("Error creating request:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   // Group and sort requests
   const pendingRequests = requests.filter((r) => r.status === false);
   const metRequests = requests.filter((r) => r.status === true);
