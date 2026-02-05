@@ -132,8 +132,9 @@ export default function Achievements() {
           memberName: "",
           title: "",
           description: "",
-          category: "Training",
+          category: "Food",
           location: "",
+          partnerOrganisation: "",
           peopleImpacted: "",
           amountContributed: "",
         });
