@@ -225,7 +225,7 @@ export default function Achievements() {
       return;
     }
 
-    // Execute delete action
+    // Execute action
     try {
       if (pendingAction.type === "delete") {
         const success = await deleteAchievement(pendingAction.achievementId);
@@ -239,6 +239,50 @@ export default function Achievements() {
           await loadData();
         } else {
           setAuthError("Failed to delete achievement");
+        }
+      } else if (pendingAction.type === "edit") {
+        // Update the achievement
+        const updateData = {
+          memberName: formData.memberName,
+          title: formData.title,
+          description: formData.description,
+          category: formData.category as
+            | "Food"
+            | "Clothing"
+            | "Materials"
+            | "Medical"
+            | "Shelter"
+            | "Water"
+            | "Evacuation"
+            | "Multiple",
+          location: formData.location,
+          partnerOrganisation: formData.partnerOrganisation || null,
+          peopleImpacted: parseInt(formData.peopleImpacted) || 0,
+          amountContributed: parseInt(formData.amountContributed) || 0,
+          status: formData.status,
+        };
+
+        const result = await updateAchievement(pendingAction.achievementId, updateData);
+        if (result) {
+          setEditingAchievementId(null);
+          setFormData({
+            memberName: "",
+            title: "",
+            description: "",
+            category: "Food",
+            location: "",
+            partnerOrganisation: "",
+            peopleImpacted: "",
+            amountContributed: "",
+            status: "pending",
+          });
+          setShowForm(false);
+          setShowAuthModal(false);
+          setAuthPassword("");
+          setPendingAction(null);
+          await loadData();
+        } else {
+          setAuthError("Failed to update achievement");
         }
       }
     } catch (error) {
