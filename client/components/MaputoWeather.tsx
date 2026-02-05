@@ -13,6 +13,7 @@ import {
   Loader,
   Zap,
   CloudFog,
+  X,
 } from "lucide-react";
 import {
   getCurrentWeather,
