@@ -105,7 +105,7 @@ export default function Achievements() {
         memberName: formData.memberName,
         title: formData.title,
         description: formData.description,
-        category: formData.category as "Training" | "Community Work" | "Infrastructure" | "Advocacy" | "Research",
+        category: formData.category as "Food" | "Clothing" | "Materials" | "Medical" | "Shelter" | "Water" | "Evacuation" | "Multiple",
         location: formData.location,
         peopleImpacted: parseInt(formData.peopleImpacted) || 0,
         amountContributed: parseInt(formData.amountContributed) || 0,
