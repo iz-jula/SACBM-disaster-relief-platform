@@ -63,6 +63,7 @@ export default function Achievements() {
     description: "",
     category: "Food" as const,
     location: "",
+    partnerOrganisation: "",
     peopleImpacted: "",
     amountContributed: "",
   });
