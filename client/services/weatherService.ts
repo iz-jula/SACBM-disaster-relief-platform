@@ -208,7 +208,7 @@ const FORECAST_CACHE_DURATION = 60 * 60 * 1000; // 60 minutes
 
 export async function getForecast(city: string): Promise<ForecastDay[] | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
-  if (!coords || !API_CONFIG.openWeather.apiKey) {
+  if (!coords || !API_CONFIG.openMeteo.apiKey) {
     return null;
   }
 
@@ -219,8 +219,18 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
   }
 
   try {
+    // Open-Meteo API format for 5-day forecast
+    const params = new URLSearchParams({
+      latitude: coords.lat.toString(),
+      longitude: coords.lon.toString(),
+      daily: 'temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max',
+      temperature_unit: 'celsius',
+      timezone: 'Africa/Johannesburg',
+      apikey: API_CONFIG.openMeteo.apiKey,
+    });
+
     const response = await fetch(
-      `${API_CONFIG.openWeather.baseUrl}/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_CONFIG.openWeather.apiKey}&units=metric`,
+      `${API_CONFIG.openMeteo.baseUrl}/v1/forecast?${params}`,
     );
 
     if (!response.ok) {
@@ -228,32 +238,12 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
     }
 
     const data = await response.json();
-    const dailyForecasts: Record<string, any> = {};
-
-    // Group forecasts by day
-    data.list.forEach((item: any) => {
-      const date = new Date(item.dt * 1000);
-      const dayKey = date.toISOString().split("T")[0];
-
-      if (!dailyForecasts[dayKey]) {
-        dailyForecasts[dayKey] = {
-          temps: [],
-          conditions: [],
-          rain: [],
-          date: dayKey,
-        };
-      }
-
-      dailyForecasts[dayKey].temps.push(item.main.temp);
-      dailyForecasts[dayKey].conditions.push(item.weather[0].id);
-      dailyForecasts[dayKey].rain.push(item.clouds.all);
-    });
 
     // Convert to ForecastDay array
-    const forecastData = Object.entries(dailyForecasts)
+    const forecastData = data.daily.time
       .slice(0, 5)
-      .map(([_, dayData], index) => {
-        const date = new Date(dayData.date);
+      .map((dateStr: string, index: number) => {
+        const date = new Date(dateStr);
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const dayName =
           index === 0
@@ -264,14 +254,11 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
 
         return {
           day: dayName,
-          date: dayData.date,
-          high: Math.round(Math.max(...dayData.temps)),
-          low: Math.round(Math.min(...dayData.temps)),
-          condition: getWeatherCondition(dayData.conditions[0]),
-          rainChance: Math.round(
-            dayData.rain.reduce((a: number, b: number) => a + b) /
-              dayData.rain.length,
-          ),
+          date: dateStr,
+          high: Math.round(data.daily.temperature_2m_max[index]),
+          low: Math.round(data.daily.temperature_2m_min[index]),
+          condition: getWeatherCondition(data.daily.weather_code[index]),
+          rainChance: data.daily.precipitation_probability_max[index],
         };
       });
 
