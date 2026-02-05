@@ -265,11 +265,14 @@ export default function Achievements() {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    <option>Training</option>
-                    <option>Community Work</option>
-                    <option>Infrastructure</option>
-                    <option>Advocacy</option>
-                    <option>Research</option>
+                    <option>Food</option>
+                    <option>Clothing</option>
+                    <option>Materials</option>
+                    <option>Medical</option>
+                    <option>Shelter</option>
+                    <option>Water</option>
+                    <option>Evacuation</option>
+                    <option>Multiple</option>
                   </select>
                 </div>
 
