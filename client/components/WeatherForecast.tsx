@@ -26,6 +26,7 @@ export default function WeatherForecast() {
   );
   const [forecast, setForecast] = useState<ForecastDay[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState<ForecastDay | null>(null);
 
   useEffect(() => {
     loadWeatherData();
