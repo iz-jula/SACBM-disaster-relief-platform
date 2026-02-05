@@ -237,6 +237,108 @@ export default function WeatherForecast() {
                 </p>
               </div>
             )}
+
+            {/* Forecast Detail Modal */}
+            {selectedDay && (
+              <div
+                className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+                onClick={() => setSelectedDay(null)}
+              >
+                <div
+                  className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-slate-900">
+                      {selectedDay.day} Forecast
+                    </h3>
+                    <button
+                      onClick={() => setSelectedDay(null)}
+                      className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <X size={20} className="text-slate-600" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Weather Icon and Description */}
+                    <div className="flex flex-col items-center gap-3 py-4 border-b border-slate-200">
+                      {getLargeWeatherIcon(selectedDay.weatherCode)}
+                      <p className="text-base font-semibold text-slate-900">
+                        {getWeatherIconInfo(selectedDay.weatherCode).description}
+                      </p>
+                    </div>
+
+                    {/* Temperature Range */}
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <p className="text-xs text-slate-600 font-semibold mb-1">
+                            HIGH
+                          </p>
+                          <p className="text-3xl font-bold text-slate-900">
+                            {selectedDay.high}°C
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-slate-600 font-semibold mb-1">
+                            LOW
+                          </p>
+                          <p className="text-3xl font-bold text-slate-900">
+                            {selectedDay.low}°C
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Precipitation Details */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CloudRain size={18} className="text-blue-500" />
+                          <span className="font-semibold text-slate-900">
+                            Rain Chance
+                          </span>
+                        </div>
+                        <span className="font-bold text-slate-900">
+                          {selectedDay.rainChance}%
+                        </span>
+                      </div>
+
+                      {selectedDay.precipitation !== undefined &&
+                        selectedDay.precipitation > 0 && (
+                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Droplets size={18} className="text-blue-600" />
+                              <span className="font-semibold text-slate-900">
+                                Precipitation
+                              </span>
+                            </div>
+                            <span className="font-bold text-slate-900">
+                              {selectedDay.precipitation.toFixed(1)} mm
+                            </span>
+                          </div>
+                        )}
+                    </div>
+
+                    {/* Date */}
+                    <div className="pt-4 border-t border-slate-200">
+                      <p className="text-sm text-slate-600 text-center">
+                        {new Date(selectedDay.date).toLocaleDateString(
+                          "en-US",
+                          {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          },
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg text-center">
