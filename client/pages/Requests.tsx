@@ -245,7 +245,6 @@ export default function Requests() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<RelieRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(
     new Set(),
   );
