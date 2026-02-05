@@ -228,9 +228,9 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {/* Total Achievements */}
-              <div className="group relative bg-gradient-to-br from-indigo-50 to-indigo-50/30 rounded-2xl p-6 border border-indigo-200/50 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-100">
+              <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
                 <div className="relative">
-                  <p className="text-indigo-600/70 text-xs font-semibold uppercase tracking-wider">Total Achievements</p>
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">Total Achievements</p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.totalAchievements}</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Community work</p>
@@ -242,9 +242,9 @@ export default function Dashboard() {
               </div>
 
               {/* People Impacted */}
-              <div className="group relative bg-gradient-to-br from-emerald-50 to-emerald-50/30 rounded-2xl p-6 border border-emerald-200/50 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100">
+              <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
                 <div className="relative">
-                  <p className="text-emerald-600/70 text-xs font-semibold uppercase tracking-wider">People Impacted</p>
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">People Impacted</p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">{(achievementsMetrics.totalPeopleImpacted || 0).toLocaleString()}</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Direct impact</p>
@@ -256,9 +256,9 @@ export default function Dashboard() {
               </div>
 
               {/* Total Contribution */}
-              <div className="group relative bg-gradient-to-br from-amber-50 to-amber-50/30 rounded-2xl p-6 border border-amber-200/50 hover:border-amber-300 transition-all duration-300 hover:shadow-lg hover:shadow-amber-100">
+              <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
                 <div className="relative">
-                  <p className="text-amber-600/70 text-xs font-semibold uppercase tracking-wider">Total Contribution</p>
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">Total Contribution</p>
                   <p className="text-3xl font-bold text-slate-900 mt-3">{((achievementsMetrics.totalContributed || 0) / 1000).toFixed(1)}K</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">MZN invested</p>
@@ -270,9 +270,9 @@ export default function Dashboard() {
               </div>
 
               {/* In Progress */}
-              <div className="group relative bg-gradient-to-br from-cyan-50 to-cyan-50/30 rounded-2xl p-6 border border-cyan-200/50 hover:border-cyan-300 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-100">
+              <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
                 <div className="relative">
-                  <p className="text-cyan-600/70 text-xs font-semibold uppercase tracking-wider">In Progress</p>
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">In Progress</p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">{achievementsMetrics.inProgressAchievements}</p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Ongoing work</p>
