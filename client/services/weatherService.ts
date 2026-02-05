@@ -133,18 +133,29 @@ export async function getCurrentWeather(
   city: string,
 ): Promise<WeatherData | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
+
+  // Debug logging
+  console.log(`[WEATHER] Getting weather for ${city}`, {
+    coordsFound: !!coords,
+    apiConfig: !!API_CONFIG,
+    apiKey: !!API_CONFIG?.openMeteo?.apiKey,
+  });
+
   if (!coords || !API_CONFIG?.openMeteo?.apiKey) {
-    console.warn(`City ${city} not found or API key not configured`);
+    const reason = !coords ? "City not found" : "API key not configured";
+    console.warn(`[WEATHER] ${reason} for ${city}`);
     return null;
   }
 
   // Check cache
   const cached = weatherCache.get(city);
   if (cached && Date.now() - cached.timestamp < WEATHER_CACHE_DURATION) {
+    console.log(`[WEATHER] Using cached data for ${city}`);
     return cached.data;
   }
 
   try {
+    console.log(`[WEATHER] Fetching fresh weather data for ${city}`);
     // Open-Meteo API format
     const params = new URLSearchParams({
       latitude: coords.lat.toString(),
