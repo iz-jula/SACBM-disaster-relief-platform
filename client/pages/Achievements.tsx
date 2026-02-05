@@ -10,11 +10,17 @@ import {
   ImagePlus,
   X,
   Plus,
+  Edit2,
+  Trash2,
+  Lock,
+  AlertCircle,
 } from "lucide-react";
 import {
   getAchievements,
   getAchievementsMetrics,
   createAchievement,
+  updateAchievement,
+  deleteAchievement,
   Achievement,
   AchievementsMetrics,
 } from "@/services/achievementsService";
