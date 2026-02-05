@@ -94,29 +94,46 @@ export async function handleNewsAlerts(req: any, res: any) {
 
     if (Array.isArray(eventsList) && eventsList.length > 0) {
       // Convert events to article format for frontend compatibility
-      articles = eventsList.slice(0, 20).map((event: any) => ({
-        // Use event data as primary
-        title:
-          extractLabel(event.title) ||
-          extractLabel(event.name) ||
-          "Untitled Event",
-        description:
-          extractLabel(event.summary) ||
-          extractLabel(event.description) ||
-          extractLabel(event.body) ||
-          "",
-        body:
-          extractLabel(event.summary) || extractLabel(event.description) || "",
-        url: event.uri || event.url || event.link || "#",
-        date: event.date?.date || event.publishDate || new Date().toISOString(),
-        publishedAt:
-          event.date?.date || event.publishDate || new Date().toISOString(),
-        source: extractLabel(event.location?.label) || "EventRegistry",
-        // Store raw event for reference
-        _event: event,
-        // Include story/article data if available
-        stories: event.stories || [],
-      }));
+      articles = eventsList.slice(0, 20).map((event: any) => {
+        // Extract URL from stories' medoidArticle first (most reliable source)
+        let url: string | undefined;
+        if (event.stories && Array.isArray(event.stories) && event.stories.length > 0) {
+          const firstStory = event.stories[0];
+          if (firstStory.medoidArticle?.url) {
+            url = firstStory.medoidArticle.url;
+          } else if (firstStory.url) {
+            url = firstStory.url;
+          }
+        }
+        // Fallback to event-level URIs
+        if (!url) {
+          url = event.uri || event.url || event.link;
+        }
+
+        return {
+          // Use event data as primary
+          title:
+            extractLabel(event.title) ||
+            extractLabel(event.name) ||
+            "Untitled Event",
+          description:
+            extractLabel(event.summary) ||
+            extractLabel(event.description) ||
+            extractLabel(event.body) ||
+            "",
+          body:
+            extractLabel(event.summary) || extractLabel(event.description) || "",
+          url: url, // Will be undefined if no valid URL found
+          date: event.date?.date || event.publishDate || new Date().toISOString(),
+          publishedAt:
+            event.date?.date || event.publishDate || new Date().toISOString(),
+          source: extractLabel(event.location?.label) || "EventRegistry",
+          // Store raw event for reference
+          _event: event,
+          // Include story/article data if available
+          stories: event.stories || [],
+        };
+      });
 
       console.log("[NEWS] Converted", articles.length, "events to articles");
     } else {
