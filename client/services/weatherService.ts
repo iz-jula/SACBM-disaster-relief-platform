@@ -244,12 +244,12 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
   }
 
   try {
-    // Open-Meteo API format for 5-day forecast
+    // Open-Meteo API format for 5-day forecast with precipitation data
     const params = new URLSearchParams({
       latitude: coords.lat.toString(),
       longitude: coords.lon.toString(),
       daily:
-        "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max",
+        "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,precipitation_sum",
       temperature_unit: "celsius",
       timezone: "Africa/Johannesburg",
       apikey: API_CONFIG.openMeteo.apiKey,
