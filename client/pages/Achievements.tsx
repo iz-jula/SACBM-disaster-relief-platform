@@ -734,6 +734,13 @@ export default function Achievements() {
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <button
+                        onClick={() => handleEditAchievement(achievement)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit achievement"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
                         onClick={() => handleDeleteAchievement(achievement.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete achievement"
