@@ -102,7 +102,7 @@ export async function getCurrentWeather(
   city: string,
 ): Promise<WeatherData | null> {
   const coords = MOZAMBIQUE_CITIES[city as keyof typeof MOZAMBIQUE_CITIES];
-  if (!coords || !API_CONFIG.openWeather.apiKey) {
+  if (!coords || !API_CONFIG.openMeteo.apiKey) {
     console.warn(`City ${city} not found or API key not configured`);
     return null;
   }
@@ -114,29 +114,46 @@ export async function getCurrentWeather(
   }
 
   try {
+    // Open-Meteo API format
+    const params = new URLSearchParams({
+      latitude: coords.lat.toString(),
+      longitude: coords.lon.toString(),
+      current: 'temperature_2m,weather_code,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,visibility',
+      daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+      temperature_unit: 'celsius',
+      wind_speed_unit: 'kmh',
+      timezone: 'Africa/Johannesburg',
+      apikey: API_CONFIG.openMeteo.apiKey,
+    });
+
     const response = await fetch(
-      `${API_CONFIG.openWeather.baseUrl}/weather?lat=${coords.lat}&lon=${coords.lon}&appid=${API_CONFIG.openWeather.apiKey}&units=metric`,
+      `${API_CONFIG.openMeteo.baseUrl}/v1/forecast?${params}`,
     );
 
     if (!response.ok) {
-      console.error("OpenWeatherMap API error:", response.statusText);
+      console.error("Open-Meteo API error:", response.statusText);
       return null;
     }
 
     const data = await response.json();
+    const current = data.current;
+    const daily = data.daily;
+
+    // Map Open-Meteo weather codes to our conditions
+    const condition = getWeatherCondition(current.weather_code);
 
     const weatherData: WeatherData = {
-      temp: Math.round(data.main.temp),
-      high: Math.round(data.main.temp_max),
-      low: Math.round(data.main.temp_min),
-      humidity: data.main.humidity,
-      windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
-      windDirection: getWindDirection(data.wind.deg || 0),
-      condition: getWeatherCondition(data.weather[0].id),
-      rainChance: data.clouds.all,
-      visibility: Math.round(data.visibility / 1000), // Convert to km
-      pressure: data.main.pressure,
-      description: data.weather[0].description,
+      temp: Math.round(current.temperature_2m),
+      high: Math.round(daily.temperature_2m_max[0]),
+      low: Math.round(daily.temperature_2m_min[0]),
+      humidity: current.relative_humidity_2m,
+      windSpeed: Math.round(current.wind_speed_10m),
+      windDirection: getWindDirection(current.wind_direction_10m || 0),
+      condition: condition,
+      rainChance: daily.precipitation_probability_max[0],
+      visibility: 10, // Open-Meteo doesn't provide visibility in free tier
+      pressure: Math.round(current.pressure_msl),
+      description: getWeatherDescription(current.weather_code),
     };
 
     // Cache the result in both caches
