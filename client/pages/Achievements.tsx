@@ -662,6 +662,7 @@ export default function Achievements() {
                   onClick={() => {
                     setShowForm(false);
                     setUploadedMedia([]);
+                    setEditingAchievementId(null);
                     setFormData({
                       memberName: "",
                       title: "",
@@ -671,6 +672,7 @@ export default function Achievements() {
                       partnerOrganisation: "",
                       peopleImpacted: "",
                       amountContributed: "",
+                      status: "pending",
                     });
                   }}
                   className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium"
