@@ -11,6 +11,7 @@ export default function Upload() {
     email: "",
     full_name: "",
     location: "",
+    partner_organisation: "",
     help_type: "",
     evacuation_type: "",
     people: "",
