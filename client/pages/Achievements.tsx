@@ -133,7 +133,7 @@ export default function Achievements() {
     }
   };
 
-  const categories = ["Training", "Community Work", "Infrastructure", "Advocacy", "Research"];
+  const categories = ["Food", "Clothing", "Materials", "Medical", "Shelter", "Water", "Evacuation", "Multiple"];
   const statuses = [
     { value: "completed", label: "Completed" },
     { value: "in_progress", label: "In Progress" },
