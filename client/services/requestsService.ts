@@ -79,6 +79,7 @@ export async function createRequest(
       email: request.email,
       full_name: request.full_name,
       location: request.location,
+      partner_organisation: request.partner_organisation,
       help_type: request.help_type,
       evacuation_type: request.evacuation_type,
       people: request.people,
