@@ -450,7 +450,7 @@ export default function Requests() {
             )}
 
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => navigate("/upload")}
               className="inline-flex items-center gap-2 bg-primary hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
             >
               <Plus size={20} />
