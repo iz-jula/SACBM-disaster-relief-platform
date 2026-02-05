@@ -655,7 +655,7 @@ export default function Achievements() {
                   type="submit"
                   className="flex-1 bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary/90"
                 >
-                  Submit
+                  {editingAchievementId ? "Save Changes" : "Submit"}
                 </button>
                 <button
                   type="button"
