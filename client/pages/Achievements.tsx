@@ -391,6 +391,7 @@ export default function Achievements() {
                       description: "",
                       category: "Food",
                       location: "",
+                      partnerOrganisation: "",
                       peopleImpacted: "",
                       amountContributed: "",
                     });
