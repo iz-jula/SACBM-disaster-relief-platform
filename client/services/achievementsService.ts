@@ -3,7 +3,7 @@ export interface Achievement {
   memberName: string;
   title: string;
   description: string;
-  category: "Training" | "Community Work" | "Infrastructure" | "Advocacy" | "Research";
+  category: "Food" | "Clothing" | "Materials" | "Medical" | "Shelter" | "Water" | "Evacuation" | "Multiple";
   location: string;
   peopleImpacted: number;
   amountContributed: number;
