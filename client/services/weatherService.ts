@@ -105,6 +105,72 @@ function getWeatherDescription(code: number): string {
   return descriptions[code] || "Unknown";
 }
 
+export interface WeatherIconInfo {
+  condition: "sunny" | "cloudy" | "rainy" | "snow" | "storm" | "fog";
+  description: string;
+  severity: "clear" | "light" | "moderate" | "heavy" | "severe";
+}
+
+export function getWeatherIconInfo(code: number): WeatherIconInfo {
+  // Map WMO codes to detailed icon information
+  if (code === 0) {
+    return {
+      condition: "sunny",
+      description: "Clear sky",
+      severity: "clear",
+    };
+  } else if (code === 1 || code === 2) {
+    return {
+      condition: "sunny",
+      description: "Partly cloudy",
+      severity: "light",
+    };
+  } else if (code === 3) {
+    return {
+      condition: "cloudy",
+      description: "Overcast",
+      severity: "moderate",
+    };
+  } else if (code === 45 || code === 48) {
+    return {
+      condition: "fog",
+      description: "Foggy",
+      severity: "moderate",
+    };
+  } else if (code >= 51 && code <= 67) {
+    // Drizzle and rain
+    const intensity =
+      code <= 55 ? "light" : code <= 63 ? "moderate" : "heavy";
+    return {
+      condition: "rainy",
+      description: getWeatherDescription(code),
+      severity: intensity as "light" | "moderate" | "heavy",
+    };
+  } else if (code >= 71 && code <= 86) {
+    // Snow and snow showers
+    const intensity =
+      code <= 73 ? "light" : code <= 77 ? "moderate" : "heavy";
+    return {
+      condition: "snow",
+      description: getWeatherDescription(code),
+      severity: intensity as "light" | "moderate" | "heavy",
+    };
+  } else if (code >= 95 && code <= 99) {
+    // Thunderstorm
+    return {
+      condition: "storm",
+      description: getWeatherDescription(code),
+      severity: "severe",
+    };
+  }
+
+  return {
+    condition: "cloudy",
+    description: getWeatherDescription(code),
+    severity: "moderate",
+  };
+}
+
 function getWindDirection(degrees: number): string {
   const directions = [
     "N",
