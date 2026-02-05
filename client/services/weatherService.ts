@@ -6,12 +6,16 @@ export interface WeatherData {
   low: number;
   humidity: number;
   windSpeed: number;
+  windGust?: number;
   windDirection: string;
   condition: "sunny" | "cloudy" | "rainy";
   rainChance: number;
+  precipitation?: number;
+  cloudCover?: number;
   visibility: number;
   pressure: number;
   description: string;
+  weatherCode: number;
 }
 
 export interface ForecastDay {
