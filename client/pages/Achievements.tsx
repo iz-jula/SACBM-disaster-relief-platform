@@ -61,7 +61,7 @@ export default function Achievements() {
     memberName: "",
     title: "",
     description: "",
-    category: "Training" as const,
+    category: "Food" as const,
     location: "",
     peopleImpacted: "",
     amountContributed: "",
