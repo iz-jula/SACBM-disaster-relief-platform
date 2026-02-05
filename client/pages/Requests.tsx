@@ -1,4 +1,4 @@
-import { Plus, X, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Trash2, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
