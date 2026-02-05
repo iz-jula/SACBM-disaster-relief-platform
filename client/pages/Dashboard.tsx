@@ -286,13 +286,13 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Maputo Weather and Alerts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Maputo Weather and Alerts Row - Modern Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Suspense
               fallback={
-                <div className="bg-white rounded-xl p-6 text-center">
-                  Loading weather...
+                <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 p-8 text-center">
+                  <div className="text-slate-600">Loading weather...</div>
                 </div>
               }
             >
@@ -302,8 +302,8 @@ export default function Dashboard() {
           <div>
             <Suspense
               fallback={
-                <div className="bg-white rounded-xl p-6 text-center">
-                  Loading alerts...
+                <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 p-8 text-center">
+                  <div className="text-slate-600">Loading alerts...</div>
                 </div>
               }
             >
