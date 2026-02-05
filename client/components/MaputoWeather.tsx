@@ -132,10 +132,10 @@ export default function MaputoWeather() {
                 {error}
               </p>
               <p className="text-xs sm:text-sm text-red-700 mt-1">
-                To enable real-time weather, add your OpenWeatherMap API key to
+                To enable real-time weather, add your Open-Meteo API key to
                 .env:
                 <code className="block mt-1 text-xs bg-white p-1 rounded font-mono overflow-x-auto">
-                  VITE_OPENWEATHER_API_KEY=your_api_key
+                  VITE_OPENMETEO_API_KEY=your_api_key
                 </code>
               </p>
             </div>
