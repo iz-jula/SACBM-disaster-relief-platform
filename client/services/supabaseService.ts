@@ -11,6 +11,7 @@ export interface RelieRequest {
   email: string;
   full_name: string;
   location: string;
+  partner_organisation?: string | null;
   help_type: string;
   evacuation_type: string;
   people: string;
