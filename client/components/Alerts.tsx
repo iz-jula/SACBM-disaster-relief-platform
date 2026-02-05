@@ -262,7 +262,7 @@ export default function Alerts() {
             return (
               <div
                 key={alert.id}
-                className={`border rounded-lg p-3 sm:p-4 transition-all hover:shadow-md ${getSeverityColor(severity)}`}
+                className={`rounded-xl border p-4 transition-all duration-300 hover:shadow-md hover:border-opacity-100 group ${getSeverityColor(severity)}`}
               >
                 <div className="flex items-start gap-2 sm:gap-3">
                   <div
