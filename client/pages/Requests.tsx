@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import {
   getRequests,
-  createRequest,
   updateRequest,
   deleteRequest,
 } from "@/services/requestsService";
