@@ -132,7 +132,7 @@ export default function Dashboard() {
                     {metrics?.totalRequests || 0}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-3 shadow-lg shadow-blue-200">
+                <div className="bg-gradient-to-br from-primary to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
                   <BarChart3 size={24} className="text-white" />
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function Dashboard() {
                     {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-3 shadow-lg shadow-blue-200">
+                <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
                   <Users size={24} className="text-white" />
                 </div>
               </div>
@@ -175,7 +175,7 @@ export default function Dashboard() {
                   </p>
                   <p className="text-xs text-slate-600 mt-1">MZN</p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-3 shadow-lg shadow-blue-200">
+                <div className="bg-gradient-to-br from-primary to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
                   <TrendingUp size={24} className="text-white" />
                 </div>
               </div>
@@ -196,7 +196,7 @@ export default function Dashboard() {
                     {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-3 shadow-lg shadow-blue-200">
+                <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
                   <Activity size={24} className="text-white" />
                 </div>
               </div>
