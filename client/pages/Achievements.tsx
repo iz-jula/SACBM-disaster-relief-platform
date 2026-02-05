@@ -160,6 +160,64 @@ export default function Achievements() {
     }
   };
 
+  const handleDeleteAchievement = (achievementId: string) => {
+    if (
+      !window.confirm("Delete this achievement? This cannot be undone.")
+    ) {
+      return;
+    }
+    setPendingAction({ type: "delete", achievementId });
+    setShowAuthModal(true);
+    setAuthPassword("");
+    setAuthError("");
+  };
+
+  const verifyAuthAndExecute = async () => {
+    const adminPassword = "vilankulos2025";
+    const isAdmin = authPassword === adminPassword;
+
+    if (!pendingAction) {
+      setAuthError("No action to execute");
+      return;
+    }
+
+    const achievement = achievements.find((a) => a.id === pendingAction.achievementId);
+
+    // For non-admin, check if password matches the member name
+    if (!isAdmin && achievement) {
+      if (authPassword !== achievement.memberName) {
+        setAuthError(
+          "Invalid password. Use your member name or admin password.",
+        );
+        return;
+      }
+    } else if (!isAdmin) {
+      setAuthError("Invalid password");
+      return;
+    }
+
+    // Execute delete action
+    try {
+      if (pendingAction.type === "delete") {
+        const success = await deleteAchievement(pendingAction.achievementId);
+        if (success) {
+          setAchievements((prevAchievements) =>
+            prevAchievements.filter((a) => a.id !== pendingAction.achievementId),
+          );
+          setShowAuthModal(false);
+          setAuthPassword("");
+          setPendingAction(null);
+          await loadData();
+        } else {
+          setAuthError("Failed to delete achievement");
+        }
+      }
+    } catch (error) {
+      setAuthError("Action failed. Please try again.");
+      console.error("Error executing action:", error);
+    }
+  };
+
   const categories = [
     "Food",
     "Clothing",
