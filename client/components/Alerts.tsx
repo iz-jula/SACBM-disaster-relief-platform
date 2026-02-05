@@ -331,9 +331,9 @@ export default function Alerts() {
         )}
       </div>
 
-      <div className="px-6 py-3 border-t border-slate-200 bg-blue-50 text-xs text-blue-700">
-        ℹ News alerts are updated automatically from Google News and other news
-        sources
+      <div className="px-6 py-4 border-t border-slate-200/50 bg-blue-50/30 text-xs text-blue-700 flex items-center gap-2">
+        <AlertCircle size={14} className="flex-shrink-0" />
+        <span>Updated automatically from news sources</span>
       </div>
     </div>
   );
