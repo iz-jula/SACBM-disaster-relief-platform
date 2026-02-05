@@ -117,15 +117,15 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Key Metrics - Modern Cards */}
+        {/* Key Metrics - Modern Cards with Consistent Colors */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Total Requests Card */}
-          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/30 rounded-2xl p-6 border border-blue-200/50 hover:border-blue-300 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+          <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-500/0 to-slate-500/0 group-hover:from-slate-500/5 group-hover:to-slate-500/5 rounded-2xl transition-all duration-300" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
                     Total Requests
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
@@ -141,12 +141,12 @@ export default function Dashboard() {
           </div>
 
           {/* People Assisted Card */}
-          <div className="group relative bg-gradient-to-br from-green-50 to-green-50/30 rounded-2xl p-6 border border-green-200/50 hover:border-green-300 transition-all duration-300 hover:shadow-lg hover:shadow-green-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/0 to-green-500/0 group-hover:from-green-500/5 group-hover:to-green-500/5 rounded-2xl transition-all duration-300" />
+          <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-500/0 to-slate-500/0 group-hover:from-slate-500/5 group-hover:to-slate-500/5 rounded-2xl transition-all duration-300" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-green-600/70 text-xs font-semibold uppercase tracking-wider">
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
                     People Assisted
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
@@ -162,12 +162,12 @@ export default function Dashboard() {
           </div>
 
           {/* Total Value Card */}
-          <div className="group relative bg-gradient-to-br from-orange-50 to-orange-50/30 rounded-2xl p-6 border border-orange-200/50 hover:border-orange-300 transition-all duration-300 hover:shadow-lg hover:shadow-orange-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/5 group-hover:to-orange-500/5 rounded-2xl transition-all duration-300" />
+          <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-500/0 to-slate-500/0 group-hover:from-slate-500/5 group-hover:to-slate-500/5 rounded-2xl transition-all duration-300" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-orange-600/70 text-xs font-semibold uppercase tracking-wider">
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
                     Total Value
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
@@ -175,7 +175,7 @@ export default function Dashboard() {
                   </p>
                   <p className="text-xs text-slate-600 mt-1">MZN</p>
                 </div>
-                <div className="bg-gradient-to-br from-orange-400 to-primary rounded-xl p-3 shadow-lg shadow-orange-200">
+                <div className="bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
                   <TrendingUp size={24} className="text-white" />
                 </div>
               </div>
@@ -184,12 +184,12 @@ export default function Dashboard() {
           </div>
 
           {/* Average Per Request Card */}
-          <div className="group relative bg-gradient-to-br from-purple-50 to-purple-50/30 rounded-2xl p-6 border border-purple-200/50 hover:border-purple-300 transition-all duration-300 hover:shadow-lg hover:shadow-purple-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-purple-500/5 rounded-2xl transition-all duration-300" />
+          <div className="group relative bg-slate-50/50 rounded-2xl p-6 border border-slate-200/50 hover:border-slate-300 transition-all duration-300 hover:shadow-lg hover:shadow-slate-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-500/0 to-slate-500/0 group-hover:from-slate-500/5 group-hover:to-slate-500/5 rounded-2xl transition-all duration-300" />
             <div className="relative">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-purple-600/70 text-xs font-semibold uppercase tracking-wider">
+                  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
                     Avg. Per Request
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
