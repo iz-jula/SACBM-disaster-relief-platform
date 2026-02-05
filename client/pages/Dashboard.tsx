@@ -117,77 +117,91 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-            <div className="flex items-start sm:items-center justify-between gap-3">
-              <div className="flex-1">
-                <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                  Total Requests
-                </p>
-                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                  {metrics?.totalRequests || 0}
-                </p>
+        {/* Key Metrics - Modern Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Total Requests Card */}
+          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/30 rounded-2xl p-6 border border-blue-200/50 hover:border-blue-300 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Total Requests
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {metrics?.totalRequests || 0}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-3 shadow-lg shadow-blue-200">
+                  <BarChart3 size={24} className="text-white" />
+                </div>
               </div>
-              <div className="bg-blue-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                <BarChart3 size={20} className="text-blue-600 sm:w-6 sm:h-6" />
-              </div>
+              <p className="text-sm text-slate-600">Active relief operations</p>
             </div>
-            <p className="text-xs text-slate-500 mt-2 sm:mt-3">
-              Active relief operations
-            </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-            <div className="flex items-start sm:items-center justify-between gap-3">
-              <div className="flex-1">
-                <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                  People Assisted
-                </p>
-                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                  {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
-                </p>
+          {/* People Assisted Card */}
+          <div className="group relative bg-gradient-to-br from-green-50 to-green-50/30 rounded-2xl p-6 border border-green-200/50 hover:border-green-300 transition-all duration-300 hover:shadow-lg hover:shadow-green-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/0 to-green-500/0 group-hover:from-green-500/5 group-hover:to-green-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-green-600/70 text-xs font-semibold uppercase tracking-wider">
+                    People Assisted
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
+                  <Users size={24} className="text-white" />
+                </div>
               </div>
-              <div className="bg-green-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                <Users size={20} className="text-green-600 sm:w-6 sm:h-6" />
-              </div>
+              <p className="text-sm text-slate-600">Across all districts</p>
             </div>
-            <p className="text-xs text-slate-500 mt-2 sm:mt-3">Across all districts</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-            <div className="flex items-start sm:items-center justify-between gap-3">
-              <div className="flex-1">
-                <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                  Total Value
-                </p>
-                <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
-                  {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M
-                  MZN
-                </p>
+          {/* Total Value Card */}
+          <div className="group relative bg-gradient-to-br from-orange-50 to-orange-50/30 rounded-2xl p-6 border border-orange-200/50 hover:border-orange-300 transition-all duration-300 hover:shadow-lg hover:shadow-orange-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/5 group-hover:to-orange-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-orange-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Total Value
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M
+                  </p>
+                  <p className="text-xs text-slate-600 mt-1">MZN</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-400 to-primary rounded-xl p-3 shadow-lg shadow-orange-200">
+                  <TrendingUp size={24} className="text-white" />
+                </div>
               </div>
-              <div className="bg-orange-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                <TrendingUp size={20} className="text-primary sm:w-6 sm:h-6" />
-              </div>
+              <p className="text-sm text-slate-600">Total funds deployed</p>
             </div>
-            <p className="text-xs text-slate-500 mt-2 sm:mt-3">Total funds deployed</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-            <div className="flex items-start sm:items-center justify-between gap-3">
-              <div className="flex-1">
-                <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                  Avg. Per Request
-                </p>
-                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                  {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
-                </p>
+          {/* Average Per Request Card */}
+          <div className="group relative bg-gradient-to-br from-purple-50 to-purple-50/30 rounded-2xl p-6 border border-purple-200/50 hover:border-purple-300 transition-all duration-300 hover:shadow-lg hover:shadow-purple-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-purple-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-purple-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Avg. Per Request
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl p-3 shadow-lg shadow-purple-200">
+                  <Activity size={24} className="text-white" />
+                </div>
               </div>
-              <div className="bg-purple-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                <Activity size={20} className="text-purple-600 sm:w-6 sm:h-6" />
-              </div>
+              <p className="text-sm text-slate-600">Meticais</p>
             </div>
-            <p className="text-xs text-slate-500 mt-2 sm:mt-3">Meticais</p>
           </div>
         </div>
 
