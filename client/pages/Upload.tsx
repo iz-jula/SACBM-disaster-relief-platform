@@ -115,6 +115,7 @@ export default function Upload() {
         email: formData.email,
         full_name: formData.full_name,
         location: formData.location,
+        partner_organisation: formData.partner_organisation || null,
         help_type: formData.help_type,
         evacuation_type: formData.evacuation_type,
         people: formData.people,
