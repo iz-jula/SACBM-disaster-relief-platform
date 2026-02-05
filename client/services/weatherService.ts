@@ -289,10 +289,13 @@ export interface NewsAlert {
   id: string;
   title: string;
   description: string;
+  body?: string;
   source: string;
-  url: string;
+  url?: string;
   publishedAt: string;
   severity: "high" | "medium" | "low";
+  author?: string;
+  image?: string;
 }
 
 // Cache for news alerts and weather data to minimize API calls
