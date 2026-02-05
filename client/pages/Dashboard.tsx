@@ -99,13 +99,22 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="space-y-6 sm:space-y-8">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm sm:text-base text-slate-600 mt-1">
-            Overview of disaster relief operations
-          </p>
+      <div className="space-y-8">
+        {/* Modern Page Header */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-blue-500/5 rounded-2xl" />
+          <div className="relative px-6 sm:px-8 py-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">
+                  Relief Dashboard
+                </h1>
+                <p className="text-base sm:text-lg text-slate-600 mt-2 max-w-2xl">
+                  Real-time overview of disaster relief operations and community impact
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Key Metrics */}
