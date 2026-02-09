@@ -347,11 +347,6 @@ export default function Achievements() {
     "Evacuation",
     "Multiple",
   ];
-  const statuses = [
-    { value: "completed", label: "Completed" },
-    { value: "in_progress", label: "In Progress" },
-    { value: "pending", label: "Pending" },
-  ];
 
   return (
     <Layout>
