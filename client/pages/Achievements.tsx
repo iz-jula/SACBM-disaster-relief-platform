@@ -292,8 +292,8 @@ export default function Achievements() {
       } else if (pendingAction.type === "edit") {
         // Update the achievement
         const updateData = {
-          memberName: formData.memberName,
-          title: formData.title,
+          company_name: formData.company_name,
+          type_action: formData.type_action,
           description: formData.description,
           category: formData.category as
             | "Food"
@@ -305,10 +305,9 @@ export default function Achievements() {
             | "Evacuation"
             | "Multiple",
           location: formData.location,
-          partnerOrganisation: formData.partnerOrganisation || null,
-          peopleImpacted: parseInt(formData.peopleImpacted) || 0,
-          amountContributed: parseInt(formData.amountContributed) || 0,
-          status: formData.status,
+          partner_organisation: formData.partner_organisation || null,
+          people_impacted: parseInt(formData.people_impacted) || 0,
+          amount: parseInt(formData.amount) || 0,
         };
 
         const result = await updateAchievement(
@@ -316,17 +315,16 @@ export default function Achievements() {
           updateData,
         );
         if (result) {
-          setEditingAchievementId(null);
+          setEditingAchievementId("");
           setFormData({
-            memberName: "",
-            title: "",
+            company_name: "",
+            type_action: "",
             description: "",
             category: "Food",
             location: "",
-            partnerOrganisation: "",
-            peopleImpacted: "",
-            amountContributed: "",
-            status: "pending",
+            partner_organisation: "",
+            people_impacted: "",
+            amount: "",
           });
           setShowForm(false);
           setShowAuthModal(false);
@@ -334,7 +332,7 @@ export default function Achievements() {
           setPendingAction(null);
           await loadData();
         } else {
-          setAuthError("Failed to update achievement");
+          setAuthError("Failed to update action");
         }
       }
     } catch (error) {
