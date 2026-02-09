@@ -818,7 +818,8 @@ export default function Achievements() {
                             <img
                               src={achievement.image}
                               alt={achievement.title}
-                              className="w-full h-32 object-cover rounded-lg"
+                              className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => setSelectedImage(achievement.image)}
                             />
                           </div>
                         )}
