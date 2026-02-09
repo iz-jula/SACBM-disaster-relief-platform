@@ -583,11 +583,11 @@ export default function Achievements() {
                   </label>
                   <input
                     type="number"
-                    value={formData.peopleImpacted}
+                    value={formData.people_impacted}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        peopleImpacted: e.target.value,
+                        people_impacted: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -601,11 +601,11 @@ export default function Achievements() {
                   </label>
                   <input
                     type="number"
-                    value={formData.amountContributed}
+                    value={formData.amount}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        amountContributed: e.target.value,
+                        amount: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
