@@ -32,7 +32,6 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/requests" element={<Requests />} />
             <Route path="/actions" element={<Achievements />} />
-            <Route path="/achievements" element={<Achievements />} />
             <Route path="/upload" element={<Upload />} />
             <Route path="/weather" element={<Weather />} />
             <Route path="/ingd-dashboard" element={<INGDDashboard />} />
