@@ -131,6 +131,18 @@ export default function Achievements() {
     } else {
       // For creating new achievements, directly submit
       try {
+        // Convert first uploaded media to base64
+        let imageData: string | null = null;
+        if (uploadedMedia.length > 0) {
+          const file = uploadedMedia[0];
+          imageData = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        }
+
         const newAchievementData = {
           memberName: formData.memberName,
           title: formData.title,
@@ -149,6 +161,7 @@ export default function Achievements() {
           peopleImpacted: parseInt(formData.peopleImpacted) || 0,
           amountContributed: parseInt(formData.amountContributed) || 0,
           status: "pending" as const,
+          image: imageData || null,
         };
 
         const result = await createAchievement(newAchievementData);
