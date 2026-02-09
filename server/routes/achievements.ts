@@ -185,6 +185,7 @@ export async function handleCreateAchievement(req: any, res: any) {
       location,
       peopleImpacted,
       amountContributed,
+      image,
     } = req.body;
 
     // Validate required fields
@@ -203,6 +204,7 @@ export async function handleCreateAchievement(req: any, res: any) {
       peopleImpacted: parseInt(peopleImpacted) || 0,
       amountContributed: parseInt(amountContributed) || 0,
       status: "pending", // New submissions start as pending
+      image: image || null,
       createdAt: new Date().toISOString(),
     };
 
