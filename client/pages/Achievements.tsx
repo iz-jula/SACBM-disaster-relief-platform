@@ -168,8 +168,8 @@ export default function Achievements() {
         }
 
         const newAchievementData = {
-          memberName: formData.memberName,
-          title: formData.title,
+          company_name: formData.company_name,
+          type_action: formData.type_action,
           description: formData.description,
           category: formData.category as
             | "Food"
@@ -181,11 +181,10 @@ export default function Achievements() {
             | "Evacuation"
             | "Multiple",
           location: formData.location,
-          partnerOrganisation: formData.partnerOrganisation || null,
-          peopleImpacted: parseInt(formData.peopleImpacted) || 0,
-          amountContributed: parseInt(formData.amountContributed) || 0,
-          status: "completed" as const,
-          image: imageData || null,
+          partner_organisation: formData.partner_organisation || null,
+          people_impacted: parseInt(formData.people_impacted) || 0,
+          amount: parseInt(formData.amount) || 0,
+          media: imageData || null,
         };
 
         console.log("Sending achievement data:", newAchievementData);
