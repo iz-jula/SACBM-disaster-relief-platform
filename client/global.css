@@ -105,6 +105,7 @@
 
   body {
     @apply bg-background text-foreground;
+    user-select: none;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
@@ -112,9 +113,15 @@
     word-break: break-word;
   }
 
+  /* Allow text selection only on elements that should have it */
+  :where(input, textarea, [role="textbox"]) {
+    user-select: text;
+  }
+
   pre,
   code {
     overflow-x: auto;
     white-space: pre;
+    user-select: text;
   }
 }
