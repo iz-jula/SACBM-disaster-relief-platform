@@ -257,7 +257,7 @@ export default function Achievements() {
 
     // For non-admin, check if password matches the company name
     if (!isAdmin && achievement) {
-      if (authPassword !== achievement.memberName) {
+      if (authPassword !== achievement.company_name) {
         setAuthError(
           "Invalid password. Use the company name or admin password.",
         );
