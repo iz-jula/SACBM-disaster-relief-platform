@@ -467,7 +467,7 @@ export default function Achievements() {
                       setFormData({ ...formData, memberName: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="John Doe"
+                    placeholder="Organization Name"
                   />
                 </div>
 
