@@ -250,7 +250,7 @@ export default function Achievements() {
     }
 
     const achievement = achievements.find(
-      (a) => a.id === pendingAction.achievementId,
+      (a) => a.id?.toString() === pendingAction.achievementId,
     );
 
     // For non-admin, check if password matches the company name
