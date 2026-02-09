@@ -136,8 +136,15 @@ export default function Achievements() {
         console.log("Creating new achievement with data:", formData);
 
         // Validate required fields
-        if (!formData.memberName || !formData.title || !formData.description || !formData.location) {
-          alert("Please fill in all required fields: Company Name, Type of Action, Location, and Description");
+        if (
+          !formData.memberName ||
+          !formData.title ||
+          !formData.description ||
+          !formData.location
+        ) {
+          alert(
+            "Please fill in all required fields: Company Name, Type of Action, Location, and Description",
+          );
           return;
         }
 
@@ -206,7 +213,12 @@ export default function Achievements() {
         }
       } catch (error) {
         console.error("Error submitting achievement:", error);
-        alert("Error: " + (error instanceof Error ? error.message : "Failed to submit action"));
+        alert(
+          "Error: " +
+            (error instanceof Error
+              ? error.message
+              : "Failed to submit action"),
+        );
       }
     }
   };
