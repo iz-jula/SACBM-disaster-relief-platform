@@ -65,9 +65,7 @@ export default function Achievements() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
-  const [editingAchievementId, setEditingAchievementId] = useState<
-    string | null
-  >(null);
+  const [editingAchievementId, setEditingAchievementId] = useState<string>("");
   const [pendingAction, setPendingAction] = useState<{
     type: "delete" | "edit";
     achievementId: string;
