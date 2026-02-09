@@ -320,7 +320,7 @@ export default function Achievements() {
         {/* Page Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Member Achievements
+            Member Actions
           </h1>
           <p className="text-sm sm:text-base text-slate-600 mt-1">
             Track community work and contributions beyond relief requests
@@ -334,7 +334,7 @@ export default function Achievements() {
               <div className="flex items-start sm:items-center justify-between gap-3">
                 <div className="flex-1">
                   <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                    Total Achievements
+                    Total Actions
                   </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
                     {metrics.totalAchievements}
@@ -434,8 +434,8 @@ export default function Achievements() {
               <Plus size={20} className="text-primary" />
               <h3 className="font-semibold text-slate-900">
                 {editingAchievementId
-                  ? "Edit Achievement"
-                  : "Submit Your Achievement"}
+                  ? "Edit Action"
+                  : "Submit Your Action"}
               </h3>
             </div>
             <span className="text-slate-600">{showForm ? "−" : "+"}</span>
@@ -446,7 +446,7 @@ export default function Achievements() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Your Name *
+                    Company Name *
                   </label>
                   <input
                     type="text"
@@ -462,7 +462,7 @@ export default function Achievements() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Achievement Title *
+                    Type of Action *
                   </label>
                   <input
                     type="text"
@@ -472,7 +472,7 @@ export default function Achievements() {
                       setFormData({ ...formData, title: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Community Training Program"
+                    placeholder="Emergency Response"
                   />
                 </div>
 
@@ -667,7 +667,7 @@ export default function Achievements() {
                   type="submit"
                   className="flex-1 bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary/90"
                 >
-                  {editingAchievementId ? "Save Changes" : "Submit"}
+                  {editingAchievementId ? "Save Changes" : "Submit Action"}
                 </button>
                 <button
                   type="button"
@@ -732,7 +732,7 @@ export default function Achievements() {
               Member Work
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              {achievements.length} achievement
+              {achievements.length} action
               {achievements.length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -788,14 +788,14 @@ export default function Achievements() {
                       <button
                         onClick={() => handleEditAchievement(achievement)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit achievement"
+                        title="Edit action"
                       >
                         <Edit2 size={18} />
                       </button>
                       <button
                         onClick={() => handleDeleteAchievement(achievement.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete achievement"
+                        title="Delete action"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -805,7 +805,7 @@ export default function Achievements() {
               ))
             ) : (
               <div className="p-6 text-center text-slate-600">
-                No achievements found
+                No actions found
               </div>
             )}
           </div>
