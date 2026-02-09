@@ -689,17 +689,16 @@ export default function Achievements() {
                   onClick={() => {
                     setShowForm(false);
                     setUploadedMedia([]);
-                    setEditingAchievementId(null);
+                    setEditingAchievementId("");
                     setFormData({
-                      memberName: "",
-                      title: "",
+                      company_name: "",
+                      type_action: "",
                       description: "",
                       category: "Food",
                       location: "",
-                      partnerOrganisation: "",
-                      peopleImpacted: "",
-                      amountContributed: "",
-                      status: "pending",
+                      partner_organisation: "",
+                      people_impacted: "",
+                      amount: "",
                     });
                   }}
                   className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium"
