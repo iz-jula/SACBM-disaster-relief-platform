@@ -222,17 +222,16 @@ export default function Achievements() {
   };
 
   const handleEditAchievement = (achievement: Achievement) => {
-    setEditingAchievementId(achievement.id);
+    setEditingAchievementId(achievement.id?.toString() || "");
     setFormData({
-      memberName: achievement.memberName,
-      title: achievement.title,
+      company_name: achievement.company_name,
+      type_action: achievement.type_action,
       description: achievement.description,
       category: achievement.category,
       location: achievement.location,
-      partnerOrganisation: achievement.partnerOrganisation || "",
-      peopleImpacted: achievement.peopleImpacted.toString(),
-      amountContributed: achievement.amountContributed.toString(),
-      status: achievement.status,
+      partner_organisation: achievement.partner_organisation || "",
+      people_impacted: achievement.people_impacted.toString(),
+      amount: achievement.amount.toString(),
     });
     setShowForm(true);
   };
