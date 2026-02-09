@@ -1,26 +1,14 @@
-export interface Achievement {
-  id: string;
-  memberName: string;
-  title: string;
-  description: string;
-  category:
-    | "Food"
-    | "Clothing"
-    | "Materials"
-    | "Medical"
-    | "Shelter"
-    | "Water"
-    | "Evacuation"
-    | "Multiple";
-  location: string;
-  partnerOrganisation?: string | null;
-  peopleImpacted: number;
-  amountContributed: number;
-  status: "completed" | "in_progress" | "pending";
-  image?: string | null;
-  createdAt: string;
-  completedAt?: string;
-}
+import {
+  getActions as getSupabaseActions,
+  getActionsMetrics as getSupabaseActionsMetrics,
+  createAction as createSupabaseAction,
+  updateAction as updateSupabaseAction,
+  deleteAction as deleteSupabaseAction,
+  Action,
+} from "./supabaseService";
+
+export type Achievement = Action;
+export type { Action };
 
 export interface AchievementsMetrics {
   totalAchievements: number;
