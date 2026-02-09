@@ -774,7 +774,7 @@ export default function Achievements() {
                             <img
                               src={achievement.media}
                               alt={achievement.type_action}
-                              className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                              className="h-24 w-auto object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                               onClick={() => setSelectedImage(achievement.media || null)}
                             />
                           </div>
