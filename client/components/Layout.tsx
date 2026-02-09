@@ -26,7 +26,7 @@ export default function Layout({ children }: LayoutProps) {
   const navItems = [
     { href: "/", label: "Dashboard", icon: BarChart3 },
     { href: "/requests", label: "Relief Requests", icon: Table2 },
-    { href: "/achievements", label: "Actions", icon: Award },
+    { href: "/actions", label: "Actions", icon: Award },
     { href: "/upload", label: "Upload Requests", icon: Upload },
     { href: "/weather", label: "Weather Forecast", icon: Cloud },
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
