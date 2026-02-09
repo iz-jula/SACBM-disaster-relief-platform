@@ -46,9 +46,6 @@ export async function getAchievements(
     now - achievementsCache.timestamp < CACHE_DURATION
   ) {
     let filtered = [...achievementsCache.achievements];
-    if (status) {
-      filtered = filtered.filter((a) => a.status === status);
-    }
     if (category) {
       filtered = filtered.filter((a) => a.category === category);
     }
@@ -56,8 +53,8 @@ export async function getAchievements(
   }
 
   try {
-    const achievements = await getSupabaseActions(status, category);
-    
+    const achievements = await getSupabaseActions(undefined, category);
+
     // Update cache
     achievementsCache.achievements = achievements;
     achievementsCache.timestamp = now;
