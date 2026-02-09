@@ -184,6 +184,7 @@ export default function Achievements() {
         }
       } catch (error) {
         console.error("Error submitting achievement:", error);
+        alert("Failed to submit action. Please check the form and try again.");
       }
     }
   };
