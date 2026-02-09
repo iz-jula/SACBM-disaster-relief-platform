@@ -251,7 +251,10 @@ export async function getActionsMetrics() {
       .from("actions_table")
       .select("*");
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error in getActionsMetrics:", error.message);
+      throw error;
+    }
 
     const actions = data || [];
     const totalAchievements = actions.length;
