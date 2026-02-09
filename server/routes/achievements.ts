@@ -203,7 +203,7 @@ export async function handleCreateAchievement(req: any, res: any) {
       location,
       peopleImpacted: parseInt(peopleImpacted) || 0,
       amountContributed: parseInt(amountContributed) || 0,
-      status: "pending", // New submissions start as pending
+      status: "completed", // New submissions are completed
       image: image || null,
       createdAt: new Date().toISOString(),
     };
