@@ -238,7 +238,8 @@ export async function getActions(
     if (error) throw error;
     return data || [];
   } catch (error) {
-    console.error("Error fetching actions:", error);
+    const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error("Error fetching actions:", errorMsg);
     return [];
   }
 }
