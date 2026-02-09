@@ -228,11 +228,7 @@ export async function getActions(
     let query = supabase
       .from("actions_table")
       .select("*")
-      .order("createdAt", { ascending: false });
-
-    if (status) {
-      query = query.eq("status", status);
-    }
+      .order("created_at", { ascending: false });
 
     if (category) {
       query = query.eq("category", category);
