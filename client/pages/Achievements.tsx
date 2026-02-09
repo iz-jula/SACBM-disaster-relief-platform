@@ -73,6 +73,7 @@ export default function Achievements() {
     type: "delete" | "edit";
     achievementId: string;
   } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     memberName: "",
     title: "",
