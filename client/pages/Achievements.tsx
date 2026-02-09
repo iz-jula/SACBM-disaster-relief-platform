@@ -777,6 +777,15 @@ export default function Achievements() {
                         <p className="text-xs sm:text-sm opacity-90 mb-3">
                           {achievement.description}
                         </p>
+                        {achievement.image && (
+                          <div className="mb-3">
+                            <img
+                              src={achievement.image}
+                              alt={achievement.title}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                          </div>
+                        )}
                         <div className="grid grid-cols-3 gap-2 text-xs">
                           <div className="flex items-center gap-1">
                             <MapPin size={14} />
