@@ -493,9 +493,9 @@ export default function Achievements() {
                   <input
                     type="text"
                     required
-                    value={formData.memberName}
+                    value={formData.company_name}
                     onChange={(e) =>
-                      setFormData({ ...formData, memberName: e.target.value })
+                      setFormData({ ...formData, company_name: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Organization Name"
@@ -509,9 +509,9 @@ export default function Achievements() {
                   <input
                     type="text"
                     required
-                    value={formData.title}
+                    value={formData.type_action}
                     onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
+                      setFormData({ ...formData, type_action: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Emergency Response"
