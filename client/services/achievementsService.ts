@@ -56,28 +56,14 @@ export async function getAchievements(
   }
 
   try {
-    const params = new URLSearchParams();
-    if (status) params.append("status", status);
-    if (category) params.append("category", category);
-
-    const queryString = params.toString();
-    const url = `/api/achievements${queryString ? "?" + queryString : ""}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      console.error("Failed to fetch achievements:", response.statusText);
-      return [];
-    }
-
-    const data = await response.json();
-
+    const achievements = await getSupabaseActions(status, category);
+    
     // Update cache
-    achievementsCache.achievements = data.achievements || [];
+    achievementsCache.achievements = achievements;
     achievementsCache.timestamp = now;
 
-    console.log("Fetched", data.achievements?.length || 0, "achievements");
-    return data.achievements || [];
+    console.log("Fetched", achievements.length, "achievements");
+    return achievements;
   } catch (error) {
     console.error("Error fetching achievements:", error);
     return [];
@@ -96,24 +82,14 @@ export async function getAchievementsMetrics(): Promise<AchievementsMetrics | nu
   }
 
   try {
-    const response = await fetch("/api/achievements/metrics");
-
-    if (!response.ok) {
-      console.error(
-        "Failed to fetch achievement metrics:",
-        response.statusText,
-      );
-      return null;
-    }
-
-    const data = await response.json();
+    const metrics = await getSupabaseActionsMetrics();
 
     // Update cache
-    achievementsCache.metrics = data;
+    achievementsCache.metrics = metrics;
     achievementsCache.timestamp = now;
 
     console.log("Fetched achievement metrics");
-    return data;
+    return metrics;
   } catch (error) {
     console.error("Error fetching achievement metrics:", error);
     return null;
@@ -124,20 +100,9 @@ export async function createAchievement(
   achievement: Omit<Achievement, "id" | "createdAt">,
 ): Promise<Achievement | null> {
   try {
-    const response = await fetch("/api/achievements", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(achievement),
-    });
-
-    if (!response.ok) {
-      console.error("Failed to create achievement:", response.statusText);
-      return null;
-    }
-
-    const data = await response.json();
+    console.log("Creating achievement:", achievement);
+    
+    const result = await createSupabaseAction(achievement);
 
     // Invalidate cache so fresh data is fetched
     achievementsCache.achievements = [];
@@ -145,7 +110,7 @@ export async function createAchievement(
     achievementsCache.timestamp = 0;
 
     console.log("Achievement created successfully");
-    return data.achievement || null;
+    return result;
   } catch (error) {
     console.error("Error creating achievement:", error);
     return null;
@@ -157,20 +122,7 @@ export async function updateAchievement(
   updates: Partial<Omit<Achievement, "id" | "createdAt">>,
 ): Promise<Achievement | null> {
   try {
-    const response = await fetch(`/api/achievements/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updates),
-    });
-
-    if (!response.ok) {
-      console.error("Failed to update achievement:", response.statusText);
-      return null;
-    }
-
-    const data = await response.json();
+    const result = await updateSupabaseAction(id, updates);
 
     // Invalidate cache so fresh data is fetched
     achievementsCache.achievements = [];
@@ -178,7 +130,7 @@ export async function updateAchievement(
     achievementsCache.timestamp = 0;
 
     console.log("Achievement updated successfully");
-    return data.achievement || null;
+    return result;
   } catch (error) {
     console.error("Error updating achievement:", error);
     return null;
@@ -187,17 +139,7 @@ export async function updateAchievement(
 
 export async function deleteAchievement(id: string): Promise<boolean> {
   try {
-    const response = await fetch(`/api/achievements/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      console.error("Failed to delete achievement:", response.statusText);
-      return false;
-    }
+    const result = await deleteSupabaseAction(id);
 
     // Invalidate cache so fresh data is fetched
     achievementsCache.achievements = [];
@@ -205,7 +147,7 @@ export async function deleteAchievement(id: string): Promise<boolean> {
     achievementsCache.timestamp = 0;
 
     console.log("Achievement deleted successfully");
-    return true;
+    return result;
   } catch (error) {
     console.error("Error deleting achievement:", error);
     return false;
