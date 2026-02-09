@@ -207,16 +207,16 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Achievements Summary - Modern Section */}
+        {/* Community Actions Summary - Modern Section */}
         {achievementsMetrics && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">
-                  Community Achievements
+                  Community Actions
                 </h2>
                 <p className="text-slate-600 mt-2">
-                  Member work and contributions beyond relief requests
+                  Member actions and contributions beyond relief requests
                 </p>
               </div>
               <Link
@@ -231,11 +231,11 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {/* Total Achievements */}
+              {/* Total Actions */}
               <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
                 <div className="relative">
                   <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                    Total Achievements
+                    Total Actions
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
                     {achievementsMetrics.totalAchievements}
