@@ -193,15 +193,14 @@ export default function Achievements() {
 
         if (result) {
           setFormData({
-            memberName: "",
-            title: "",
+            company_name: "",
+            type_action: "",
             description: "",
             category: "Food",
             location: "",
-            partnerOrganisation: "",
-            peopleImpacted: "",
-            amountContributed: "",
-            status: "pending",
+            partner_organisation: "",
+            people_impacted: "",
+            amount: "",
           });
           setUploadedMedia([]);
           setShowForm(false);
