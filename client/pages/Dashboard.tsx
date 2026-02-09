@@ -220,7 +220,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <Link
-                to="/achievements"
+                to="/actions"
                 className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
               >
                 View All
