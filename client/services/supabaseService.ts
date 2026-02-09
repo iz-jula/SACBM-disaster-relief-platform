@@ -216,7 +216,6 @@ export interface Action {
   amount: number;
   media?: string | null;
   created_at?: string;
-  status?: "completed" | "in_progress" | "pending";
 }
 
 // Fetch all actions
