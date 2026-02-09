@@ -122,6 +122,8 @@ export default function Achievements() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log("Form submitted, editingAchievementId:", editingAchievementId);
+
     if (editingAchievementId) {
       // For editing, check permissions
       setPendingAction({ type: "edit", achievementId: editingAchievementId });
@@ -131,14 +133,29 @@ export default function Achievements() {
     } else {
       // For creating new achievements, directly submit
       try {
+        console.log("Creating new achievement with data:", formData);
+
+        // Validate required fields
+        if (!formData.memberName || !formData.title || !formData.description || !formData.location) {
+          alert("Please fill in all required fields: Company Name, Type of Action, Location, and Description");
+          return;
+        }
+
         // Convert first uploaded media to base64
         let imageData: string | null = null;
         if (uploadedMedia.length > 0) {
+          console.log("Processing image...");
           const file = uploadedMedia[0];
           imageData = await new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
+            reader.onload = () => {
+              console.log("Image converted to base64");
+              resolve(reader.result as string);
+            };
+            reader.onerror = () => {
+              console.error("FileReader error:", reader.error);
+              reject(reader.error);
+            };
             reader.readAsDataURL(file);
           });
         }
@@ -164,7 +181,9 @@ export default function Achievements() {
           image: imageData || null,
         };
 
+        console.log("Sending achievement data:", newAchievementData);
         const result = await createAchievement(newAchievementData);
+        console.log("Achievement creation result:", result);
 
         if (result) {
           setFormData({
@@ -181,10 +200,13 @@ export default function Achievements() {
           setUploadedMedia([]);
           setShowForm(false);
           await loadData();
+          alert("Action submitted successfully!");
+        } else {
+          alert("Failed to submit action. Please try again.");
         }
       } catch (error) {
         console.error("Error submitting achievement:", error);
-        alert("Failed to submit action. Please check the form and try again.");
+        alert("Error: " + (error instanceof Error ? error.message : "Failed to submit action"));
       }
     }
   };
