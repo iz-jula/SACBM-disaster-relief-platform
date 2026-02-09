@@ -241,7 +241,8 @@ export async function getActions(
     }
     return data || [];
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    const errorMsg =
+      error instanceof Error ? error.message : JSON.stringify(error);
     console.error("Error fetching actions:", errorMsg);
     return [];
   }
@@ -250,9 +251,7 @@ export async function getActions(
 // Get action metrics
 export async function getActionsMetrics() {
   try {
-    const { data, error } = await supabase
-      .from("actions_table")
-      .select("*");
+    const { data, error } = await supabase.from("actions_table").select("*");
 
     if (error) {
       console.error("Supabase error in getActionsMetrics:", error.message);

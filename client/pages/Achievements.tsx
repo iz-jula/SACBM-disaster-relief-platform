@@ -230,11 +230,16 @@ export default function Achievements() {
     setShowForm(true);
   };
 
-  const handleDeleteAchievement = (achievementId: number | string | undefined) => {
+  const handleDeleteAchievement = (
+    achievementId: number | string | undefined,
+  ) => {
     if (!window.confirm("Delete this action? This cannot be undone.")) {
       return;
     }
-    setPendingAction({ type: "delete", achievementId: achievementId?.toString() || "" });
+    setPendingAction({
+      type: "delete",
+      achievementId: achievementId?.toString() || "",
+    });
     setShowAuthModal(true);
     setAuthPassword("");
     setAuthError("");
@@ -777,7 +782,11 @@ export default function Achievements() {
                           <Edit2 size={16} />
                         </button>
                         <button
-                          onClick={() => handleDeleteAchievement(achievement.id?.toString() || "")}
+                          onClick={() =>
+                            handleDeleteAchievement(
+                              achievement.id?.toString() || "",
+                            )
+                          }
                           className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
                           title="Delete action"
                         >
@@ -801,7 +810,9 @@ export default function Achievements() {
                             src={achievement.media}
                             alt={achievement.type_action}
                             className="h-24 w-full sm:w-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => setSelectedImage(achievement.media || null)}
+                            onClick={() =>
+                              setSelectedImage(achievement.media || null)
+                            }
                           />
                         </div>
                       )}
