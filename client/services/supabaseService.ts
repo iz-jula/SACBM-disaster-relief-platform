@@ -235,7 +235,10 @@ export async function getActions(
 
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error in getActions:", error.message);
+      throw error;
+    }
     return data || [];
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
