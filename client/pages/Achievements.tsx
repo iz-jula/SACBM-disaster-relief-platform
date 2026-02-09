@@ -214,11 +214,11 @@ export default function Achievements() {
       (a) => a.id === pendingAction.achievementId,
     );
 
-    // For non-admin, check if password matches the member name
+    // For non-admin, check if password matches the company name
     if (!isAdmin && achievement) {
       if (authPassword !== achievement.memberName) {
         setAuthError(
-          "Invalid password. Use your member name or admin password.",
+          "Invalid password. Use the company name or admin password.",
         );
         return;
       }
@@ -824,7 +824,7 @@ export default function Achievements() {
               <p className="text-sm text-slate-600 mb-4">
                 {pendingAction?.type === "edit"
                   ? "To save changes, confirm your identity"
-                  : "To delete this achievement, confirm your identity"}
+                  : "To delete this action, confirm your identity"}
               </p>
 
               {authError && (
@@ -838,7 +838,7 @@ export default function Achievements() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     {pendingAction?.achievementId
-                      ? `Member Name or Admin Password`
+                      ? `Company Name or Admin Password`
                       : "Admin Password"}
                   </label>
                   <input
@@ -857,7 +857,7 @@ export default function Achievements() {
                     }}
                   />
                   <p className="text-xs text-slate-500 mt-2">
-                    Use your member name or the admin password
+                    Use the company name or the admin password
                   </p>
                 </div>
 
