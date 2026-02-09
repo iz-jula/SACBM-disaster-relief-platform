@@ -86,16 +86,13 @@ export default function Achievements() {
 
   useEffect(() => {
     loadData();
-  }, [selectedCategory, selectedStatus]);
+  }, [selectedCategory]);
 
   const loadData = async () => {
     setIsLoading(true);
     try {
       const [achievementsData, metricsData] = await Promise.all([
-        getAchievements(
-          selectedStatus || undefined,
-          selectedCategory || undefined,
-        ),
+        getAchievements(undefined, selectedCategory || undefined),
         getAchievementsMetrics(),
       ]);
       setAchievements(achievementsData);
