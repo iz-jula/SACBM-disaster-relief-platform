@@ -232,11 +232,11 @@ export default function Achievements() {
     setShowForm(true);
   };
 
-  const handleDeleteAchievement = (achievementId: string) => {
-    if (!window.confirm("Delete this achievement? This cannot be undone.")) {
+  const handleDeleteAchievement = (achievementId: number | string | undefined) => {
+    if (!window.confirm("Delete this action? This cannot be undone.")) {
       return;
     }
-    setPendingAction({ type: "delete", achievementId });
+    setPendingAction({ type: "delete", achievementId: achievementId?.toString() || "" });
     setShowAuthModal(true);
     setAuthPassword("");
     setAuthError("");
