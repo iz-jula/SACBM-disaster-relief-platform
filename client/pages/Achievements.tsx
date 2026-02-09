@@ -565,11 +565,11 @@ export default function Achievements() {
                   </label>
                   <input
                     type="text"
-                    value={formData.partnerOrganisation}
+                    value={formData.partner_organisation}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        partnerOrganisation: e.target.value,
+                        partner_organisation: e.target.value,
                       })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
