@@ -273,7 +273,7 @@ export default function Achievements() {
         if (success) {
           setAchievements((prevAchievements) =>
             prevAchievements.filter(
-              (a) => a.id !== pendingAction.achievementId,
+              (a) => a.id?.toString() !== pendingAction.achievementId,
             ),
           );
           setShowAuthModal(false);
