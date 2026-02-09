@@ -97,12 +97,25 @@ export async function getAchievementsMetrics(): Promise<AchievementsMetrics | nu
 }
 
 export async function createAchievement(
-  achievement: Omit<Achievement, "id" | "createdAt">,
+  achievement: Omit<Achievement, "id" | "created_at">,
 ): Promise<Achievement | null> {
   try {
     console.log("Creating achievement:", achievement);
-    
-    const result = await createSupabaseAction(achievement);
+
+    // Map from UI field names to database column names
+    const dbAction = {
+      company_name: achievement.company_name,
+      type_action: achievement.type_action,
+      description: achievement.description,
+      category: achievement.category,
+      location: achievement.location,
+      partner_organisation: achievement.partner_organisation,
+      people_impacted: achievement.people_impacted,
+      amount: achievement.amount,
+      media: achievement.media,
+    };
+
+    const result = await createSupabaseAction(dbAction as any);
 
     // Invalidate cache so fresh data is fetched
     achievementsCache.achievements = [];
