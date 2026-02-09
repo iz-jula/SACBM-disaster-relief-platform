@@ -17,6 +17,7 @@ export interface Achievement {
   peopleImpacted: number;
   amountContributed: number;
   status: "completed" | "in_progress" | "pending";
+  image?: string | null;
   createdAt: string;
   completedAt?: string;
 }
