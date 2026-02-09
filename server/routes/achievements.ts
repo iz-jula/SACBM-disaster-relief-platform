@@ -219,3 +219,56 @@ export async function handleCreateAchievement(req: any, res: any) {
     res.status(500).json({ error: "Failed to create achievement" });
   }
 }
+
+export async function handleUpdateAchievement(req: any, res: any) {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // Find achievement by id
+    const achievementIndex = MOCK_ACHIEVEMENTS.findIndex((a) => a.id === id);
+    if (achievementIndex === -1) {
+      return res.status(404).json({ error: "Achievement not found" });
+    }
+
+    // Update the achievement with new data
+    const updatedAchievement = {
+      ...MOCK_ACHIEVEMENTS[achievementIndex],
+      ...updates,
+    };
+
+    MOCK_ACHIEVEMENTS[achievementIndex] = updatedAchievement;
+
+    res.json({
+      success: true,
+      message: "Achievement updated successfully",
+      achievement: updatedAchievement,
+    });
+  } catch (error) {
+    console.error("Error updating achievement:", error);
+    res.status(500).json({ error: "Failed to update achievement" });
+  }
+}
+
+export async function handleDeleteAchievement(req: any, res: any) {
+  try {
+    const { id } = req.params;
+
+    // Find achievement by id
+    const achievementIndex = MOCK_ACHIEVEMENTS.findIndex((a) => a.id === id);
+    if (achievementIndex === -1) {
+      return res.status(404).json({ error: "Achievement not found" });
+    }
+
+    // Remove the achievement
+    MOCK_ACHIEVEMENTS.splice(achievementIndex, 1);
+
+    res.json({
+      success: true,
+      message: "Achievement deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting achievement:", error);
+    res.status(500).json({ error: "Failed to delete achievement" });
+  }
+}
