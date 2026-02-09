@@ -535,11 +535,10 @@ export default function Achievements() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    People Impacted *
+                    People Impacted
                   </label>
                   <input
                     type="number"
-                    required
                     value={formData.peopleImpacted}
                     onChange={(e) =>
                       setFormData({
@@ -554,11 +553,10 @@ export default function Achievements() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Amount (MZN) *
+                    Amount (MZN)
                   </label>
                   <input
                     type="number"
-                    required
                     value={formData.amountContributed}
                     onChange={(e) =>
                       setFormData({
