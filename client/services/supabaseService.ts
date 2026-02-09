@@ -195,11 +195,11 @@ export function subscribeToRequests(callback: (request: RelieRequest) => void) {
   return subscription;
 }
 
-// Action/Achievement Interface
+// Action/Achievement Interface - matches Supabase actions_table schema
 export interface Action {
-  id?: string;
-  memberName: string;
-  title: string;
+  id?: number;
+  company_name: string;
+  type_action: string;
   description: string;
   category:
     | "Food"
@@ -211,12 +211,12 @@ export interface Action {
     | "Evacuation"
     | "Multiple";
   location: string;
-  partnerOrganisation?: string | null;
-  peopleImpacted: number;
-  amountContributed: number;
-  status: "completed" | "in_progress" | "pending";
-  image?: string | null;
-  createdAt?: string;
+  partner_organisation?: string | null;
+  people_impacted: number;
+  amount: number;
+  media?: string | null;
+  created_at?: string;
+  status?: "completed" | "in_progress" | "pending";
 }
 
 // Fetch all actions
