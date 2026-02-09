@@ -137,8 +137,8 @@ export default function Achievements() {
 
         // Validate required fields
         if (
-          !formData.memberName ||
-          !formData.title ||
+          !formData.company_name ||
+          !formData.type_action ||
           !formData.description ||
           !formData.location
         ) {
