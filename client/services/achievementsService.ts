@@ -102,20 +102,7 @@ export async function createAchievement(
   try {
     console.log("Creating achievement:", achievement);
 
-    // Map from UI field names to database column names
-    const dbAction = {
-      company_name: achievement.company_name,
-      type_action: achievement.type_action,
-      description: achievement.description,
-      category: achievement.category,
-      location: achievement.location,
-      partner_organisation: achievement.partner_organisation,
-      people_impacted: achievement.people_impacted,
-      amount: achievement.amount,
-      media: achievement.media,
-    };
-
-    const result = await createSupabaseAction(dbAction as any);
+    const result = await createSupabaseAction(achievement);
 
     // Invalidate cache so fresh data is fetched
     achievementsCache.achievements = [];
