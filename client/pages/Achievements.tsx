@@ -745,72 +745,110 @@ export default function Achievements() {
               achievements.map((achievement) => (
                 <div
                   key={achievement.id}
-                  className="p-4 sm:p-6 bg-green-50 border-green-200 text-green-900"
+                  className="bg-white hover:shadow-lg transition-shadow border-b border-slate-200 last:border-b-0"
                 >
-                  <div className="flex items-start gap-3 justify-between">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="mt-0.5">
-                        <CheckCircle size={16} className="text-green-600" />
+                  {/* Card Header */}
+                  <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
+                        <CheckCircle size={20} className="text-green-600" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <h3 className="font-semibold text-sm sm:text-base">
-                            {achievement.type_action}
-                          </h3>
-                          <span
-                            className={`px-2 py-1 text-xs rounded font-medium ${CATEGORY_COLORS[achievement.category]}`}
-                          >
-                            {achievement.category}
-                          </span>
+                      <div>
+                        <h3 className="font-bold text-base sm:text-lg text-slate-900">
+                          {achievement.type_action}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-slate-500">
+                          {achievement.company_name}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full font-semibold ${CATEGORY_COLORS[achievement.category]}`}
+                      >
+                        {achievement.category}
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleEditAchievement(achievement)}
+                          className="p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
+                          title="Edit action"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAchievement(achievement.id?.toString() || "")}
+                          className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                          title="Delete action"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="px-4 sm:px-6 pb-4 sm:pb-5 space-y-4">
+                    <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
+                      {achievement.description}
+                    </p>
+
+                    {/* Image and Metrics Row */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      {achievement.media && (
+                        <div className="sm:w-32 flex-shrink-0">
+                          <img
+                            src={achievement.media}
+                            alt={achievement.type_action}
+                            className="h-24 w-full sm:w-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setSelectedImage(achievement.media || null)}
+                          />
                         </div>
-                        <p className="text-xs sm:text-sm text-slate-700 mb-2">
-                          by {achievement.company_name}
-                        </p>
-                        <p className="text-xs sm:text-sm opacity-90 mb-3">
-                          {achievement.description}
-                        </p>
-                        {achievement.media && (
-                          <div className="mb-3">
-                            <img
-                              src={achievement.media}
-                              alt={achievement.type_action}
-                              className="h-24 w-auto object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={() => setSelectedImage(achievement.media || null)}
-                            />
+                      )}
+
+                      {/* Metrics */}
+                      <div className="flex-1 grid grid-cols-3 gap-4">
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-slate-500 font-medium mb-1">
+                            Location
+                          </p>
+                          <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                            <MapPin size={16} className="text-slate-400" />
+                            <span className="line-clamp-2">
+                              {achievement.location}
+                            </span>
                           </div>
-                        )}
-                        <div className="grid grid-cols-3 gap-2 text-xs">
-                          <div className="flex items-center gap-1">
-                            <MapPin size={14} />
-                            {achievement.location}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users size={14} />
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <p className="text-xs text-slate-500 font-medium mb-1">
+                            People Impacted
+                          </p>
+                          <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                            <Users size={16} className="text-slate-400" />
                             {achievement.people_impacted.toLocaleString()}
                           </div>
-                          <div className="font-semibold text-primary">
+                        </div>
+                        <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                          <p className="text-xs text-orange-600 font-medium mb-1">
+                            Contribution
+                          </p>
+                          <p className="text-lg font-bold text-primary">
                             {(achievement.amount / 1000).toFixed(1)}K
-                            MZN
-                          </div>
+                            <span className="text-xs ml-0.5">MZN</span>
+                          </p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => handleEditAchievement(achievement)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit action"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAchievement(achievement.id?.toString() || "")}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete action"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+
+                    {/* Partner Organisation */}
+                    {achievement.partner_organisation && (
+                      <div className="pt-2 border-t border-slate-100">
+                        <p className="text-xs text-slate-500 mb-1">Partner</p>
+                        <p className="text-sm font-medium text-slate-700">
+                          {achievement.partner_organisation}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
