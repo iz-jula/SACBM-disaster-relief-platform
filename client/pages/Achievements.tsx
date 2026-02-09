@@ -433,9 +433,7 @@ export default function Achievements() {
             <div className="flex items-center gap-3">
               <Plus size={20} className="text-primary" />
               <h3 className="font-semibold text-slate-900">
-                {editingAchievementId
-                  ? "Edit Action"
-                  : "Submit Your Action"}
+                {editingAchievementId ? "Edit Action" : "Submit Your Action"}
               </h3>
             </div>
             <span className="text-slate-600">{showForm ? "−" : "+"}</span>
