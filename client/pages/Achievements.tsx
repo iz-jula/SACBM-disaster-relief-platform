@@ -185,7 +185,7 @@ export default function Achievements() {
           partnerOrganisation: formData.partnerOrganisation || null,
           peopleImpacted: parseInt(formData.peopleImpacted) || 0,
           amountContributed: parseInt(formData.amountContributed) || 0,
-          status: "pending" as const,
+          status: "completed" as const,
           image: imageData || null,
         };
 
