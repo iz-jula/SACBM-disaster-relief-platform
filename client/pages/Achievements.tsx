@@ -756,17 +756,17 @@ export default function Achievements() {
               achievements.map((achievement) => (
                 <div
                   key={achievement.id}
-                  className={`p-4 sm:p-6 ${STATUS_COLORS[achievement.status]}`}
+                  className="p-4 sm:p-6 bg-green-50 border-green-200 text-green-900"
                 >
                   <div className="flex items-start gap-3 justify-between">
                     <div className="flex items-start gap-3 flex-1">
                       <div className="mt-0.5">
-                        {getStatusIcon(achievement.status)}
+                        <CheckCircle size={16} className="text-green-600" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between gap-2 mb-1">
                           <h3 className="font-semibold text-sm sm:text-base">
-                            {achievement.title}
+                            {achievement.type_action}
                           </h3>
                           <span
                             className={`px-2 py-1 text-xs rounded font-medium ${CATEGORY_COLORS[achievement.category]}`}
@@ -775,18 +775,18 @@ export default function Achievements() {
                           </span>
                         </div>
                         <p className="text-xs sm:text-sm text-slate-700 mb-2">
-                          by {achievement.memberName}
+                          by {achievement.company_name}
                         </p>
                         <p className="text-xs sm:text-sm opacity-90 mb-3">
                           {achievement.description}
                         </p>
-                        {achievement.image && (
+                        {achievement.media && (
                           <div className="mb-3">
                             <img
-                              src={achievement.image}
-                              alt={achievement.title}
+                              src={achievement.media}
+                              alt={achievement.type_action}
                               className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={() => setSelectedImage(achievement.image)}
+                              onClick={() => setSelectedImage(achievement.media || null)}
                             />
                           </div>
                         )}
@@ -797,10 +797,10 @@ export default function Achievements() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Users size={14} />
-                            {achievement.peopleImpacted.toLocaleString()}
+                            {achievement.people_impacted.toLocaleString()}
                           </div>
                           <div className="font-semibold text-primary">
-                            {(achievement.amountContributed / 1000).toFixed(1)}K
+                            {(achievement.amount / 1000).toFixed(1)}K
                             MZN
                           </div>
                         </div>
@@ -815,7 +815,7 @@ export default function Achievements() {
                         <Edit2 size={18} />
                       </button>
                       <button
-                        onClick={() => handleDeleteAchievement(achievement.id)}
+                        onClick={() => handleDeleteAchievement(achievement.id?.toString() || "")}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete action"
                       >
