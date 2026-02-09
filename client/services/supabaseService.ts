@@ -194,3 +194,176 @@ export function subscribeToRequests(callback: (request: RelieRequest) => void) {
 
   return subscription;
 }
+
+// Action/Achievement Interface
+export interface Action {
+  id?: string;
+  memberName: string;
+  title: string;
+  description: string;
+  category:
+    | "Food"
+    | "Clothing"
+    | "Materials"
+    | "Medical"
+    | "Shelter"
+    | "Water"
+    | "Evacuation"
+    | "Multiple";
+  location: string;
+  partnerOrganisation?: string | null;
+  peopleImpacted: number;
+  amountContributed: number;
+  status: "completed" | "in_progress" | "pending";
+  image?: string | null;
+  createdAt?: string;
+}
+
+// Fetch all actions
+export async function getActions(
+  status?: string,
+  category?: string,
+): Promise<Action[]> {
+  try {
+    let query = supabase
+      .from("actions_table")
+      .select("*")
+      .order("createdAt", { ascending: false });
+
+    if (status) {
+      query = query.eq("status", status);
+    }
+
+    if (category) {
+      query = query.eq("category", category);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching actions:", error);
+    return [];
+  }
+}
+
+// Get action metrics
+export async function getActionsMetrics() {
+  try {
+    const { data, error } = await supabase
+      .from("actions_table")
+      .select("*");
+
+    if (error) throw error;
+
+    const actions = data || [];
+    const totalAchievements = actions.length;
+    const completedAchievements = actions.filter(
+      (a: Action) => a.status === "completed",
+    ).length;
+    const inProgressAchievements = actions.filter(
+      (a: Action) => a.status === "in_progress",
+    ).length;
+    const totalPeopleImpacted = actions.reduce(
+      (sum: number, a: Action) => sum + (a.peopleImpacted || 0),
+      0,
+    );
+    const totalContributed = actions.reduce(
+      (sum: number, a: Action) => sum + (a.amountContributed || 0),
+      0,
+    );
+
+    return {
+      totalAchievements,
+      completedAchievements,
+      inProgressAchievements,
+      totalPeopleImpacted,
+      totalContributed,
+      averageImpact:
+        actions.length > 0
+          ? Math.round(totalPeopleImpacted / actions.length)
+          : 0,
+    };
+  } catch (error) {
+    console.error("Error fetching action metrics:", error);
+    return {
+      totalAchievements: 0,
+      completedAchievements: 0,
+      inProgressAchievements: 0,
+      totalPeopleImpacted: 0,
+      totalContributed: 0,
+      averageImpact: 0,
+    };
+  }
+}
+
+// Create a new action
+export async function createAction(
+  action: Omit<Action, "id" | "createdAt">,
+): Promise<Action | null> {
+  try {
+    console.log("Creating action:", action);
+
+    const { data, error } = await supabase
+      .from("actions_table")
+      .insert([{ ...action, createdAt: new Date().toISOString() }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase error details:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      throw error;
+    }
+
+    console.log("Action created successfully:", data);
+    return data;
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : JSON.stringify(error);
+    console.error("Error creating action:", errorMessage);
+    throw new Error(`Failed to create action: ${errorMessage}`);
+  }
+}
+
+// Update an action
+export async function updateAction(
+  id: string,
+  updates: Partial<Action>,
+): Promise<Action | null> {
+  try {
+    const { data, error } = await supabase
+      .from("actions_table")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error updating action:", error);
+    return null;
+  }
+}
+
+// Delete an action
+export async function deleteAction(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("actions_table")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error deleting action:", error);
+    return false;
+  }
+}
