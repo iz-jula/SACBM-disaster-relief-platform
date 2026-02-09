@@ -458,17 +458,16 @@ export default function Achievements() {
           <button
             onClick={() => {
               if (editingAchievementId) {
-                setEditingAchievementId(null);
+                setEditingAchievementId("");
                 setFormData({
-                  memberName: "",
-                  title: "",
+                  company_name: "",
+                  type_action: "",
                   description: "",
                   category: "Food",
                   location: "",
-                  partnerOrganisation: "",
-                  peopleImpacted: "",
-                  amountContributed: "",
-                  status: "pending",
+                  partner_organisation: "",
+                  people_impacted: "",
+                  amount: "",
                 });
               }
               setShowForm(!showForm);
