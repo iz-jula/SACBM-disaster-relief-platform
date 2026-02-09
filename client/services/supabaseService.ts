@@ -290,14 +290,14 @@ export async function getActionsMetrics() {
 
 // Create a new action
 export async function createAction(
-  action: Omit<Action, "id" | "createdAt">,
+  action: Omit<Action, "id" | "created_at">,
 ): Promise<Action | null> {
   try {
     console.log("Creating action:", action);
 
     const { data, error } = await supabase
       .from("actions_table")
-      .insert([{ ...action, createdAt: new Date().toISOString() }])
+      .insert([action])
       .select()
       .single();
 
