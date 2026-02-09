@@ -255,25 +255,19 @@ export async function getActionsMetrics() {
 
     const actions = data || [];
     const totalAchievements = actions.length;
-    const completedAchievements = actions.filter(
-      (a: Action) => a.status === "completed",
-    ).length;
-    const inProgressAchievements = actions.filter(
-      (a: Action) => a.status === "in_progress",
-    ).length;
     const totalPeopleImpacted = actions.reduce(
-      (sum: number, a: Action) => sum + (a.peopleImpacted || 0),
+      (sum: number, a: Action) => sum + (a.people_impacted || 0),
       0,
     );
     const totalContributed = actions.reduce(
-      (sum: number, a: Action) => sum + (a.amountContributed || 0),
+      (sum: number, a: Action) => sum + (a.amount || 0),
       0,
     );
 
     return {
       totalAchievements,
-      completedAchievements,
-      inProgressAchievements,
+      completedAchievements: totalAchievements,
+      inProgressAchievements: 0,
       totalPeopleImpacted,
       totalContributed,
       averageImpact:
