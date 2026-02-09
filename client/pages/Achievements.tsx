@@ -75,15 +75,14 @@ export default function Achievements() {
   } | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    memberName: "",
-    title: "",
+    company_name: "",
+    type_action: "",
     description: "",
     category: "Food" as const,
     location: "",
-    partnerOrganisation: "",
-    peopleImpacted: "",
-    amountContributed: "",
-    status: "pending" as "completed" | "in_progress" | "pending",
+    partner_organisation: "",
+    people_impacted: "",
+    amount: "",
   });
 
   useEffect(() => {
