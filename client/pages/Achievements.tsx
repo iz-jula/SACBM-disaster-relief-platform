@@ -939,6 +939,31 @@ export default function Achievements() {
             </div>
           </div>
         )}
+
+        {/* Image Lightbox Modal */}
+        {selectedImage && (
+          <div
+            className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div
+              className="max-w-4xl max-h-[90vh] relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="absolute top-4 right-4 text-white hover:text-slate-200 transition-colors bg-black/50 rounded-full p-2"
+              >
+                <X size={24} />
+              </button>
+              <img
+                src={selectedImage}
+                alt="Full view"
+                className="w-full h-full object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
