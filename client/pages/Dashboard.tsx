@@ -111,8 +111,7 @@ export default function Dashboard() {
                   Members Actions Dashboard
                 </h1>
                 <p className="text-base sm:text-lg text-slate-600 mt-2 max-w-2xl">
-                  Real-time overview of disaster relief operations and community
-                  impact
+                  Track and celebrate member actions and their community impact
                 </p>
               </div>
             </div>
