@@ -334,7 +334,7 @@ export default function Dashboard() {
                   <Activity size={24} className="text-white" />
                 </div>
               </div>
-              <p className="text-sm text-slate-600">Meticais</p>
+              <p className="text-sm text-slate-600">MZN</p>
             </div>
           </div>
         </div>
