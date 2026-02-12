@@ -110,15 +110,27 @@ export default function INGDDashboard() {
     try {
       const itemIds = Array.from(selectedItems);
 
-      if (pendingActionType === "commitment") {
-        await createIngdCommitment(
+      // If marking as resolved, verify email matches original commitment
+      if (pendingActionType === "resolved") {
+        for (const itemId of itemIds) {
+          const item = ingdRequests.find(r => r.id === itemId);
+          if (item && item.status === "commitment" && item.email_resolution) {
+            if (commitmentData.email !== item.email_resolution) {
+              setCommitmentError("Email does not match the original commitment. Verification failed.");
+              setIsSubmittingCommitment(false);
+              return;
+            }
+          }
+        }
+
+        await resolveIngdRequest(
           itemIds,
           commitmentData.fullName,
           commitmentData.companyName,
           commitmentData.email,
         );
-      } else if (pendingActionType === "resolved") {
-        await resolveIngdRequest(
+      } else if (pendingActionType === "commitment") {
+        await createIngdCommitment(
           itemIds,
           commitmentData.fullName,
           commitmentData.companyName,
@@ -362,7 +374,7 @@ export default function INGDDashboard() {
                           }}
                           className="w-full text-left px-4 py-3 hover:bg-purple-50 text-slate-900 font-medium transition-colors border-b border-slate-200"
                         >
-                          ✓ Commitment
+                          Commitment
                         </button>
                         <button
                           onClick={() => {
@@ -371,7 +383,7 @@ export default function INGDDashboard() {
                           }}
                           className="w-full text-left px-4 py-3 hover:bg-green-50 text-slate-900 font-medium transition-colors"
                         >
-                          ✓ Resolved
+                          Resolved
                         </button>
                       </div>
                     )}
@@ -489,11 +501,11 @@ export default function INGDDashboard() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
               <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                {pendingActionType === "resolved" ? "Mark as Resolved" : "Make a Commitment"}
+                {pendingActionType === "resolved" ? "Verify Identity & Mark as Resolved" : "Make a Commitment"}
               </h3>
               <p className="text-slate-600 mb-6 text-sm">
                 {pendingActionType === "resolved"
-                  ? `Mark ${selectedItems.size} relief item${selectedItems.size !== 1 ? "s" : ""} as resolved`
+                  ? `Please verify your identity with the email you used when committing to mark ${selectedItems.size} relief item${selectedItems.size !== 1 ? "s" : ""} as resolved`
                   : `Commit to ${selectedItems.size} relief item${selectedItems.size !== 1 ? "s" : ""}`}
               </p>
 
