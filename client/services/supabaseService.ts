@@ -642,12 +642,25 @@ export async function createIngdDocument(
   try {
     const { data, error } = await supabase
       .from("ingd_documents")
-      .insert([document])
-      .select()
-      .single();
+      .insert([{
+        file_name: document.file_name,
+        file_url: document.file_url,
+        file_type: document.file_type,
+        description: document.description,
+        uploaded_by: document.uploaded_by,
+      }])
+      .select();
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error("Supabase error creating document:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      throw error;
+    }
+    return data?.[0] || null;
   } catch (error) {
     console.error("Error creating INGD document:", error);
     throw new Error(`Failed to create document: ${error instanceof Error ? error.message : "Unknown error"}`);
