@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { getIngdRequests, createIngdCommitment, resolveIngdRequest } from "@/services/supabaseService";
+import { getIngdRequests, createIngdCommitment, resolveIngdRequest, revertIngdToPending } from "@/services/supabaseService";
 import type { IngdRequest } from "@/services/supabaseService";
 import { ChevronDown } from "lucide-react";
 import { AlertCircle } from "lucide-react";
@@ -381,9 +381,22 @@ export default function INGDDashboard() {
                             setPendingActionType("resolved");
                             setShowCommitmentModal(true);
                           }}
-                          className="w-full text-left px-4 py-3 hover:bg-green-50 text-slate-900 font-medium transition-colors"
+                          className="w-full text-left px-4 py-3 hover:bg-green-50 text-slate-900 font-medium transition-colors border-b border-slate-200"
                         >
                           Resolved
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const itemIds = Array.from(selectedItems);
+                            await revertIngdToPending(itemIds);
+                            setSelectedItems(new Set());
+                            setShowActionDropdown(false);
+                            const requests = await getIngdRequests();
+                            setIngdRequests(requests);
+                          }}
+                          className="w-full text-left px-4 py-3 hover:bg-yellow-50 text-slate-900 font-medium transition-colors"
+                        >
+                          Revert to Pending
                         </button>
                       </div>
                     )}

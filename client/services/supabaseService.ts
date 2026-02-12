@@ -556,3 +556,29 @@ export async function resolveIngdRequest(
     return false;
   }
 }
+
+// Revert INGD item status back to pending (clear commitment/resolution)
+export async function revertIngdToPending(
+  itemIds: number[],
+): Promise<boolean> {
+  try {
+    // Update each selected item back to pending, clearing all action fields
+    for (const itemId of itemIds) {
+      const { error } = await supabase
+        .from("INGD_table")
+        .update({
+          status: "pending",
+          resolved_by: null,
+          company_name_action: null,
+          email_resolution: null,
+        })
+        .eq("id", itemId);
+
+      if (error) throw error;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error reverting INGD request to pending:", error);
+    return false;
+  }
+}

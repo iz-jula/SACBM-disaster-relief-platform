@@ -7,7 +7,7 @@ import {
   updateRequest,
   deleteRequest,
 } from "@/services/requestsService";
-import { RelieRequest, getIngdRequests, IngdRequest, createIngdCommitment, resolveIngdRequest } from "@/services/supabaseService";
+import { RelieRequest, getIngdRequests, IngdRequest, createIngdCommitment, resolveIngdRequest, revertIngdToPending } from "@/services/supabaseService";
 import { Lock, AlertCircle } from "lucide-react";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -654,9 +654,22 @@ export default function Requests() {
                             setPendingIngdActionType("resolved");
                             setShowCommitmentModal(true);
                           }}
-                          className="w-full text-left px-4 py-3 hover:bg-green-50 text-slate-900 font-medium transition-colors"
+                          className="w-full text-left px-4 py-3 hover:bg-green-50 text-slate-900 font-medium transition-colors border-b border-slate-200"
                         >
                           Resolved
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const itemIds = Array.from(selectedIngdItems);
+                            await revertIngdToPending(itemIds);
+                            setSelectedIngdItems(new Set());
+                            setShowIngdActionDropdown(false);
+                            const requests = await getIngdRequests();
+                            setIngdRequests(requests);
+                          }}
+                          className="w-full text-left px-4 py-3 hover:bg-yellow-50 text-slate-900 font-medium transition-colors"
+                        >
+                          Revert to Pending
                         </button>
                       </div>
                     )}
