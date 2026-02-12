@@ -333,18 +333,28 @@ export async function updateAction(
   updates: Partial<Action>,
 ): Promise<Action | null> {
   try {
+    const numericId = parseInt(id, 10);
     const { data, error } = await supabase
       .from("actions_table")
       .update(updates)
-      .eq("id", id)
+      .eq("id", numericId)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error updating action:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      throw error;
+    }
     return data;
   } catch (error) {
-    console.error("Error updating action:", error);
-    return null;
+    const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error("Error updating action:", errorMsg);
+    throw new Error(`Failed to update action: ${errorMsg}`);
   }
 }
 

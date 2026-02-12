@@ -131,8 +131,9 @@ export async function updateAchievement(
     console.log("Achievement updated successfully");
     return result;
   } catch (error) {
-    console.error("Error updating achievement:", error);
-    return null;
+    const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error("Error updating achievement:", errorMsg);
+    throw error;
   }
 }
 

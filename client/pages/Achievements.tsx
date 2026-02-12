@@ -327,36 +327,38 @@ export default function Achievements() {
           hide_amount: formData.hide_amount,
         };
 
-        const result = await updateAchievement(
+        console.log("Updating achievement with id:", pendingAction.achievementId, "Data:", updateData);
+
+        await updateAchievement(
           pendingAction.achievementId,
           updateData,
         );
-        if (result) {
-          setEditingAchievementId("");
-          setFormData({
-            company_name: "",
-            type_action: "",
-            description: "",
-            category: "Food",
-            location: "",
-            partner_organisation: "",
-            people_impacted: "",
-            amount: "",
-            hide_amount: false,
-          });
-          setShowForm(false);
-          setShowEditModal(false);
-          setShowAuthModal(false);
-          setAuthPassword("");
-          setPendingAction(null);
-          await loadData();
-        } else {
-          setAuthError("Failed to update action");
-        }
+
+        // If we get here, update was successful
+        setEditingAchievementId("");
+        setFormData({
+          company_name: "",
+          type_action: "",
+          description: "",
+          category: "Food",
+          location: "",
+          partner_organisation: "",
+          people_impacted: "",
+          amount: "",
+          hide_amount: false,
+        });
+        setShowForm(false);
+        setShowEditModal(false);
+        setShowAuthModal(false);
+        setAuthPassword("");
+        setPendingAction(null);
+        await loadData();
+        alert("Action updated successfully!");
       }
     } catch (error) {
-      setAuthError("Action failed. Please try again.");
-      console.error("Error executing action:", error);
+      const errorMessage = error instanceof Error ? error.message : "Action failed. Please try again.";
+      setAuthError(errorMessage);
+      console.error("Error executing action:", errorMessage);
     }
   };
 
