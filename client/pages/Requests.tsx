@@ -7,7 +7,7 @@ import {
   updateRequest,
   deleteRequest,
 } from "@/services/requestsService";
-import { RelieRequest } from "@/services/supabaseService";
+import { RelieRequest, getIngdRequests, IngdRequest } from "@/services/supabaseService";
 import { Lock, AlertCircle } from "lucide-react";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -255,6 +255,7 @@ function RequestsTable({
 export default function Requests() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<RelieRequest[]>([]);
+  const [ingdRequests, setIngdRequests] = useState<IngdRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(
     new Set(),
@@ -272,8 +273,12 @@ export default function Requests() {
     const loadRequests = async () => {
       setIsLoading(true);
       try {
-        const data = await getRequests();
-        setRequests(data);
+        const [reliefData, ingdData] = await Promise.all([
+          getRequests(),
+          getIngdRequests(),
+        ]);
+        setRequests(reliefData);
+        setIngdRequests(ingdData);
       } catch (error) {
         console.error("Error loading requests:", error);
       } finally {
@@ -517,6 +522,85 @@ export default function Requests() {
             <p className="text-slate-400 mt-2">
               Click "New Request" to add your first relief request.
             </p>
+          </div>
+        )}
+
+        {/* INGD Relief Requests Section */}
+        {ingdRequests.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-purple-100">
+              <h2 className="text-xl font-bold text-slate-900">
+                INGD Relief Items ({ingdRequests.length})
+              </h2>
+              <p className="text-sm text-slate-600 mt-1">
+                INGD relief items inventory across all districts
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                      #Ref
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                      Company
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                      Item
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                      Category
+                    </th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
+                      Total
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                      People Impacted
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ingdRequests.map((request, index) => (
+                    <tr
+                      key={request.id}
+                      className={`border-b border-slate-200 transition-colors hover:bg-purple-50 ${
+                        index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                      }`}
+                    >
+                      <td className="px-6 py-4 text-sm font-medium text-slate-500">
+                        #{request.id}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                        {request.company_name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {request.Item}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
+                          {request.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
+                        {formatNumber(request.Total || 0)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-center text-slate-900 font-medium">
+                        {formatNumber(request.people_impacted || 0)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
+                          ⏳ Pending
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

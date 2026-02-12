@@ -11,6 +11,7 @@ import {
   getAchievementsMetrics,
   AchievementsMetrics,
 } from "@/services/achievementsService";
+import { getIngdMetrics, getIngdRequests, IngdRequest } from "@/services/supabaseService";
 
 const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
 const Alerts = lazy(() => import("@/components/Alerts"));
@@ -32,6 +33,8 @@ export default function Dashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [achievementsMetrics, setAchievementsMetrics] =
     useState<AchievementsMetrics | null>(null);
+  const [ingdMetrics, setIngdMetrics] = useState<any>(null);
+  const [recentIngdRequests, setRecentIngdRequests] = useState<IngdRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,14 +42,19 @@ export default function Dashboard() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [requests, metricsData, achievementsData] = await Promise.all([
+        const [requests, metricsData, achievementsData, ingdMetricsData, ingdRecentData] = await Promise.all([
           getRecentRequests(5),
           getMetrics(),
           getAchievementsMetrics(),
+          getIngdMetrics(),
+          getIngdRequests(),
         ]);
         setRecentRequests(requests);
         setMetrics(metricsData);
         setAchievementsMetrics(achievementsData);
+        setIngdMetrics(ingdMetricsData);
+        // Get first 5 INGD requests
+        setRecentIngdRequests(ingdRecentData.slice(0, 5));
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -235,10 +243,10 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-slate-900">
-                RELIEF REQUESTS
+                RELIEF REQUESTS & INGD REQUESTS
               </h2>
               <p className="text-slate-600 mt-2">
-                Real-time overview of disaster relief operations and community impact
+                Real-time overview of disaster relief operations and INGD relief items
               </p>
             </div>
             <Link
@@ -338,6 +346,118 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* INGD Requests Summary */}
+        {ingdMetrics && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  INGD RELIEF ITEMS
+                </h2>
+                <p className="text-slate-600 mt-2">
+                  INGD relief items inventory across all districts
+                </p>
+              </div>
+              <Link
+                to="/requests"
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
+              >
+                View All
+                <span className="transform group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* Total INGD Items */}
+              <div className="group relative bg-gradient-to-br from-purple-50 to-purple-50/40 rounded-2xl p-6 border border-purple-200/40 hover:border-purple-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-purple-100">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-purple-500/5 rounded-2xl transition-all duration-300" />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-purple-600/70 text-xs font-semibold uppercase tracking-wider">
+                        Total Items
+                      </p>
+                      <p className="text-4xl font-bold text-slate-900 mt-3">
+                        {ingdMetrics.totalRequests}
+                      </p>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl p-3 shadow-lg shadow-purple-200">
+                      <BarChart3 size={24} className="text-white" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600">Relief items</p>
+                </div>
+              </div>
+
+              {/* People Impacted */}
+              <div className="group relative bg-gradient-to-br from-purple-50 to-purple-50/40 rounded-2xl p-6 border border-purple-200/40 hover:border-purple-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-purple-100">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-purple-500/5 rounded-2xl transition-all duration-300" />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-purple-600/70 text-xs font-semibold uppercase tracking-wider">
+                        People Impacted
+                      </p>
+                      <p className="text-4xl font-bold text-slate-900 mt-3">
+                        {formatNumber(ingdMetrics.totalPeople || 0)}
+                      </p>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
+                      <Users size={24} className="text-white" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600">Direct impact</p>
+                </div>
+              </div>
+
+              {/* Total Value */}
+              <div className="group relative bg-gradient-to-br from-purple-50 to-purple-50/40 rounded-2xl p-6 border border-purple-200/40 hover:border-purple-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-purple-100">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-purple-500/5 rounded-2xl transition-all duration-300" />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-purple-600/70 text-xs font-semibold uppercase tracking-wider">
+                        Total Value
+                      </p>
+                      <p className="text-4xl font-bold text-slate-900 mt-3">
+                        {formatNumber((ingdMetrics.totalValue || 0) / 1000000, 1)}M
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1">MZN</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-primary to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
+                      <TrendingUp size={24} className="text-white" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600">Total value</p>
+                </div>
+              </div>
+
+              {/* Average Per Item */}
+              <div className="group relative bg-gradient-to-br from-purple-50 to-purple-50/40 rounded-2xl p-6 border border-purple-200/40 hover:border-purple-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-purple-100">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-purple-500/5 rounded-2xl transition-all duration-300" />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-purple-600/70 text-xs font-semibold uppercase tracking-wider">
+                        Avg. Per Item
+                      </p>
+                      <p className="text-4xl font-bold text-slate-900 mt-3">
+                        {formatNumber((ingdMetrics.averagePerRequest || 0) / 1000, 0)}K
+                      </p>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
+                      <Activity size={24} className="text-white" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600">MZN</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         </div>
 
         {/* Maputo Weather and Alerts Row - Modern Layout */}
@@ -520,6 +640,69 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* Recent INGD Requests - Modern Section */}
+        {recentIngdRequests.length > 0 && (
+          <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+            <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    Recent INGD Relief Items
+                  </h2>
+                  <p className="text-slate-600 mt-1">
+                    Latest INGD relief items inventory
+                  </p>
+                </div>
+                <Link
+                  to="/requests"
+                  className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
+                >
+                  View All
+                  <span className="transform group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="px-8 py-6 space-y-3">
+              {recentIngdRequests.map((request) => (
+                <div
+                  key={request.id}
+                  className="group p-5 rounded-xl border border-slate-200/50 hover:border-slate-300 hover:bg-slate-50/50 transition-all duration-300 hover:shadow-md cursor-pointer"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <p className="font-semibold text-slate-900 truncate">
+                          {request.company_name}
+                        </p>
+                        <span className="shrink-0 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                          ⏳ Pending
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-3">
+                        {request.Item}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-purple-100/80 text-purple-700 backdrop-blur">
+                          {request.category}
+                        </span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-100/80 text-blue-700 backdrop-blur">
+                          {formatNumber(request.Total || 0)} total
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm font-semibold text-primary shrink-0 whitespace-nowrap">
+                      {formatNumber(request.people_impacted || 0)} people
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -400,6 +400,34 @@ export async function getIngdRequests(): Promise<IngdRequest[]> {
   }
 }
 
+// Get INGD metrics for dashboard
+export async function getIngdMetrics() {
+  try {
+    const { data, error } = await supabase.from("INGD_table").select("*");
+
+    if (error) throw error;
+
+    const totalRequests = data?.length || 0;
+    const totalPeople = data?.reduce((sum: number, r: IngdRequest) => sum + (r.people_impacted || 0), 0) || 0;
+    const totalValue = data?.reduce((sum: number, r: IngdRequest) => sum + (r.amount || 0), 0) || 0;
+
+    return {
+      totalRequests,
+      totalPeople,
+      totalValue,
+      averagePerRequest: totalRequests > 0 ? totalValue / totalRequests : 0,
+    };
+  } catch (error) {
+    console.error("Error fetching INGD metrics:", error);
+    return {
+      totalRequests: 0,
+      totalPeople: 0,
+      totalValue: 0,
+      averagePerRequest: 0,
+    };
+  }
+}
+
 // Create a new INGD relief request
 export async function createIngdRequest(
   request: Omit<IngdRequest, "id" | "created_at">,
