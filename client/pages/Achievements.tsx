@@ -84,6 +84,7 @@ export default function Achievements() {
     achievementId: string;
   } | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedAchievements, setSelectedAchievements] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     company_name: "",
     type_action: "",
@@ -359,6 +360,25 @@ export default function Achievements() {
       const errorMessage = error instanceof Error ? error.message : "Action failed. Please try again.";
       setAuthError(errorMessage);
       console.error("Error executing action:", errorMessage);
+    }
+  };
+
+  const toggleSelectAchievement = (id: string) => {
+    const newSelected = new Set(selectedAchievements);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedAchievements(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedAchievements.size === achievements.length) {
+      setSelectedAchievements(new Set());
+    } else {
+      const allIds = new Set(achievements.map(a => a.id?.toString() || ""));
+      setSelectedAchievements(allIds);
     }
   };
 
@@ -776,13 +796,33 @@ export default function Achievements() {
         {/* Member Work List */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-              MEMBER ACTIONS
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              {achievements.length} action
-              {achievements.length !== 1 ? "s" : ""}
-            </p>
+            <div className="flex items-center gap-3 justify-between">
+              <div className="flex items-center gap-3 flex-1">
+                {achievements.length > 0 && (
+                  <input
+                    type="checkbox"
+                    checked={selectedAchievements.size === achievements.length && achievements.length > 0}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded cursor-pointer"
+                    title="Select all actions"
+                  />
+                )}
+                <div>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                    MEMBER ACTIONS
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                    {achievements.length} action
+                    {achievements.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+              {selectedAchievements.size > 0 && (
+                <span className="text-sm font-medium text-slate-600">
+                  {selectedAchievements.size} selected
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="divide-y divide-slate-200">
@@ -797,6 +837,12 @@ export default function Achievements() {
                   {/* Card Header */}
                   <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedAchievements.has(achievement.id?.toString() || "")}
+                        onChange={() => toggleSelectAchievement(achievement.id?.toString() || "")}
+                        className="w-4 h-4 rounded cursor-pointer flex-shrink-0"
+                      />
                       <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
                         <CheckCircle size={20} className="text-green-600" />
                       </div>
