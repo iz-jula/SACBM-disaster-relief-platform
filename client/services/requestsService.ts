@@ -5,6 +5,10 @@ import {
   updateRequest as updateSupabaseRequest,
   deleteRequest as deleteSupabaseRequest,
   getMetrics as getSupabaseMetrics,
+  getIngdRequests as getSupabaseIngdRequests,
+  createIngdRequest as createSupabaseIngdRequest,
+  updateIngdRequest as updateSupabaseIngdRequest,
+  deleteIngdRequest as deleteSupabaseIngdRequest,
   RelieRequest,
 } from "./supabaseService";
 
@@ -126,5 +130,54 @@ export async function getMetrics(): Promise<Metrics | null> {
   } catch (error) {
     console.error("Error fetching metrics:", error);
     return null;
+  }
+}
+
+// Fetch INGD relief requests from INGD_table
+export async function getIngdRequests(): Promise<RelieRequest[]> {
+  try {
+    const requests = await getSupabaseIngdRequests();
+    return requests;
+  } catch (error) {
+    console.error("Error fetching INGD requests:", error);
+    return [];
+  }
+}
+
+// Create a new INGD relief request (admin feature)
+export async function createIngdRequest(
+  request: Omit<RelieRequest, "id" | "created_at" | "edited_at">,
+): Promise<RelieRequest | null> {
+  try {
+    const newRequest = await createSupabaseIngdRequest(request);
+    return newRequest;
+  } catch (error) {
+    console.error("Error creating INGD request:", error);
+    return null;
+  }
+}
+
+// Update an INGD relief request (admin feature)
+export async function updateIngdRequest(
+  id: number,
+  updates: Partial<RelieRequest>,
+): Promise<RelieRequest | null> {
+  try {
+    const updated = await updateSupabaseIngdRequest(id, updates);
+    return updated;
+  } catch (error) {
+    console.error("Error updating INGD request:", error);
+    return null;
+  }
+}
+
+// Delete an INGD relief request (admin feature)
+export async function deleteIngdRequest(id: number): Promise<boolean> {
+  try {
+    const deleted = await deleteSupabaseIngdRequest(id);
+    return deleted;
+  } catch (error) {
+    console.error("Error deleting INGD request:", error);
+    return false;
   }
 }

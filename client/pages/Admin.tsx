@@ -8,11 +8,16 @@ import {
   Lock,
   AlertCircle,
   Download,
+  Plus,
+  Trash2,
+  Edit2,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
-import { getMetrics, getAllRequests } from "@/services/requestsService";
+import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
 import type { RelieRequest } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -39,7 +44,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "requests" | "users" | "settings"
+    "dashboard" | "requests" | "users" | "settings" | "ingd"
   >("dashboard");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -53,6 +58,22 @@ export default function Admin() {
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
   const [allRequests, setAllRequests] = useState<RelieRequest[]>([]);
   const [isLoadingRequests, setIsLoadingRequests] = useState(false);
+  const [ingdRequests, setIngdRequests] = useState<RelieRequest[]>([]);
+  const [isLoadingIngd, setIsLoadingIngd] = useState(false);
+  const [showIngdForm, setShowIngdForm] = useState(false);
+  const [editingIngdId, setEditingIngdId] = useState<number | null>(null);
+  const [ingdFormData, setIngdFormData] = useState<Partial<RelieRequest>>({
+    originator: "",
+    email: "",
+    full_name: "",
+    location: "",
+    partner_organisation: "",
+    help_type: "",
+    evacuation_type: "",
+    people: "",
+    value: "",
+    status: false,
+  });
 
   // Load metrics on mount
   useEffect(() => {
@@ -73,6 +94,13 @@ export default function Admin() {
     }
   }, [activeTab]);
 
+  // Load INGD requests when ingd tab is activated
+  useEffect(() => {
+    if (activeTab === "ingd") {
+      loadIngdRequests();
+    }
+  }, [activeTab]);
+
   const loadAllRequests = async () => {
     setIsLoadingRequests(true);
     try {
@@ -84,6 +112,72 @@ export default function Admin() {
     } finally {
       setIsLoadingRequests(false);
     }
+  };
+
+  const loadIngdRequests = async () => {
+    setIsLoadingIngd(true);
+    try {
+      const requests = await getIngdRequests();
+      setIngdRequests(requests || []);
+    } catch (error) {
+      console.error("Error loading INGD requests:", error);
+      setIngdRequests([]);
+    } finally {
+      setIsLoadingIngd(false);
+    }
+  };
+
+  const handleSaveIngdRequest = async () => {
+    if (!ingdFormData.originator || !ingdFormData.email) {
+      alert("Please fill in required fields");
+      return;
+    }
+
+    try {
+      if (editingIngdId) {
+        // Update existing request
+        await updateIngdRequest(editingIngdId, ingdFormData);
+      } else {
+        // Create new request
+        await createIngdRequest(ingdFormData as Omit<RelieRequest, "id" | "created_at" | "edited_at">);
+      }
+      await loadIngdRequests();
+      setShowIngdForm(false);
+      setEditingIngdId(null);
+      setIngdFormData({
+        originator: "",
+        email: "",
+        full_name: "",
+        location: "",
+        partner_organisation: "",
+        help_type: "",
+        evacuation_type: "",
+        people: "",
+        value: "",
+        status: false,
+      });
+    } catch (error) {
+      console.error("Error saving INGD request:", error);
+      alert("Error saving request");
+    }
+  };
+
+  const handleDeleteIngdRequest = async (id: number) => {
+    if (confirm("Are you sure you want to delete this INGD request?")) {
+      try {
+        await deleteIngdRequest(id);
+        await loadIngdRequests();
+      } catch (error) {
+        console.error("Error deleting INGD request:", error);
+        alert("Error deleting request");
+      }
+    }
+  };
+
+  const handleEditIngdRequest = (request: RelieRequest) => {
+    setEditingIngdId(request.id || null);
+    setIngdFormData(request);
+    setShowIngdForm(true);
   };
 
   const exportToCSV = () => {
@@ -231,6 +325,7 @@ export default function Admin() {
             {[
               { id: "dashboard", label: "Dashboard", icon: BarChart3 },
               { id: "requests", label: "All Requests", icon: Database },
+              { id: "ingd", label: "INGD Management", icon: Database },
               { id: "users", label: "Users", icon: Users },
               { id: "settings", label: "Settings", icon: Settings },
             ].map((tab) => (
@@ -752,6 +847,312 @@ export default function Admin() {
                 <li>✓ Relief requests management</li>
                 <li>✓ Automatic backups and recovery</li>
               </ul>
+            </div>
+          </div>
+        )}
+
+        {/* INGD Management Tab */}
+        {activeTab === "ingd" && (
+          <div className="space-y-6">
+            {/* INGD Requests Table */}
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    INGD Relief Requests
+                  </h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Manage INGD relief requests in the database
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowIngdForm(true);
+                    setEditingIngdId(null);
+                    setIngdFormData({
+                      originator: "",
+                      email: "",
+                      full_name: "",
+                      location: "",
+                      partner_organisation: "",
+                      help_type: "",
+                      evacuation_type: "",
+                      people: "",
+                      value: "",
+                      status: false,
+                    });
+                  }}
+                  className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center gap-2"
+                >
+                  <Plus size={18} />
+                  Add Request
+                </button>
+              </div>
+
+              {/* Add/Edit Form */}
+              {showIngdForm && (
+                <div className="px-6 py-6 border-b border-slate-200 bg-blue-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-slate-900">
+                      {editingIngdId ? "Edit INGD Request" : "Add New INGD Request"}
+                    </h4>
+                    <button
+                      onClick={() => {
+                        setShowIngdForm(false);
+                        setEditingIngdId(null);
+                      }}
+                      className="text-slate-500 hover:text-slate-700"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Originator *"
+                      value={ingdFormData.originator || ""}
+                      onChange={(e) =>
+                        setIngdFormData({
+                          ...ingdFormData,
+                          originator: e.target.value,
+                        })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email *"
+                      value={ingdFormData.email || ""}
+                      onChange={(e) =>
+                        setIngdFormData({ ...ingdFormData, email: e.target.value })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      value={ingdFormData.full_name || ""}
+                      onChange={(e) =>
+                        setIngdFormData({
+                          ...ingdFormData,
+                          full_name: e.target.value,
+                        })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Location"
+                      value={ingdFormData.location || ""}
+                      onChange={(e) =>
+                        setIngdFormData({
+                          ...ingdFormData,
+                          location: e.target.value,
+                        })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Help Type"
+                      value={ingdFormData.help_type || ""}
+                      onChange={(e) =>
+                        setIngdFormData({
+                          ...ingdFormData,
+                          help_type: e.target.value,
+                        })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Evacuation Type"
+                      value={ingdFormData.evacuation_type || ""}
+                      onChange={(e) =>
+                        setIngdFormData({
+                          ...ingdFormData,
+                          evacuation_type: e.target.value,
+                        })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="number"
+                      placeholder="People"
+                      value={ingdFormData.people || ""}
+                      onChange={(e) =>
+                        setIngdFormData({ ...ingdFormData, people: e.target.value })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Value (MZN)"
+                      value={ingdFormData.value || ""}
+                      onChange={(e) =>
+                        setIngdFormData({ ...ingdFormData, value: e.target.value })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Partner Organisation"
+                      value={ingdFormData.partner_organisation || ""}
+                      onChange={(e) =>
+                        setIngdFormData({
+                          ...ingdFormData,
+                          partner_organisation: e.target.value,
+                        })
+                      }
+                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="status"
+                        checked={ingdFormData.status || false}
+                        onChange={(e) =>
+                          setIngdFormData({
+                            ...ingdFormData,
+                            status: e.target.checked,
+                          })
+                        }
+                        className="w-4 h-4 rounded"
+                      />
+                      <label htmlFor="status" className="text-slate-700 font-medium">
+                        Mark as Met
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleSaveIngdRequest}
+                      className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                    >
+                      Save Request
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowIngdForm(false);
+                        setEditingIngdId(null);
+                      }}
+                      className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Requests Table */}
+              {isLoadingIngd ? (
+                <div className="p-6 text-center text-slate-600">
+                  Loading INGD requests...
+                </div>
+              ) : ingdRequests.length === 0 ? (
+                <div className="p-6 text-center text-slate-600">
+                  No INGD requests found
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50">
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                          #ID
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                          Originator
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                          Location
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                          Help Type
+                        </th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                          People
+                        </th>
+                        <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
+                          Value (MZN)
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                          Status
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ingdRequests.map((req) => (
+                        <tr
+                          key={req.id}
+                          className="border-b border-slate-200 hover:bg-blue-50 transition-colors"
+                        >
+                          <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                            #{req.id}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-600">
+                            {req.originator}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-600">
+                            {req.location}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-600">
+                            {req.help_type}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                            {req.people}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-right text-slate-600">
+                            {formatNumber(parseInt(req.value || "0"))}
+                          </td>
+                          <td className="px-6 py-4 text-sm">
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                req.status
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {req.status ? "✓ Met" : "⏳ Pending"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm space-x-2 flex">
+                            <button
+                              onClick={() => handleEditIngdRequest(req)}
+                              className="text-blue-600 hover:text-blue-800 font-medium transition-colors flex items-center gap-1"
+                            >
+                              <Edit2 size={14} />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteIngdRequest(req.id || 0)}
+                              className="text-red-600 hover:text-red-800 font-medium transition-colors flex items-center gap-1"
+                            >
+                              <Trash2 size={14} />
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+              <p className="text-lg font-semibold text-blue-900 mb-2">
+                📊 INGD Database Management
+              </p>
+              <p className="text-blue-800">
+                This section allows you to manage all relief requests stored in the INGD_table. You can add new requests, update existing ones, or delete records as needed.
+              </p>
             </div>
           </div>
         )}

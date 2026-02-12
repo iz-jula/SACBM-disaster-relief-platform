@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { getRequests } from "@/services/requestsService";
+import { getIngdRequests } from "@/services/requestsService";
 import type { RelieRequest } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -38,12 +38,8 @@ export default function INGDDashboard() {
       if (activeTab === "requests") {
         setIsLoading(true);
         try {
-          const allRequests = await getRequests();
-          // Filter for INGD requests only
-          const filtered = allRequests.filter(
-            (r: RelieRequest) => r.source === "INGD"
-          );
-          setIngdRequests(filtered);
+          const requests = await getIngdRequests();
+          setIngdRequests(requests);
         } catch (error) {
           console.error("Error loading INGD requests:", error);
         } finally {

@@ -362,3 +362,75 @@ export async function deleteAction(id: string): Promise<boolean> {
     return false;
   }
 }
+
+// Fetch all INGD relief requests from INGD_table
+export async function getIngdRequests(): Promise<RelieRequest[]> {
+  try {
+    const { data, error } = await supabase
+      .from("INGD_table")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching INGD requests:", error);
+    return [];
+  }
+}
+
+// Create a new INGD relief request
+export async function createIngdRequest(
+  request: Omit<RelieRequest, "id" | "created_at" | "edited_at">,
+): Promise<RelieRequest | null> {
+  try {
+    const { data, error } = await supabase
+      .from("INGD_table")
+      .insert([request])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error creating INGD request:", error);
+    return null;
+  }
+}
+
+// Update an INGD relief request
+export async function updateIngdRequest(
+  id: number,
+  updates: Partial<RelieRequest>,
+): Promise<RelieRequest | null> {
+  try {
+    const { data, error } = await supabase
+      .from("INGD_table")
+      .update({ ...updates, edited_at: new Date().toISOString() })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error updating INGD request:", error);
+    return null;
+  }
+}
+
+// Delete an INGD relief request
+export async function deleteIngdRequest(id: number): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("INGD_table")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error deleting INGD request:", error);
+    return false;
+  }
+}
