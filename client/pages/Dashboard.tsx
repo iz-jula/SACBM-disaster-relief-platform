@@ -15,6 +15,18 @@ import {
 const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
 const Alerts = lazy(() => import("@/components/Alerts"));
 
+// Format numbers with . for thousands and , for decimals (European format)
+const formatNumber = (value: number, decimals: number = 0): string => {
+  const fixed = value.toFixed(decimals);
+  const [integer, decimal] = fixed.split('.');
+
+  // Add thousands separator with dots
+  const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // Combine with comma as decimal separator
+  return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
 export default function Dashboard() {
   const [recentRequests, setRecentRequests] = useState<any[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -167,9 +179,7 @@ export default function Dashboard() {
                     People Impacted
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {(
-                      achievementsMetrics.totalPeopleImpacted || 0
-                    ).toLocaleString()}
+                    {formatNumber(achievementsMetrics.totalPeopleImpacted || 0)}
                   </p>
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-slate-600">Direct impact</p>
@@ -187,9 +197,7 @@ export default function Dashboard() {
                     Total Contribution
                   </p>
                   <p className="text-3xl font-bold text-slate-900 mt-3">
-                    {(
-                      (achievementsMetrics.totalContributed || 0) / 1000
-                    ).toFixed(1)}
+                    {formatNumber((achievementsMetrics.totalContributed || 0) / 1000, 1)}
                     K
                   </p>
                   <div className="flex items-center justify-between mt-4">
@@ -276,7 +284,7 @@ export default function Dashboard() {
                     People Assisted
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
+                    {formatNumber(metrics?.totalPeopleAssisted || 0)}
                   </p>
                 </div>
                 <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
@@ -297,7 +305,7 @@ export default function Dashboard() {
                     Total Value
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M
+                    {formatNumber((metrics?.totalValueDeployed || 0) / 1000000, 1)}M
                   </p>
                   <p className="text-xs text-slate-600 mt-1">MZN</p>
                 </div>
@@ -319,7 +327,7 @@ export default function Dashboard() {
                     Avg. Per Request
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
+                    {formatNumber((metrics?.averagePerRequest || 0) / 1000, 0)}K
                   </p>
                 </div>
                 <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
