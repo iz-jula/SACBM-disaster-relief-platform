@@ -891,10 +891,13 @@ export default function Admin() {
               {/* Add/Edit Form */}
               {showIngdForm && (
                 <div className="px-6 py-6 border-b border-slate-200 bg-blue-50">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-900">
-                      {editingIngdId ? "Edit INGD Request" : "Add New INGD Request"}
-                    </h4>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-lg">
+                        {editingIngdId ? "Edit INGD Request" : "Add New INGD Request"}
+                      </h4>
+                      <p className="text-sm text-slate-600 mt-1">* indicates required field</p>
+                    </div>
                     <button
                       onClick={() => {
                         setShowIngdForm(false);
@@ -906,122 +909,170 @@ export default function Admin() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input
-                      type="text"
-                      placeholder="Originator *"
-                      value={ingdFormData.originator || ""}
-                      onChange={(e) =>
-                        setIngdFormData({
-                          ...ingdFormData,
-                          originator: e.target.value,
-                        })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email *"
-                      value={ingdFormData.email || ""}
-                      onChange={(e) =>
-                        setIngdFormData({ ...ingdFormData, email: e.target.value })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={ingdFormData.full_name || ""}
-                      onChange={(e) =>
-                        setIngdFormData({
-                          ...ingdFormData,
-                          full_name: e.target.value,
-                        })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Location"
-                      value={ingdFormData.location || ""}
-                      onChange={(e) =>
-                        setIngdFormData({
-                          ...ingdFormData,
-                          location: e.target.value,
-                        })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Help Type"
-                      value={ingdFormData.help_type || ""}
-                      onChange={(e) =>
-                        setIngdFormData({
-                          ...ingdFormData,
-                          help_type: e.target.value,
-                        })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Evacuation Type"
-                      value={ingdFormData.evacuation_type || ""}
-                      onChange={(e) =>
-                        setIngdFormData({
-                          ...ingdFormData,
-                          evacuation_type: e.target.value,
-                        })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="number"
-                      placeholder="People"
-                      value={ingdFormData.people || ""}
-                      onChange={(e) =>
-                        setIngdFormData({ ...ingdFormData, people: e.target.value })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Value (MZN)"
-                      value={ingdFormData.value || ""}
-                      onChange={(e) =>
-                        setIngdFormData({ ...ingdFormData, value: e.target.value })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Partner Organisation"
-                      value={ingdFormData.partner_organisation || ""}
-                      onChange={(e) =>
-                        setIngdFormData({
-                          ...ingdFormData,
-                          partner_organisation: e.target.value,
-                        })
-                      }
-                      className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="status"
-                        checked={ingdFormData.status || false}
-                        onChange={(e) =>
-                          setIngdFormData({
-                            ...ingdFormData,
-                            status: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4 rounded"
-                      />
-                      <label htmlFor="status" className="text-slate-700 font-medium">
-                        Mark as Met
-                      </label>
+                  {/* Originator Information Section */}
+                  <div className="mb-6">
+                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Originator Information</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Originator *</label>
+                        <input
+                          type="text"
+                          placeholder="Organization or individual name"
+                          value={ingdFormData.originator || ""}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              originator: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Email *</label>
+                        <input
+                          type="email"
+                          placeholder="contact@example.com"
+                          value={ingdFormData.email || ""}
+                          onChange={(e) =>
+                            setIngdFormData({ ...ingdFormData, email: e.target.value })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Full Name</label>
+                        <input
+                          type="text"
+                          placeholder="Contact person's full name"
+                          value={ingdFormData.full_name || ""}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              full_name: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Request Details Section */}
+                  <div className="mb-6">
+                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Request Details</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Location *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Maputo, Gaza, Sofala, Zambézia"
+                          value={ingdFormData.location || ""}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              location: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Help Type *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Rice, Beans, Water, Tent"
+                          value={ingdFormData.help_type || ""}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              help_type: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Evacuation Type</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., By truck, By boat, By air"
+                          value={ingdFormData.evacuation_type || ""}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              evacuation_type: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Partner Organisation</label>
+                        <input
+                          type="text"
+                          placeholder="Partner organization name"
+                          value={ingdFormData.partner_organisation || ""}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              partner_organisation: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Impact & Resources Section */}
+                  <div className="mb-6">
+                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Impact & Resources</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">People Affected</label>
+                        <input
+                          type="number"
+                          placeholder="Number of people"
+                          value={ingdFormData.people || ""}
+                          onChange={(e) =>
+                            setIngdFormData({ ...ingdFormData, people: e.target.value })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Value (MZN)</label>
+                        <input
+                          type="number"
+                          placeholder="Amount in Meticais"
+                          value={ingdFormData.value || ""}
+                          onChange={(e) =>
+                            setIngdFormData({ ...ingdFormData, value: e.target.value })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Status</label>
+                        <div className="flex items-center gap-2 h-10">
+                          <input
+                            type="checkbox"
+                            id="status"
+                            checked={ingdFormData.status || false}
+                            onChange={(e) =>
+                              setIngdFormData({
+                                ...ingdFormData,
+                                status: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 rounded"
+                          />
+                          <label htmlFor="status" className="text-slate-700 font-medium text-sm cursor-pointer">
+                            Mark as Met
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
