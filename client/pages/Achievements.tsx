@@ -73,6 +73,7 @@ export default function Achievements() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authPassword, setAuthPassword] = useState("");
@@ -243,7 +244,7 @@ export default function Achievements() {
       amount: achievement.amount.toString(),
       hide_amount: achievement.hide_amount || false,
     });
-    setShowForm(true);
+    setShowEditModal(true);
   };
 
   const handleDeleteAchievement = (
@@ -344,6 +345,7 @@ export default function Achievements() {
             hide_amount: false,
           });
           setShowForm(false);
+          setShowEditModal(false);
           setShowAuthModal(false);
           setAuthPassword("");
           setPendingAction(null);
@@ -981,6 +983,221 @@ export default function Achievements() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Action Modal */}
+        {showEditModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-gradient-to-r from-blue-50 to-primary/5 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-slate-900">Edit Action</h3>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingAchievementId("");
+                  }}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.company_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, company_name: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Organization Name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Type of Action *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.type_action}
+                      onChange={(e) =>
+                        setFormData({ ...formData, type_action: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Emergency Response"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Category *
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          category: e.target.value as any,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option>Food</option>
+                      <option>Clothing</option>
+                      <option>Materials</option>
+                      <option>Medical</option>
+                      <option>Shelter</option>
+                      <option>Water</option>
+                      <option>Evacuation</option>
+                      <option>Multiple</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.location}
+                      onChange={(e) =>
+                        setFormData({ ...formData, location: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Sofala Province"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Partner Organisation (if applicable)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.partner_organisation}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          partner_organisation: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="e.g., UNICEF, Red Cross"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      People Impacted
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.people_impacted}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          people_impacted: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="120"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Amount (MZN)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.amount}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          amount: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="8500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <input
+                    type="checkbox"
+                    id="hide-amount-modal"
+                    checked={formData.hide_amount}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        hide_amount: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 rounded cursor-pointer"
+                  />
+                  <label htmlFor="hide-amount-modal" className="text-sm font-medium text-slate-700 cursor-pointer">
+                    Hide contribution value from public view
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Description *
+                  </label>
+                  <textarea
+                    required
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Describe your action..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-slate-200">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary/90"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditingAchievementId("");
+                      setFormData({
+                        company_name: "",
+                        type_action: "",
+                        description: "",
+                        category: "Food",
+                        location: "",
+                        partner_organisation: "",
+                        people_impacted: "",
+                        amount: "",
+                        hide_amount: false,
+                      });
+                    }}
+                    className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
