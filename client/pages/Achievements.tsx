@@ -42,6 +42,18 @@ const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-50 border-yellow-200 text-yellow-900",
 };
 
+// Format numbers with . for thousands and , for decimals (European format)
+const formatNumber = (value: number, decimals: number = 0): string => {
+  const fixed = value.toFixed(decimals);
+  const [integer, decimal] = fixed.split('.');
+
+  // Add thousands separator with dots
+  const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // Combine with comma as decimal separator
+  return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
 function getStatusIcon(status: string) {
   switch (status) {
     case "completed":
@@ -393,7 +405,7 @@ export default function Achievements() {
                     People Impacted
                   </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                    {(metrics.totalPeopleImpacted || 0).toLocaleString()}
+                    {formatNumber(metrics.totalPeopleImpacted || 0)}
                   </p>
                 </div>
                 <div className="bg-green-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
@@ -412,7 +424,7 @@ export default function Achievements() {
                     Total Contribution
                   </p>
                   <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
-                    {((metrics.totalContributed || 0) / 1000).toFixed(1)}K MZN
+                    {formatNumber((metrics.totalContributed || 0) / 1000, 1)}K MZN
                   </p>
                 </div>
                 <div className="bg-orange-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
@@ -836,7 +848,7 @@ export default function Achievements() {
                           </p>
                           <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
                             <Users size={16} className="text-slate-400" />
-                            {achievement.people_impacted.toLocaleString()}
+                            {formatNumber(achievement.people_impacted)}
                           </div>
                         </div>
                         <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
@@ -844,7 +856,7 @@ export default function Achievements() {
                             Contribution
                           </p>
                           <p className="text-lg font-bold text-primary">
-                            {(achievement.amount / 1000).toFixed(1)}K
+                            {formatNumber((achievement.amount / 1000), 1)}K
                             <span className="text-xs ml-0.5">MZN</span>
                           </p>
                         </div>

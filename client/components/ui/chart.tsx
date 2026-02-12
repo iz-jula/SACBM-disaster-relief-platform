@@ -3,6 +3,18 @@ import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/lib/utils";
 
+// Format numbers with . for thousands and , for decimals (European format)
+const formatNumber = (value: number, decimals: number = 0): string => {
+  const fixed = value.toFixed(decimals);
+  const [integer, decimal] = fixed.split('.');
+
+  // Add thousands separator with dots
+  const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // Combine with comma as decimal separator
+  return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
@@ -238,7 +250,7 @@ const ChartTooltipContent = React.forwardRef<
                       </div>
                       {item.value && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
-                          {item.value.toLocaleString()}
+                          {formatNumber(item.value)}
                         </span>
                       )}
                     </div>

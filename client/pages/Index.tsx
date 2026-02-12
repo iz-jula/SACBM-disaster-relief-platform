@@ -12,6 +12,18 @@ interface RelieRequest {
   source: "INGD" | "Chamber";
 }
 
+// Format numbers with . for thousands and , for decimals (European format)
+const formatNumber = (value: number, decimals: number = 0): string => {
+  const fixed = value.toFixed(decimals);
+  const [integer, decimal] = fixed.split('.');
+
+  // Add thousands separator with dots
+  const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // Combine with comma as decimal separator
+  return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
 export default function Index() {
   const [requests, setRequests] = useState<RelieRequest[]>([
     {
@@ -320,7 +332,7 @@ export default function Index() {
                       {request.peopleInvolved}
                     </td>
                     <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
-                      {request.amountSpent.toLocaleString()}
+                      {formatNumber(request.amountSpent)}
                     </td>
                     <td className="px-6 py-4 text-sm text-center">
                       <span
@@ -414,14 +426,14 @@ export default function Index() {
             <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
               <p className="text-slate-600 text-sm font-medium">Total People Assisted</p>
               <p className="text-3xl font-bold text-secondary mt-2">
-                {requests.reduce((sum, r) => sum + r.peopleInvolved, 0).toLocaleString()}
+                {formatNumber(requests.reduce((sum, r) => sum + r.peopleInvolved, 0))}
               </p>
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
               <p className="text-slate-600 text-sm font-medium">Total Value Spent</p>
               <p className="text-3xl font-bold text-accent mt-2">
-                {requests.reduce((sum, r) => sum + r.amountSpent, 0).toLocaleString()} MZN
+                {formatNumber(requests.reduce((sum, r) => sum + r.amountSpent, 0))} MZN
               </p>
             </div>
           </div>

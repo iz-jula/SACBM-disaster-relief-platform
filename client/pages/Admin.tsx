@@ -15,6 +15,18 @@ import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests } from "@/services/requestsService";
 import type { RelieRequest } from "@/services/supabaseService";
 
+// Format numbers with . for thousands and , for decimals (European format)
+const formatNumber = (value: number, decimals: number = 0): string => {
+  const fixed = value.toFixed(decimals);
+  const [integer, decimal] = fixed.split('.');
+
+  // Add thousands separator with dots
+  const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // Combine with comma as decimal separator
+  return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
 interface AdminUser {
   id: string;
   name: string;
@@ -360,22 +372,20 @@ export default function Admin() {
                       <div className="flex justify-between py-2 border-b border-slate-100">
                         <p className="text-slate-600">Total People Assisted</p>
                         <p className="font-bold text-slate-900">
-                          {metrics.totalPeopleAssisted.toLocaleString()}
+                          {formatNumber(metrics.totalPeopleAssisted)}
                         </p>
                       </div>
                       <div className="flex justify-between py-2 border-b border-slate-100">
                         <p className="text-slate-600">Total Funds Deployed</p>
                         <p className="font-bold text-slate-900">
-                          {(
-                            (metrics.totalValueDeployed || 0) / 1000000
-                          ).toFixed(2)}
+                          {formatNumber((metrics.totalValueDeployed || 0) / 1000000, 2)}
                           M MZN
                         </p>
                       </div>
                       <div className="flex justify-between py-2 border-b border-slate-100">
                         <p className="text-slate-600">Average per Request</p>
                         <p className="font-bold text-slate-900">
-                          {((metrics.averagePerRequest || 0) / 1000).toFixed(0)}
+                          {formatNumber((metrics.averagePerRequest || 0) / 1000, 0)}
                           K MZN
                         </p>
                       </div>

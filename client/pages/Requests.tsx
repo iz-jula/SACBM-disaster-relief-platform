@@ -10,6 +10,18 @@ import {
 import { RelieRequest } from "@/services/supabaseService";
 import { Lock, AlertCircle } from "lucide-react";
 
+// Format numbers with . for thousands and , for decimals (European format)
+const formatNumber = (value: number, decimals: number = 0): string => {
+  const fixed = value.toFixed(decimals);
+  const [integer, decimal] = fixed.split('.');
+
+  // Add thousands separator with dots
+  const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // Combine with comma as decimal separator
+  return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
 function getStatusStyles(status: boolean) {
   return status
     ? "bg-green-100 text-green-700 border border-green-300"
@@ -116,7 +128,7 @@ function RequestsTable({
                   {request.people}
                 </td>
                 <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
-                  {parseInt(request.value || "0").toLocaleString()}
+                  {formatNumber(parseInt(request.value || "0"))}
                 </td>
                 <td className="px-6 py-4 text-sm">
                   <span
@@ -216,7 +228,7 @@ function RequestsTable({
                     Value (MZN)
                   </p>
                   <p className="text-lg font-bold text-primary mt-1">
-                    {parseInt(request.value || "0").toLocaleString()}
+                    {formatNumber(parseInt(request.value || "0"))}
                   </p>
                 </div>
               </div>
