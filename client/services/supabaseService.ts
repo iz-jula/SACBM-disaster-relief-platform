@@ -582,3 +582,111 @@ export async function revertIngdToPending(
     return false;
   }
 }
+
+// INGD Documents Interface
+export interface IngdDocument {
+  id?: number;
+  created_at?: string;
+  file_name: string;
+  file_url: string;
+  file_type: string; // "pdf", "xlsx", "xls", etc.
+  description: string;
+  uploaded_by?: string;
+}
+
+// Upload file to Supabase Storage
+export async function uploadDocumentToStorage(
+  file: File,
+  documentType: string = "ingd",
+): Promise<string> {
+  try {
+    const fileName = `${documentType}/${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("ingd-documents")
+      .upload(fileName, file, { upsert: true });
+
+    if (error) throw error;
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("ingd-documents")
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  } catch (error) {
+    console.error("Error uploading document:", error);
+    throw new Error(`Failed to upload document: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
+
+// Fetch all INGD documents
+export async function getIngdDocuments(): Promise<IngdDocument[]> {
+  try {
+    const { data, error } = await supabase
+      .from("ingd_documents")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching INGD documents:", error);
+    return [];
+  }
+}
+
+// Create a new INGD document
+export async function createIngdDocument(
+  document: Omit<IngdDocument, "id" | "created_at">,
+): Promise<IngdDocument | null> {
+  try {
+    const { data, error } = await supabase
+      .from("ingd_documents")
+      .insert([document])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error creating INGD document:", error);
+    throw new Error(`Failed to create document: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
+
+// Delete an INGD document
+export async function deleteIngdDocument(id: number): Promise<boolean> {
+  try {
+    // First, get the document to find the file path
+    const { data: docData, error: fetchError } = await supabase
+      .from("ingd_documents")
+      .select("file_url")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Delete from storage if URL exists
+    if (docData?.file_url) {
+      const url = new URL(docData.file_url);
+      const filePath = url.pathname.split("/storage/v1/object/public/ingd-documents/")[1];
+      if (filePath) {
+        await supabase.storage
+          .from("ingd-documents")
+          .remove([decodeURIComponent(filePath)]);
+      }
+    }
+
+    // Delete from database
+    const { error: deleteError } = await supabase
+      .from("ingd_documents")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) throw deleteError;
+    return true;
+  } catch (error) {
+    console.error("Error deleting INGD document:", error);
+    return false;
+  }
+}

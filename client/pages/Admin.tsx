@@ -17,7 +17,8 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
-import type { RelieRequest, IngdRequest } from "@/services/supabaseService";
+import { getIngdDocuments, createIngdDocument, deleteIngdDocument, uploadDocumentToStorage } from "@/services/supabaseService";
+import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -43,7 +44,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "requests" | "users" | "settings" | "ingd"
+    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents"
   >("dashboard");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -75,6 +76,11 @@ export default function Admin() {
     Zambezia: 0,
     Total: 0,
   });
+  const [ingdDocuments, setIngdDocuments] = useState<IngdDocument[]>([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [documentDescription, setDocumentDescription] = useState("");
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
 
   // Load metrics on mount
   useEffect(() => {
@@ -99,6 +105,13 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === "ingd") {
       loadIngdRequests();
+    }
+  }, [activeTab]);
+
+  // Load documents when documents tab is activated
+  useEffect(() => {
+    if (activeTab === "documents") {
+      loadIngdDocuments();
     }
   }, [activeTab]);
 
@@ -171,6 +184,67 @@ export default function Admin() {
       } catch (error) {
         console.error("Error deleting INGD request:", error);
         alert("Error deleting request");
+      }
+    }
+  };
+
+  const loadIngdDocuments = async () => {
+    setIsLoadingDocuments(true);
+    try {
+      const documents = await getIngdDocuments();
+      setIngdDocuments(documents || []);
+    } catch (error) {
+      console.error("Error loading INGD documents:", error);
+      setIngdDocuments([]);
+    } finally {
+      setIsLoadingDocuments(false);
+    }
+  };
+
+  const handleUploadDocument = async () => {
+    if (!documentFile || !documentDescription.trim()) {
+      alert("Please select a file and enter a description");
+      return;
+    }
+
+    setIsUploadingDocument(true);
+    try {
+      // Upload file to Supabase Storage
+      const fileUrl = await uploadDocumentToStorage(documentFile, "ingd");
+
+      // Create document record in database
+      const fileType = documentFile.name.split(".").pop() || "file";
+      await createIngdDocument({
+        file_name: documentFile.name,
+        file_url: fileUrl,
+        file_type: fileType,
+        description: documentDescription,
+        uploaded_by: user?.email || "admin",
+      });
+
+      // Reload documents
+      await loadIngdDocuments();
+
+      // Clear form
+      setDocumentFile(null);
+      setDocumentDescription("");
+      alert("Document uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      alert(`Error uploading document: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsUploadingDocument(false);
+    }
+  };
+
+  const handleDeleteDocument = async (id: number) => {
+    if (confirm("Are you sure you want to delete this document?")) {
+      try {
+        await deleteIngdDocument(id);
+        await loadIngdDocuments();
+      } catch (error) {
+        console.error("Error deleting document:", error);
+        alert("Error deleting document");
       }
     }
   };
@@ -327,6 +401,7 @@ export default function Admin() {
               { id: "dashboard", label: "Dashboard", icon: BarChart3 },
               { id: "requests", label: "All Requests", icon: Database },
               { id: "ingd", label: "INGD Management", icon: Database },
+              { id: "documents", label: "INGD Documents", icon: Download },
               { id: "users", label: "Users", icon: Users },
               { id: "settings", label: "Settings", icon: Settings },
             ].map((tab) => (
@@ -1244,6 +1319,150 @@ export default function Admin() {
               </p>
               <p className="text-blue-800">
                 This section allows you to manage all relief requests stored in the INGD_table. You can add new requests, update existing ones, or delete records as needed.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Documents Tab */}
+        {activeTab === "documents" && (
+          <div className="space-y-6">
+            {/* Upload Section */}
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Upload INGD Document
+                </h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  Add PDFs (INGD protocols) or Excel spreadsheets (Master List)
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label htmlFor="document-file" className="block text-sm font-medium text-slate-700 mb-2">
+                    Select File (PDF, XLSX, XLS)
+                  </label>
+                  <input
+                    id="document-file"
+                    type="file"
+                    accept=".pdf,.xlsx,.xls"
+                    onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                  {documentFile && (
+                    <p className="text-sm text-slate-600 mt-2">
+                      Selected: {documentFile.name}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="document-description" className="block text-sm font-medium text-slate-700 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    id="document-description"
+                    value={documentDescription}
+                    onChange={(e) => setDocumentDescription(e.target.value)}
+                    placeholder="E.g., INGD Protocol v2.0, Master List - Jan 2024"
+                    rows={3}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                  />
+                </div>
+
+                <button
+                  onClick={handleUploadDocument}
+                  disabled={isUploadingDocument || !documentFile}
+                  className="w-full bg-primary hover:bg-primary/90 disabled:bg-slate-300 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {isUploadingDocument ? "Uploading..." : (
+                    <>
+                      <Plus size={18} />
+                      Upload Document
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Documents List */}
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Available Documents ({ingdDocuments.length})
+                </h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  Documents displayed below will be available for download in the INGD Relief Requests section
+                </p>
+              </div>
+
+              {isLoadingDocuments ? (
+                <div className="p-6 text-center text-slate-600">
+                  Loading documents...
+                </div>
+              ) : ingdDocuments.length === 0 ? (
+                <div className="p-6 text-center text-slate-600">
+                  No documents uploaded yet. Upload your first document to get started.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-200">
+                  {ingdDocuments.map((doc) => (
+                    <div key={doc.id} className="p-6 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Download size={18} className="text-blue-600" />
+                            <h3 className="font-semibold text-slate-900 break-words">
+                              {doc.file_name}
+                            </h3>
+                            <span className="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                              {doc.file_type.toUpperCase()}
+                            </span>
+                          </div>
+                          {doc.description && (
+                            <p className="text-sm text-slate-600 mb-2">
+                              {doc.description}
+                            </p>
+                          )}
+                          <p className="text-xs text-slate-500">
+                            Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Unknown"}
+                            {doc.uploaded_by && ` by ${doc.uploaded_by}`}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <a
+                            href={doc.file_url}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                          >
+                            <Download size={16} />
+                            Download
+                          </a>
+                          <button
+                            onClick={() => handleDeleteDocument(doc.id || 0)}
+                            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                          >
+                            <Trash2 size={16} />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+              <p className="text-lg font-semibold text-blue-900 mb-2">
+                📄 INGD Documents Management
+              </p>
+              <p className="text-blue-800">
+                Upload and manage INGD protocol documents and Excel spreadsheets. These documents will be displayed in the INGD Relief Requests section for members to reference and download.
               </p>
             </div>
           </div>

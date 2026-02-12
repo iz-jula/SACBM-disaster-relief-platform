@@ -7,7 +7,8 @@ import {
   updateRequest,
   deleteRequest,
 } from "@/services/requestsService";
-import { RelieRequest, getIngdRequests, IngdRequest, createIngdCommitment, resolveIngdRequest, revertIngdToPending } from "@/services/supabaseService";
+import { RelieRequest, getIngdRequests, IngdRequest, createIngdCommitment, resolveIngdRequest, revertIngdToPending, getIngdDocuments } from "@/services/supabaseService";
+import type { IngdDocument } from "@/services/supabaseService";
 import { Lock, AlertCircle } from "lucide-react";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -265,7 +266,9 @@ export default function Requests() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState<RelieRequest[]>([]);
   const [ingdRequests, setIngdRequests] = useState<IngdRequest[]>([]);
+  const [ingdDocuments, setIngdDocuments] = useState<IngdDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(
     new Set(),
   );
@@ -294,17 +297,21 @@ export default function Requests() {
   useEffect(() => {
     const loadRequests = async () => {
       setIsLoading(true);
+      setIsLoadingDocuments(true);
       try {
-        const [reliefData, ingdData] = await Promise.all([
+        const [reliefData, ingdData, documentsData] = await Promise.all([
           getRequests(),
           getIngdRequests(),
+          getIngdDocuments(),
         ]);
         setRequests(reliefData);
         setIngdRequests(ingdData);
+        setIngdDocuments(documentsData);
       } catch (error) {
         console.error("Error loading requests:", error);
       } finally {
         setIsLoading(false);
+        setIsLoadingDocuments(false);
       }
     };
 
@@ -740,6 +747,70 @@ export default function Requests() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* INGD Documents Section */}
+        {ingdRequests.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-purple-50">
+              <h2 className="text-lg font-bold text-slate-900">
+                📄 INGD Documents
+              </h2>
+              <p className="text-sm text-slate-600 mt-1">
+                Download INGD protocols, Excel spreadsheets, and reference materials
+              </p>
+            </div>
+
+            {isLoadingDocuments ? (
+              <div className="p-6 text-center text-slate-600">
+                Loading documents...
+              </div>
+            ) : ingdDocuments.length === 0 ? (
+              <div className="p-6 text-center text-slate-600">
+                No documents available yet. Check back soon for INGD protocols and spreadsheets.
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-200">
+                {ingdDocuments.map((doc) => (
+                  <div key={doc.id} className="p-4 sm:p-6 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="text-lg">📄</span>
+                            <h3 className="font-semibold text-slate-900 break-words">
+                              {doc.file_name}
+                            </h3>
+                          </span>
+                          <span className="ml-auto sm:ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded whitespace-nowrap">
+                            {doc.file_type.toUpperCase()}
+                          </span>
+                        </div>
+                        {doc.description && (
+                          <p className="text-sm text-slate-600 mb-2">
+                            {doc.description}
+                          </p>
+                        )}
+                        <p className="text-xs text-slate-500">
+                          Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Unknown"}
+                        </p>
+                      </div>
+                      <a
+                        href={doc.file_url}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                      >
+                        <Download size={16} />
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
