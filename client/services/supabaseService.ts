@@ -409,7 +409,8 @@ export async function getIngdMetrics() {
 
     const totalRequests = data?.length || 0;
     const totalPeople = data?.reduce((sum: number, r: IngdRequest) => sum + (r.people_impacted || 0), 0) || 0;
-    const totalValue = data?.reduce((sum: number, r: IngdRequest) => sum + (r.amount || 0), 0) || 0;
+    // Sum the Total column which represents total quantities across all locations
+    const totalValue = data?.reduce((sum: number, r: IngdRequest) => sum + (r.Total || 0), 0) || 0;
 
     return {
       totalRequests,
