@@ -747,7 +747,7 @@ export default function Achievements() {
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
             <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-              Member Work
+              MEMBER ACTIONS
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1">
               {achievements.length} action
