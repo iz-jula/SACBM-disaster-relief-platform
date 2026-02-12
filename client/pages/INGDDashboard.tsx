@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { getIngdRequests } from "@/services/requestsService";
-import type { RelieRequest } from "@/services/supabaseService";
+import { getIngdRequests } from "@/services/supabaseService";
+import type { IngdRequest } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -29,7 +29,7 @@ function getStatusLabel(status: boolean) {
 export default function INGDDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"dashboard" | "requests">("dashboard");
-  const [ingdRequests, setIngdRequests] = useState<RelieRequest[]>([]);
+  const [ingdRequests, setIngdRequests] = useState<IngdRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -254,13 +254,14 @@ export default function INGDDashboard() {
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">#Ref</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Originator</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Location</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Help Type</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Evacuation Type</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">People</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Value (MZN)</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Company</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Item</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Category</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Maputo</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Gaza</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Sofala</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Zambézia</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -272,22 +273,19 @@ export default function INGDDashboard() {
                         }`}
                       >
                         <td className="px-6 py-4 text-sm text-slate-600">#{request.id}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{request.originator}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{request.location}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{request.company_name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{request.Item}</td>
                         <td className="px-6 py-4 text-sm">
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                            {request.help_type}
+                            {request.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{request.evacuation_type}</td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-900 font-medium">{request.people}</td>
+                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Maputo || 0}</td>
+                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Gaza || 0}</td>
+                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Sofala || 0}</td>
+                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Zambezia || 0}</td>
                         <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
-                          {formatNumber(parseInt(request.value || "0"))}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}>
-                            {getStatusLabel(request.status)}
-                          </span>
+                          {formatNumber(request.Total || 0)}
                         </td>
                       </tr>
                     ))}
