@@ -92,6 +92,7 @@ export default function Achievements() {
     partner_organisation: "",
     people_impacted: "",
     amount: "",
+    hide_amount: false,
   });
 
   useEffect(() => {
@@ -191,6 +192,7 @@ export default function Achievements() {
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
           media: imageData || null,
+          hide_amount: formData.hide_amount,
         };
 
         console.log("Sending achievement data:", newAchievementData);
@@ -207,6 +209,7 @@ export default function Achievements() {
             partner_organisation: "",
             people_impacted: "",
             amount: "",
+            hide_amount: false,
           });
           setUploadedMedia([]);
           setShowForm(false);
@@ -238,6 +241,7 @@ export default function Achievements() {
       partner_organisation: achievement.partner_organisation || "",
       people_impacted: achievement.people_impacted.toString(),
       amount: achievement.amount.toString(),
+      hide_amount: achievement.hide_amount || false,
     });
     setShowForm(true);
   };
@@ -319,6 +323,7 @@ export default function Achievements() {
           partner_organisation: formData.partner_organisation || null,
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
+          hide_amount: formData.hide_amount,
         };
 
         const result = await updateAchievement(
@@ -336,6 +341,7 @@ export default function Achievements() {
             partner_organisation: "",
             people_impacted: "",
             amount: "",
+            hide_amount: false,
           });
           setShowForm(false);
           setShowAuthModal(false);
@@ -472,6 +478,7 @@ export default function Achievements() {
                   partner_organisation: "",
                   people_impacted: "",
                   amount: "",
+                  hide_amount: false,
                 });
               }
               setShowForm(!showForm);
@@ -618,6 +625,24 @@ export default function Achievements() {
                 </div>
               </div>
 
+              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <input
+                  type="checkbox"
+                  id="hide-amount"
+                  checked={formData.hide_amount}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      hide_amount: e.target.checked,
+                    })
+                  }
+                  className="w-4 h-4 rounded cursor-pointer"
+                />
+                <label htmlFor="hide-amount" className="text-sm font-medium text-slate-700 cursor-pointer">
+                  Hide contribution value from public view
+                </label>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Description *
@@ -703,6 +728,7 @@ export default function Achievements() {
                       partner_organisation: "",
                       people_impacted: "",
                       amount: "",
+                      hide_amount: false,
                     });
                   }}
                   className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium"
@@ -851,15 +877,17 @@ export default function Achievements() {
                             {formatNumber(achievement.people_impacted)}
                           </div>
                         </div>
-                        <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                          <p className="text-xs text-orange-600 font-medium mb-1">
-                            Contribution
-                          </p>
-                          <p className="text-lg font-bold text-primary">
-                            {formatNumber((achievement.amount / 1000), 1)}K
-                            <span className="text-xs ml-0.5">MZN</span>
-                          </p>
-                        </div>
+                        {!achievement.hide_amount && (
+                          <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                            <p className="text-xs text-orange-600 font-medium mb-1">
+                              Contribution
+                            </p>
+                            <p className="text-lg font-bold text-primary">
+                              {formatNumber((achievement.amount / 1000), 1)}K
+                              <span className="text-xs ml-0.5">MZN</span>
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 

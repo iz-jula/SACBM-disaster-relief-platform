@@ -216,6 +216,7 @@ export interface Action {
   amount: number;
   media?: string | null;
   created_at?: string;
+  hide_amount?: boolean;
 }
 
 // Fetch all actions
