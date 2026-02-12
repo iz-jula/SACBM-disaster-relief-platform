@@ -222,8 +222,29 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Key Metrics - Modern Cards with Consistent Pastel Blue */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Relief Requests Summary - Modern Section */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                RELIEF REQUESTS
+              </h2>
+              <p className="text-slate-600 mt-2">
+                Real-time overview of disaster relief operations and community impact
+              </p>
+            </div>
+            <Link
+              to="/requests"
+              className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
+            >
+              View All
+              <span className="transform group-hover:translate-x-1 transition-transform">
+                →
+              </span>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Total Requests Card */}
           <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
@@ -308,6 +329,7 @@ export default function Dashboard() {
               <p className="text-sm text-slate-600">Meticais</p>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Maputo Weather and Alerts Row - Modern Layout */}
