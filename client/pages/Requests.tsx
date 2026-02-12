@@ -22,6 +22,15 @@ const formatNumber = (value: number, decimals: number = 0): string => {
   return decimal ? `${withThousands},${decimal}` : withThousands;
 };
 
+// Extract item name and quantity from format like "Arroz (25Kg)"
+const parseItem = (item: string): { name: string; quantity: string } => {
+  const match = item?.match(/^(.*?)\s*\((.+?)\)$/);
+  if (match) {
+    return { name: match[1].trim(), quantity: match[2] };
+  }
+  return { name: item || "", quantity: "" };
+};
+
 function getStatusStyles(status: boolean) {
   return status
     ? "bg-green-100 text-green-700 border border-green-300"
@@ -537,67 +546,54 @@ export default function Requests() {
               </p>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                      #Ref
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                      Company
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                      Item
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                      Category
-                    </th>
-                    <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
-                      Total
-                    </th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
-                      People Impacted
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                      Status
-                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">#</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Company</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Category</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Item</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Qty</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700">Maputo</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700">Gaza</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700">Sofala</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700">Zambézia</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700">Total</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {ingdRequests.map((request, index) => (
-                    <tr
-                      key={request.id}
-                      className={`border-b border-slate-200 transition-colors hover:bg-purple-50 ${
-                        index % 2 === 0 ? "bg-white" : "bg-slate-50"
-                      }`}
-                    >
-                      <td className="px-6 py-4 text-sm font-medium text-slate-500">
-                        #{request.id}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                        {request.company_name}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        {request.Item}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
-                          {request.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
-                        {formatNumber(request.Total || 0)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-center text-slate-900 font-medium">
-                        {formatNumber(request.people_impacted || 0)}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
-                          ⏳ Pending
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {ingdRequests.map((request, index) => {
+                    const { name, quantity } = parseItem(request.Item || "");
+                    return (
+                      <tr
+                        key={request.id}
+                        className={`border-b border-slate-200 transition-colors hover:bg-purple-50 ${
+                          index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                        }`}
+                      >
+                        <td className="px-4 py-3 text-sm font-medium text-slate-600">#{request.id}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-slate-900">{request.company_name}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                            {request.category}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{name}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">{quantity}</td>
+                        <td className="px-4 py-3 text-sm text-center text-slate-600">{formatNumber(request.Maputo || 0)}</td>
+                        <td className="px-4 py-3 text-sm text-center text-slate-600">{formatNumber(request.Gaza || 0)}</td>
+                        <td className="px-4 py-3 text-sm text-center text-slate-600">{formatNumber(request.Sofala || 0)}</td>
+                        <td className="px-4 py-3 text-sm text-center text-slate-600">{formatNumber(request.Zambezia || 0)}</td>
+                        <td className="px-4 py-3 text-sm text-right font-semibold text-primary">{formatNumber(request.Total || 0)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
+                            ⏳ Pending
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
