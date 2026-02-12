@@ -47,6 +47,8 @@ export default function INGDDashboard() {
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [displayedIngdRequests, setDisplayedIngdRequests] = useState(15);
+  const [displayedIngdDocuments, setDisplayedIngdDocuments] = useState(15);
   const [showActionDropdown, setShowActionDropdown] = useState(false);
   const [showCommitmentModal, setShowCommitmentModal] = useState(false);
   const [commitmentData, setCommitmentData] = useState({
@@ -467,7 +469,7 @@ export default function INGDDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredRequests.map((request, index) => {
+                    {filteredRequests.slice(0, displayedIngdRequests).map((request, index) => {
                       const { name, quantity } = parseItem(request.Item || "");
                       return (
                         <tr
@@ -514,6 +516,16 @@ export default function INGDDashboard() {
                 </div>
               )}
             </div>
+            {filteredRequests.length > displayedIngdRequests && (
+              <div className="p-4 border-t border-slate-200 text-center">
+                <button
+                  onClick={() => setDisplayedIngdRequests(prev => prev + 15)}
+                  className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                >
+                  Load More ({displayedIngdRequests} of {filteredRequests.length})
+                </button>
+              </div>
+            )}
 
             {/* Documents Section */}
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
@@ -536,7 +548,7 @@ export default function INGDDashboard() {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-200">
-                  {ingdDocuments.map((doc) => (
+                  {ingdDocuments.slice(0, displayedIngdDocuments).map((doc) => (
                     <div key={doc.id} className="p-4 sm:p-6 hover:bg-slate-50 transition-colors">
                       <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
                         <div className="flex-1 min-w-0">
@@ -573,6 +585,16 @@ export default function INGDDashboard() {
                       </div>
                     </div>
                   ))}
+                  {ingdDocuments.length > displayedIngdDocuments && (
+                    <div className="p-4 border-t border-slate-200 text-center">
+                      <button
+                        onClick={() => setDisplayedIngdDocuments(prev => prev + 15)}
+                        className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                      >
+                        Load More ({displayedIngdDocuments} of {ingdDocuments.length})
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

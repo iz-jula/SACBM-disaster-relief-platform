@@ -85,6 +85,7 @@ export default function Achievements() {
   } | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedAchievements, setSelectedAchievements] = useState<Set<string>>(new Set());
+  const [displayedAchievementsCount, setDisplayedAchievementsCount] = useState(15);
   const [formData, setFormData] = useState({
     company_name: "",
     type_action: "",
@@ -829,7 +830,7 @@ export default function Achievements() {
             {isLoading ? (
               <div className="p-6 text-center text-slate-600">Loading...</div>
             ) : achievements.length > 0 ? (
-              achievements.map((achievement) => (
+              achievements.slice(0, displayedAchievementsCount).map((achievement) => (
                 <div
                   key={achievement.id}
                   className="bg-white hover:shadow-lg transition-shadow border-b border-slate-200 last:border-b-0"
@@ -959,6 +960,18 @@ export default function Achievements() {
               </div>
             )}
           </div>
+
+          {/* Load More Button */}
+          {achievements.length > displayedAchievementsCount && (
+            <div className="p-4 sm:p-6 border-t border-slate-200 text-center">
+              <button
+                onClick={() => setDisplayedAchievementsCount(prev => prev + 15)}
+                className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+              >
+                Load More ({displayedAchievementsCount} of {achievements.length})
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Authentication Modal for Edit/Delete */}

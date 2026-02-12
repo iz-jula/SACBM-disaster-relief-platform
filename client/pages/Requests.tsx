@@ -292,6 +292,9 @@ export default function Requests() {
   const [pendingAction, setPendingAction] = useState<{
     type: "resolve" | "pending" | "delete";
   } | null>(null);
+  const [displayedRelieRequests, setDisplayedRelieRequests] = useState(15);
+  const [displayedIngdRequests, setDisplayedIngdRequests] = useState(15);
+  const [displayedIngdDocuments, setDisplayedIngdDocuments] = useState(15);
 
   // Load requests on mount
   useEffect(() => {
@@ -587,11 +590,21 @@ export default function Requests() {
               </h2>
             </div>
             <RequestsTable
-              requests={pendingRequests}
+              requests={pendingRequests.slice(0, displayedRelieRequests)}
               onStatusChange={handleStatusChange}
               selectedRequests={selectedRequests}
               onToggleSelect={toggleSelectRequest}
             />
+            {pendingRequests.length > displayedRelieRequests && (
+              <div className="p-4 border-t border-slate-200 text-center">
+                <button
+                  onClick={() => setDisplayedRelieRequests(prev => prev + 15)}
+                  className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                >
+                  Load More ({displayedRelieRequests} of {pendingRequests.length})
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -604,11 +617,21 @@ export default function Requests() {
               </h2>
             </div>
             <RequestsTable
-              requests={metRequests}
+              requests={metRequests.slice(0, displayedRelieRequests)}
               onStatusChange={handleStatusChange}
               selectedRequests={selectedRequests}
               onToggleSelect={toggleSelectRequest}
             />
+            {metRequests.length > displayedRelieRequests && (
+              <div className="p-4 border-t border-slate-200 text-center">
+                <button
+                  onClick={() => setDisplayedRelieRequests(prev => prev + 15)}
+                  className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                >
+                  Load More ({displayedRelieRequests} of {metRequests.length})
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -705,7 +728,7 @@ export default function Requests() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ingdRequests.map((request, index) => {
+                  {ingdRequests.slice(0, displayedIngdRequests).map((request, index) => {
                     const { name, quantity } = parseItem(request.Item || "");
                     return (
                       <tr
@@ -747,6 +770,16 @@ export default function Requests() {
                 </tbody>
               </table>
             </div>
+            {ingdRequests.length > displayedIngdRequests && (
+              <div className="p-4 border-t border-slate-200 text-center">
+                <button
+                  onClick={() => setDisplayedIngdRequests(prev => prev + 15)}
+                  className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                >
+                  Load More ({displayedIngdRequests} of {ingdRequests.length})
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -772,7 +805,7 @@ export default function Requests() {
               </div>
             ) : (
               <div className="divide-y divide-slate-200">
-                {ingdDocuments.map((doc) => (
+                {ingdDocuments.slice(0, displayedIngdDocuments).map((doc) => (
                   <div key={doc.id} className="p-4 sm:p-6 hover:bg-slate-50 transition-colors">
                     <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
                       <div className="flex-1 min-w-0">
@@ -809,6 +842,16 @@ export default function Requests() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            {ingdDocuments.length > displayedIngdDocuments && (
+              <div className="p-4 border-t border-slate-200 text-center">
+                <button
+                  onClick={() => setDisplayedIngdDocuments(prev => prev + 15)}
+                  className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                >
+                  Load More ({displayedIngdDocuments} of {ingdDocuments.length})
+                </button>
               </div>
             )}
           </div>
