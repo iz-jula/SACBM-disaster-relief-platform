@@ -1,9 +1,59 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
+import { getRequests } from "@/services/requestsService";
+import type { RelieRequest } from "@/services/supabaseService";
+
+// Format numbers with . for thousands and , for decimals (European format)
+const formatNumber = (value: number, decimals: number = 0): string => {
+  const fixed = value.toFixed(decimals);
+  const [integer, decimal] = fixed.split('.');
+  
+  // Add thousands separator with dots
+  const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  
+  // Combine with comma as decimal separator
+  return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
+function getStatusStyles(status: boolean) {
+  return status
+    ? "bg-green-100 text-green-700 border border-green-300"
+    : "bg-blue-100 text-blue-700 border border-blue-300";
+}
+
+function getStatusLabel(status: boolean) {
+  return status ? "✓ Met" : "⏳ Pending";
+}
 
 export default function INGDDashboard() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"dashboard" | "requests">("dashboard");
+  const [ingdRequests, setIngdRequests] = useState<RelieRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Load INGD requests when requests tab is selected
+    const loadIngdRequests = async () => {
+      if (activeTab === "requests") {
+        setIsLoading(true);
+        try {
+          const allRequests = await getRequests();
+          // Filter for INGD requests only
+          const filtered = allRequests.filter(
+            (r: RelieRequest) => r.source === "INGD"
+          );
+          setIngdRequests(filtered);
+        } catch (error) {
+          console.error("Error loading INGD requests:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadIngdRequests();
+  }, [activeTab]);
 
   useEffect(() => {
     // Set up Tableau visualization with responsive dimensions
@@ -85,7 +135,33 @@ export default function INGDDashboard() {
           </button>
         </div>
 
-        {/* Embedded Tableau Dashboard */}
+        {/* Tab Navigation */}
+        <div className="flex gap-2 border-b border-slate-200">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`px-4 py-3 font-medium transition-colors border-b-2 ${
+              activeTab === "dashboard"
+                ? "text-primary border-primary"
+                : "text-slate-600 border-transparent hover:text-slate-900"
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab("requests")}
+            className={`px-4 py-3 font-medium transition-colors border-b-2 ${
+              activeTab === "requests"
+                ? "text-primary border-primary"
+                : "text-slate-600 border-transparent hover:text-slate-900"
+            }`}
+          >
+            INGD Relief Requests
+          </button>
+        </div>
+
+        {/* Embedded Tableau Dashboard - Only show when dashboard tab is active */}
+        {activeTab === "dashboard" && (
+        <>
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-6 py-4 border-b border-slate-200">
             <p className="text-sm text-slate-600">
@@ -161,6 +237,72 @@ export default function INGDDashboard() {
             </p>
           </div>
         </div>
+        </>
+        )}
+
+        {/* INGD Relief Requests Tab */}
+        {activeTab === "requests" && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+              <h2 className="text-lg font-bold text-slate-900">INGD Relief Requests</h2>
+              <p className="text-sm text-slate-600 mt-1">
+                {ingdRequests.length} request{ingdRequests.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              {isLoading ? (
+                <div className="p-6 text-center text-slate-600">Loading INGD requests...</div>
+              ) : ingdRequests.length > 0 ? (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">#Ref</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Originator</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Location</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Help Type</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Evacuation Type</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">People</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Value (MZN)</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ingdRequests.map((request, index) => (
+                      <tr
+                        key={request.id}
+                        className={`border-b border-slate-200 transition-colors hover:bg-blue-50 ${
+                          index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                        }`}
+                      >
+                        <td className="px-6 py-4 text-sm text-slate-600">#{request.id}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{request.originator}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{request.location}</td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                            {request.help_type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{request.evacuation_type}</td>
+                        <td className="px-6 py-4 text-sm text-center text-slate-900 font-medium">{request.people}</td>
+                        <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
+                          {formatNumber(parseInt(request.value || "0"))}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(request.status)}`}>
+                            {getStatusLabel(request.status)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-6 text-center text-slate-600">No INGD relief requests found</div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
