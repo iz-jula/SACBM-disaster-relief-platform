@@ -9,7 +9,7 @@ import {
 } from "@/services/requestsService";
 import { RelieRequest, getIngdRequests, IngdRequest, createIngdCommitment, resolveIngdRequest, revertIngdToPending, getIngdDocuments } from "@/services/supabaseService";
 import type { IngdDocument } from "@/services/supabaseService";
-import { Lock, AlertCircle } from "lucide-react";
+import { Lock, AlertCircle, ChevronDown, Download, Trash2, Plus } from "lucide-react";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
