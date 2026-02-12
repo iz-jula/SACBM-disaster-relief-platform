@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
-import type { RelieRequest } from "@/services/supabaseService";
+import type { RelieRequest, IngdRequest } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -57,21 +57,23 @@ export default function Admin() {
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
   const [allRequests, setAllRequests] = useState<RelieRequest[]>([]);
   const [isLoadingRequests, setIsLoadingRequests] = useState(false);
-  const [ingdRequests, setIngdRequests] = useState<RelieRequest[]>([]);
+  const [ingdRequests, setIngdRequests] = useState<IngdRequest[]>([]);
   const [isLoadingIngd, setIsLoadingIngd] = useState(false);
   const [showIngdForm, setShowIngdForm] = useState(false);
   const [editingIngdId, setEditingIngdId] = useState<number | null>(null);
-  const [ingdFormData, setIngdFormData] = useState<Partial<RelieRequest>>({
-    originator: "",
-    email: "",
-    full_name: "",
-    location: "",
+  const [ingdFormData, setIngdFormData] = useState<Partial<IngdRequest>>({
+    company_name: "",
+    Item: "",
+    category: "",
     partner_organisation: "",
-    help_type: "",
-    evacuation_type: "",
-    people: "",
-    value: "",
-    status: false,
+    people_impacted: 0,
+    amount: 0,
+    description: "",
+    Maputo: 0,
+    Gaza: 0,
+    Sofala: 0,
+    Zambezia: 0,
+    Total: 0,
   });
 
   // Load metrics on mount
@@ -869,16 +871,18 @@ export default function Admin() {
                     setShowIngdForm(true);
                     setEditingIngdId(null);
                     setIngdFormData({
-                      originator: "",
-                      email: "",
-                      full_name: "",
-                      location: "",
+                      company_name: "",
+                      Item: "",
+                      category: "",
                       partner_organisation: "",
-                      help_type: "",
-                      evacuation_type: "",
-                      people: "",
-                      value: "",
-                      status: false,
+                      people_impacted: 0,
+                      amount: 0,
+                      description: "",
+                      Maputo: 0,
+                      Gaza: 0,
+                      Sofala: 0,
+                      Zambezia: 0,
+                      Total: 0,
                     });
                   }}
                   className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors flex items-center gap-2"
@@ -909,47 +913,50 @@ export default function Admin() {
                     </button>
                   </div>
 
-                  {/* Originator Information Section */}
+                  {/* Item Information Section */}
                   <div className="mb-6">
-                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Originator Information</h5>
+                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Item Information</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Originator *</label>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Company/Organization</label>
                         <input
                           type="text"
-                          placeholder="Organization or individual name"
-                          value={ingdFormData.originator || ""}
+                          placeholder="e.g., INGD, Red Cross"
+                          value={ingdFormData.company_name || ""}
                           onChange={(e) =>
                             setIngdFormData({
                               ...ingdFormData,
-                              originator: e.target.value,
+                              company_name: e.target.value,
                             })
                           }
                           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Email *</label>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Item</label>
                         <input
-                          type="email"
-                          placeholder="contact@example.com"
-                          value={ingdFormData.email || ""}
+                          type="text"
+                          placeholder="e.g., Rice (25kg), Beans (5kg)"
+                          value={ingdFormData.Item || ""}
                           onChange={(e) =>
-                            setIngdFormData({ ...ingdFormData, email: e.target.value })
+                            setIngdFormData({
+                              ...ingdFormData,
+                              Item: e.target.value,
+                            })
                           }
                           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Full Name</label>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Category</label>
                         <input
                           type="text"
-                          placeholder="Contact person's full name"
-                          value={ingdFormData.full_name || ""}
+                          placeholder="e.g., Food, Hygiene, Shelter"
+                          value={ingdFormData.category || ""}
                           onChange={(e) =>
                             setIngdFormData({
                               ...ingdFormData,
-                              full_name: e.target.value,
+                              category: e.target.value,
                             })
                           }
                           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -958,50 +965,117 @@ export default function Admin() {
                     </div>
                   </div>
 
-                  {/* Request Details Section */}
+                  {/* Quantity by Location Section */}
                   <div className="mb-6">
-                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Request Details</h5>
+                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Quantity Needed by Location</h5>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Maputo</label>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={ingdFormData.Maputo || 0}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              Maputo: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Gaza</label>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={ingdFormData.Gaza || 0}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              Gaza: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Sofala</label>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={ingdFormData.Sofala || 0}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              Sofala: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Zambézia</label>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={ingdFormData.Zambezia || 0}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              Zambezia: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Total</label>
+                        <input
+                          type="number"
+                          placeholder="0"
+                          value={ingdFormData.Total || 0}
+                          onChange={(e) =>
+                            setIngdFormData({
+                              ...ingdFormData,
+                              Total: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Details Section */}
+                  <div className="mb-6">
+                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Additional Details</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Location *</label>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">People Impacted</label>
                         <input
-                          type="text"
-                          placeholder="e.g., Maputo, Gaza, Sofala, Zambézia"
-                          value={ingdFormData.location || ""}
+                          type="number"
+                          placeholder="Number of people"
+                          value={ingdFormData.people_impacted || 0}
                           onChange={(e) =>
                             setIngdFormData({
                               ...ingdFormData,
-                              location: e.target.value,
+                              people_impacted: parseInt(e.target.value) || 0,
                             })
                           }
                           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Help Type *</label>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Amount (MZN)</label>
                         <input
-                          type="text"
-                          placeholder="e.g., Rice, Beans, Water, Tent"
-                          value={ingdFormData.help_type || ""}
+                          type="number"
+                          placeholder="Amount in Meticais"
+                          value={ingdFormData.amount || 0}
                           onChange={(e) =>
                             setIngdFormData({
                               ...ingdFormData,
-                              help_type: e.target.value,
-                            })
-                          }
-                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Evacuation Type</label>
-                        <input
-                          type="text"
-                          placeholder="e.g., By truck, By boat, By air"
-                          value={ingdFormData.evacuation_type || ""}
-                          onChange={(e) =>
-                            setIngdFormData({
-                              ...ingdFormData,
-                              evacuation_type: e.target.value,
+                              amount: parseInt(e.target.value) || 0,
                             })
                           }
                           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -1022,56 +1096,20 @@ export default function Admin() {
                           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Impact & Resources Section */}
-                  <div className="mb-6">
-                    <h5 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wide">Impact & Resources</h5>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">People Affected</label>
-                        <input
-                          type="number"
-                          placeholder="Number of people"
-                          value={ingdFormData.people || ""}
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Description</label>
+                        <textarea
+                          placeholder="Additional details about this item..."
+                          value={ingdFormData.description || ""}
                           onChange={(e) =>
-                            setIngdFormData({ ...ingdFormData, people: e.target.value })
+                            setIngdFormData({
+                              ...ingdFormData,
+                              description: e.target.value,
+                            })
                           }
                           className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                          rows={3}
                         />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Value (MZN)</label>
-                        <input
-                          type="number"
-                          placeholder="Amount in Meticais"
-                          value={ingdFormData.value || ""}
-                          onChange={(e) =>
-                            setIngdFormData({ ...ingdFormData, value: e.target.value })
-                          }
-                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-slate-700 mb-1">Status</label>
-                        <div className="flex items-center gap-2 h-10">
-                          <input
-                            type="checkbox"
-                            id="status"
-                            checked={ingdFormData.status || false}
-                            onChange={(e) =>
-                              setIngdFormData({
-                                ...ingdFormData,
-                                status: e.target.checked,
-                              })
-                            }
-                            className="w-4 h-4 rounded"
-                          />
-                          <label htmlFor="status" className="text-slate-700 font-medium text-sm cursor-pointer">
-                            Mark as Met
-                          </label>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1114,22 +1152,28 @@ export default function Admin() {
                           #ID
                         </th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                          Originator
+                          Company
                         </th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                          Location
+                          Item
                         </th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                          Help Type
+                          Category
                         </th>
                         <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
-                          People
+                          Maputo
+                        </th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                          Gaza
+                        </th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                          Sofala
+                        </th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                          Zambézia
                         </th>
                         <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
-                          Value (MZN)
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                          Status
+                          Total
                         </th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                           Actions
@@ -1146,30 +1190,28 @@ export default function Admin() {
                             #{req.id}
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-600">
-                            {req.originator}
+                            {req.company_name}
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-600">
-                            {req.location}
+                            {req.Item}
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-600">
-                            {req.help_type}
+                            {req.category}
                           </td>
                           <td className="px-6 py-4 text-sm text-center text-slate-600">
-                            {req.people}
+                            {req.Maputo || 0}
                           </td>
-                          <td className="px-6 py-4 text-sm text-right text-slate-600">
-                            {formatNumber(parseInt(req.value || "0"))}
+                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                            {req.Gaza || 0}
                           </td>
-                          <td className="px-6 py-4 text-sm">
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                req.status
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-yellow-100 text-yellow-700"
-                              }`}
-                            >
-                              {req.status ? "✓ Met" : "⏳ Pending"}
-                            </span>
+                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                            {req.Sofala || 0}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                            {req.Zambezia || 0}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-right font-semibold text-slate-900">
+                            {formatNumber(req.Total || 0)}
                           </td>
                           <td className="px-6 py-4 text-sm space-x-2 flex">
                             <button

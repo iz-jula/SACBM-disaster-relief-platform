@@ -10,6 +10,7 @@ import {
   updateIngdRequest as updateSupabaseIngdRequest,
   deleteIngdRequest as deleteSupabaseIngdRequest,
   RelieRequest,
+  IngdRequest,
 } from "./supabaseService";
 
 export interface Metrics {
@@ -134,7 +135,7 @@ export async function getMetrics(): Promise<Metrics | null> {
 }
 
 // Fetch INGD relief requests from INGD_table
-export async function getIngdRequests(): Promise<RelieRequest[]> {
+export async function getIngdRequests(): Promise<IngdRequest[]> {
   try {
     const requests = await getSupabaseIngdRequests();
     return requests;
@@ -146,8 +147,8 @@ export async function getIngdRequests(): Promise<RelieRequest[]> {
 
 // Create a new INGD relief request (admin feature)
 export async function createIngdRequest(
-  request: Omit<RelieRequest, "id" | "created_at" | "edited_at">,
-): Promise<RelieRequest | null> {
+  request: Omit<IngdRequest, "id" | "created_at">,
+): Promise<IngdRequest | null> {
   try {
     const newRequest = await createSupabaseIngdRequest(request);
     return newRequest;
@@ -160,8 +161,8 @@ export async function createIngdRequest(
 // Update an INGD relief request (admin feature)
 export async function updateIngdRequest(
   id: number,
-  updates: Partial<RelieRequest>,
-): Promise<RelieRequest | null> {
+  updates: Partial<IngdRequest>,
+): Promise<IngdRequest | null> {
   try {
     const updated = await updateSupabaseIngdRequest(id, updates);
     return updated;

@@ -363,8 +363,28 @@ export async function deleteAction(id: string): Promise<boolean> {
   }
 }
 
+// INGD Table Interface - matches the actual INGD_table schema
+export interface IngdRequest {
+  id?: number;
+  created_at?: string;
+  company_name?: string;
+  Item?: string;
+  category?: string;
+  partner_organisation?: string;
+  people_impacted?: number;
+  amount?: number;
+  description?: string;
+  media?: any;
+  Maputo?: number;
+  Gaza?: number;
+  Sofala?: number;
+  Zambezia?: number;
+  Total?: number;
+  quantity?: number;
+}
+
 // Fetch all INGD relief requests from INGD_table
-export async function getIngdRequests(): Promise<RelieRequest[]> {
+export async function getIngdRequests(): Promise<IngdRequest[]> {
   try {
     const { data, error } = await supabase
       .from("INGD_table")
@@ -381,8 +401,8 @@ export async function getIngdRequests(): Promise<RelieRequest[]> {
 
 // Create a new INGD relief request
 export async function createIngdRequest(
-  request: Omit<RelieRequest, "id" | "created_at" | "edited_at">,
-): Promise<RelieRequest | null> {
+  request: Omit<IngdRequest, "id" | "created_at">,
+): Promise<IngdRequest | null> {
   try {
     const { data, error } = await supabase
       .from("INGD_table")
@@ -401,12 +421,12 @@ export async function createIngdRequest(
 // Update an INGD relief request
 export async function updateIngdRequest(
   id: number,
-  updates: Partial<RelieRequest>,
-): Promise<RelieRequest | null> {
+  updates: Partial<IngdRequest>,
+): Promise<IngdRequest | null> {
   try {
     const { data, error } = await supabase
       .from("INGD_table")
-      .update({ ...updates, edited_at: new Date().toISOString() })
+      .update(updates)
       .eq("id", id)
       .select()
       .single();
