@@ -108,7 +108,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">
-                  Relief Dashboard
+                  Members Actions Dashboard
                 </h1>
                 <p className="text-base sm:text-lg text-slate-600 mt-2 max-w-2xl">
                   Real-time overview of disaster relief operations and community
