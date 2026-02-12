@@ -774,7 +774,7 @@ export default function Achievements() {
                         <h3 className="font-bold text-base sm:text-lg text-slate-900">
                           {achievement.type_action}
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-500">
+                        <p className="text-sm sm:text-base font-bold text-slate-700">
                           {achievement.company_name}
                         </p>
                       </div>
