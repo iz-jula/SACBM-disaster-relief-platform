@@ -118,94 +118,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Key Metrics - Modern Cards with Consistent Pastel Blue */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Total Requests Card */}
-          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
-            <div className="relative">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                    Total Requests
-                  </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {metrics?.totalRequests || 0}
-                  </p>
-                </div>
-                <div className="bg-gradient-to-br from-primary to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
-                  <BarChart3 size={24} className="text-white" />
-                </div>
-              </div>
-              <p className="text-sm text-slate-600">Active relief operations</p>
-            </div>
-          </div>
-
-          {/* People Assisted Card */}
-          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
-            <div className="relative">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                    People Assisted
-                  </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
-                  </p>
-                </div>
-                <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
-                  <Users size={24} className="text-white" />
-                </div>
-              </div>
-              <p className="text-sm text-slate-600">Across all districts</p>
-            </div>
-          </div>
-
-          {/* Total Value Card */}
-          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
-            <div className="relative">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                    Total Value
-                  </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M
-                  </p>
-                  <p className="text-xs text-slate-600 mt-1">MZN</p>
-                </div>
-                <div className="bg-gradient-to-br from-primary to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
-                  <TrendingUp size={24} className="text-white" />
-                </div>
-              </div>
-              <p className="text-sm text-slate-600">Total funds deployed</p>
-            </div>
-          </div>
-
-          {/* Average Per Request Card */}
-          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
-            <div className="relative">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                    Avg. Per Request
-                  </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
-                  </p>
-                </div>
-                <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
-                  <Activity size={24} className="text-white" />
-                </div>
-              </div>
-              <p className="text-sm text-slate-600">Meticais</p>
-            </div>
-          </div>
-        </div>
-
         {/* Community Actions Summary - Modern Section */}
         {achievementsMetrics && (
           <div className="space-y-6">
@@ -309,6 +221,94 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Key Metrics - Modern Cards with Consistent Pastel Blue */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Total Requests Card */}
+          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Total Requests
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {metrics?.totalRequests || 0}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-primary to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
+                  <BarChart3 size={24} className="text-white" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-600">Active relief operations</p>
+            </div>
+          </div>
+
+          {/* People Assisted Card */}
+          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    People Assisted
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {(metrics?.totalPeopleAssisted || 0).toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
+                  <Users size={24} className="text-white" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-600">Across all districts</p>
+            </div>
+          </div>
+
+          {/* Total Value Card */}
+          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Total Value
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {((metrics?.totalValueDeployed || 0) / 1000000).toFixed(1)}M
+                  </p>
+                  <p className="text-xs text-slate-600 mt-1">MZN</p>
+                </div>
+                <div className="bg-gradient-to-br from-primary to-orange-600 rounded-xl p-3 shadow-lg shadow-orange-200">
+                  <TrendingUp size={24} className="text-white" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-600">Total funds deployed</p>
+            </div>
+          </div>
+
+          {/* Average Per Request Card */}
+          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    Avg. Per Request
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {((metrics?.averagePerRequest || 0) / 1000).toFixed(0)}K
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-3 shadow-lg shadow-green-200">
+                  <Activity size={24} className="text-white" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-600">Meticais</p>
+            </div>
+          </div>
+        </div>
 
         {/* Maputo Weather and Alerts Row - Modern Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
