@@ -262,6 +262,7 @@ export default function INGDDashboard() {
                       <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Sofala</th>
                       <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Zambézia</th>
                       <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Total</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -286,6 +287,11 @@ export default function INGDDashboard() {
                         <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Zambezia || 0}</td>
                         <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
                           {formatNumber(request.Total || 0)}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
+                            ⏳ Pending
+                          </span>
                         </td>
                       </tr>
                     ))}

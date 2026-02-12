@@ -381,6 +381,7 @@ export interface IngdRequest {
   Zambezia?: number;
   Total?: number;
   quantity?: number;
+  status?: string;
 }
 
 // Fetch all INGD relief requests from INGD_table
