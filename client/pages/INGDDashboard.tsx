@@ -39,7 +39,9 @@ export default function INGDDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"dashboard" | "requests">("dashboard");
   const [ingdRequests, setIngdRequests] = useState<IngdRequest[]>([]);
+  const [filteredRequests, setFilteredRequests] = useState<IngdRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     // Load INGD requests when requests tab is selected
@@ -49,6 +51,12 @@ export default function INGDDashboard() {
         try {
           const requests = await getIngdRequests();
           setIngdRequests(requests);
+          // Apply filter
+          if (selectedCategory === "all") {
+            setFilteredRequests(requests);
+          } else {
+            setFilteredRequests(requests.filter(r => r.category === selectedCategory));
+          }
         } catch (error) {
           console.error("Error loading INGD requests:", error);
         } finally {
@@ -59,6 +67,15 @@ export default function INGDDashboard() {
 
     loadIngdRequests();
   }, [activeTab]);
+
+  // Handle category filter change
+  useEffect(() => {
+    if (selectedCategory === "all") {
+      setFilteredRequests(ingdRequests);
+    } else {
+      setFilteredRequests(ingdRequests.filter(r => r.category === selectedCategory));
+    }
+  }, [selectedCategory, ingdRequests]);
 
   useEffect(() => {
     // Set up Tableau visualization with responsive dimensions
@@ -251,22 +268,52 @@ export default function INGDDashboard() {
             <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
               <h2 className="text-lg font-bold text-slate-900">INGD Relief Requests</h2>
               <p className="text-sm text-slate-600 mt-1">
-                {ingdRequests.length} request{ingdRequests.length !== 1 ? "s" : ""}
+                {filteredRequests.length} of {ingdRequests.length} request{ingdRequests.length !== 1 ? "s" : ""}
               </p>
+            </div>
+
+            {/* Category Filter */}
+            <div className="px-6 py-4 border-b border-slate-200 bg-white">
+              <label className="block text-sm font-medium text-slate-700 mb-2">Filter by Category:</label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedCategory("all")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedCategory === "all"
+                      ? "bg-primary text-white"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  All Categories
+                </button>
+                {Array.from(new Set(ingdRequests.map(r => r.category).filter(Boolean))).map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      selectedCategory === category
+                        ? "bg-primary text-white"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="overflow-x-auto">
               {isLoading ? (
                 <div className="p-6 text-center text-slate-600">Loading INGD requests...</div>
-              ) : ingdRequests.length > 0 ? (
+              ) : filteredRequests.length > 0 ? (
                 <table className="w-full text-sm md:text-base">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
                       <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">#</th>
                       <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Company</th>
+                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Category</th>
                       <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Item</th>
                       <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Qty</th>
-                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700 hidden sm:table-cell">Category</th>
                       <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Maputo</th>
                       <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Gaza</th>
                       <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Sofala</th>
@@ -276,7 +323,7 @@ export default function INGDDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {ingdRequests.map((request, index) => {
+                    {filteredRequests.map((request, index) => {
                       const { name, quantity } = parseItem(request.Item || "");
                       return (
                         <tr
@@ -287,17 +334,17 @@ export default function INGDDashboard() {
                         >
                           <td className="px-2 md:px-4 py-3 text-xs md:text-sm font-medium text-slate-600">#{request.id}</td>
                           <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-700 font-medium">{request.company_name}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600">{name}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600 whitespace-nowrap">{quantity}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm hidden sm:table-cell">
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm">
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                               {request.category}
                             </span>
                           </td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Maputo || 0}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Gaza || 0}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Sofala || 0}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Zambezia || 0}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600">{name}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600 whitespace-nowrap">{quantity}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Maputo || 0)}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Gaza || 0)}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Sofala || 0)}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Zambezia || 0)}</td>
                           <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-right font-semibold text-primary">{formatNumber(request.Total || 0)}</td>
                           <td className="px-2 md:px-4 py-3 text-xs md:text-sm hidden sm:table-cell">
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
@@ -310,7 +357,9 @@ export default function INGDDashboard() {
                   </tbody>
                 </table>
               ) : (
-                <div className="p-6 text-center text-slate-600">No INGD relief requests found</div>
+                <div className="p-6 text-center text-slate-600">
+                  {ingdRequests.length === 0 ? "No INGD relief requests found" : "No requests match the selected category"}
+                </div>
               )}
             </div>
           </div>
