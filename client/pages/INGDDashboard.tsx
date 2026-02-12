@@ -8,12 +8,21 @@ import type { IngdRequest } from "@/services/supabaseService";
 const formatNumber = (value: number, decimals: number = 0): string => {
   const fixed = value.toFixed(decimals);
   const [integer, decimal] = fixed.split('.');
-  
+
   // Add thousands separator with dots
   const withThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  
+
   // Combine with comma as decimal separator
   return decimal ? `${withThousands},${decimal}` : withThousands;
+};
+
+// Extract item name and quantity from format like "Arroz (25Kg)"
+const parseItem = (item: string): { name: string; quantity: string } => {
+  const match = item?.match(/^(.*?)\s*\((.+?)\)$/);
+  if (match) {
+    return { name: match[1].trim(), quantity: match[2] };
+  }
+  return { name: item || "", quantity: "" };
 };
 
 function getStatusStyles(status: boolean) {
@@ -250,51 +259,54 @@ export default function INGDDashboard() {
               {isLoading ? (
                 <div className="p-6 text-center text-slate-600">Loading INGD requests...</div>
               ) : ingdRequests.length > 0 ? (
-                <table className="w-full">
+                <table className="w-full text-sm md:text-base">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">#Ref</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Company</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Item</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Category</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Maputo</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Gaza</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Sofala</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Zambézia</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Total</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
+                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">#</th>
+                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Company</th>
+                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Item</th>
+                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Qty</th>
+                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700 hidden sm:table-cell">Category</th>
+                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Maputo</th>
+                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Gaza</th>
+                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Sofala</th>
+                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Zambézia</th>
+                      <th className="px-2 md:px-4 py-3 text-right text-xs md:text-sm font-semibold text-slate-700">Total</th>
+                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700 hidden sm:table-cell">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {ingdRequests.map((request, index) => (
-                      <tr
-                        key={request.id}
-                        className={`border-b border-slate-200 transition-colors hover:bg-blue-50 ${
-                          index % 2 === 0 ? "bg-white" : "bg-slate-50"
-                        }`}
-                      >
-                        <td className="px-6 py-4 text-sm text-slate-600">#{request.id}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{request.company_name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{request.Item}</td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-                            {request.category}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Maputo || 0}</td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Gaza || 0}</td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Sofala || 0}</td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-600">{request.Zambezia || 0}</td>
-                        <td className="px-6 py-4 text-sm text-right font-semibold text-primary">
-                          {formatNumber(request.Total || 0)}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
-                            ⏳ Pending
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {ingdRequests.map((request, index) => {
+                      const { name, quantity } = parseItem(request.Item || "");
+                      return (
+                        <tr
+                          key={request.id}
+                          className={`border-b border-slate-200 transition-colors hover:bg-blue-50 ${
+                            index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                          }`}
+                        >
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm font-medium text-slate-600">#{request.id}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-700 font-medium">{request.company_name}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600">{name}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600 whitespace-nowrap">{quantity}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm hidden sm:table-cell">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                              {request.category}
+                            </span>
+                          </td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Maputo || 0}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Gaza || 0}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Sofala || 0}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{request.Zambezia || 0}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-right font-semibold text-primary">{formatNumber(request.Total || 0)}</td>
+                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm hidden sm:table-cell">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
+                              ⏳ Pending
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               ) : (
