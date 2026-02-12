@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { getIngdRequests } from "@/services/supabaseService";
+import { getIngdRequests, createIngdCommitment, resolveIngdRequest } from "@/services/supabaseService";
 import type { IngdRequest } from "@/services/supabaseService";
+import { ChevronDown } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -42,6 +44,17 @@ export default function INGDDashboard() {
   const [filteredRequests, setFilteredRequests] = useState<IngdRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [showActionDropdown, setShowActionDropdown] = useState(false);
+  const [showCommitmentModal, setShowCommitmentModal] = useState(false);
+  const [commitmentData, setCommitmentData] = useState({
+    fullName: "",
+    companyName: "",
+    email: "",
+  });
+  const [commitmentError, setCommitmentError] = useState("");
+  const [isSubmittingCommitment, setIsSubmittingCommitment] = useState(false);
+  const [pendingActionType, setPendingActionType] = useState<"commitment" | "resolved" | null>(null);
 
   useEffect(() => {
     // Load INGD requests when requests tab is selected
@@ -76,6 +89,61 @@ export default function INGDDashboard() {
       setFilteredRequests(ingdRequests.filter(r => r.category === selectedCategory));
     }
   }, [selectedCategory, ingdRequests]);
+
+  const toggleSelectItem = (id: number) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const handleCommitmentSubmit = async () => {
+    if (!commitmentData.fullName || !commitmentData.companyName || !commitmentData.email) {
+      setCommitmentError("All fields are required");
+      return;
+    }
+
+    setIsSubmittingCommitment(true);
+    try {
+      const itemIds = Array.from(selectedItems);
+
+      if (pendingActionType === "commitment") {
+        await createIngdCommitment(
+          itemIds,
+          commitmentData.fullName,
+          commitmentData.companyName,
+          commitmentData.email,
+        );
+      } else if (pendingActionType === "resolved") {
+        await resolveIngdRequest(
+          itemIds,
+          commitmentData.fullName,
+          commitmentData.companyName,
+          commitmentData.email,
+        );
+      }
+
+      // Reset form and close modal
+      setSelectedItems(new Set());
+      setCommitmentData({ fullName: "", companyName: "", email: "" });
+      setShowCommitmentModal(false);
+      setShowActionDropdown(false);
+      setCommitmentError("");
+      setPendingActionType(null);
+
+      // Reload items to show updated status
+      const requests = await getIngdRequests();
+      setIngdRequests(requests);
+    } catch (error) {
+      setCommitmentError("Failed to submit. Please try again.");
+      console.error("Error submitting:", error);
+    } finally {
+      setIsSubmittingCommitment(false);
+    }
+  };
 
   useEffect(() => {
     // Set up Tableau visualization with responsive dimensions
@@ -266,10 +334,50 @@ export default function INGDDashboard() {
         {activeTab === "requests" && (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-              <h2 className="text-lg font-bold text-slate-900">INGD Relief Requests</h2>
-              <p className="text-sm text-slate-600 mt-1">
-                {filteredRequests.length} of {ingdRequests.length} request{ingdRequests.length !== 1 ? "s" : ""}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">INGD Relief Requests</h2>
+                  <p className="text-sm text-slate-600 mt-1">
+                    {filteredRequests.length} of {ingdRequests.length} request{ingdRequests.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+
+                {/* Action Dropdown */}
+                {selectedItems.size > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowActionDropdown(!showActionDropdown)}
+                      className="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-800 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                    >
+                      Actions ({selectedItems.size})
+                      <ChevronDown size={18} />
+                    </button>
+
+                    {showActionDropdown && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 z-10">
+                        <button
+                          onClick={() => {
+                            setPendingActionType("commitment");
+                            setShowCommitmentModal(true);
+                          }}
+                          className="w-full text-left px-4 py-3 hover:bg-purple-50 text-slate-900 font-medium transition-colors border-b border-slate-200"
+                        >
+                          ✓ Commitment
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPendingActionType("resolved");
+                            setShowCommitmentModal(true);
+                          }}
+                          className="w-full text-left px-4 py-3 hover:bg-green-50 text-slate-900 font-medium transition-colors"
+                        >
+                          ✓ Resolved
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Category Filter */}
@@ -309,6 +417,9 @@ export default function INGDDashboard() {
                 <table className="w-full text-sm md:text-base">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700">
+                        <input type="checkbox" className="w-4 h-4 rounded" disabled />
+                      </th>
                       <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">#</th>
                       <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Company</th>
                       <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Category</th>
@@ -328,10 +439,18 @@ export default function INGDDashboard() {
                       return (
                         <tr
                           key={request.id}
-                          className={`border-b border-slate-200 transition-colors hover:bg-blue-50 ${
+                          className={`border-b border-slate-200 transition-colors hover:bg-blue-50 cursor-pointer ${
                             index % 2 === 0 ? "bg-white" : "bg-slate-50"
                           }`}
                         >
+                          <td className="px-2 md:px-4 py-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.has(request.id || 0)}
+                              onChange={() => toggleSelectItem(request.id || 0)}
+                              className="w-4 h-4 rounded cursor-pointer"
+                            />
+                          </td>
                           <td className="px-2 md:px-4 py-3 text-xs md:text-sm font-medium text-slate-600">#{request.id}</td>
                           <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-700 font-medium">{request.company_name}</td>
                           <td className="px-2 md:px-4 py-3 text-xs md:text-sm">
@@ -361,6 +480,113 @@ export default function INGDDashboard() {
                   {ingdRequests.length === 0 ? "No INGD relief requests found" : "No requests match the selected category"}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Commitment Modal */}
+        {showCommitmentModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                {pendingActionType === "resolved" ? "Mark as Resolved" : "Make a Commitment"}
+              </h3>
+              <p className="text-slate-600 mb-6 text-sm">
+                {pendingActionType === "resolved"
+                  ? `Mark ${selectedItems.size} relief item${selectedItems.size !== 1 ? "s" : ""} as resolved`
+                  : `Commit to ${selectedItems.size} relief item${selectedItems.size !== 1 ? "s" : ""}`}
+              </p>
+
+              {commitmentError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
+                  <AlertCircle
+                    size={18}
+                    className="text-red-600 flex-shrink-0 mt-0.5"
+                  />
+                  <p className="text-sm text-red-800">{commitmentError}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="full-name"
+                    className="block text-sm font-medium text-slate-700 mb-2"
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    id="full-name"
+                    type="text"
+                    value={commitmentData.fullName}
+                    onChange={(e) => setCommitmentData({ ...commitmentData, fullName: e.target.value })}
+                    placeholder="Enter your full name"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="company-name"
+                    className="block text-sm font-medium text-slate-700 mb-2"
+                  >
+                    Company Name
+                  </label>
+                  <input
+                    id="company-name"
+                    type="text"
+                    value={commitmentData.companyName}
+                    onChange={(e) => setCommitmentData({ ...commitmentData, companyName: e.target.value })}
+                    placeholder="Enter your company name"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-slate-700 mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={commitmentData.email}
+                    onChange={(e) => setCommitmentData({ ...commitmentData, email: e.target.value })}
+                    placeholder="Enter your email"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 mt-4">
+                Your information will not be displayed publicly
+              </p>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowCommitmentModal(false);
+                    setCommitmentData({ fullName: "", companyName: "", email: "" });
+                    setCommitmentError("");
+                  }}
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCommitmentSubmit}
+                  disabled={isSubmittingCommitment || !commitmentData.fullName || !commitmentData.companyName || !commitmentData.email}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-orange-600 disabled:bg-slate-300 text-white rounded-lg font-medium transition-colors"
+                >
+                  {isSubmittingCommitment
+                    ? "Submitting..."
+                    : pendingActionType === "resolved"
+                      ? "Mark as Resolved"
+                      : "Submit Commitment"}
+                </button>
+              </div>
             </div>
           </div>
         )}

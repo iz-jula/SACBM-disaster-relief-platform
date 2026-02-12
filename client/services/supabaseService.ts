@@ -382,6 +382,9 @@ export interface IngdRequest {
   Total?: number;
   quantity?: number;
   status?: string;
+  resolved_by?: string;
+  company_name_action?: string;
+  email_resolution?: string;
 }
 
 // Fetch all INGD relief requests from INGD_table
@@ -481,6 +484,64 @@ export async function deleteIngdRequest(id: number): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error deleting INGD request:", error);
+    return false;
+  }
+}
+
+// Create/Update INGD commitment - stores directly in INGD_table
+export async function createIngdCommitment(
+  itemIds: number[],
+  fullName: string,
+  companyName: string,
+  email: string,
+): Promise<boolean> {
+  try {
+    // Update each selected item with commitment info
+    for (const itemId of itemIds) {
+      const { error } = await supabase
+        .from("INGD_table")
+        .update({
+          status: "commitment",
+          resolved_by: fullName,
+          company_name_action: companyName,
+          email_resolution: email,
+        })
+        .eq("id", itemId);
+
+      if (error) throw error;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error creating INGD commitment:", error);
+    return false;
+  }
+}
+
+// Mark INGD item as resolved
+export async function resolveIngdRequest(
+  itemIds: number[],
+  fullName: string,
+  companyName: string,
+  email: string,
+): Promise<boolean> {
+  try {
+    // Update each selected item to resolved
+    for (const itemId of itemIds) {
+      const { error } = await supabase
+        .from("INGD_table")
+        .update({
+          status: "resolved",
+          resolved_by: fullName,
+          company_name_action: companyName,
+          email_resolution: email,
+        })
+        .eq("id", itemId);
+
+      if (error) throw error;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error resolving INGD request:", error);
     return false;
   }
 }
