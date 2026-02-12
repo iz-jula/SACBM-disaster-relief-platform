@@ -124,7 +124,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">
-                  Community Actions
+                  MEMBERS ACTIONS
                 </h2>
                 <p className="text-slate-600 mt-2">
                   Member actions and contributions beyond relief requests
