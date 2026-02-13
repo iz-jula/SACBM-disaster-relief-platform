@@ -315,26 +315,35 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
   }
 
   try {
-    // Open-Meteo API format for 5-day forecast with precipitation data
+    // Open-Meteo API format for 5-day forecast with all available daily data
     const params = new URLSearchParams({
       latitude: coords.lat.toString(),
       longitude: coords.lon.toString(),
       daily:
-        "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,precipitation_sum",
+        "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,precipitation_sum,relative_humidity_2m_max,relative_humidity_2m_min,wind_speed_10m_max,wind_direction_10m_dominant,pressure_msl_max,uv_index_max,visibility_max",
       temperature_unit: "celsius",
+      wind_speed_unit: "kmh",
       timezone: "Africa/Johannesburg",
       apikey: API_CONFIG.openMeteo.apiKey,
+    });
+
+    console.log(`[FORECAST] Fetching forecast for ${city}`, {
+      url: `${API_CONFIG.openMeteo.baseUrl}/v1/forecast?${params}`,
     });
 
     const response = await fetch(
       `${API_CONFIG.openMeteo.baseUrl}/v1/forecast?${params}`,
     );
 
+    console.log(`[FORECAST] Response status: ${response.status}`);
+
     if (!response.ok) {
+      console.error(`[FORECAST] API error for ${city}:`, response.statusText);
       return null;
     }
 
     const data = await response.json();
+    console.log(`[FORECAST] Received data for ${city}:`, data);
 
     // Convert to ForecastDay array
     const forecastData = data.daily.time
@@ -354,30 +363,46 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
         const rainChance = data.daily.precipitation_probability_max[index];
         const condition = getWeatherCondition(data.daily.weather_code[index]);
 
-        // Generate reasonable estimates for missing fields
-        // Humidity is typically 60-85% in Mozambique, higher with rain
-        const baseHumidity = rainChance > 70 ? 80 : rainChance > 40 ? 70 : 60;
-        const humidity = Math.min(95, baseHumidity + Math.random() * 10);
+        // Use real API data when available
+        const humidity = data.daily.relative_humidity_2m_max
+          ? Math.round(
+              (data.daily.relative_humidity_2m_max[index] +
+                (data.daily.relative_humidity_2m_min?.[index] || 0)) /
+                2,
+            )
+          : Math.round(rainChance > 70 ? 80 : rainChance > 40 ? 70 : 60);
 
-        // Wind speed varies: 8-15 km/h normally, 15-25 in rainy conditions
-        const baseWindSpeed = rainChance > 70 ? 18 : rainChance > 40 ? 13 : 10;
-        const windSpeed = Math.round(baseWindSpeed + Math.random() * 6);
+        const windSpeed = data.daily.wind_speed_10m_max
+          ? Math.round(data.daily.wind_speed_10m_max[index])
+          : Math.round(rainChance > 70 ? 18 : rainChance > 40 ? 13 : 10);
 
-        // Wind direction (rotating through compass)
-        const windDirections = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-        const windDirection = windDirections[(index * 2) % windDirections.length];
+        const windDirection = data.daily.wind_direction_10m_dominant
+          ? getWindDirection(data.daily.wind_direction_10m_dominant[index])
+          : ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][
+              (index * 2) % 8
+            ];
 
-        // Visibility: 10km normal, 6-8km with rain
-        const visibility = rainChance > 70 ? 7 : rainChance > 40 ? 9 : 11;
+        const visibility = data.daily.visibility_max
+          ? Math.round(data.daily.visibility_max[index] / 1000) // Convert from meters to km
+          : rainChance > 70
+            ? 7
+            : rainChance > 40
+              ? 9
+              : 11;
 
-        // Pressure: typically 1010-1015 mb in Mozambique
-        const pressure = Math.round(1010 + Math.random() * 8 - (rainChance > 70 ? 5 : 0));
+        const pressure = data.daily.pressure_msl_max
+          ? Math.round(data.daily.pressure_msl_max[index])
+          : Math.round(1010 + (rainChance > 70 ? -5 : 0));
 
-        // UV Index: 5-9 normally, 3-5 with clouds/rain
-        const baseUV = rainChance > 70 ? 4 : rainChance > 40 ? 5 : 7;
-        const uvIndex = baseUV + Math.random() * 2;
+        const uvIndex = data.daily.uv_index_max
+          ? Math.round(data.daily.uv_index_max[index] * 10) / 10
+          : rainChance > 70
+            ? 4
+            : rainChance > 40
+              ? 5
+              : 7;
 
-        // Rain trajectory descriptions
+        // Generate rain trajectory descriptions based on API data
         const trajectories: Record<"sunny" | "cloudy" | "rainy", string[]> = {
           sunny: [
             "Clear skies",
@@ -410,15 +435,17 @@ export async function getForecast(city: string): Promise<ForecastDay[] | null> {
           rainChance,
           precipitation: data.daily.precipitation_sum?.[index] || 0,
           weatherCode: data.daily.weather_code[index],
-          humidity: Math.round(humidity),
+          humidity,
           windSpeed,
           windDirection,
           visibility,
           pressure,
-          uvIndex: Math.round(uvIndex * 10) / 10,
+          uvIndex,
           rainTrajectory,
         };
       });
+
+    console.log(`[FORECAST] Processed ${forecastData.length} forecast days`);
 
     // Cache the result in both caches
     const now = Date.now();
