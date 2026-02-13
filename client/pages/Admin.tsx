@@ -55,6 +55,12 @@ export default function Admin() {
     pendingRequests: 0,
     partiallyMet: 0,
   });
+  const [ingdMetrics, setIngdMetrics] = useState({
+    totalItems: 0,
+    totalQuantity: 0,
+    totalPeopleImpacted: 0,
+    totalAmount: 0,
+  });
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
   const [allRequests, setAllRequests] = useState<RelieRequest[]>([]);
   const [isLoadingRequests, setIsLoadingRequests] = useState(false);
@@ -85,10 +91,28 @@ export default function Admin() {
   // Load metrics on mount
   useEffect(() => {
     const loadMetrics = async () => {
+      // Load relief request metrics
       const data = await getMetrics();
       if (data) {
         setMetrics(data);
       }
+
+      // Load INGD metrics
+      const ingdReqs = await getIngdRequests();
+      if (ingdReqs && ingdReqs.length > 0) {
+        const totalItems = ingdReqs.length;
+        const totalQuantity = ingdReqs.reduce((sum: number, item: IngdRequest) => sum + (item.Total || 0), 0);
+        const totalPeopleImpacted = ingdReqs.reduce((sum: number, item: IngdRequest) => sum + (item.people_impacted || 0), 0);
+        const totalAmount = ingdReqs.reduce((sum: number, item: IngdRequest) => sum + (item.amount || 0), 0);
+
+        setIngdMetrics({
+          totalItems,
+          totalQuantity,
+          totalPeopleImpacted,
+          totalAmount,
+        });
+      }
+
       setIsLoadingMetrics(false);
     };
     loadMetrics();
@@ -345,10 +369,22 @@ export default function Admin() {
       color: "yellow",
     },
     {
-      label: "Partially Met",
-      value: metrics.partiallyMet,
-      icon: Users,
+      label: "INGD Items",
+      value: ingdMetrics.totalItems,
+      icon: Database,
       color: "orange",
+    },
+    {
+      label: "Total Quantity",
+      value: formatNumber(ingdMetrics.totalQuantity),
+      icon: BarChart3,
+      color: "blue",
+    },
+    {
+      label: "INGD People",
+      value: formatNumber(ingdMetrics.totalPeopleImpacted),
+      icon: Users,
+      color: "green",
     },
   ];
 
@@ -418,7 +454,7 @@ export default function Admin() {
         {activeTab === "dashboard" && (
           <div className="space-y-8">
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {stats.map((stat, idx) => {
                 const Icon = stat.icon;
                 const colorClasses: Record<string, string> = {
@@ -453,7 +489,7 @@ export default function Admin() {
             </div>
 
             {/* Quick Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
                 <h3 className="text-lg font-bold text-slate-900 mb-4">
                   Request Status Breakdown
@@ -559,6 +595,44 @@ export default function Admin() {
                           {allRequests && allRequests.length > 0
                             ? new Set(allRequests.map((r) => r.location)).size
                             : 0}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">
+                  INGD Data Summary
+                </h3>
+                <div className="space-y-3">
+                  {isLoadingMetrics ? (
+                    <p className="text-slate-500 text-sm">Loading...</p>
+                  ) : (
+                    <>
+                      <div className="flex justify-between py-2 border-b border-slate-100">
+                        <p className="text-slate-600">Total Items</p>
+                        <p className="font-bold text-slate-900">
+                          {ingdMetrics.totalItems}
+                        </p>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-slate-100">
+                        <p className="text-slate-600">Total Quantity</p>
+                        <p className="font-bold text-slate-900">
+                          {formatNumber(ingdMetrics.totalQuantity)}
+                        </p>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-slate-100">
+                        <p className="text-slate-600">People Impacted</p>
+                        <p className="font-bold text-slate-900">
+                          {formatNumber(ingdMetrics.totalPeopleImpacted)}
+                        </p>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <p className="text-slate-600">Total Value</p>
+                        <p className="font-bold text-slate-900">
+                          {formatNumber((ingdMetrics.totalAmount || 0) / 1000, 0)}K MZN
                         </p>
                       </div>
                     </>
