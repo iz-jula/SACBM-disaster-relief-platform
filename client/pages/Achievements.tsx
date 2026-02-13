@@ -197,7 +197,6 @@ export default function Achievements() {
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
           media: imageData || null,
-          hide_amount: formData.hide_amount,
         };
 
         console.log("Sending achievement data:", newAchievementData);
@@ -248,7 +247,7 @@ export default function Achievements() {
       partner_organisation: achievement.partner_organisation || "",
       people_impacted: achievement.people_impacted.toString(),
       amount: achievement.amount.toString(),
-      hide_amount: achievement.hide_amount || false,
+      hide_amount: false,
       media: achievement.media || null,
     });
     setShowEditModal(true);
@@ -331,7 +330,6 @@ export default function Achievements() {
           partner_organisation: formData.partner_organisation || null,
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
-          hide_amount: formData.hide_amount,
         };
 
         console.log("Updating achievement with id:", pendingAction.achievementId, "Data:", updateData);
@@ -937,17 +935,15 @@ export default function Achievements() {
                             {formatNumber(achievement.people_impacted)}
                           </div>
                         </div>
-                        {!achievement.hide_amount && (
-                          <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                            <p className="text-xs text-orange-600 font-medium mb-1">
-                              Contribution
-                            </p>
-                            <p className="text-lg font-bold text-primary">
-                              {formatNumber((achievement.amount / 1000), 1)}K
-                              <span className="text-xs ml-0.5">MZN</span>
-                            </p>
-                          </div>
-                        )}
+                        <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                          <p className="text-xs text-orange-600 font-medium mb-1">
+                            Contribution
+                          </p>
+                          <p className="text-lg font-bold text-primary">
+                            {formatNumber((achievement.amount / 1000), 1)}K
+                            <span className="text-xs ml-0.5">MZN</span>
+                          </p>
+                        </div>
                       </div>
                     </div>
 
