@@ -314,7 +314,24 @@ export default function Achievements() {
         }
       } else if (pendingAction.type === "edit") {
         // Update the achievement
-        const updateData = {
+        let mediaData: string | null = null;
+
+        // Handle newly uploaded media
+        if (uploadedMedia.length > 0) {
+          const file = uploadedMedia[0];
+          mediaData = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              resolve(reader.result as string);
+            };
+            reader.onerror = () => {
+              reject(reader.error);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+
+        const updateData: any = {
           company_name: formData.company_name,
           type_action: formData.type_action,
           description: formData.description,
@@ -333,6 +350,14 @@ export default function Achievements() {
           amount: parseInt(formData.amount) || 0,
         };
 
+        // Include media if there's new media or if media was explicitly removed
+        if (mediaData) {
+          updateData.media = mediaData;
+        } else if (uploadedMedia.length === 0 && formData.media === null) {
+          // Media was removed
+          updateData.media = null;
+        }
+
         console.log("Updating achievement with id:", pendingAction.achievementId, "Data:", updateData);
 
         await updateAchievement(
@@ -342,6 +367,7 @@ export default function Achievements() {
 
         // If we get here, update was successful
         setEditingAchievementId("");
+        setUploadedMedia([]);
         setFormData({
           company_name: "",
           type_action: "",
