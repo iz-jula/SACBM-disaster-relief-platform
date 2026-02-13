@@ -85,6 +85,8 @@ export default function Achievements() {
     achievementId: string;
   } | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageArray, setSelectedImageArray] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedAchievements, setSelectedAchievements] = useState<Set<string>>(new Set());
   const [displayedAchievementsCount, setDisplayedAchievementsCount] = useState(15);
   const [hiddenContributions, setHiddenContributions] = useState<Set<string>>(new Set());
@@ -161,23 +163,30 @@ export default function Achievements() {
           return;
         }
 
-        // Convert first uploaded media to base64
+        // Convert all uploaded media to base64 array
         let imageData: string | null = null;
         if (uploadedMedia.length > 0) {
-          console.log("Processing image...");
-          const file = uploadedMedia[0];
-          imageData = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              console.log("Image converted to base64");
-              resolve(reader.result as string);
-            };
-            reader.onerror = () => {
-              console.error("FileReader error:", reader.error);
-              reject(reader.error);
-            };
-            reader.readAsDataURL(file);
-          });
+          console.log("Processing", uploadedMedia.length, "images...");
+          const mediaArray: string[] = [];
+
+          for (const file of uploadedMedia) {
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                resolve(reader.result as string);
+              };
+              reader.onerror = () => {
+                console.error("FileReader error:", reader.error);
+                reject(reader.error);
+              };
+              reader.readAsDataURL(file);
+            });
+            mediaArray.push(base64);
+          }
+
+          // Store as JSON array
+          imageData = JSON.stringify(mediaArray);
+          console.log("Images converted to base64 array");
         }
 
         const newAchievementData = {
@@ -316,20 +325,27 @@ export default function Achievements() {
         // Update the achievement
         let mediaData: string | null | undefined = undefined;
 
-        // Handle newly uploaded media
+        // Handle newly uploaded media - convert all files to base64
         if (uploadedMedia.length > 0) {
-          const file = uploadedMedia[0];
-          mediaData = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              resolve(reader.result as string);
-            };
-            reader.onerror = () => {
-              reject(reader.error);
-            };
-            reader.readAsDataURL(file);
-          });
-          console.log("New media converted to base64, length:", mediaData?.length);
+          const mediaArray: string[] = [];
+
+          for (const file of uploadedMedia) {
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                resolve(reader.result as string);
+              };
+              reader.onerror = () => {
+                reject(reader.error);
+              };
+              reader.readAsDataURL(file);
+            });
+            mediaArray.push(base64);
+          }
+
+          // Store as JSON array of base64 strings
+          mediaData = JSON.stringify(mediaArray);
+          console.log("Converted", uploadedMedia.length, "files to base64 array");
         }
 
         const updateData: any = {
@@ -954,14 +970,48 @@ export default function Achievements() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       {achievement.media && (
                         <div className="sm:w-32 flex-shrink-0">
-                          <img
-                            src={achievement.media}
-                            alt={achievement.type_action}
-                            className="h-24 w-full sm:w-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() =>
-                              setSelectedImage(achievement.media || null)
+                          {(() => {
+                            try {
+                              const mediaArray = JSON.parse(achievement.media);
+                              if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+                                return (
+                                  <div className="flex flex-col gap-2">
+                                    <img
+                                      src={mediaArray[0]}
+                                      alt={achievement.type_action}
+                                      className="h-24 w-full sm:w-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                      onClick={() => {
+                                        setSelectedImageArray(mediaArray);
+                                        setCurrentImageIndex(0);
+                                        setSelectedImage(mediaArray[0]);
+                                      }}
+                                      title={mediaArray.length > 1 ? `Click to view (${mediaArray.length} images)` : "Click to view"}
+                                    />
+                                    {mediaArray.length > 1 && (
+                                      <div className="text-xs text-center text-slate-500 font-medium">
+                                        +{mediaArray.length - 1} more
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              }
+                            } catch (e) {
+                              // Fallback for single image stored as string
+                              return (
+                                <img
+                                  src={achievement.media}
+                                  alt={achievement.type_action}
+                                  className="h-24 w-full sm:w-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => {
+                                    setSelectedImageArray([achievement.media!]);
+                                    setCurrentImageIndex(0);
+                                    setSelectedImage(achievement.media || null);
+                                  }}
+                                />
+                              );
                             }
-                          />
+                            return null;
+                          })()}
                         </div>
                       )}
 
@@ -1363,11 +1413,38 @@ export default function Achievements() {
                   {editingAchievementId && editingAchievement?.media && uploadedMedia.length === 0 && (
                     <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
                       <p className="text-sm font-medium text-slate-700 mb-2">Current Media</p>
-                      <img
-                        src={editingAchievement.media}
-                        alt="Current action media"
-                        className="w-full h-40 object-cover rounded-lg"
-                      />
+                      {(() => {
+                        try {
+                          const mediaArray = JSON.parse(editingAchievement.media);
+                          if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+                            return (
+                              <div>
+                                <div className="grid grid-cols-2 gap-2 mb-3">
+                                  {mediaArray.map((img, idx) => (
+                                    <img
+                                      key={idx}
+                                      src={img}
+                                      alt={`Current media ${idx + 1}`}
+                                      className="w-full h-24 object-cover rounded-lg"
+                                    />
+                                  ))}
+                                </div>
+                                <p className="text-xs text-slate-600 mb-2">{mediaArray.length} image{mediaArray.length !== 1 ? 's' : ''}</p>
+                              </div>
+                            );
+                          }
+                        } catch (e) {
+                          // Single image fallback
+                          return (
+                            <img
+                              src={editingAchievement.media}
+                              alt="Current action media"
+                              className="w-full h-40 object-cover rounded-lg"
+                            />
+                          );
+                        }
+                        return null;
+                      })()}
                       <button
                         type="button"
                         onClick={() => {
@@ -1423,20 +1500,55 @@ export default function Achievements() {
             onClick={() => setSelectedImage(null)}
           >
             <div
-              className="max-w-4xl max-h-[90vh] relative"
+              className="max-w-4xl max-h-[90vh] relative flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 text-white hover:text-slate-200 transition-colors bg-black/50 rounded-full p-2"
+                className="absolute top-4 right-4 text-white hover:text-slate-200 transition-colors bg-black/50 rounded-full p-2 z-10"
               >
                 <X size={24} />
               </button>
-              <img
-                src={selectedImage}
-                alt="Full view"
-                className="w-full h-full object-contain rounded-lg"
-              />
+
+              {/* Image Container */}
+              <div className="relative flex-1 flex items-center justify-center">
+                <img
+                  src={selectedImageArray[currentImageIndex] || selectedImage}
+                  alt={`Image ${currentImageIndex + 1}`}
+                  className="w-full h-full object-contain rounded-lg"
+                />
+
+                {/* Navigation Arrows */}
+                {selectedImageArray.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : selectedImageArray.length - 1))}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+                      title="Previous image"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setCurrentImageIndex((prev) => (prev < selectedImageArray.length - 1 ? prev + 1 : 0))}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+                      title="Next image"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Image Counter */}
+              {selectedImageArray.length > 1 && (
+                <div className="text-center text-white mt-4 text-sm font-medium bg-black/50 rounded-lg py-2">
+                  {currentImageIndex + 1} of {selectedImageArray.length}
+                </div>
+              )}
             </div>
           </div>
         )}
