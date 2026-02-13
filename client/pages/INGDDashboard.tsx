@@ -449,23 +449,23 @@ export default function INGDDashboard() {
               {isLoading ? (
                 <div className="p-6 text-center text-slate-600">Loading INGD requests...</div>
               ) : filteredRequests.length > 0 ? (
-                <table className="w-full text-sm md:text-base">
+                <table className="w-full min-w-max border-collapse">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700">
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap">
                         <input type="checkbox" className="w-4 h-4 rounded" disabled />
                       </th>
-                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">#</th>
-                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Company</th>
-                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Category</th>
-                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Item</th>
-                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700">Qty</th>
-                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Maputo</th>
-                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Gaza</th>
-                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Sofala</th>
-                      <th className="px-2 md:px-4 py-3 text-center text-xs md:text-sm font-semibold text-slate-700 hidden lg:table-cell">Zambézia</th>
-                      <th className="px-2 md:px-4 py-3 text-right text-xs md:text-sm font-semibold text-slate-700">Total</th>
-                      <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold text-slate-700 hidden sm:table-cell">Status</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 whitespace-nowrap min-w-[60px]">ID</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 whitespace-nowrap min-w-[150px]">Company</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 whitespace-nowrap min-w-[120px]">Category</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 whitespace-nowrap min-w-[150px]">Item</th>
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap min-w-[80px]">Qty</th>
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap min-w-[100px]">Maputo</th>
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap min-w-[100px]">Gaza</th>
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap min-w-[100px]">Sofala</th>
+                      <th className="px-4 py-3 text-center font-semibold text-slate-700 whitespace-nowrap min-w-[110px]">Zambézia</th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700 whitespace-nowrap min-w-[100px]">Total</th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 whitespace-nowrap min-w-[110px]">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -478,7 +478,7 @@ export default function INGDDashboard() {
                             index % 2 === 0 ? "bg-white" : "bg-slate-50"
                           }`}
                         >
-                          <td className="px-2 md:px-4 py-3 text-center">
+                          <td className="px-4 py-3 text-center">
                             <input
                               type="checkbox"
                               checked={selectedItems.has(request.id || 0)}
@@ -486,22 +486,22 @@ export default function INGDDashboard() {
                               className="w-4 h-4 rounded cursor-pointer"
                             />
                           </td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm font-medium text-slate-600">#{request.id}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-700 font-medium">{request.company_name}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          <td className="px-4 py-3 text-sm font-medium text-slate-600 whitespace-nowrap">#{request.id}</td>
+                          <td className="px-4 py-3 text-sm text-slate-700 font-medium break-words max-w-[150px]">{request.company_name}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 whitespace-nowrap">
                               {request.category}
                             </span>
                           </td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600">{name}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-slate-600 whitespace-nowrap">{quantity}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Maputo || 0)}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Gaza || 0)}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Sofala || 0)}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-center text-slate-600 hidden lg:table-cell">{formatNumber(request.Zambezia || 0)}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm text-right font-semibold text-primary">{formatNumber(request.Total || 0)}</td>
-                          <td className="px-2 md:px-4 py-3 text-xs md:text-sm hidden sm:table-cell">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
+                          <td className="px-4 py-3 text-sm text-slate-600 break-words max-w-[150px]" title={name}>{name}</td>
+                          <td className="px-4 py-3 text-sm text-slate-600 text-center whitespace-nowrap">{quantity}</td>
+                          <td className="px-4 py-3 text-sm text-center text-slate-600 whitespace-nowrap">{formatNumber(request.Maputo || 0)}</td>
+                          <td className="px-4 py-3 text-sm text-center text-slate-600 whitespace-nowrap">{formatNumber(request.Gaza || 0)}</td>
+                          <td className="px-4 py-3 text-sm text-center text-slate-600 whitespace-nowrap">{formatNumber(request.Sofala || 0)}</td>
+                          <td className="px-4 py-3 text-sm text-center text-slate-600 whitespace-nowrap">{formatNumber(request.Zambezia || 0)}</td>
+                          <td className="px-4 py-3 text-sm text-right font-semibold text-primary whitespace-nowrap">{formatNumber(request.Total || 0)}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-300 whitespace-nowrap">
                               ⏳ Pending
                             </span>
                           </td>
