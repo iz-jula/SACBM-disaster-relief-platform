@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
+import ActionsCarousel from "@/components/ActionsCarousel";
 import {
   Award,
   Users,
@@ -495,6 +496,19 @@ export default function Achievements() {
           </div>
         )}
 
+        {/* Member Actions Gallery Carousel */}
+        {achievements && achievements.length > 0 && (
+          <ActionsCarousel
+            images={achievements
+              .filter((action) => action.media)
+              .map((action) => ({
+                id: action.id?.toString() || "",
+                image: action.media as string,
+                title: action.type_action,
+                company: action.company_name,
+              }))}
+          />
+        )}
         {/* Submit Achievement Form */}
         <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
           <button
