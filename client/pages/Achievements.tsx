@@ -87,6 +87,7 @@ export default function Achievements() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedAchievements, setSelectedAchievements] = useState<Set<string>>(new Set());
   const [displayedAchievementsCount, setDisplayedAchievementsCount] = useState(15);
+  const [hiddenContributions, setHiddenContributions] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     company_name: "",
     type_action: "",
@@ -661,12 +662,22 @@ export default function Achievements() {
                   type="checkbox"
                   id="hide-amount"
                   checked={formData.hide_amount}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData({
                       ...formData,
                       hide_amount: e.target.checked,
-                    })
-                  }
+                    });
+                    // Toggle the visibility for this achievement in the list
+                    if (editingAchievementId) {
+                      const newHidden = new Set(hiddenContributions);
+                      if (e.target.checked) {
+                        newHidden.add(editingAchievementId);
+                      } else {
+                        newHidden.delete(editingAchievementId);
+                      }
+                      setHiddenContributions(newHidden);
+                    }
+                  }}
                   className="w-4 h-4 rounded cursor-pointer"
                 />
                 <label htmlFor="hide-amount" className="text-sm font-medium text-slate-700 cursor-pointer">
@@ -939,7 +950,7 @@ export default function Achievements() {
                           <p className="text-xs text-orange-600 font-medium mb-1">
                             Contribution
                           </p>
-                          <p className="text-lg font-bold text-primary">
+                          <p className={`text-lg font-bold text-primary ${hiddenContributions.has(achievement.id?.toString() || "") ? 'blur-sm' : ''}`}>
                             {formatNumber((achievement.amount / 1000), 1)}K
                             <span className="text-xs ml-0.5">MZN</span>
                           </p>
@@ -1206,12 +1217,22 @@ export default function Achievements() {
                     type="checkbox"
                     id="hide-amount-modal"
                     checked={formData.hide_amount}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
                         hide_amount: e.target.checked,
-                      })
-                    }
+                      });
+                      // Toggle the visibility for this achievement in the list
+                      if (editingAchievementId) {
+                        const newHidden = new Set(hiddenContributions);
+                        if (e.target.checked) {
+                          newHidden.add(editingAchievementId);
+                        } else {
+                          newHidden.delete(editingAchievementId);
+                        }
+                        setHiddenContributions(newHidden);
+                      }
+                    }}
                     className="w-4 h-4 rounded cursor-pointer"
                   />
                   <label htmlFor="hide-amount-modal" className="text-sm font-medium text-slate-700 cursor-pointer">
