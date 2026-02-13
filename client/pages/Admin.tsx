@@ -317,17 +317,10 @@ export default function Admin() {
   const [adminUsers] = useState<AdminUser[]>([
     {
       id: "1",
-      name: "Admin User",
-      email: "admin@sabcm.org",
+      name: user?.name || "Admin User",
+      email: user?.email || "admin@sacbm.co.mz",
       role: "admin",
-      lastLogin: "2024-01-26 10:30 AM",
-    },
-    {
-      id: "2",
-      name: "Manager User",
-      email: "manager@sabcm.org",
-      role: "manager",
-      lastLogin: "2024-01-25 3:15 PM",
+      lastLogin: new Date().toLocaleString(),
     },
   ]);
 
@@ -1220,37 +1213,37 @@ export default function Admin() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-max">
                     <thead>
                       <tr className="border-b border-slate-200 bg-slate-50">
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                          #ID
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 whitespace-nowrap">
+                          ID
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 min-w-[140px]">
                           Company
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 min-w-[140px]">
                           Item
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 min-w-[110px]">
                           Category
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Maputo
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Gaza
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Sofala
                         </th>
-                        <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Zambézia
                         </th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Total
                         </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 whitespace-nowrap">
                           Actions
                         </th>
                       </tr>
@@ -1261,47 +1254,49 @@ export default function Admin() {
                           key={req.id}
                           className="border-b border-slate-200 hover:bg-blue-50 transition-colors"
                         >
-                          <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                          <td className="px-4 py-3 text-xs font-medium text-slate-900 whitespace-nowrap">
                             #{req.id}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600">
-                            {req.company_name}
+                          <td className="px-4 py-3 text-xs text-slate-600 truncate">
+                            {req.company_name || "—"}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600">
-                            {req.Item}
+                          <td className="px-4 py-3 text-xs text-slate-600 truncate">
+                            {req.Item || "—"}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600">
-                            {req.category}
+                          <td className="px-4 py-3 text-xs text-slate-600 truncate">
+                            {req.category || "—"}
                           </td>
-                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                          <td className="px-4 py-3 text-xs text-center text-slate-600 whitespace-nowrap">
                             {req.Maputo || 0}
                           </td>
-                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                          <td className="px-4 py-3 text-xs text-center text-slate-600 whitespace-nowrap">
                             {req.Gaza || 0}
                           </td>
-                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                          <td className="px-4 py-3 text-xs text-center text-slate-600 whitespace-nowrap">
                             {req.Sofala || 0}
                           </td>
-                          <td className="px-6 py-4 text-sm text-center text-slate-600">
+                          <td className="px-4 py-3 text-xs text-center text-slate-600 whitespace-nowrap">
                             {req.Zambezia || 0}
                           </td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-slate-900">
+                          <td className="px-4 py-3 text-xs text-right font-semibold text-slate-900 whitespace-nowrap">
                             {formatNumber(req.Total || 0)}
                           </td>
-                          <td className="px-6 py-4 text-sm space-x-2 flex">
+                          <td className="px-4 py-3 text-xs space-x-1 flex whitespace-nowrap">
                             <button
                               onClick={() => handleEditIngdRequest(req)}
-                              className="text-blue-600 hover:text-blue-800 font-medium transition-colors flex items-center gap-1"
+                              className="text-blue-600 hover:text-blue-800 font-medium transition-colors flex items-center gap-1 px-2 py-1"
+                              title="Edit"
                             >
-                              <Edit2 size={14} />
+                              <Edit2 size={12} />
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteIngdRequest(req.id || 0)}
-                              className="text-red-600 hover:text-red-800 font-medium transition-colors flex items-center gap-1"
+                              className="text-red-600 hover:text-red-800 font-medium transition-colors flex items-center gap-1 px-2 py-1"
+                              title="Delete"
                             >
-                              <Trash2 size={14} />
-                              Delete
+                              <Trash2 size={12} />
+                              Del
                             </button>
                           </td>
                         </tr>
