@@ -9,10 +9,14 @@ import {
 } from "@/services/requestsService";
 import {
   getAchievementsMetrics,
+  Achievement,
+  getAchievements,
   AchievementsMetrics,
+  Achievement,
 } from "@/services/achievementsService";
 import { getIngdMetrics, getIngdRequests, IngdRequest } from "@/services/supabaseService";
 
+import ActionsImageGrid from "@/components/ActionsImageGrid";
 const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
 const Alerts = lazy(() => import("@/components/Alerts"));
 
@@ -36,18 +40,20 @@ export default function Dashboard() {
   const [ingdMetrics, setIngdMetrics] = useState<any>(null);
   const [recentIngdRequests, setRecentIngdRequests] = useState<IngdRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
   useEffect(() => {
     // Fetch data from API
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [requests, metricsData, achievementsData, ingdMetricsData, ingdRecentData] = await Promise.all([
+        const [requests, metricsData, achievementsData, ingdMetricsData, ingdRecentData, achievementsImages] = await Promise.all([
           getRecentRequests(5),
           getMetrics(),
           getAchievementsMetrics(),
           getIngdMetrics(),
           getIngdRequests(),
+          getAchievements(),
         ]);
         setRecentRequests(requests);
         setMetrics(metricsData);
@@ -55,6 +61,7 @@ export default function Dashboard() {
         setIngdMetrics(ingdMetricsData);
         // Get first 5 INGD requests
         setRecentIngdRequests(ingdRecentData.slice(0, 5));
+        setAchievements(achievementsImages || []);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -444,6 +451,18 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+        {/* Member Actions Gallery */}
+        <ActionsImageGrid
+          images={achievements
+            .filter((action) => action.media)
+            .map((action) => ({
+              id: action.id?.toString() || "",
+              image: action.media as string,
+              title: action.type_action,
+              company: action.company_name,
+            }))}
+        />
+
 
         {/* Recent Requests - Modern Section */}
         <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
