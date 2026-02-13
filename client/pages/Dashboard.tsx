@@ -16,7 +16,7 @@ import {
 } from "@/services/achievementsService";
 import { getIngdMetrics, getIngdRequests, IngdRequest } from "@/services/supabaseService";
 
-import ActionsImageGrid from "@/components/ActionsImageGrid";
+import ActionsCarousel from "@/components/ActionsCarousel";
 const MaputoWeather = lazy(() => import("@/components/MaputoWeather"));
 const Alerts = lazy(() => import("@/components/Alerts"));
 
@@ -451,8 +451,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        {/* Member Actions Gallery */}
-        <ActionsImageGrid
+        {/* Member Actions Gallery Carousel */}
+        <ActionsCarousel
           images={achievements
             .filter((action) => action.media)
             .flatMap((action) => {
