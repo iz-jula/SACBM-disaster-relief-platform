@@ -79,6 +79,7 @@ export default function Achievements() {
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [editingAchievementId, setEditingAchievementId] = useState<string>("");
+  const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
   const [pendingAction, setPendingAction] = useState<{
     type: "delete" | "edit";
     achievementId: string;
@@ -96,6 +97,7 @@ export default function Achievements() {
     people_impacted: "",
     amount: "",
     hide_amount: false,
+    media: null as string | null,
   });
 
   useEffect(() => {
@@ -213,6 +215,7 @@ export default function Achievements() {
             people_impacted: "",
             amount: "",
             hide_amount: false,
+    media: null as string | null,
           });
           setUploadedMedia([]);
           setShowForm(false);
@@ -234,6 +237,7 @@ export default function Achievements() {
   };
 
   const handleEditAchievement = (achievement: Achievement) => {
+    setEditingAchievement(achievement);
     setEditingAchievementId(achievement.id?.toString() || "");
     setFormData({
       company_name: achievement.company_name,
@@ -245,6 +249,7 @@ export default function Achievements() {
       people_impacted: achievement.people_impacted.toString(),
       amount: achievement.amount.toString(),
       hide_amount: achievement.hide_amount || false,
+      media: achievement.media || null,
     });
     setShowEditModal(true);
   };
@@ -348,9 +353,11 @@ export default function Achievements() {
           people_impacted: "",
           amount: "",
           hide_amount: false,
+    media: null as string | null,
         });
         setShowForm(false);
         setShowEditModal(false);
+        setEditingAchievement(null);
         setShowAuthModal(false);
         setAuthPassword("");
         setPendingAction(null);
@@ -504,6 +511,7 @@ export default function Achievements() {
                   people_impacted: "",
                   amount: "",
                   hide_amount: false,
+    media: null as string | null,
                 });
               }
               setShowForm(!showForm);
@@ -754,6 +762,7 @@ export default function Achievements() {
                       people_impacted: "",
                       amount: "",
                       hide_amount: false,
+    media: null as string | null,
                     });
                   }}
                   className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium"
@@ -1057,6 +1066,7 @@ export default function Achievements() {
                 <button
                   onClick={() => {
                     setShowEditModal(false);
+        setEditingAchievement(null);
                     setEditingAchievementId("");
                   }}
                   className="text-slate-400 hover:text-slate-600"
@@ -1229,6 +1239,89 @@ export default function Achievements() {
                   />
                 </div>
 
+                {/* Media Upload Section */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">
+                    Media (Optional)
+                  </label>
+                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={handleMediaUpload}
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      id="media-upload-edit"
+                    />
+                    <label
+                      htmlFor="media-upload-edit"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <ImagePlus size={20} className="text-slate-600" />
+                      <span className="text-sm text-slate-600">
+                        Click to upload or drag and drop
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        PNG, JPG, GIF or PDF (max 10MB)
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Uploaded Media Preview */}
+                  {uploadedMedia.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm font-medium text-slate-700">
+                        Uploaded Files ({uploadedMedia.length})
+                      </p>
+                      {uploadedMedia.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200"
+                        >
+                          <span className="text-sm text-slate-700 truncate">
+                            {file.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeMedia(index)}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                            title="Remove file"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setUploadedMedia([])}
+                        className="text-sm text-slate-500 hover:text-slate-700 mt-2"
+                      >
+                        Clear all files
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Existing Media Display */}
+                  {editingAchievementId && editingAchievement?.media && uploadedMedia.length === 0 && (
+                    <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                      <p className="text-sm font-medium text-slate-700 mb-2">Current Media</p>
+                      <img
+                        src={editingAchievement.media}
+                        alt="Current action media"
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({ ...formData, media: null });
+                        }}
+                        className="mt-2 w-full text-sm text-red-600 hover:text-red-700 font-medium py-1"
+                      >
+                        Remove Current Media
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="flex gap-3 pt-4 border-t border-slate-200">
                   <button
                     type="submit"
@@ -1240,6 +1333,7 @@ export default function Achievements() {
                     type="button"
                     onClick={() => {
                       setShowEditModal(false);
+        setEditingAchievement(null);
                       setEditingAchievementId("");
                       setFormData({
                         company_name: "",
@@ -1251,6 +1345,7 @@ export default function Achievements() {
                         people_impacted: "",
                         amount: "",
                         hide_amount: false,
+    media: null as string | null,
                       });
                     }}
                     className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-200"
