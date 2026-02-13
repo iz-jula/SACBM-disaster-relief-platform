@@ -314,7 +314,7 @@ export default function Achievements() {
         }
       } else if (pendingAction.type === "edit") {
         // Update the achievement
-        let mediaData: string | null = null;
+        let mediaData: string | null | undefined = undefined;
 
         // Handle newly uploaded media
         if (uploadedMedia.length > 0) {
@@ -329,6 +329,7 @@ export default function Achievements() {
             };
             reader.readAsDataURL(file);
           });
+          console.log("New media converted to base64, length:", mediaData?.length);
         }
 
         const updateData: any = {
@@ -350,20 +351,34 @@ export default function Achievements() {
           amount: parseInt(formData.amount) || 0,
         };
 
-        // Include media if there's new media or if media was explicitly removed
-        if (mediaData) {
+        // Handle media updates
+        if (mediaData !== undefined) {
+          // User uploaded new media
           updateData.media = mediaData;
-        } else if (uploadedMedia.length === 0 && formData.media === null) {
+          console.log("Updating with new media");
+        } else if (formData.media !== null && uploadedMedia.length === 0) {
+          // Keep existing media - only include if they didn't upload new files
+          updateData.media = formData.media;
+          console.log("Keeping existing media");
+        } else if (formData.media === null && uploadedMedia.length === 0) {
           // Media was removed
           updateData.media = null;
+          console.log("Removing media");
         }
 
         console.log("Updating achievement with id:", pendingAction.achievementId, "Data:", updateData);
 
-        await updateAchievement(
-          pendingAction.achievementId,
-          updateData,
-        );
+        try {
+          await updateAchievement(
+            pendingAction.achievementId,
+            updateData,
+          );
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+          setAuthError("Failed to save: " + errorMsg);
+          console.error("Update failed:", error);
+          return;
+        }
 
         // If we get here, update was successful
         setEditingAchievementId("");
