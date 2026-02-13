@@ -6,11 +6,22 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated } = useAuth();
+  try {
+    const { isAuthenticated, isLoading } = useAuth();
 
-  if (!isAuthenticated) {
+    // While loading auth state, show nothing to avoid flashing content
+    if (isLoading) {
+      return null;
+    }
+
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+
+    return <>{children}</>;
+  } catch (error) {
+    console.error("ProtectedRoute error:", error);
+    // If auth context is not available, redirect to login
     return <Navigate to="/login" replace />;
   }
-
-  return <>{children}</>;
 }
