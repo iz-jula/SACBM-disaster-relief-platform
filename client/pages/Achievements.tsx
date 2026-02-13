@@ -985,7 +985,7 @@ export default function Achievements() {
 
         {/* Authentication Modal for Edit/Delete */}
         {showAuthModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Lock className="w-5 h-5 text-slate-600" />
