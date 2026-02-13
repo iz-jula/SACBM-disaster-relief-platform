@@ -650,18 +650,19 @@ export async function createIngdDocument(
       .select();
 
     if (error) {
-      console.error("Supabase error creating document:", {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-      });
+      const errorMsg = typeof error === 'object' && error !== null
+        ? JSON.stringify(error, null, 2)
+        : String(error);
+      console.error("Supabase error creating document:", errorMsg);
       throw error;
     }
     return data?.[0] || null;
   } catch (error) {
-    console.error("Error creating INGD document:", error);
-    throw new Error(`Failed to create document: ${error instanceof Error ? error.message : "Unknown error"}`);
+    const errorMsg = error instanceof Error ? error.message :
+                     typeof error === 'object' && error !== null ? JSON.stringify(error, null, 2) :
+                     String(error);
+    console.error("Error creating INGD document:", errorMsg);
+    throw new Error(`Failed to create document: ${errorMsg}`);
   }
 }
 
