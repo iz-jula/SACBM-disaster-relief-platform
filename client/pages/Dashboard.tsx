@@ -455,12 +455,30 @@ export default function Dashboard() {
         <ActionsImageGrid
           images={achievements
             .filter((action) => action.media)
-            .map((action) => ({
-              id: action.id?.toString() || "",
-              image: action.media as string,
-              title: action.type_action,
-              company: action.company_name,
-            }))}
+            .flatMap((action) => {
+              try {
+                const mediaArray = JSON.parse(action.media as string);
+                if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+                  return mediaArray.map((img, idx) => ({
+                    id: `${action.id}-${idx}`,
+                    image: img,
+                    title: action.type_action,
+                    company: action.company_name,
+                  }));
+                }
+              } catch (e) {
+                // Fallback for single image stored as string
+                if (action.media) {
+                  return [{
+                    id: action.id?.toString() || "",
+                    image: action.media as string,
+                    title: action.type_action,
+                    company: action.company_name,
+                  }];
+                }
+              }
+              return [];
+            })}
         />
 
 
