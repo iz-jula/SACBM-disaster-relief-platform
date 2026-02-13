@@ -3897,6 +3897,8 @@ export default function Weather() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
   const [lastWeatherUpdate, setLastWeatherUpdate] = useState<Date | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string>("Incoming Cyclone Alert - Southern Mozambique");
+  const [alertType, setAlertType] = useState<"cyclone" | "flooding" | "heavy-rain" | "warning">("cyclone");
 
   // Fetch real forecast data when selected region changes
   useEffect(() => {
