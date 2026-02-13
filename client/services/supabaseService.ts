@@ -588,34 +588,32 @@ export interface IngdDocument {
   id?: number;
   created_at?: string;
   file_name: string;
-  file_url: string;
+  file_url: string; // Contains base64 encoded data
   file_type: string; // "pdf", "xlsx", "xls", etc.
   description: string;
   uploaded_by?: string;
 }
 
-// Upload file to Supabase Storage
+// Convert file to base64 data URL
 export async function uploadDocumentToStorage(
   file: File,
   documentType: string = "ingd",
 ): Promise<string> {
   try {
-    const fileName = `${documentType}/${Date.now()}_${file.name}`;
-    const { data, error } = await supabase.storage
-      .from("ingd-documents")
-      .upload(fileName, file, { upsert: true });
-
-    if (error) throw error;
-
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from("ingd-documents")
-      .getPublicUrl(fileName);
-
-    return urlData.publicUrl;
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result); // Returns "data:mime/type;base64,..."
+      };
+      reader.onerror = () => {
+        reject(new Error("Failed to read file"));
+      };
+      reader.readAsDataURL(file);
+    });
   } catch (error) {
-    console.error("Error uploading document:", error);
-    throw new Error(`Failed to upload document: ${error instanceof Error ? error.message : "Unknown error"}`);
+    console.error("Error converting document to base64:", error);
+    throw new Error(`Failed to process document: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
 
@@ -670,27 +668,7 @@ export async function createIngdDocument(
 // Delete an INGD document
 export async function deleteIngdDocument(id: number): Promise<boolean> {
   try {
-    // First, get the document to find the file path
-    const { data: docData, error: fetchError } = await supabase
-      .from("ingd_documents")
-      .select("file_url")
-      .eq("id", id)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    // Delete from storage if URL exists
-    if (docData?.file_url) {
-      const url = new URL(docData.file_url);
-      const filePath = url.pathname.split("/storage/v1/object/public/ingd-documents/")[1];
-      if (filePath) {
-        await supabase.storage
-          .from("ingd-documents")
-          .remove([decodeURIComponent(filePath)]);
-      }
-    }
-
-    // Delete from database
+    // Delete from database only (no storage cleanup needed for base64)
     const { error: deleteError } = await supabase
       .from("ingd_documents")
       .delete()
