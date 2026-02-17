@@ -7,7 +7,6 @@ import {
   Upload,
   Menu,
   X,
-  Cloud,
   ChevronLeft,
   Lock,
   Database,
@@ -28,7 +27,6 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/requests", label: "Relief Requests", icon: Table2 },
     { href: "/actions", label: "Actions", icon: Award },
     { href: "/upload", label: "Upload Requests", icon: Upload },
-    { href: "/weather", label: "Weather Forecast", icon: Cloud },
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
   ];
 
