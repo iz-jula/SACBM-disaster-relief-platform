@@ -1,4 +1,5 @@
 import { ReactNode, useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   BarChart3,
@@ -21,14 +22,34 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [ingdActive, setIngdActive] = useState(() => {
+    const stored = localStorage.getItem("ingd_active");
+    return stored !== null ? JSON.parse(stored) : true;
+  });
 
-  const navItems = [
+  // Listen for changes to INGD active state
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem("ingd_active");
+      setIngdActive(stored !== null ? JSON.parse(stored) : true);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const allNavItems = [
     { href: "/", label: "Dashboard", icon: BarChart3 },
     { href: "/requests", label: "Relief Requests", icon: Table2 },
     { href: "/actions", label: "Actions", icon: Award },
     { href: "/upload", label: "Upload Requests", icon: Upload },
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
   ];
+
+  // Filter INGD Dashboard based on active state
+  const navItems = allNavItems.filter(
+    (item) => item.href !== "/ingd-dashboard" || ingdActive
+  );
 
   const adminItems = [{ href: "/admin", label: "Admin Panel", icon: Lock }];
 

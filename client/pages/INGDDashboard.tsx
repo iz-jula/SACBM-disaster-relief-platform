@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { getIngdRequests, createIngdCommitment, resolveIngdRequest, revertIngdToPending, getIngdDocuments } from "@/services/supabaseService";
 import type { IngdRequest, IngdDocument } from "@/services/supabaseService";
@@ -39,6 +40,11 @@ function getStatusLabel(status: boolean) {
 
 export default function INGDDashboard() {
   const navigate = useNavigate();
+  const [ingdActive] = useState(() => {
+    const stored = localStorage.getItem("ingd_active");
+    return stored !== null ? JSON.parse(stored) : true;
+  });
+
   const [activeTab, setActiveTab] = useState<"dashboard" | "requests">("dashboard");
   const [ingdRequests, setIngdRequests] = useState<IngdRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<IngdRequest[]>([]);
@@ -59,6 +65,28 @@ export default function INGDDashboard() {
   const [commitmentError, setCommitmentError] = useState("");
   const [isSubmittingCommitment, setIsSubmittingCommitment] = useState(false);
   const [pendingActionType, setPendingActionType] = useState<"commitment" | "resolved" | null>(null);
+
+  if (!ingdActive) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center max-w-md">
+            <AlertCircle size={48} className="mx-auto mb-4 text-slate-400" />
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">INGD Dashboard Inactive</h2>
+            <p className="text-slate-600 mb-6">
+              The INGD Management feature has been disabled. Please contact your administrator if you need access.
+            </p>
+            <button
+              onClick={() => navigate("/")}
+              className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            >
+              Return to Dashboard
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   useEffect(() => {
     // Load INGD requests and documents when requests tab is selected
