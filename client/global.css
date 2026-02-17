@@ -106,11 +106,13 @@
   body {
     @apply bg-background text-foreground;
     user-select: auto;
+    cursor: default;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
     overflow-wrap: anywhere;
     word-break: break-word;
+    cursor: inherit;
   }
 
   /* Allow text selection only on elements that should have it */
