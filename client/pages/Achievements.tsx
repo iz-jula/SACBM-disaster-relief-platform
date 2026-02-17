@@ -72,6 +72,7 @@ export default function Achievements() {
   const [metrics, setMetrics] = useState<AchievementsMetrics | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [customLocation, setCustomLocation] = useState("");
   const [showCustomLocation, setShowCustomLocation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -888,6 +889,26 @@ export default function Achievements() {
                 ))}
               </div>
             </div>
+
+            <div>
+              <p className="text-sm font-medium text-slate-700 mb-2">
+                Member / Organization
+              </p>
+              <select
+                value={selectedCompany || ""}
+                onChange={(e) => setSelectedCompany(e.target.value || null)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              >
+                <option value="">All Members</option>
+                {Array.from(new Set(achievements.map((a) => a.company_name)))
+                  .sort()
+                  .map((company) => (
+                    <option key={company} value={company}>
+                      {company}
+                    </option>
+                  ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -910,8 +931,12 @@ export default function Achievements() {
                     MEMBER ACTIONS
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                    {achievements.length} action
-                    {achievements.length !== 1 ? "s" : ""}
+                    {(() => {
+                      const filtered = selectedCompany
+                        ? achievements.filter((a) => a.company_name === selectedCompany)
+                        : achievements;
+                      return `${filtered.length} action${filtered.length !== 1 ? "s" : ""}`;
+                    })()}
                   </p>
                 </div>
               </div>
@@ -927,7 +952,10 @@ export default function Achievements() {
             {isLoading ? (
               <div className="p-6 text-center text-slate-600">Loading...</div>
             ) : achievements.length > 0 ? (
-              achievements.slice(0, displayedAchievementsCount).map((achievement) => (
+              achievements
+                .filter((a) => (selectedCompany ? a.company_name === selectedCompany : true))
+                .slice(0, displayedAchievementsCount)
+                .map((achievement) => (
                 <div
                   key={achievement.id}
                   className="bg-white hover:shadow-lg transition-shadow border-b border-slate-200 last:border-b-0"

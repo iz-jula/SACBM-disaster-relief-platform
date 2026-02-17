@@ -272,6 +272,7 @@ export default function Requests() {
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(
     new Set(),
   );
+  const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [selectedIngdItems, setSelectedIngdItems] = useState<Set<number>>(
     new Set(),
   );
@@ -502,9 +503,15 @@ export default function Requests() {
     }
   };
 
-  // Group and sort requests
-  const pendingRequests = requests.filter((r) => r.status === false);
-  const metRequests = requests.filter((r) => r.status === true);
+  // Get unique members for filter dropdown
+  const uniqueMembers = Array.from(new Set(requests.map((r) => r.originator))).sort();
+
+  // Group and sort requests with member filter
+  const filteredRequests = selectedMember
+    ? requests.filter((r) => r.originator === selectedMember)
+    : requests;
+  const pendingRequests = filteredRequests.filter((r) => r.status === false);
+  const metRequests = filteredRequests.filter((r) => r.status === true);
 
   return (
     <Layout>
@@ -573,6 +580,39 @@ export default function Requests() {
             </button>
           </div>
         </div>
+
+        {/* Filter Section */}
+        {requests.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Filter by Member/Organization
+                </label>
+                <select
+                  value={selectedMember || ""}
+                  onChange={(e) => setSelectedMember(e.target.value || null)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">All Members</option>
+                  {uniqueMembers.map((member) => (
+                    <option key={member} value={member}>
+                      {member}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedMember && (
+                <button
+                  onClick={() => setSelectedMember(null)}
+                  className="mt-6 sm:mt-0 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+                >
+                  Clear Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Loading State */}
         {isLoading && (
