@@ -42,6 +42,10 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [showPdfViewer, setShowPdfViewer] = useState(false);
+  const [ingdActive, setIngdActive] = useState(() => {
+    const stored = localStorage.getItem("ingd_active");
+    return stored !== null ? JSON.parse(stored) : true;
+  });
 
   useEffect(() => {
     // Fetch data from API
@@ -82,6 +86,15 @@ export default function Dashboard() {
     };
 
     loadData();
+
+    // Listen for INGD active state changes from localStorage
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem("ingd_active");
+      const isActive = stored !== null ? JSON.parse(stored) : true;
+      setIngdActive(isActive);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
 
     // Set up Tableau visualization on dashboard with responsive sizing
     const resizeDashboardViz = () => {
@@ -131,6 +144,7 @@ export default function Dashboard() {
 
     return () => {
       window.removeEventListener("resize", resizeDashboardViz);
+      window.removeEventListener("storage", handleStorageChange);
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
@@ -269,7 +283,7 @@ export default function Dashboard() {
                   Total Requests
                 </p>
                 <p className="text-4xl font-bold text-slate-900 mt-3">
-                  {(metrics?.totalRequests || 0) + (ingdMetrics?.totalRequests || 0)}
+                  {(metrics?.totalRequests || 0) + (ingdActive ? (ingdMetrics?.totalRequests || 0) : 0)}
                 </p>
               </div>
               <p className="text-sm text-slate-600">Active relief operations</p>
@@ -277,20 +291,22 @@ export default function Dashboard() {
           </div>
 
           {/* People to Assist Card */}
-          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
-            <div className="relative">
-              <div>
-                <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                  People to Assist
-                </p>
-                <p className="text-4xl font-bold text-slate-900 mt-3">
-                  {formatNumber(ingdMetrics?.totalPeople || 10)}
-                </p>
+          {ingdActive && (
+            <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+              <div className="relative">
+                <div>
+                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                    People to Assist
+                  </p>
+                  <p className="text-4xl font-bold text-slate-900 mt-3">
+                    {formatNumber(ingdMetrics?.totalPeople || 10)}
+                  </p>
+                </div>
+                <p className="text-sm text-slate-600">Requiring assistance</p>
               </div>
-              <p className="text-sm text-slate-600">Requiring assistance</p>
             </div>
-          </div>
+          )}
 
           {/* Total Value Card (Combined) */}
           <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
@@ -301,7 +317,7 @@ export default function Dashboard() {
                   Total Value
                 </p>
                 <p className="text-4xl font-bold text-slate-900 mt-3">
-                  {formatNumber(((metrics?.totalValueDeployed || 0) + (ingdMetrics?.totalValue || 0)) / 1000000, 1)}M
+                  {formatNumber(((metrics?.totalValueDeployed || 0) + (ingdActive ? (ingdMetrics?.totalValue || 0) : 0)) / 1000000, 1)}M
                 </p>
                 <p className="text-xs text-slate-600 mt-1">MZN</p>
               </div>
@@ -319,8 +335,8 @@ export default function Dashboard() {
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
                     {formatNumber(
-                      (((metrics?.totalValueDeployed || 0) + (ingdMetrics?.totalValue || 0)) /
-                        ((metrics?.totalRequests || 1) + (ingdMetrics?.totalRequests || 1))) / 1000,
+                      (((metrics?.totalValueDeployed || 0) + (ingdActive ? (ingdMetrics?.totalValue || 0) : 0)) /
+                        ((metrics?.totalRequests || 1) + (ingdActive ? (ingdMetrics?.totalRequests || 1) : 0))) / 1000,
                       0
                     )}K
                   </p>
@@ -334,9 +350,10 @@ export default function Dashboard() {
 
 
         {/* INGD Analytics & Government Priorities Split View */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid gap-6 ${ingdActive ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
           {/* INGD Dashboard - Left Side */}
-          <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+          {ingdActive && (
+            <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">
@@ -404,6 +421,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+            )}
 
           {/* Government Priorities - Right Side */}
           <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
