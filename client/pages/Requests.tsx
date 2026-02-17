@@ -944,7 +944,7 @@ export default function Requests() {
         )}
 
         {/* INGD Documents Section */}
-        {ingdRequests.length > 0 && (
+        {ingdActive && ingdRequests.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-purple-50">
               <h2 className="text-lg font-bold text-slate-900">
