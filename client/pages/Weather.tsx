@@ -1,16 +1,4 @@
 import { useState, useEffect } from "react";
-import {
-  Search,
-  Cloud,
-  CloudRain,
-  Sun,
-  Wind,
-  Droplets,
-  Eye,
-  Gauge,
-  AlertCircle,
-  Clock,
-} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { getForecast, getWeatherLastUpdate } from "@/services/weatherService";
@@ -3946,18 +3934,6 @@ export default function Weather() {
     realForecast || locationData[selectedRegion] || locationData.Inhambane;
   const todayWeather = weatherData[0];
 
-  const getWeatherIcon = (condition: string) => {
-    switch (condition) {
-      case "sunny":
-        return <Sun size={48} className="text-yellow-500" />;
-      case "cloudy":
-        return <Cloud size={48} className="text-slate-400" />;
-      case "rainy":
-        return <CloudRain size={48} className="text-blue-500" />;
-      default:
-        return <Sun size={48} className="text-yellow-500" />;
-    }
-  };
 
   const handleLocationSelect = (location: string) => {
     setSelectedRegion(location);
@@ -3998,10 +3974,6 @@ export default function Weather() {
           {/* Search Bar */}
           <div className="relative max-w-2xl">
             <div className="relative">
-              <Search
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"
-                size={20}
-              />
               <input
                 type="text"
                 placeholder="Search by city or district..."
@@ -4074,11 +4046,7 @@ export default function Weather() {
 
             {/* API Status Message */}
             {apiError && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-2">
-                <AlertCircle
-                  size={18}
-                  className="text-yellow-600 flex-shrink-0 mt-0.5"
-                />
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-sm text-yellow-800">
                   OpenWeatherMap API key not configured. Showing weather
                   forecast from reliable weather data.
@@ -4094,8 +4062,7 @@ export default function Weather() {
                   <p className="text-xs text-green-700 font-medium">
                     Live data from OpenWeatherMap
                   </p>
-                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                    <Clock size={12} />
+                  <p className="text-xs text-green-600 mt-1">
                     Updated {formatTimeAgo(lastWeatherUpdate)}
                   </p>
                 </div>
@@ -4106,9 +4073,6 @@ export default function Weather() {
             {todayWeather && (
               <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 space-y-4">
                 <div className="text-center">
-                  <div className="flex justify-center mb-3">
-                    {getWeatherIcon(todayWeather.condition)}
-                  </div>
                   <h3 className="text-2xl font-bold text-slate-900">
                     {todayWeather.day}
                   </h3>
@@ -4196,7 +4160,6 @@ export default function Weather() {
                       <p className="text-sm text-slate-600">{weather.date}</p>
                     </div>
                     <div className="flex items-center gap-4">
-                      {getWeatherIcon(weather.condition)}
                       <div className="text-right">
                         <p className="text-3xl font-bold text-slate-900">
                           {weather.high}°C
@@ -4244,12 +4207,9 @@ export default function Weather() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {/* Humidity */}
                       <div className="bg-blue-50 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Droplets size={18} className="text-blue-600" />
-                          <p className="text-xs font-medium text-slate-600 uppercase">
-                            Humidity
-                          </p>
-                        </div>
+                        <p className="text-xs font-medium text-slate-600 uppercase mb-2">
+                          Humidity
+                        </p>
                         <p className="text-2xl font-bold text-slate-900">
                           {weather.humidity}%
                         </p>
@@ -4257,12 +4217,9 @@ export default function Weather() {
 
                       {/* Wind */}
                       <div className="bg-green-50 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Wind size={18} className="text-green-600" />
-                          <p className="text-xs font-medium text-slate-600 uppercase">
-                            Wind
-                          </p>
-                        </div>
+                        <p className="text-xs font-medium text-slate-600 uppercase mb-2">
+                          Wind
+                        </p>
                         <p className="text-2xl font-bold text-slate-900">
                           {weather.windSpeed} km/h
                         </p>
@@ -4273,12 +4230,9 @@ export default function Weather() {
 
                       {/* Visibility */}
                       <div className="bg-purple-50 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Eye size={18} className="text-purple-600" />
-                          <p className="text-xs font-medium text-slate-600 uppercase">
-                            Visibility
-                          </p>
-                        </div>
+                        <p className="text-xs font-medium text-slate-600 uppercase mb-2">
+                          Visibility
+                        </p>
                         <p className="text-2xl font-bold text-slate-900">
                           {weather.visibility} km
                         </p>
@@ -4286,12 +4240,9 @@ export default function Weather() {
 
                       {/* Pressure */}
                       <div className="bg-orange-50 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Gauge size={18} className="text-orange-600" />
-                          <p className="text-xs font-medium text-slate-600 uppercase">
-                            Pressure
-                          </p>
-                        </div>
+                        <p className="text-xs font-medium text-slate-600 uppercase mb-2">
+                          Pressure
+                        </p>
                         <p className="text-2xl font-bold text-slate-900">
                           {weather.pressure} mb
                         </p>
