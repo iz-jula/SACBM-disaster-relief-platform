@@ -1,16 +1,9 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  BarChart3,
-  Table2,
-  Map,
-  Upload,
   Menu,
   X,
   ChevronLeft,
-  Lock,
-  Database,
-  Award,
 } from "lucide-react";
 
 interface LayoutProps {
@@ -38,12 +31,12 @@ export default function Layout({ children }: LayoutProps) {
   }, []);
 
   const allNavItems = [
-    { href: "/", label: "Dashboard", icon: BarChart3 },
-    { href: "/requests", label: "Relief Requests", icon: Table2 },
-    { href: "/actions", label: "Actions", icon: Award },
-    { href: "/upload", label: "Upload Requests", icon: Upload },
-    { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
-    { href: "/government-priorities", label: "Government Priorities", icon: Upload },
+    { href: "/", label: "Dashboard" },
+    { href: "/requests", label: "Relief Requests" },
+    { href: "/actions", label: "Actions" },
+    { href: "/upload", label: "Upload Requests" },
+    { href: "/ingd-dashboard", label: "INGD Dashboard" },
+    { href: "/government-priorities", label: "Government Priorities" },
   ];
 
   // Filter INGD Dashboard based on active state
@@ -51,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
     (item) => item.href !== "/ingd-dashboard" || ingdActive
   );
 
-  const adminItems = [{ href: "/admin", label: "Admin Panel", icon: Lock }];
+  const adminItems = [{ href: "/admin", label: "Admin Panel" }];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
@@ -90,7 +83,7 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* Navigation */}
             <nav className="space-y-2">
-              {navItems.map(({ href, label, icon: Icon }) => {
+              {navItems.map(({ href, label }) => {
                 const isActive = location.pathname === href;
                 return (
                   <Link
@@ -98,13 +91,12 @@ export default function Layout({ children }: LayoutProps) {
                     to={href}
                     onClick={() => setSidebarOpen(false)}
                     title={label}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
+                    className={`block px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
                       isActive
                         ? "bg-primary text-white shadow-md"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
                   >
-                    <Icon size={20} className="flex-shrink-0" />
                     {!sidebarCollapsed && <span className="truncate">{label}</span>}
                   </Link>
                 );
@@ -114,7 +106,7 @@ export default function Layout({ children }: LayoutProps) {
               <div className="my-4 border-t border-slate-200" />
 
               {/* Admin Items */}
-              {adminItems.map(({ href, label, icon: Icon }) => {
+              {adminItems.map(({ href, label }) => {
                 const isActive = location.pathname === href;
                 return (
                   <Link
@@ -122,13 +114,12 @@ export default function Layout({ children }: LayoutProps) {
                     to={href}
                     onClick={() => setSidebarOpen(false)}
                     title={label}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
+                    className={`block px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
                       isActive
                         ? "bg-red-100 text-red-700 shadow-md"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
                   >
-                    <Icon size={20} className="flex-shrink-0" />
                     {!sidebarCollapsed && <span className="truncate">{label}</span>}
                   </Link>
                 );
