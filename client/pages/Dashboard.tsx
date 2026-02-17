@@ -17,6 +17,7 @@ import { getIngdMetrics, getIngdRequests, IngdRequest, getIngdDocuments, IngdDoc
 import { Download } from "lucide-react";
 
 import ActionsImageGrid from "@/components/ActionsImageGrid";
+import PdfViewer from "@/components/PdfViewer";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const [governmentDocument, setGovernmentDocument] = useState<IngdDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
 
   useEffect(() => {
     // Fetch data from API
@@ -428,31 +430,26 @@ export default function Dashboard() {
             <div className="w-full bg-white p-6" style={{ minHeight: "400px" }}>
               {governmentDocument ? (
                 <div className="flex flex-col items-center justify-center h-full gap-6">
-                  <div className="text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <span className="text-3xl">📄</span>
+                  <button
+                    onClick={() => setShowPdfViewer(true)}
+                    className="flex flex-col items-center justify-center w-full h-full gap-6 hover:opacity-80 transition-opacity"
+                  >
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <span className="text-3xl">📄</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                        {governmentDocument.file_name}
+                      </h3>
+                      <p className="text-sm text-slate-600 mb-4">
+                        {governmentDocument.description}
+                      </p>
+                      <div className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors">
+                        <Download size={18} />
+                        Click to View PDF
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                      {governmentDocument.file_name}
-                    </h3>
-                    <p className="text-sm text-slate-600 mb-4">
-                      {governmentDocument.description}
-                    </p>
-                    <button
-                      onClick={() => {
-                        if (governmentDocument.file_url) {
-                          const link = document.createElement("a");
-                          link.href = governmentDocument.file_url;
-                          link.download = governmentDocument.file_name;
-                          link.click();
-                        }
-                      }}
-                      className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
-                    >
-                      <Download size={18} />
-                      Download PDF
-                    </button>
-                  </div>
+                  </button>
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-center">
@@ -592,6 +589,17 @@ export default function Dashboard() {
         </div>
 
       </div>
+
+      {/* PDF Viewer Modal */}
+      {governmentDocument && (
+        <PdfViewer
+          isOpen={showPdfViewer}
+          onClose={() => setShowPdfViewer(false)}
+          pdfUrl={governmentDocument.file_url}
+          fileName={governmentDocument.file_name}
+          description={governmentDocument.description}
+        />
+      )}
     </Layout>
   );
 }

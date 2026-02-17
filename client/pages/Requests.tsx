@@ -276,6 +276,10 @@ export default function Requests() {
   const [selectedIngdItems, setSelectedIngdItems] = useState<Set<number>>(
     new Set(),
   );
+  const [ingdActive, setIngdActive] = useState(() => {
+    const stored = localStorage.getItem("ingd_active");
+    return stored !== null ? JSON.parse(stored) : true;
+  });
   const [showActionDropdown, setShowActionDropdown] = useState(false);
   const [showIngdActionDropdown, setShowIngdActionDropdown] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -320,6 +324,18 @@ export default function Requests() {
     };
 
     loadRequests();
+  }, []);
+
+  // Listen for INGD active state changes from localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem("ingd_active");
+      const isActive = stored !== null ? JSON.parse(stored) : true;
+      setIngdActive(isActive);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const toggleSelectRequest = (id: number) => {
@@ -685,7 +701,7 @@ export default function Requests() {
         )}
 
         {/* INGD Relief Requests Section */}
-        {ingdRequests.length > 0 && (
+        {ingdActive && ingdRequests.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-purple-50 to-purple-100">
               <div className="flex items-center justify-between">
