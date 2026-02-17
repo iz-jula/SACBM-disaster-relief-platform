@@ -145,7 +145,7 @@ export default function Dashboard() {
         {/* Community Actions Summary - Modern Section */}
         {achievementsMetrics && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">
                   MEMBERS ACTIONS
@@ -156,7 +156,7 @@ export default function Dashboard() {
               </div>
               <Link
                 to="/actions"
-                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
               >
                 View All
                 <span className="transform group-hover:translate-x-1 transition-transform">
@@ -224,7 +224,7 @@ export default function Dashboard() {
 
         {/* Relief Requests Summary - Combined with INGD */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-slate-900">
                 RELIEF REQUESTS
@@ -235,7 +235,7 @@ export default function Dashboard() {
             </div>
             <Link
               to="/requests"
-              className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
+              className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
             >
               View All
               <span className="transform group-hover:translate-x-1 transition-transform">
@@ -418,8 +418,8 @@ export default function Dashboard() {
 
         {/* Recent Requests - Modern Section */}
         <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
-          <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent">
-            <div className="flex items-center justify-between">
+          <div className="px-4 sm:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">
                   Recent Relief Requests
@@ -430,7 +430,7 @@ export default function Dashboard() {
               </div>
               <Link
                 to="/requests"
-                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300"
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
               >
                 View All
                 <span className="transform group-hover:translate-x-1 transition-transform">
