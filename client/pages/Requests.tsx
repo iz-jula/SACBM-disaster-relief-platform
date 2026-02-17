@@ -708,8 +708,9 @@ export default function Requests() {
               </div>
             </div>
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="hidden md:block">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50">
                     <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700">
@@ -770,6 +771,7 @@ export default function Requests() {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* Mobile Card View */}
