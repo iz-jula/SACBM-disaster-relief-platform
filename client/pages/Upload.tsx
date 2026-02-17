@@ -399,6 +399,7 @@ export default function Upload() {
                     <option value="Water">Water & Sanitation</option>
                     <option value="Evacuation">Evacuation</option>
                     <option value="Multiple">Multiple Items</option>
+                    <option value="Other">OTHER - Please specify</option>
                   </select>
                 </div>
 
