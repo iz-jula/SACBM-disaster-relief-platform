@@ -10,6 +10,7 @@ import Requests from "./pages/Requests";
 import Upload from "./pages/Upload";
 import Weather from "./pages/Weather";
 import INGDDashboard from "./pages/INGDDashboard";
+import GovernmentPriorities from "./pages/GovernmentPriorities";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import DataRepository from "./pages/DataRepository";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/upload" element={<Upload />} />
             <Route path="/weather" element={<Weather />} />
             <Route path="/ingd-dashboard" element={<INGDDashboard />} />
+            <Route path="/government-priorities" element={<GovernmentPriorities />} />
             <Route path="/data-repository" element={<DataRepository />} />
             <Route
               path="/admin"

@@ -43,6 +43,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/actions", label: "Actions", icon: Award },
     { href: "/upload", label: "Upload Requests", icon: Upload },
     { href: "/ingd-dashboard", label: "INGD Dashboard", icon: Map },
+    { href: "/government-priorities", label: "Government Priorities", icon: Upload },
   ];
 
   // Filter INGD Dashboard based on active state

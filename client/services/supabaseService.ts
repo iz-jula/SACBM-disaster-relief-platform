@@ -591,6 +591,7 @@ export interface IngdDocument {
   file_type: string; // "pdf", "xlsx", "xls", etc.
   description: string;
   uploaded_by?: string;
+  type?: string; // "ingd" or "government_priority"
 }
 
 // Convert file to base64 data URL
