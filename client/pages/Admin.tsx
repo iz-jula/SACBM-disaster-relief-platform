@@ -508,28 +508,30 @@ export default function Admin() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-slate-200">
-          <div className="flex gap-8 overflow-x-auto">
+        <div className="border-b border-slate-200 bg-white overflow-x-auto">
+          <div className="flex gap-1 sm:gap-2 min-w-min">
             {[
-              { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-              { id: "requests", label: "All Requests", icon: Database },
-              { id: "ingd", label: "INGD Management", icon: Database },
-              { id: "documents", label: "INGD Documents", icon: Download },
-              { id: "government-priorities", label: "Government Priorities", icon: Download },
-              { id: "users", label: "Users", icon: Users },
-              { id: "settings", label: "Settings", icon: Settings },
+              { id: "dashboard", label: "Dashboard", shortLabel: "Dashboard", icon: BarChart3 },
+              { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
+              { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
+              { id: "documents", label: "INGD Documents", shortLabel: "Docs", icon: Download },
+              { id: "government-priorities", label: "Government Priorities", shortLabel: "Priorities", icon: Download },
+              { id: "users", label: "Users", shortLabel: "Users", icon: Users },
+              { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-4 font-medium flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
+                title={tab.label}
+                className={`px-2 sm:px-4 py-4 font-medium flex items-center gap-1 sm:gap-2 border-b-2 transition-all whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab.id
                     ? "border-primary text-primary"
                     : "border-transparent text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <tab.icon size={18} />
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden text-xs">{tab.shortLabel}</span>
               </button>
             ))}
           </div>

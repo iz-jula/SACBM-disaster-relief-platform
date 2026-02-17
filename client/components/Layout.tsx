@@ -97,15 +97,15 @@ export default function Layout({ children }: LayoutProps) {
                     key={href}
                     to={href}
                     onClick={() => setSidebarOpen(false)}
-                    title={sidebarCollapsed ? label : ""}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                    title={label}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
                       isActive
                         ? "bg-primary text-white shadow-md"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
                   >
                     <Icon size={20} className="flex-shrink-0" />
-                    {!sidebarCollapsed && <span>{label}</span>}
+                    {!sidebarCollapsed && <span className="truncate">{label}</span>}
                   </Link>
                 );
               })}
@@ -121,15 +121,15 @@ export default function Layout({ children }: LayoutProps) {
                     key={href}
                     to={href}
                     onClick={() => setSidebarOpen(false)}
-                    title={sidebarCollapsed ? label : ""}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                    title={label}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
                       isActive
                         ? "bg-red-100 text-red-700 shadow-md"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
                   >
                     <Icon size={20} className="flex-shrink-0" />
-                    {!sidebarCollapsed && <span>{label}</span>}
+                    {!sidebarCollapsed && <span className="truncate">{label}</span>}
                   </Link>
                 );
               })}
