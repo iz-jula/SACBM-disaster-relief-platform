@@ -85,6 +85,24 @@ export default function Layout({ children }: LayoutProps) {
             <nav className="space-y-2">
               {navItems.map(({ href, label }) => {
                 const isActive = location.pathname === href;
+
+                // INGD Dashboard is an external link to Tableau
+                if (label === "INGD Dashboard") {
+                  return (
+                    <a
+                      key={href}
+                      href="https://public.tableau.com/app/profile/cenoe/viz/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setSidebarOpen(false)}
+                      title={label}
+                      className="block px-4 py-3 rounded-lg font-medium transition-all overflow-hidden text-slate-600 hover:bg-slate-100"
+                    >
+                      {!sidebarCollapsed && <span className="truncate">{label}</span>}
+                    </a>
+                  );
+                }
+
                 return (
                   <Link
                     key={href}
