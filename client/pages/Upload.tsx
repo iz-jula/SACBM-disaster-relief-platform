@@ -338,14 +338,20 @@ export default function Upload() {
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Partner Organisation (if applicable)
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="partner_organisation"
                     value={formData.partner_organisation}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="e.g., UNICEF, Red Cross, WHO"
-                  />
+                  >
+                    <option value="">Select organization</option>
+                    <option>FDC</option>
+                    <option>UNICEF</option>
+                    <option>CARE MOZAMBIQUE</option>
+                    <option>REPENSAR</option>
+                    <option>RESILIÊNCIA</option>
+                    <option>OTHER - Please specify</option>
+                  </select>
                 </div>
               </div>
             </div>
