@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import {
-  Award,
-  Users,
-  TrendingUp,
   CheckCircle,
   Clock,
   MapPin,
@@ -502,18 +499,13 @@ export default function Achievements() {
         {metrics && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-              <div className="flex items-start sm:items-center justify-between gap-3">
-                <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                    Total Actions
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                    {metrics.totalAchievements}
-                  </p>
-                </div>
-                <div className="bg-blue-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                  <Award size={20} className="text-blue-600" />
-                </div>
+              <div>
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                  Total Actions
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
+                  {metrics.totalAchievements}
+                </p>
               </div>
               <p className="text-xs text-slate-500 mt-2 sm:mt-3">
                 Member contributions
@@ -521,18 +513,13 @@ export default function Achievements() {
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-              <div className="flex items-start sm:items-center justify-between gap-3">
-                <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                    People Impacted
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                    {formatNumber(metrics.totalPeopleImpacted || 0)}
-                  </p>
-                </div>
-                <div className="bg-green-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                  <Users size={20} className="text-green-600" />
-                </div>
+              <div>
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                  People Impacted
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
+                  {formatNumber(metrics.totalPeopleImpacted || 0)}
+                </p>
               </div>
               <p className="text-xs text-slate-500 mt-2 sm:mt-3">
                 Direct impact
@@ -540,18 +527,13 @@ export default function Achievements() {
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-              <div className="flex items-start sm:items-center justify-between gap-3">
-                <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                    Total Contribution
-                  </p>
-                  <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
-                    {formatNumber((metrics.totalContributed || 0) / 1000, 1)}K MZN
-                  </p>
-                </div>
-                <div className="bg-orange-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                  <TrendingUp size={20} className="text-primary" />
-                </div>
+              <div>
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                  Total Contribution
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-primary mt-1 sm:mt-2">
+                  {formatNumber((metrics.totalContributed || 0) / 1000, 1)}K MZN
+                </p>
               </div>
               <p className="text-xs text-slate-500 mt-2 sm:mt-3">
                 Funds invested
@@ -559,18 +541,13 @@ export default function Achievements() {
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-slate-200">
-              <div className="flex items-start sm:items-center justify-between gap-3">
-                <div className="flex-1">
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium">
-                    Completed
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
-                    {metrics.completedAchievements}
-                  </p>
-                </div>
-                <div className="bg-purple-100 rounded-lg p-2 sm:p-3 flex-shrink-0">
-                  <CheckCircle size={20} className="text-purple-600" />
-                </div>
+              <div>
+                <p className="text-slate-600 text-xs sm:text-sm font-medium">
+                  Completed
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 sm:mt-2">
+                  {metrics.completedAchievements}
+                </p>
               </div>
               <p className="text-xs text-slate-500 mt-2 sm:mt-3">
                 Successfully done
