@@ -344,7 +344,7 @@ export default function Upload() {
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    <option value="">Select organization</option>
+                    <option value="">Select organisation</option>
                     <option>FDC</option>
                     <option>UNICEF</option>
                     <option>CARE MOZAMBIQUE</option>

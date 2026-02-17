@@ -726,7 +726,7 @@ export default function Achievements() {
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    <option value="">Select organization</option>
+                    <option value="">Select organisation</option>
                     <option>FDC</option>
                     <option>UNICEF</option>
                     <option>CARE MOZAMBIQUE</option>
@@ -1373,7 +1373,7 @@ export default function Achievements() {
                       }
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                      <option value="">Select organization</option>
+                      <option value="">Select organisation</option>
                       <option>FDC</option>
                       <option>UNICEF</option>
                       <option>CARE MOZAMBIQUE</option>
