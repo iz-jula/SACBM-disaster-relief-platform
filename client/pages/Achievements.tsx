@@ -119,6 +119,9 @@ export default function Achievements() {
     media: null as string | null,
   });
 
+  const [customTypeAction, setCustomTypeAction] = useState("");
+  const [customPartnerOrg, setCustomPartnerOrg] = useState("");
+
   useEffect(() => {
     loadData();
   }, [selectedCategory]);
@@ -179,6 +182,18 @@ export default function Achievements() {
           return;
         }
 
+        // Validate custom type of action if OTHER is selected
+        if (formData.type_action === "Other - please specify" && !customTypeAction.trim()) {
+          alert("Please specify the type of action");
+          return;
+        }
+
+        // Validate custom partner organisation if OTHER is selected
+        if (formData.partner_organisation === "OTHER - Please specify" && !customPartnerOrg.trim()) {
+          alert("Please specify the organisation name");
+          return;
+        }
+
         // Convert all uploaded media to base64 array
         let imageData: string | null = null;
         if (uploadedMedia.length > 0) {
@@ -205,9 +220,20 @@ export default function Achievements() {
           console.log("Images converted to base64 array");
         }
 
+        // Combine custom values with "Other -" prefix
+        const typeActionValue =
+          formData.type_action === "Other - please specify"
+            ? `OTHER - ${customTypeAction}`
+            : formData.type_action;
+
+        const partnerOrgValue =
+          formData.partner_organisation === "OTHER - Please specify"
+            ? `OTHER - ${customPartnerOrg}`
+            : formData.partner_organisation || null;
+
         const newAchievementData = {
           company_name: formData.company_name,
-          type_action: formData.type_action,
+          type_action: typeActionValue,
           description: formData.description,
           category: formData.category as
             | "Food"
@@ -219,7 +245,7 @@ export default function Achievements() {
             | "Evacuation"
             | "Multiple",
           location: formData.district ? `${formData.province}, ${formData.district}` : formData.province,
-          partner_organisation: formData.partner_organisation || null,
+          partner_organisation: partnerOrgValue,
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
           media: imageData || null,
@@ -243,6 +269,8 @@ export default function Achievements() {
             hide_amount: false,
     media: null as string | null,
           });
+          setCustomTypeAction("");
+          setCustomPartnerOrg("");
           setUploadedMedia([]);
           setShowForm(false);
           await loadData();
@@ -372,9 +400,31 @@ export default function Achievements() {
           console.log("Converted", uploadedMedia.length, "files to base64 array");
         }
 
+        // Validate custom fields
+        if (formData.type_action === "Other - please specify" && !customTypeAction.trim()) {
+          setAuthError("Please specify the type of action");
+          return;
+        }
+
+        if (formData.partner_organisation === "OTHER - Please specify" && !customPartnerOrg.trim()) {
+          setAuthError("Please specify the organisation name");
+          return;
+        }
+
+        // Combine custom values with "Other -" prefix
+        const typeActionValue =
+          formData.type_action === "Other - please specify"
+            ? `OTHER - ${customTypeAction}`
+            : formData.type_action;
+
+        const partnerOrgValue =
+          formData.partner_organisation === "OTHER - Please specify"
+            ? `OTHER - ${customPartnerOrg}`
+            : formData.partner_organisation || null;
+
         const updateData: any = {
           company_name: formData.company_name,
-          type_action: formData.type_action,
+          type_action: typeActionValue,
           description: formData.description,
           category: formData.category as
             | "Food"
@@ -386,7 +436,7 @@ export default function Achievements() {
             | "Evacuation"
             | "Multiple",
           location: formData.district ? `${formData.province}, ${formData.district}` : formData.province,
-          partner_organisation: formData.partner_organisation || null,
+          partner_organisation: partnerOrgValue,
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
         };
@@ -436,6 +486,8 @@ export default function Achievements() {
           hide_amount: false,
     media: null as string | null,
         });
+        setCustomTypeAction("");
+        setCustomPartnerOrg("");
         setShowForm(false);
         setShowEditModal(false);
         setEditingAchievement(null);
@@ -615,9 +667,12 @@ export default function Achievements() {
                   <select
                     required
                     value={formData.type_action}
-                    onChange={(e) =>
-                      setFormData({ ...formData, type_action: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, type_action: e.target.value });
+                      if (e.target.value !== "Other - please specify") {
+                        setCustomTypeAction("");
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Select type of action</option>
@@ -627,6 +682,22 @@ export default function Achievements() {
                     <option>Other - please specify</option>
                   </select>
                 </div>
+
+                {/* Custom Type of Action - Show when OTHER is selected */}
+                {formData.type_action === "Other - please specify" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Please specify action type *
+                    </label>
+                    <input
+                      type="text"
+                      value={customTypeAction}
+                      onChange={(e) => setCustomTypeAction(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="e.g., Training, Advocacy, etc."
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -695,12 +766,15 @@ export default function Achievements() {
                   </label>
                   <select
                     value={formData.partner_organisation}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
                         partner_organisation: e.target.value,
-                      })
-                    }
+                      });
+                      if (e.target.value !== "OTHER - Please specify") {
+                        setCustomPartnerOrg("");
+                      }
+                    }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Select organisation</option>
@@ -712,6 +786,22 @@ export default function Achievements() {
                     <option>OTHER - Please specify</option>
                   </select>
                 </div>
+
+                {/* Custom Partner Organisation - Show when OTHER is selected */}
+                {formData.partner_organisation === "OTHER - Please specify" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Please specify organisation *
+                    </label>
+                    <input
+                      type="text"
+                      value={customPartnerOrg}
+                      onChange={(e) => setCustomPartnerOrg(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="e.g., Red Cross, WHO, etc."
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -1261,9 +1351,12 @@ export default function Achievements() {
                     <select
                       required
                       value={formData.type_action}
-                      onChange={(e) =>
-                        setFormData({ ...formData, type_action: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFormData({ ...formData, type_action: e.target.value });
+                        if (e.target.value !== "Other - please specify") {
+                          setCustomTypeAction("");
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="">Select type of action</option>
@@ -1273,6 +1366,22 @@ export default function Achievements() {
                       <option>Other - please specify</option>
                     </select>
                   </div>
+
+                  {/* Custom Type of Action - Show when OTHER is selected */}
+                  {formData.type_action === "Other - please specify" && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Please specify action type *
+                      </label>
+                      <input
+                        type="text"
+                        value={customTypeAction}
+                        onChange={(e) => setCustomTypeAction(e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="e.g., Training, Advocacy, etc."
+                      />
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -1341,12 +1450,15 @@ export default function Achievements() {
                     </label>
                     <select
                       value={formData.partner_organisation}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          partner_organisation: e.target.value,
-                        })
+                      onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        partner_organisation: e.target.value,
+                      });
+                      if (e.target.value !== "OTHER - Please specify") {
+                        setCustomPartnerOrg("");
                       }
+                    }}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="">Select organisation</option>
@@ -1359,27 +1471,43 @@ export default function Achievements() {
                     </select>
                   </div>
 
+                {/* Custom Partner Organisation - Show when OTHER is selected */}
+                {formData.partner_organisation === "OTHER - Please specify" && (
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
-                      People Impacted
+                      Please specify organisation *
                     </label>
                     <input
-                      type="number"
-                      value={formData.people_impacted}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          people_impacted: e.target.value,
-                        })
-                      }
+                      type="text"
+                      value={customPartnerOrg}
+                      onChange={(e) => setCustomPartnerOrg(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="120"
+                      placeholder="e.g., Red Cross, WHO, etc."
                     />
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Amount (MZN)
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    People Impacted
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.people_impacted}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        people_impacted: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="120"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Amount (MZN)
                     </label>
                     <input
                       type="number"

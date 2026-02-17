@@ -27,6 +27,8 @@ export default function Upload() {
   const [errorMessage, setErrorMessage] = useState("");
   const [customLocation, setCustomLocation] = useState("");
   const [showCustomLocation, setShowCustomLocation] = useState(false);
+  const [customPartnerOrg, setCustomPartnerOrg] = useState("");
+  const [customHelpType, setCustomHelpType] = useState("");
 
   // Mozambique locations/districts
   const mozambiqueLocations = [
@@ -95,6 +97,22 @@ export default function Upload() {
       return;
     }
 
+    // Validate custom partner organisation if OTHER is selected
+    if (formData.partner_organisation === "OTHER - Please specify" && !customPartnerOrg.trim()) {
+      setSubmitStatus("error");
+      setErrorMessage("Please specify the organisation name");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+      return;
+    }
+
+    // Validate custom help type if OTHER is selected
+    if (formData.help_type === "Other" && !customHelpType.trim()) {
+      setSubmitStatus("error");
+      setErrorMessage("Please specify the type of help");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+      return;
+    }
+
     // Validate evacuation type if evacuation is selected as help type
     if (formData.help_type === "Evacuation" && !formData.evacuation_type) {
       setSubmitStatus("error");
@@ -126,14 +144,25 @@ export default function Upload() {
           ? multipleItems.join(", ")
           : formData.value.replace(/,/g, "");
 
+      // Combine custom values with "Other -" prefix
+      const partnerOrgValue =
+        formData.partner_organisation === "OTHER - Please specify"
+          ? `OTHER - ${customPartnerOrg}`
+          : formData.partner_organisation || null;
+
+      const helpTypeValue =
+        formData.help_type === "Other"
+          ? `OTHER - ${customHelpType}`
+          : formData.help_type;
+
       // Save to Supabase
       const newRequest = await createRequest({
         originator: formData.originator,
         email: formData.email,
         full_name: formData.full_name,
         location: formData.district ? `${formData.province}, ${formData.district}` : formData.province,
-        partner_organisation: formData.partner_organisation || null,
-        help_type: formData.help_type,
+        partner_organisation: partnerOrgValue,
+        help_type: helpTypeValue,
         evacuation_type: formData.evacuation_type,
         people: formData.people,
         value: submitValue,
@@ -156,6 +185,8 @@ export default function Upload() {
         });
         setMultipleItems([]);
         setNewItem("");
+        setCustomPartnerOrg("");
+        setCustomHelpType("");
 
         // Redirect to requests page after 2 seconds
         setTimeout(() => {
@@ -353,6 +384,22 @@ export default function Upload() {
                     <option>OTHER - Please specify</option>
                   </select>
                 </div>
+
+                {/* Custom Partner Organisation - Show when OTHER is selected */}
+                {formData.partner_organisation === "OTHER - Please specify" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Please specify organisation *
+                    </label>
+                    <input
+                      type="text"
+                      value={customPartnerOrg}
+                      onChange={(e) => setCustomPartnerOrg(e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="e.g., Red Cross, WHO, etc."
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -386,6 +433,10 @@ export default function Upload() {
                           value: "",
                         }));
                       }
+                      // Clear custom help type if switching away from Other
+                      if (e.target.value !== "Other") {
+                        setCustomHelpType("");
+                      }
                     }}
                     required
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -402,6 +453,22 @@ export default function Upload() {
                     <option value="Other">OTHER - Please specify</option>
                   </select>
                 </div>
+
+                {/* Custom Help Type - Show when OTHER is selected */}
+                {formData.help_type === "Other" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Please specify type of help *
+                    </label>
+                    <input
+                      type="text"
+                      value={customHelpType}
+                      onChange={(e) => setCustomHelpType(e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="e.g., Transportation, Education, etc."
+                    />
+                  </div>
+                )}
 
                 {/* Evacuation Method - Only shows if Evacuation is selected */}
                 {formData.help_type === "Evacuation" && (
