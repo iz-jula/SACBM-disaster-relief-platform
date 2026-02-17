@@ -30,9 +30,8 @@ export default function Upload() {
 
   // Mozambique locations/districts
   const mozambiqueLocations = [
-    "Maputo City",
-    "Maputo Province",
-    "Gaza Province",
+    "Maputo",
+    "Gaza",
     "Inhambane",
     "Sofala",
     "Manica",
