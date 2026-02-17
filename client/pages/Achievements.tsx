@@ -71,8 +71,26 @@ export default function Achievements() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [metrics, setMetrics] = useState<AchievementsMetrics | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [customLocation, setCustomLocation] = useState("");
+  const [showCustomLocation, setShowCustomLocation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+
+  // Mozambique locations/districts
+  const mozambiqueLocations = [
+    "Maputo City",
+    "Maputo Province",
+    "Gaza Province",
+    "Inhambane",
+    "Sofala",
+    "Manica",
+    "Tete",
+    "Zambezia",
+    "Nampula",
+    "Cabo Delgado",
+    "Niassa",
+  ];
   const [showEditModal, setShowEditModal] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState<File[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);

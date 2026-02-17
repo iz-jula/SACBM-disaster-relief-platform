@@ -24,6 +24,23 @@ export default function Upload() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
+  const [showCustomLocation, setShowCustomLocation] = useState(false);
+
+  // Mozambique locations/districts
+  const mozambiqueLocations = [
+    "Maputo City",
+    "Maputo Province",
+    "Gaza Province",
+    "Inhambane",
+    "Sofala",
+    "Manica",
+    "Tete",
+    "Zambezia",
+    "Nampula",
+    "Cabo Delgado",
+    "Niassa",
+  ];
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -242,17 +259,45 @@ export default function Upload() {
                 {/* Location */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Location (District, Village, Locality) *
+                    Location (District, Province) *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="location"
                     value={formData.location}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        location: value === "other" ? customLocation : value,
+                      }));
+                      setShowCustomLocation(value === "other");
+                    }}
                     required
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="e.g., Inhambane District, Maxixe"
-                  />
+                  >
+                    <option value="">Select a location...</option>
+                    {mozambiqueLocations.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                    <option value="other">Other (specify below)</option>
+                  </select>
+                  {showCustomLocation && (
+                    <input
+                      type="text"
+                      placeholder="Enter location name"
+                      value={customLocation}
+                      onChange={(e) => {
+                        setCustomLocation(e.target.value);
+                        setFormData((prev) => ({
+                          ...prev,
+                          location: e.target.value,
+                        }));
+                      }}
+                      className="w-full mt-2 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
                 </div>
 
                 {/* Full Name */}
