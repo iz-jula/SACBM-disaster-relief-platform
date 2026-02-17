@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, Suspense, lazy } from "react";
-import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import {
   getRecentRequests,
