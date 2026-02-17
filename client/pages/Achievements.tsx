@@ -269,12 +269,19 @@ export default function Achievements() {
   const handleEditAchievement = (achievement: Achievement) => {
     setEditingAchievement(achievement);
     setEditingAchievementId(achievement.id?.toString() || "");
+
+    // Parse location into province and district
+    const [province, district] = achievement.location.includes(", ")
+      ? achievement.location.split(", ")
+      : [achievement.location, ""];
+
     setFormData({
       company_name: achievement.company_name,
       type_action: achievement.type_action,
       description: achievement.description,
       category: achievement.category,
-      location: achievement.location,
+      province: province,
+      district: district,
       partner_organisation: achievement.partner_organisation || "",
       people_impacted: achievement.people_impacted.toString(),
       amount: achievement.amount.toString(),
@@ -425,7 +432,8 @@ export default function Achievements() {
           type_action: "",
           description: "",
           category: "Food",
-          location: "",
+          province: "",
+          district: "",
           partner_organisation: "",
           people_impacted: "",
           amount: "",
@@ -667,17 +675,37 @@ export default function Achievements() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Location *
+                    Province *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     required
                     value={formData.province}
                     onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
+                      setFormData({ ...formData, province: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Sofala Province"
+                  >
+                    <option value="">Select a province</option>
+                    {mozambiqueLocations.map((location) => (
+                      <option key={location} value={location}>
+                        {location}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    District
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.district}
+                    onChange={(e) =>
+                      setFormData({ ...formData, district: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="e.g., Chokwe, Xai-Xai (optional)"
                   />
                 </div>
 
@@ -1284,17 +1312,37 @@ export default function Achievements() {
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Location *
+                      Province *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
                       value={formData.province}
                       onChange={(e) =>
-                        setFormData({ ...formData, location: e.target.value })
+                        setFormData({ ...formData, province: e.target.value })
                       }
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Sofala Province"
+                    >
+                      <option value="">Select a province</option>
+                      {mozambiqueLocations.map((location) => (
+                        <option key={location} value={location}>
+                          {location}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      District
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.district}
+                      onChange={(e) =>
+                        setFormData({ ...formData, district: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="e.g., Chokwe, Xai-Xai (optional)"
                     />
                   </div>
 
