@@ -176,11 +176,30 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
         <header className="md:hidden bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
-          <div className="px-4 py-4 flex items-center justify-between">
-            <h1 className="text-lg font-bold text-slate-900">SABCM</h1>
+          <div className="px-4 py-3 flex items-center justify-between gap-3">
+            <Link
+              to="/"
+              className="flex items-center gap-2 flex-1"
+              onClick={() => setSidebarOpen(false)}
+              title="SACBM - South African Chamber of Business in Mozambique"
+            >
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
+                alt="SACBM Logo"
+                className="h-10 flex-shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 leading-tight">
+                  Disaster Relief
+                </p>
+                <p className="text-xs text-slate-500 leading-tight">
+                  Operations
+                </p>
+              </div>
+            </Link>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-slate-600 hover:text-slate-900 transition-colors"
+              className="text-slate-600 hover:text-slate-900 transition-colors flex-shrink-0"
             >
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
