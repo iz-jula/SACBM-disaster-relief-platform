@@ -291,22 +291,20 @@ export default function Dashboard() {
           </div>
 
           {/* People to Assist Card */}
-          {ingdActive && (
-            <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
-              <div className="relative">
-                <div>
-                  <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                    People to Assist
-                  </p>
-                  <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {formatNumber(ingdMetrics?.totalPeople || 10)}
-                  </p>
-                </div>
-                <p className="text-sm text-slate-600">Requiring assistance</p>
+          <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
+            <div className="relative">
+              <div>
+                <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
+                  People to Assist
+                </p>
+                <p className="text-4xl font-bold text-slate-900 mt-3">
+                  {formatNumber(ingdActive ? (ingdMetrics?.totalPeople || 10) : 0)}
+                </p>
               </div>
+              <p className="text-sm text-slate-600">Requiring assistance</p>
             </div>
-          )}
+          </div>
 
           {/* Total Value Card (Combined) */}
           <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
@@ -350,10 +348,9 @@ export default function Dashboard() {
 
 
         {/* INGD Analytics & Government Priorities Split View */}
-        <div className={`grid gap-6 ${ingdActive ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* INGD Dashboard - Left Side */}
-          {ingdActive && (
-            <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+          <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">
@@ -421,7 +418,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-            )}
 
           {/* Government Priorities - Right Side */}
           <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
