@@ -1096,8 +1096,7 @@ export default function Achievements() {
                           <p className="text-xs text-slate-500 font-medium mb-1">
                             People Impacted
                           </p>
-                          <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-                            <Users size={16} className="text-slate-400" />
+                          <div className="text-sm font-semibold text-slate-900">
                             {formatNumber(achievement.people_impacted)}
                           </div>
                         </div>
