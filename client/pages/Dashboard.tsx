@@ -235,16 +235,24 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* In Progress */}
+              {/* Most Active Province */}
               <div className="group relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 hover:border-blue-300/60 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100">
                 <div className="relative">
                   <p className="text-blue-600/70 text-xs font-semibold uppercase tracking-wider">
-                    In Progress
+                    Most Active Province
                   </p>
                   <p className="text-4xl font-bold text-slate-900 mt-3">
-                    {achievementsMetrics.inProgressAchievements}
+                    {(() => {
+                      const provinceCounts = achievements.reduce((acc: Record<string, number>, action) => {
+                        const province = action.location?.split(",")[0].trim() || "Unknown";
+                        acc[province] = (acc[province] || 0) + 1;
+                        return acc;
+                      }, {});
+                      const mostActive = Object.entries(provinceCounts).sort(([,a], [,b]) => b - a)[0];
+                      return mostActive ? mostActive[0] : "N/A";
+                    })()}
                   </p>
-                  <p className="text-sm text-slate-600 mt-4">Ongoing work</p>
+                  <p className="text-sm text-slate-600 mt-4">By actions count</p>
                 </div>
               </div>
             </div>
