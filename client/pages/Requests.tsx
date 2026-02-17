@@ -707,7 +707,8 @@ export default function Requests() {
                 )}
               </div>
             </div>
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50">
@@ -769,6 +770,107 @@ export default function Requests() {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-slate-200">
+              {ingdRequests.slice(0, displayedIngdRequests).map((request) => {
+                const { name, quantity } = parseItem(request.Item || "");
+                return (
+                  <div
+                    key={request.id}
+                    className="px-4 py-6 hover:bg-purple-50 transition-colors"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            Company
+                          </p>
+                          <p className="text-base font-bold text-slate-900 mt-1">
+                            {request.company_name}
+                          </p>
+                        </div>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 whitespace-nowrap flex-shrink-0">
+                          {request.category}
+                        </span>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Item & Quantity
+                        </p>
+                        <p className="text-sm text-slate-700 mt-1">
+                          {name} {quantity && `(${quantity})`}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            Maputo
+                          </p>
+                          <p className="text-lg font-bold text-slate-900 mt-1">
+                            {formatNumber(request.Maputo || 0)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            Gaza
+                          </p>
+                          <p className="text-lg font-bold text-slate-900 mt-1">
+                            {formatNumber(request.Gaza || 0)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            Sofala
+                          </p>
+                          <p className="text-lg font-bold text-slate-900 mt-1">
+                            {formatNumber(request.Sofala || 0)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            Zambézia
+                          </p>
+                          <p className="text-lg font-bold text-slate-900 mt-1">
+                            {formatNumber(request.Zambezia || 0)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                            Total
+                          </p>
+                          <p className="text-lg font-bold text-primary mt-1">
+                            {formatNumber(request.Total || 0)}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-300">
+                            ⏳ Pending
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-slate-100">
+                        <input
+                          type="checkbox"
+                          checked={selectedIngdItems.has(request.id || 0)}
+                          onChange={() => toggleSelectIngdItem(request.id || 0)}
+                          className="w-4 h-4 rounded cursor-pointer"
+                        />
+                        <span className="ml-2 text-sm text-slate-600">
+                          Select for actions
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             {ingdRequests.length > displayedIngdRequests && (
               <div className="p-4 border-t border-slate-200 text-center">
