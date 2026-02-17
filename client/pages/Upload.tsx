@@ -10,7 +10,8 @@ export default function Upload() {
     originator: "",
     email: "",
     full_name: "",
-    location: "",
+    province: "",
+    district: "",
     partner_organisation: "",
     help_type: "",
     evacuation_type: "",
@@ -85,7 +86,7 @@ export default function Upload() {
       !formData.originator ||
       !formData.email ||
       !formData.full_name ||
-      !formData.location ||
+      !formData.province ||
       !formData.help_type ||
       !formData.people
     ) {
@@ -131,7 +132,7 @@ export default function Upload() {
         originator: formData.originator,
         email: formData.email,
         full_name: formData.full_name,
-        location: formData.location,
+        location: formData.district ? `${formData.province}, ${formData.district}` : formData.province,
         partner_organisation: formData.partner_organisation || null,
         help_type: formData.help_type,
         evacuation_type: formData.evacuation_type,
@@ -146,7 +147,8 @@ export default function Upload() {
           originator: "",
           email: "",
           full_name: "",
-          location: "",
+          province: "",
+          district: "",
           partner_organisation: "",
           help_type: "",
           evacuation_type: "",
@@ -256,48 +258,48 @@ export default function Upload() {
                   />
                 </div>
 
-                {/* Location */}
+                {/* Province */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Location (District, Province) *
+                    Province *
                   </label>
                   <select
-                    name="location"
-                    value={formData.location}
+                    value={formData.province}
                     onChange={(e) => {
-                      const value = e.target.value;
                       setFormData((prev) => ({
                         ...prev,
-                        location: value === "other" ? customLocation : value,
+                        province: e.target.value,
                       }));
-                      setShowCustomLocation(value === "other");
                     }}
                     required
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
-                    <option value="">Select a location...</option>
+                    <option value="">Select a province...</option>
                     {mozambiqueLocations.map((loc) => (
                       <option key={loc} value={loc}>
                         {loc}
                       </option>
                     ))}
-                    <option value="other">Other (specify below)</option>
                   </select>
-                  {showCustomLocation && (
-                    <input
-                      type="text"
-                      placeholder="Enter location name"
-                      value={customLocation}
-                      onChange={(e) => {
-                        setCustomLocation(e.target.value);
-                        setFormData((prev) => ({
-                          ...prev,
-                          location: e.target.value,
-                        }));
-                      }}
-                      className="w-full mt-2 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  )}
+                </div>
+
+                {/* District (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    District / Locality
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.district}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        district: e.target.value,
+                      }));
+                    }}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="e.g., Maxixe, Inhambane City (optional)"
+                  />
                 </div>
 
                 {/* Full Name */}

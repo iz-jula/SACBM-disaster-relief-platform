@@ -113,7 +113,8 @@ export default function Achievements() {
     type_action: "",
     description: "",
     category: "Food" as const,
-    location: "",
+    province: "",
+    district: "",
     partner_organisation: "",
     people_impacted: "",
     amount: "",
@@ -173,10 +174,10 @@ export default function Achievements() {
           !formData.company_name ||
           !formData.type_action ||
           !formData.description ||
-          !formData.location
+          !formData.province
         ) {
           alert(
-            "Please fill in all required fields: Company Name, Type of Action, Location, and Description",
+            "Please fill in all required fields: Company Name, Type of Action, Province, and Description",
           );
           return;
         }
@@ -220,7 +221,7 @@ export default function Achievements() {
             | "Water"
             | "Evacuation"
             | "Multiple",
-          location: formData.location,
+          location: formData.district ? `${formData.province}, ${formData.district}` : formData.province,
           partner_organisation: formData.partner_organisation || null,
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
@@ -237,7 +238,8 @@ export default function Achievements() {
             type_action: "",
             description: "",
             category: "Food",
-            location: "",
+            province: "",
+            district: "",
             partner_organisation: "",
             people_impacted: "",
             amount: "",
@@ -379,7 +381,7 @@ export default function Achievements() {
             | "Water"
             | "Evacuation"
             | "Multiple",
-          location: formData.location,
+          location: formData.district ? `${formData.province}, ${formData.district}` : formData.province,
           partner_organisation: formData.partner_organisation || null,
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
@@ -580,7 +582,8 @@ export default function Achievements() {
                   type_action: "",
                   description: "",
                   category: "Food",
-                  location: "",
+                  province: "",
+            district: "",
                   partner_organisation: "",
                   people_impacted: "",
                   amount: "",
@@ -668,7 +671,7 @@ export default function Achievements() {
                   <input
                     type="text"
                     required
-                    value={formData.location}
+                    value={formData.province}
                     onChange={(e) =>
                       setFormData({ ...formData, location: e.target.value })
                     }
@@ -841,7 +844,8 @@ export default function Achievements() {
                       type_action: "",
                       description: "",
                       category: "Food",
-                      location: "",
+                      province: "",
+            district: "",
                       partner_organisation: "",
                       people_impacted: "",
                       amount: "",
@@ -1257,7 +1261,7 @@ export default function Achievements() {
                     <input
                       type="text"
                       required
-                      value={formData.location}
+                      value={formData.province}
                       onChange={(e) =>
                         setFormData({ ...formData, location: e.target.value })
                       }
@@ -1493,7 +1497,8 @@ export default function Achievements() {
                         type_action: "",
                         description: "",
                         category: "Food",
-                        location: "",
+                        province: "",
+            district: "",
                         partner_organisation: "",
                         people_impacted: "",
                         amount: "",
