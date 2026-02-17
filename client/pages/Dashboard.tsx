@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, Suspense, lazy } from "react";
+import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import {
   getRecentRequests,
@@ -13,7 +14,8 @@ import {
   AchievementsMetrics,
   Achievement,
 } from "@/services/achievementsService";
-import { getIngdMetrics, getIngdRequests, IngdRequest } from "@/services/supabaseService";
+import { getIngdMetrics, getIngdRequests, IngdRequest, getIngdDocuments, IngdDocument } from "@/services/supabaseService";
+import { Download } from "lucide-react";
 
 import ActionsImageGrid from "@/components/ActionsImageGrid";
 
@@ -36,6 +38,7 @@ export default function Dashboard() {
     useState<AchievementsMetrics | null>(null);
   const [ingdMetrics, setIngdMetrics] = useState<any>(null);
   const [recentIngdRequests, setRecentIngdRequests] = useState<IngdRequest[]>([]);
+  const [governmentDocument, setGovernmentDocument] = useState<IngdDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
 
@@ -44,13 +47,14 @@ export default function Dashboard() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [requests, metricsData, achievementsData, ingdMetricsData, ingdRecentData, achievementsImages] = await Promise.all([
+        const [requests, metricsData, achievementsData, ingdMetricsData, ingdRecentData, achievementsImages, allDocuments] = await Promise.all([
           getRecentRequests(5),
           getMetrics(),
           getAchievementsMetrics(),
           getIngdMetrics(),
           getIngdRequests(),
           getAchievements(),
+          getIngdDocuments(),
         ]);
         setRecentRequests(requests);
         setMetrics(metricsData);
@@ -59,6 +63,16 @@ export default function Dashboard() {
         // Get first 5 INGD requests
         setRecentIngdRequests(ingdRecentData.slice(0, 5));
         setAchievements(achievementsImages || []);
+
+        // Get latest government priority document
+        const govDocs = allDocuments?.filter(doc =>
+          doc.type === "government_priority" ||
+          doc.description?.toLowerCase().includes("government") ||
+          doc.description?.toLowerCase().includes("priority")
+        ) || [];
+        if (govDocs.length > 0) {
+          setGovernmentDocument(govDocs[0]); // Get most recent/first one
+        }
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -318,70 +332,145 @@ export default function Dashboard() {
         </div>
 
 
-        {/* Embedded INGD Dashboard */}
-        <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
-          <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                INGD Disaster Impact Analytics
-              </h2>
-              <p className="text-slate-600 mt-1">
-                Real-time impact data and insights from INGD
-              </p>
+        {/* INGD Analytics & Government Priorities Split View */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* INGD Dashboard - Left Side */}
+          <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+            <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  INGD Disaster Impact Analytics
+                </h2>
+                <p className="text-slate-600 mt-1">
+                  Real-time impact data and insights from INGD
+                </p>
+              </div>
+              <a
+                href="https://www.ingd.gov.mz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
+              >
+                View Full
+                <span className="transform group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
+              </a>
             </div>
-            <Link
-              to="/ingd-dashboard"
-              className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
+
+            <div
+              className="w-full bg-white overflow-x-auto"
+              style={{ minHeight: "400px" }}
             >
-              View Full
-              <span className="transform group-hover:translate-x-1 transition-transform">
-                →
-              </span>
-            </Link>
+              <div
+                className="tableauPlaceholder"
+                id="viz1769532767397_dashboard"
+                style={{ position: "relative" }}
+              >
+                <noscript>
+                  <a href="#">
+                    <img
+                      alt="Dashboard"
+                      src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1_rss.png"
+                      style={{ border: "none" }}
+                    />
+                  </a>
+                </noscript>
+                <object className="tableauViz" style={{ display: "none" }}>
+                  <param
+                    name="host_url"
+                    value="https%3A%2F%2Fpublic.tableau.com%2F"
+                  />
+                  <param name="embed_code_version" value="3" />
+                  <param name="site_root" value="" />
+                  <param
+                    name="name"
+                    value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
+                  />
+                  <param name="tabs" value="no" />
+                  <param name="toolbar" value="yes" />
+                  <param
+                    name="static_image"
+                    value="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1.png"
+                  />
+                  <param name="animate_transition" value="yes" />
+                  <param name="display_static_image" value="yes" />
+                  <param name="display_spinner" value="yes" />
+                  <param name="display_overlay" value="yes" />
+                  <param name="display_count" value="yes" />
+                  <param name="language" value="en-US" />
+                </object>
+              </div>
+            </div>
           </div>
 
-          <div
-            className="w-full bg-white overflow-x-auto"
-            style={{ minHeight: "400px" }}
-          >
-            <div
-              className="tableauPlaceholder"
-              id="viz1769532767397_dashboard"
-              style={{ position: "relative" }}
-            >
-              <noscript>
-                <a href="#">
-                  <img
-                    alt="Dashboard"
-                    src="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1_rss.png"
-                    style={{ border: "none" }}
-                  />
-                </a>
-              </noscript>
-              <object className="tableauViz" style={{ display: "none" }}>
-                <param
-                  name="host_url"
-                  value="https%3A%2F%2Fpublic.tableau.com%2F"
-                />
-                <param name="embed_code_version" value="3" />
-                <param name="site_root" value="" />
-                <param
-                  name="name"
-                  value="DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
-                />
-                <param name="tabs" value="no" />
-                <param name="toolbar" value="yes" />
-                <param
-                  name="static_image"
-                  value="https://public.tableau.com/static/images/DA/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard/1.png"
-                />
-                <param name="animate_transition" value="yes" />
-                <param name="display_static_image" value="yes" />
-                <param name="display_spinner" value="yes" />
-                <param name="display_overlay" value="yes" />
-                <param name="display_count" value="yes" />
-                <param name="language" value="en-US" />
-              </object>
+          {/* Government Priorities - Right Side */}
+          <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
+            <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  Government Priorities
+                </h2>
+                <p className="text-slate-600 mt-1">
+                  Official disaster response priorities
+                </p>
+              </div>
+              <Link
+                to="/government-priorities"
+                className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
+              >
+                View More
+                <span className="transform group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
+              </Link>
+            </div>
+
+            <div className="w-full bg-white p-6" style={{ minHeight: "400px" }}>
+              {governmentDocument ? (
+                <div className="flex flex-col items-center justify-center h-full gap-6">
+                  <div className="text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <span className="text-3xl">📄</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                      {governmentDocument.file_name}
+                    </h3>
+                    <p className="text-sm text-slate-600 mb-4">
+                      {governmentDocument.description}
+                    </p>
+                    <button
+                      onClick={() => {
+                        if (governmentDocument.file_url) {
+                          const link = document.createElement("a");
+                          link.href = governmentDocument.file_url;
+                          link.download = governmentDocument.file_name;
+                          link.click();
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                    >
+                      <Download size={18} />
+                      Download PDF
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-center">
+                  <div>
+                    <p className="text-slate-500 mb-4">
+                      No government priority documents available yet.
+                    </p>
+                    <Link
+                      to="/government-priorities"
+                      className="inline-flex items-center gap-2 px-6 py-2 bg-primary/10 text-primary rounded-lg font-medium hover:bg-primary/20 transition-colors"
+                    >
+                      View Priorities
+                      <span>→</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
