@@ -105,19 +105,21 @@
 
   body {
     @apply bg-background text-foreground;
-    user-select: auto;
+    user-select: none;
     cursor: default;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
     overflow-wrap: anywhere;
     word-break: break-word;
-    cursor: inherit;
+    user-select: auto;
+    cursor: default;
   }
 
-  /* Allow text selection only on elements that should have it */
+  /* Allow text selection and text cursor on input elements */
   :where(input, textarea, [role="textbox"]) {
     user-select: text;
+    cursor: text;
   }
 
   pre,

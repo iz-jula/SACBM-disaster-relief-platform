@@ -369,7 +369,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <a
-                href="https://www.ingd.gov.mz"
+                href="https://public.tableau.com/app/profile/cenoe/viz/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-all duration-300 whitespace-nowrap"
