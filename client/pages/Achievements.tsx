@@ -635,16 +635,20 @@ export default function Achievements() {
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Type of Action *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     required
                     value={formData.type_action}
                     onChange={(e) =>
                       setFormData({ ...formData, type_action: e.target.value })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Emergency Response"
-                  />
+                  >
+                    <option value="">Select type of action</option>
+                    <option>Evacuation</option>
+                    <option>Cash donation</option>
+                    <option>Goods donation</option>
+                    <option>Other - please specify</option>
+                  </select>
                 </div>
 
                 <div>
@@ -712,8 +716,7 @@ export default function Achievements() {
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Partner Organisation (if applicable)
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.partner_organisation}
                     onChange={(e) =>
                       setFormData({
@@ -722,8 +725,15 @@ export default function Achievements() {
                       })
                     }
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="e.g., UNICEF, Red Cross"
-                  />
+                  >
+                    <option value="">Select organization</option>
+                    <option>FDC</option>
+                    <option>UNICEF</option>
+                    <option>CARE MOZAMBIQUE</option>
+                    <option>REPENSAR</option>
+                    <option>RESILIÊNCIA</option>
+                    <option>OTHER - Please specify</option>
+                  </select>
                 </div>
 
                 <div>
@@ -1272,16 +1282,20 @@ export default function Achievements() {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Type of Action *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
                       value={formData.type_action}
                       onChange={(e) =>
                         setFormData({ ...formData, type_action: e.target.value })
                       }
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Emergency Response"
-                    />
+                    >
+                      <option value="">Select type of action</option>
+                      <option>Evacuation</option>
+                      <option>Cash donation</option>
+                      <option>Goods donation</option>
+                      <option>Other - please specify</option>
+                    </select>
                   </div>
 
                   <div>
@@ -1349,8 +1363,7 @@ export default function Achievements() {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Partner Organisation (if applicable)
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={formData.partner_organisation}
                       onChange={(e) =>
                         setFormData({
@@ -1359,8 +1372,15 @@ export default function Achievements() {
                         })
                       }
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="e.g., UNICEF, Red Cross"
-                    />
+                    >
+                      <option value="">Select organization</option>
+                      <option>FDC</option>
+                      <option>UNICEF</option>
+                      <option>CARE MOZAMBIQUE</option>
+                      <option>REPENSAR</option>
+                      <option>RESILIÊNCIA</option>
+                      <option>OTHER - Please specify</option>
+                    </select>
                   </div>
 
                   <div>
