@@ -7,7 +7,7 @@ import {
   updateRequest,
   deleteRequest,
 } from "@/services/requestsService";
-import { RelieRequest, getIngdRequests, IngdRequest, createIngdCommitment, resolveIngdRequest, revertIngdToPending, getIngdDocuments } from "@/services/supabaseService";
+import { RelieRequest, getIngdRequests, IngdRequest, createIngdCommitment, resolveIngdRequest, revertIngdToPending, getIngdDocuments, getIngdActiveSetting } from "@/services/supabaseService";
 import type { IngdDocument } from "@/services/supabaseService";
 import { Lock, AlertCircle, Download } from "lucide-react";
 
@@ -276,10 +276,7 @@ export default function Requests() {
   const [selectedIngdItems, setSelectedIngdItems] = useState<Set<number>>(
     new Set(),
   );
-  const [ingdActive, setIngdActive] = useState(() => {
-    const stored = localStorage.getItem("ingd_active");
-    return stored !== null ? JSON.parse(stored) : true;
-  });
+  const [ingdActive, setIngdActive] = useState(true);
   const [showActionDropdown, setShowActionDropdown] = useState(false);
   const [showIngdActionDropdown, setShowIngdActionDropdown] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -326,16 +323,18 @@ export default function Requests() {
     loadRequests();
   }, []);
 
-  // Listen for INGD active state changes from localStorage
+  // Load INGD active state from database
   useEffect(() => {
-    const handleStorageChange = () => {
-      const stored = localStorage.getItem("ingd_active");
-      const isActive = stored !== null ? JSON.parse(stored) : true;
+    const loadIngdSetting = async () => {
+      const isActive = await getIngdActiveSetting();
       setIngdActive(isActive);
     };
 
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    loadIngdSetting();
+
+    // Poll for changes every 2 seconds
+    const interval = setInterval(loadIngdSetting, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const toggleSelectRequest = (id: number) => {

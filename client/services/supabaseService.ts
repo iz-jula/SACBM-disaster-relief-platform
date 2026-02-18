@@ -682,3 +682,40 @@ export async function deleteIngdDocument(id: number): Promise<boolean> {
     return false;
   }
 }
+
+// Get INGD active setting from database
+export async function getIngdActiveSetting(): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from("admin_settings")
+      .select("setting_value")
+      .eq("setting_key", "ingd_active")
+      .single();
+
+    if (error) {
+      console.error("Error fetching INGD setting:", error);
+      return true; // Default to true if error
+    }
+
+    return data?.setting_value === true;
+  } catch (error) {
+    console.error("Error fetching INGD setting:", error);
+    return true; // Default to true if error
+  }
+}
+
+// Update INGD active setting in database
+export async function setIngdActiveSetting(isActive: boolean): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("admin_settings")
+      .update({ setting_value: isActive, updated_at: new Date().toISOString() })
+      .eq("setting_key", "ingd_active");
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error updating INGD setting:", error);
+    return false;
+  }
+}

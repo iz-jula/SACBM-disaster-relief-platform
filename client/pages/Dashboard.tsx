@@ -13,7 +13,7 @@ import {
   AchievementsMetrics,
   Achievement,
 } from "@/services/achievementsService";
-import { getIngdMetrics, getIngdRequests, IngdRequest, getIngdDocuments, IngdDocument } from "@/services/supabaseService";
+import { getIngdMetrics, getIngdRequests, IngdRequest, getIngdDocuments, IngdDocument, getIngdActiveSetting } from "@/services/supabaseService";
 import { Download } from "lucide-react";
 
 import ActionsImageGrid from "@/components/ActionsImageGrid";
@@ -42,10 +42,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [showPdfViewer, setShowPdfViewer] = useState(false);
-  const [ingdActive, setIngdActive] = useState(() => {
-    const stored = localStorage.getItem("ingd_active");
-    return stored !== null ? JSON.parse(stored) : true;
-  });
+  const [ingdActive, setIngdActive] = useState(true);
 
   useEffect(() => {
     // Fetch data from API
@@ -87,14 +84,16 @@ export default function Dashboard() {
 
     loadData();
 
-    // Listen for INGD active state changes from localStorage
-    const handleStorageChange = () => {
-      const stored = localStorage.getItem("ingd_active");
-      const isActive = stored !== null ? JSON.parse(stored) : true;
+    // Load INGD setting from database
+    const loadIngdSetting = async () => {
+      const isActive = await getIngdActiveSetting();
       setIngdActive(isActive);
     };
 
-    window.addEventListener("storage", handleStorageChange);
+    loadIngdSetting();
+
+    // Poll for changes every 2 seconds
+    const interval = setInterval(loadIngdSetting, 2000);
 
     // Set up Tableau visualization on dashboard with responsive sizing
     const resizeDashboardViz = () => {
@@ -144,7 +143,7 @@ export default function Dashboard() {
 
     return () => {
       window.removeEventListener("resize", resizeDashboardViz);
-      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }

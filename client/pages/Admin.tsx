@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
-import { getIngdDocuments, createIngdDocument, deleteIngdDocument, uploadDocumentToStorage } from "@/services/supabaseService";
+import { getIngdDocuments, createIngdDocument, deleteIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -92,15 +92,18 @@ export default function Admin() {
   const [isUploadingPriority, setIsUploadingPriority] = useState(false);
   const [governmentDocuments, setGovernmentDocuments] = useState<IngdDocument[]>([]);
   const [isLoadingGovernmentDocs, setIsLoadingGovernmentDocs] = useState(false);
-  const [ingdActive, setIngdActive] = useState(() => {
-    const stored = localStorage.getItem("ingd_active");
-    return stored !== null ? JSON.parse(stored) : true;
-  });
+  const [ingdActive, setIngdActive] = useState(true);
+  const [isUpdatingIngd, setIsUpdatingIngd] = useState(false);
 
-  // Save INGD active state to localStorage
+  // Load INGD active state from database
   useEffect(() => {
-    localStorage.setItem("ingd_active", JSON.stringify(ingdActive));
-  }, [ingdActive]);
+    const loadIngdSetting = async () => {
+      const isActive = await getIngdActiveSetting();
+      setIngdActive(isActive);
+    };
+
+    loadIngdSetting();
+  }, []);
 
   // Load metrics on mount
   useEffect(() => {
@@ -1100,21 +1103,33 @@ export default function Admin() {
                     {/* Active/Inactive Toggle */}
                     <div className="ml-4 flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200">
                       <button
-                        onClick={() => setIngdActive(true)}
+                        onClick={async () => {
+                          setIsUpdatingIngd(true);
+                          await setIngdActiveSetting(true);
+                          setIngdActive(true);
+                          setIsUpdatingIngd(false);
+                        }}
+                        disabled={isUpdatingIngd}
                         className={`px-3 py-1 rounded font-medium text-sm transition-colors ${
                           ingdActive
                             ? "bg-green-500 text-white"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:bg-slate-100"
                         }`}
                       >
                         ON
                       </button>
                       <button
-                        onClick={() => setIngdActive(false)}
+                        onClick={async () => {
+                          setIsUpdatingIngd(true);
+                          await setIngdActiveSetting(false);
+                          setIngdActive(false);
+                          setIsUpdatingIngd(false);
+                        }}
+                        disabled={isUpdatingIngd}
                         className={`px-3 py-1 rounded font-medium text-sm transition-colors ${
                           !ingdActive
                             ? "bg-red-500 text-white"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:bg-slate-100"
                         }`}
                       >
                         OFF

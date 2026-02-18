@@ -5,6 +5,7 @@ import {
   X,
   ChevronLeft,
 } from "lucide-react";
+import { getIngdActiveSetting } from "@/services/supabaseService";
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,20 +15,20 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [ingdActive, setIngdActive] = useState(() => {
-    const stored = localStorage.getItem("ingd_active");
-    return stored !== null ? JSON.parse(stored) : true;
-  });
+  const [ingdActive, setIngdActive] = useState(true);
 
-  // Listen for changes to INGD active state
+  // Load INGD active state from database
   useEffect(() => {
-    const handleStorageChange = () => {
-      const stored = localStorage.getItem("ingd_active");
-      setIngdActive(stored !== null ? JSON.parse(stored) : true);
+    const loadIngdSetting = async () => {
+      const isActive = await getIngdActiveSetting();
+      setIngdActive(isActive);
     };
 
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    loadIngdSetting();
+
+    // Poll for changes every 2 seconds to sync across devices
+    const interval = setInterval(loadIngdSetting, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const allNavItems = [
