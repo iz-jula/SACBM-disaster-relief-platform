@@ -71,11 +71,11 @@ export default function Layout({ children }: LayoutProps) {
               />
               {!sidebarCollapsed && (
                 <div className="text-center">
-                  <h1 className="text-xs font-bold text-slate-900 leading-tight">
-                    Disaster Relief
+                  <h1 className="text-sm font-bold text-slate-900 leading-tight">
+                    SACBM
                   </h1>
                   <p className="text-xs text-slate-500 leading-tight">
-                    Operations
+                    Disaster Relief
                   </p>
                 </div>
               )}
@@ -189,11 +189,11 @@ export default function Layout({ children }: LayoutProps) {
                 className="h-10 flex-shrink-0"
               />
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 leading-tight">
-                  Disaster Relief
+                <p className="text-sm font-bold text-slate-900 leading-tight">
+                  SACBM
                 </p>
                 <p className="text-xs text-slate-500 leading-tight">
-                  Operations
+                  Disaster Relief
                 </p>
               </div>
             </Link>
