@@ -1,11 +1,10 @@
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
   X,
   ChevronLeft,
 } from "lucide-react";
-import { getIngdActiveSetting } from "@/services/supabaseService";
 
 interface LayoutProps {
   children: ReactNode;
@@ -15,35 +14,14 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [ingdActive, setIngdActive] = useState(true);
 
-  // Load INGD active state from database
-  useEffect(() => {
-    const loadIngdSetting = async () => {
-      const isActive = await getIngdActiveSetting();
-      setIngdActive(isActive);
-    };
-
-    loadIngdSetting();
-
-    // Poll for changes every 2 seconds to sync across devices
-    const interval = setInterval(loadIngdSetting, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const allNavItems = [
+  const navItems = [
     { href: "/", label: "Dashboard" },
     { href: "/requests", label: "Relief Requests" },
     { href: "/actions", label: "Actions" },
     { href: "/upload", label: "Upload Requests" },
-    { href: "/ingd-dashboard", label: "INGD Dashboard" },
     { href: "/government-priorities", label: "Government Priorities" },
   ];
-
-  // Filter INGD Dashboard based on active state
-  const navItems = allNavItems.filter(
-    (item) => item.href !== "/ingd-dashboard" || ingdActive
-  );
 
   const adminItems = [{ href: "/admin", label: "Admin Panel" }];
 
@@ -86,23 +64,6 @@ export default function Layout({ children }: LayoutProps) {
             <nav className="space-y-2">
               {navItems.map(({ href, label }) => {
                 const isActive = location.pathname === href;
-
-                // INGD Dashboard is an external link to Tableau
-                if (label === "INGD Dashboard") {
-                  return (
-                    <a
-                      key={href}
-                      href="https://public.tableau.com/app/profile/cenoe/viz/DASHBOARD_IMPACTO_INGD_EXTERNO_17418596149660/Dashboard"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setSidebarOpen(false)}
-                      title={label}
-                      className="block px-4 py-3 rounded-lg font-medium transition-all overflow-hidden text-slate-600 hover:bg-slate-100"
-                    >
-                      {!sidebarCollapsed && <span className="truncate">{label}</span>}
-                    </a>
-                  );
-                }
 
                 return (
                   <Link
