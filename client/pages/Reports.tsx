@@ -180,9 +180,19 @@ export default function Reports() {
     return filtered;
   };
 
+  const getImageFiles = () => {
+    // Filter for image files only (can be embedded in PDF)
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+    return allDocuments.filter(d => {
+      const fileName = d.file_name?.toLowerCase() || '';
+      return imageExtensions.some(ext => fileName.endsWith(ext));
+    });
+  };
+
   const getSelectedMediaList = () => {
-    const mediaItems = allDocuments.filter(d => d.type === "actions" || !d.type);
-    return Array.from(selectedMedia).map(id => mediaItems.find(m => m.id === id)).filter(Boolean) as IngdDocument[];
+    return Array.from(selectedMedia)
+      .map(id => getImageFiles().find(m => m.id === id))
+      .filter(Boolean) as IngdDocument[];
   };
 
   const handleGenerateReport = async () => {
@@ -489,39 +499,40 @@ export default function Reports() {
                     {isLoading ? (
                       <div className="flex items-center justify-center py-8">
                         <Loader size={18} className="animate-spin text-blue-600 mr-2" />
-                        <p className="text-sm text-slate-600">Loading media files...</p>
+                        <p className="text-sm text-slate-600">Loading image files...</p>
                       </div>
-                    ) : allDocuments.filter(d => d.type === "actions" || !d.type).length === 0 ? (
-                      <p className="text-sm text-slate-600 py-4">No media files available</p>
+                    ) : getImageFiles().length === 0 ? (
+                      <div className="py-4">
+                        <p className="text-sm text-slate-600 mb-2">No image files available</p>
+                        <p className="text-xs text-slate-500">Supported formats: JPG, PNG, GIF, WebP, BMP, SVG</p>
+                      </div>
                     ) : (
                       <div className="space-y-2">
-                        {allDocuments
-                          .filter(d => d.type === "actions" || !d.type)
-                          .map((doc) => (
-                            <label key={doc.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={selectedMedia.has(doc.id || 0)}
-                                onChange={(e) => {
-                                  const newSelected = new Set(selectedMedia);
-                                  if (e.target.checked) {
-                                    newSelected.add(doc.id || 0);
-                                  } else {
-                                    newSelected.delete(doc.id || 0);
-                                  }
-                                  setSelectedMedia(newSelected);
-                                }}
-                                className="w-4 h-4 rounded"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-slate-900 truncate">{doc.file_name}</p>
-                                <p className="text-xs text-slate-600">{doc.description}</p>
-                              </div>
-                              <span className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded whitespace-nowrap">
-                                {doc.file_type}
-                              </span>
-                            </label>
-                          ))}
+                        {getImageFiles().map((doc) => (
+                          <label key={doc.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedMedia.has(doc.id || 0)}
+                              onChange={(e) => {
+                                const newSelected = new Set(selectedMedia);
+                                if (e.target.checked) {
+                                  newSelected.add(doc.id || 0);
+                                } else {
+                                  newSelected.delete(doc.id || 0);
+                                }
+                                setSelectedMedia(newSelected);
+                              }}
+                              className="w-4 h-4 rounded"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-slate-900 truncate">{doc.file_name}</p>
+                              <p className="text-xs text-slate-600">{doc.description}</p>
+                            </div>
+                            <span className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded whitespace-nowrap">
+                              {doc.file_type?.toUpperCase()}
+                            </span>
+                          </label>
+                        ))}
                       </div>
                     )}
                   </div>
