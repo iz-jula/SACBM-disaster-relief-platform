@@ -148,14 +148,8 @@ export default function Admin() {
 
   // Load documents when documents tab is activated
   useEffect(() => {
-    if (activeTab === "documents" || activeTab === "actions-upload") {
+    if (activeTab === "documents") {
       loadAllDocuments();
-      // Set default document type based on active tab
-      if (activeTab === "actions-upload") {
-        setDocumentType("actions");
-      } else if (documentType === "actions") {
-        setDocumentType("ingd");
-      }
     }
   }, [activeTab]);
 
@@ -470,7 +464,6 @@ export default function Admin() {
               { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
               { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
               { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
-              { id: "actions-upload", label: "Actions", shortLabel: "Actions", icon: Download },
               { id: "users", label: "Users", shortLabel: "Users", icon: Users },
               { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
             ].map((tab) => (
@@ -1478,22 +1471,6 @@ export default function Admin() {
         {activeTab === "documents" && (
           <DocumentUploadForm
             documentType={documentType as any}
-            documentFile={documentFile}
-            documentDescription={documentDescription}
-            isUploading={isUploadingDocument}
-            allDocuments={allDocuments}
-            isLoadingDocuments={isLoadingDocuments}
-            onFileChange={setDocumentFile}
-            onDescriptionChange={setDocumentDescription}
-            onDocumentTypeChange={setDocumentType}
-            onUpload={handleUploadDocument}
-            onDelete={handleDeleteDocument}
-          />
-        )}
-
-        {activeTab === "actions-upload" && (
-          <DocumentUploadForm
-            documentType="actions"
             documentFile={documentFile}
             documentDescription={documentDescription}
             isUploading={isUploadingDocument}
