@@ -6,7 +6,7 @@ import {
   AlertCircle,
   Loader,
 } from "lucide-react";
-import { getActions } from "@/services/achievementsService";
+import { getAchievements } from "@/services/achievementsService";
 import { getRequests } from "@/services/supabaseService";
 import { downloadReport, filterActions, generateSummaryNarrative, ReportFilters } from "@/services/reportService";
 import type { Achievement } from "@/services/achievementsService";
@@ -41,7 +41,7 @@ export default function Reports() {
     setIsLoading(true);
     try {
       if (reportType === "actions") {
-        const actions = await getActions();
+        const actions = await getAchievements();
         setAllActions(actions);
 
         // Extract unique submitter names
