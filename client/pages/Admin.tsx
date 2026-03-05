@@ -12,6 +12,7 @@ import {
   Trash2,
   Edit2,
   X,
+  FileText,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -19,7 +20,9 @@ import DocumentUploadForm from "@/components/DocumentUploadForm";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
 import { getIngdDocuments, createIngdDocument, deleteIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
-import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
+import { getAchievements } from "@/services/achievementsService";
+import { downloadReport, filterActions, generateSummaryNarrative, ReportFilters } from "@/services/reportService";
+import type { RelieRequest, IngdRequest, IngdDocument, Action } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -45,7 +48,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities"
+    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities" | "reports"
   >("dashboard");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -91,6 +94,19 @@ export default function Admin() {
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [ingdActive, setIngdActive] = useState(true);
   const [isUpdatingIngd, setIsUpdatingIngd] = useState(false);
+
+  // Report state
+  const [allActions, setAllActions] = useState<Action[]>([]);
+  const [isLoadingActions, setIsLoadingActions] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportFilters, setReportFilters] = useState<ReportFilters>({
+    startDate: undefined,
+    endDate: undefined,
+    category: undefined,
+    submitter: undefined,
+    includeDocuments: true,
+    includeMedia: true,
+  });
 
   // Load INGD active state from database
   useEffect(() => {
@@ -150,6 +166,13 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === "documents") {
       loadAllDocuments();
+    }
+  }, [activeTab]);
+
+  // Load actions when reports tab is activated
+  useEffect(() => {
+    if (activeTab === "reports") {
+      loadAllActionsForReport();
     }
   }, [activeTab]);
 
@@ -366,6 +389,42 @@ export default function Admin() {
     window.URL.revokeObjectURL(url);
   };
 
+  const loadAllActionsForReport = async () => {
+    setIsLoadingActions(true);
+    try {
+      const actions = await getAchievements();
+      setAllActions(actions);
+    } catch (error) {
+      console.error("Error loading actions for report:", error);
+      setAllActions([]);
+    } finally {
+      setIsLoadingActions(false);
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    if (allActions.length === 0) {
+      alert("No actions available to generate report");
+      return;
+    }
+
+    setIsGeneratingReport(true);
+    try {
+      await downloadReport(allActions, reportFilters, {
+        title: "Actions Report",
+        organizationName: "SABCM Disaster Relief",
+        footer: `Generated on ${new Date().toLocaleDateString()} by Admin Dashboard`,
+        includeMetrics: true,
+      });
+      alert("Report generated and downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert(`Error generating report: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -464,6 +523,7 @@ export default function Admin() {
               { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
               { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
               { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
+              { id: "reports", label: "Reports", shortLabel: "Reports", icon: FileText },
               { id: "users", label: "Users", shortLabel: "Users", icon: Users },
               { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
             ].map((tab) => (
@@ -1482,6 +1542,173 @@ export default function Admin() {
             onUpload={handleUploadDocument}
             onDelete={handleDeleteDocument}
           />
+        )}
+
+        {/* Reports Tab */}
+        {activeTab === "reports" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <FileText size={24} className="text-blue-600" />
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Generate Action Reports</h2>
+                  <p className="text-sm text-slate-600 mt-1">Create customized PDF reports of all submitted actions with filters</p>
+                </div>
+              </div>
+
+              {/* Report Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                {/* Start Date */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Start Date (Optional)</label>
+                  <input
+                    type="date"
+                    value={reportFilters.startDate ? reportFilters.startDate.toISOString().split('T')[0] : ''}
+                    onChange={(e) => setReportFilters({
+                      ...reportFilters,
+                      startDate: e.target.value ? new Date(e.target.value) : undefined
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* End Date */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">End Date (Optional)</label>
+                  <input
+                    type="date"
+                    value={reportFilters.endDate ? reportFilters.endDate.toISOString().split('T')[0] : ''}
+                    onChange={(e) => setReportFilters({
+                      ...reportFilters,
+                      endDate: e.target.value ? new Date(e.target.value) : undefined
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Category (Optional)</label>
+                  <select
+                    value={reportFilters.category || ''}
+                    onChange={(e) => setReportFilters({
+                      ...reportFilters,
+                      category: e.target.value || undefined
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">All Categories</option>
+                    <option value="Food">Food</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Materials">Materials</option>
+                    <option value="Medical">Medical</option>
+                    <option value="Shelter">Shelter</option>
+                    <option value="Water">Water</option>
+                    <option value="Evacuation">Evacuation</option>
+                    <option value="Multiple">Multiple</option>
+                  </select>
+                </div>
+
+                {/* Submitter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Submitter (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="Filter by organization name..."
+                    value={reportFilters.submitter || ''}
+                    onChange={(e) => setReportFilters({
+                      ...reportFilters,
+                      submitter: e.target.value || undefined
+                    })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Include Options */}
+                <div className="md:col-span-2">
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={reportFilters.includeDocuments !== false}
+                        onChange={(e) => setReportFilters({
+                          ...reportFilters,
+                          includeDocuments: e.target.checked
+                        })}
+                        className="w-4 h-4 rounded border-slate-300"
+                      />
+                      <span className="text-sm font-medium text-slate-700">Include Documents</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={reportFilters.includeMedia !== false}
+                        onChange={(e) => setReportFilters({
+                          ...reportFilters,
+                          includeMedia: e.target.checked
+                        })}
+                        className="w-4 h-4 rounded border-slate-300"
+                      />
+                      <span className="text-sm font-medium text-slate-700">Include Media</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Report Preview Section */}
+              {allActions.length > 0 && (
+                <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h3 className="font-bold text-slate-900 mb-2">Report Preview</h3>
+                  <p className="text-sm text-slate-700 mb-3">
+                    {generateSummaryNarrative(filterActions(allActions, reportFilters), reportFilters)}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Total actions matching filter: {filterActions(allActions, reportFilters).length} / {allActions.length}
+                  </p>
+                </div>
+              )}
+
+              {/* Generate Button */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleGenerateReport}
+                  disabled={isGeneratingReport || allActions.length === 0 || isLoadingActions}
+                  className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <FileText size={18} />
+                  {isGeneratingReport ? 'Generating Report...' : 'Generate PDF Report'}
+                </button>
+                <button
+                  onClick={loadAllActionsForReport}
+                  disabled={isLoadingActions}
+                  className="px-6 py-3 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+                >
+                  {isLoadingActions ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
+
+              {isLoadingActions && (
+                <div className="mt-4 text-center text-slate-600">
+                  <p>Loading actions...</p>
+                </div>
+              )}
+
+              {!isLoadingActions && allActions.length === 0 && (
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                  <AlertCircle size={18} className="text-yellow-600 mx-auto mb-2" />
+                  <p className="text-sm text-yellow-800">No actions found. Check back when actions have been submitted.</p>
+                </div>
+              )}
+
+              {!isLoadingActions && allActions.length > 0 && (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800 font-medium">
+                    ✓ {allActions.length} action{allActions.length !== 1 ? 's' : ''} available for reporting
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
       </div>
