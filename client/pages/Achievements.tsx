@@ -12,7 +12,6 @@ import {
   Lock,
   AlertCircle,
   Download,
-  FileText,
 } from "lucide-react";
 import {
   getAchievements,
@@ -23,9 +22,8 @@ import {
   Achievement,
   AchievementsMetrics,
 } from "@/services/achievementsService";
-import { getIngdDocuments, getActions } from "@/services/supabaseService";
-import type { IngdDocument, Action } from "@/services/supabaseService";
-import { downloadReport, filterActions, generateSummaryNarrative, ReportFilters } from "@/services/reportService";
+import { getIngdDocuments } from "@/services/supabaseService";
+import type { IngdDocument } from "@/services/supabaseService";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Food: "bg-blue-100 text-blue-800",
@@ -131,20 +129,6 @@ export default function Achievements() {
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
 
-  // Report state
-  const [showReportGenerator, setShowReportGenerator] = useState(false);
-  const [allActionsForReport, setAllActionsForReport] = useState<Action[]>([]);
-  const [isLoadingActionsForReport, setIsLoadingActionsForReport] = useState(false);
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  const [reportFilters, setReportFilters] = useState<ReportFilters>({
-    startDate: undefined,
-    endDate: undefined,
-    category: undefined,
-    submitter: undefined,
-    includeDocuments: true,
-    includeMedia: true,
-  });
-
   useEffect(() => {
     loadData();
     loadActionDocuments();
@@ -162,42 +146,6 @@ export default function Achievements() {
       setActionDocuments([]);
     } finally {
       setIsLoadingDocuments(false);
-    }
-  };
-
-  const loadActionsForReport = async () => {
-    setIsLoadingActionsForReport(true);
-    try {
-      const actions = await getActions();
-      setAllActionsForReport(actions);
-    } catch (error) {
-      console.error("Error loading actions for report:", error);
-      setAllActionsForReport([]);
-    } finally {
-      setIsLoadingActionsForReport(false);
-    }
-  };
-
-  const handleGeneratePublicReport = async () => {
-    if (allActionsForReport.length === 0) {
-      alert("No actions available to generate report");
-      return;
-    }
-
-    setIsGeneratingReport(true);
-    try {
-      await downloadReport(allActionsForReport, reportFilters, {
-        title: "Actions Report",
-        organizationName: "SABCM Disaster Relief",
-        footer: `Generated on ${new Date().toLocaleDateString()}`,
-        includeMetrics: true,
-      });
-      alert("Report generated and downloaded successfully!");
-    } catch (error) {
-      console.error("Error generating report:", error);
-      alert(`Error generating report: ${error instanceof Error ? error.message : "Unknown error"}`);
-    } finally {
-      setIsGeneratingReport(false);
     }
   };
 
@@ -1471,139 +1419,6 @@ export default function Achievements() {
           )}
         </div>
 
-        {/* Report Generator Section */}
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <FileText size={24} className="text-blue-600" />
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Generate Action Report</h2>
-                <p className="text-sm text-slate-600 mt-1">Download a PDF report of all submitted actions</p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setShowReportGenerator(!showReportGenerator);
-                if (!showReportGenerator && allActionsForReport.length === 0) {
-                  loadActionsForReport();
-                }
-              }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-            >
-              {showReportGenerator ? 'Hide' : 'Show'} Generator
-            </button>
-          </div>
-
-          {showReportGenerator && (
-            <div className="space-y-6 border-t pt-6">
-              {/* Report Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                {/* Category Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Category (Optional)</label>
-                  <select
-                    value={reportFilters.category || ''}
-                    onChange={(e) => setReportFilters({
-                      ...reportFilters,
-                      category: e.target.value || undefined
-                    })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">All Categories</option>
-                    <option value="Food">Food</option>
-                    <option value="Clothing">Clothing</option>
-                    <option value="Materials">Materials</option>
-                    <option value="Medical">Medical</option>
-                    <option value="Shelter">Shelter</option>
-                    <option value="Water">Water</option>
-                    <option value="Evacuation">Evacuation</option>
-                    <option value="Multiple">Multiple</option>
-                  </select>
-                </div>
-
-                {/* Start Date */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Start Date (Optional)</label>
-                  <input
-                    type="date"
-                    value={reportFilters.startDate ? reportFilters.startDate.toISOString().split('T')[0] : ''}
-                    onChange={(e) => setReportFilters({
-                      ...reportFilters,
-                      startDate: e.target.value ? new Date(e.target.value) : undefined
-                    })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* End Date */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">End Date (Optional)</label>
-                  <input
-                    type="date"
-                    value={reportFilters.endDate ? reportFilters.endDate.toISOString().split('T')[0] : ''}
-                    onChange={(e) => setReportFilters({
-                      ...reportFilters,
-                      endDate: e.target.value ? new Date(e.target.value) : undefined
-                    })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Submitter Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Submitter/Organization (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="Filter by organization name..."
-                    value={reportFilters.submitter || ''}
-                    onChange={(e) => setReportFilters({
-                      ...reportFilters,
-                      submitter: e.target.value || undefined
-                    })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Report Preview */}
-              {allActionsForReport.length > 0 && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h3 className="font-bold text-slate-900 mb-2">Report Summary</h3>
-                  <p className="text-sm text-slate-700 mb-3">
-                    {generateSummaryNarrative(filterActions(allActionsForReport, reportFilters), reportFilters)}
-                  </p>
-                  <p className="text-xs text-slate-600">
-                    Actions in report: {filterActions(allActionsForReport, reportFilters).length} / {allActionsForReport.length}
-                  </p>
-                </div>
-              )}
-
-              {/* Generate Button */}
-              <button
-                onClick={handleGeneratePublicReport}
-                disabled={isGeneratingReport || allActionsForReport.length === 0 || isLoadingActionsForReport}
-                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-              >
-                <FileText size={18} />
-                {isGeneratingReport ? 'Generating Report...' : isLoadingActionsForReport ? 'Loading Actions...' : 'Generate PDF Report'}
-              </button>
-
-              {allActionsForReport.length === 0 && !isLoadingActionsForReport && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                  <p className="text-sm text-yellow-800">No actions available yet. Report will be available once actions are submitted.</p>
-                </div>
-              )}
-
-              {allActionsForReport.length > 0 && !isLoadingActionsForReport && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800 font-medium">
-                    ✓ {allActionsForReport.length} action{allActionsForReport.length !== 1 ? 's' : ''} available for reporting
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
 
         {/* Action Documents Section */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">

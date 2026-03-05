@@ -21,6 +21,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/actions", label: "Actions" },
     { href: "/upload", label: "Upload Requests" },
     { href: "/government-priorities", label: "Government Priorities" },
+    { href: "/reports", label: "Reports" },
   ];
 
   const adminItems = [{ href: "/admin", label: "Admin Panel" }];
