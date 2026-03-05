@@ -53,10 +53,14 @@ export default function Reports() {
   const [reliefFilters, setReliefFilters] = useState({
     submitter: "",
     originator: "",
+    helpType: "",
     startDate: "",
     endDate: "",
     includeINGD: false,
   });
+
+  // Relief request help types
+  const [reliefHelpTypes, setReliefHelpTypes] = useState<string[]>([]);
 
   // Government Priorities filters
   const [govPriorityFilters, setGovPriorityFilters] = useState({
@@ -90,8 +94,11 @@ export default function Reports() {
         setAllRequests(requests);
         const originators = [...new Set(requests.map(r => r.originator))].filter(Boolean).sort();
         setReliefSubmitterOptions(originators);
+        const helpTypes = [...new Set(requests.map(r => r.help_type))].filter(Boolean).sort();
+        setReliefHelpTypes(helpTypes);
       }
 
+      // Always load documents if government priorities or media is selected
       if (includeData.governmentPriorities || includeData.media) {
         const docs = await getIngdDocuments();
         setAllDocuments(docs);
@@ -102,6 +109,21 @@ export default function Reports() {
       setIsLoading(false);
     }
   };
+
+  // Load documents when media is selected
+  useEffect(() => {
+    if (includeData.media && allDocuments.length === 0) {
+      const loadMediaFiles = async () => {
+        try {
+          const docs = await getIngdDocuments();
+          setAllDocuments(docs);
+        } catch (error) {
+          console.error("Error loading media files:", error);
+        }
+      };
+      loadMediaFiles();
+    }
+  }, [includeData.media]);
 
   const getFilteredActions = () => {
     let filtered = allActions;
@@ -132,6 +154,9 @@ export default function Reports() {
     }
     if (reliefFilters.submitter) {
       filtered = filtered.filter(r => r.originator === reliefFilters.submitter);
+    }
+    if (reliefFilters.helpType) {
+      filtered = filtered.filter(r => r.help_type === reliefFilters.helpType);
     }
     if (reliefFilters.startDate) {
       filtered = filtered.filter(r => new Date(r.created_at || '') >= new Date(reliefFilters.startDate));
@@ -397,6 +422,19 @@ export default function Reports() {
                         </select>
                       </div>
                       <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Help Type</label>
+                        <select
+                          value={reliefFilters.helpType}
+                          onChange={(e) => setReliefFilters({ ...reliefFilters, helpType: e.target.value })}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          <option value="">All Help Types</option>
+                          {reliefHelpTypes.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
                         <input
                           type="date"
@@ -448,11 +486,16 @@ export default function Reports() {
                 </button>
                 {expandedFilters.media && (
                   <div className="p-4 bg-white max-h-80 overflow-y-auto">
-                    <div className="space-y-2">
-                      {allDocuments.filter(d => d.type === "actions" || !d.type).length === 0 ? (
-                        <p className="text-sm text-slate-600">No media files available</p>
-                      ) : (
-                        allDocuments
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader size={18} className="animate-spin text-blue-600 mr-2" />
+                        <p className="text-sm text-slate-600">Loading media files...</p>
+                      </div>
+                    ) : allDocuments.filter(d => d.type === "actions" || !d.type).length === 0 ? (
+                      <p className="text-sm text-slate-600 py-4">No media files available</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {allDocuments
                           .filter(d => d.type === "actions" || !d.type)
                           .map((doc) => (
                             <label key={doc.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
@@ -478,9 +521,9 @@ export default function Reports() {
                                 {doc.file_type}
                               </span>
                             </label>
-                          ))
-                      )}
-                    </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
