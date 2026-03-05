@@ -82,16 +82,12 @@ export default function Admin() {
     Zambezia: 0,
     Total: 0,
   });
-  const [ingdDocuments, setIngdDocuments] = useState<IngdDocument[]>([]);
+  const [allDocuments, setAllDocuments] = useState<IngdDocument[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentDescription, setDocumentDescription] = useState("");
+  const [documentType, setDocumentType] = useState<"ingd" | "government_priority">("ingd");
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
-  const [governmentPriorityFile, setGovernmentPriorityFile] = useState<File | null>(null);
-  const [governmentPriorityDescription, setGovernmentPriorityDescription] = useState("");
-  const [isUploadingPriority, setIsUploadingPriority] = useState(false);
-  const [governmentDocuments, setGovernmentDocuments] = useState<IngdDocument[]>([]);
-  const [isLoadingGovernmentDocs, setIsLoadingGovernmentDocs] = useState(false);
   const [ingdActive, setIngdActive] = useState(true);
   const [isUpdatingIngd, setIsUpdatingIngd] = useState(false);
 
@@ -152,9 +148,7 @@ export default function Admin() {
   // Load documents when documents tab is activated
   useEffect(() => {
     if (activeTab === "documents") {
-      loadIngdDocuments();
-    } else if (activeTab === "government-priorities") {
-      loadGovernmentDocuments();
+      loadAllDocuments();
     }
   }, [activeTab]);
 
@@ -231,35 +225,16 @@ export default function Admin() {
     }
   };
 
-  const loadIngdDocuments = async () => {
+  const loadAllDocuments = async () => {
     setIsLoadingDocuments(true);
     try {
       const documents = await getIngdDocuments();
-      setIngdDocuments(documents || []);
+      setAllDocuments(documents || []);
     } catch (error) {
-      console.error("Error loading INGD documents:", error);
-      setIngdDocuments([]);
+      console.error("Error loading documents:", error);
+      setAllDocuments([]);
     } finally {
       setIsLoadingDocuments(false);
-    }
-  };
-
-  const loadGovernmentDocuments = async () => {
-    setIsLoadingGovernmentDocs(true);
-    try {
-      const documents = await getIngdDocuments();
-      // Filter for government priority documents
-      const governmentDocs = documents?.filter(doc =>
-        doc.type === "government_priority" ||
-        doc.description?.toLowerCase().includes("government") ||
-        doc.description?.toLowerCase().includes("priority")
-      ) || [];
-      setGovernmentDocuments(governmentDocs);
-    } catch (error) {
-      console.error("Error loading government documents:", error);
-      setGovernmentDocuments([]);
-    } finally {
-      setIsLoadingGovernmentDocs(false);
     }
   };
 
@@ -272,7 +247,8 @@ export default function Admin() {
     setIsUploadingDocument(true);
     try {
       // Upload file to Supabase Storage
-      const fileUrl = await uploadDocumentToStorage(documentFile, "ingd");
+      const storagePath = documentType === "government_priority" ? "government-priorities" : "ingd";
+      const fileUrl = await uploadDocumentToStorage(documentFile, storagePath);
 
       // Create document record in database
       const fileType = documentFile.name.split(".").pop() || "file";
@@ -281,16 +257,18 @@ export default function Admin() {
         file_url: fileUrl,
         file_type: fileType,
         description: documentDescription,
+        ...(documentType === "government_priority" && { type: "government_priority" }),
         uploaded_by: user?.email || "admin",
       });
 
       // Reload documents
-      await loadIngdDocuments();
+      await loadAllDocuments();
 
       // Clear form
       setDocumentFile(null);
       setDocumentDescription("");
-      alert("Document uploaded successfully!");
+      const typeLabel = documentType === "government_priority" ? "Government Priority" : "INGD";
+      alert(`${typeLabel} document uploaded successfully!`);
     } catch (error) {
       console.error("Error uploading document:", error);
       alert(`Error uploading document: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -303,7 +281,7 @@ export default function Admin() {
     if (confirm("Are you sure you want to delete this document?")) {
       try {
         await deleteIngdDocument(id);
-        await loadIngdDocuments();
+        await loadAllDocuments();
       } catch (error) {
         console.error("Error deleting document:", error);
         alert("Error deleting document");
@@ -311,54 +289,6 @@ export default function Admin() {
     }
   };
 
-  const handleUploadPriorityDocument = async () => {
-    if (!governmentPriorityFile || !governmentPriorityDescription.trim()) {
-      alert("Please select a file and enter a description");
-      return;
-    }
-
-    setIsUploadingPriority(true);
-    try {
-      // Upload file to Supabase Storage
-      const fileUrl = await uploadDocumentToStorage(governmentPriorityFile, "government-priorities");
-
-      // Create document record in database
-      const fileType = governmentPriorityFile.name.split(".").pop() || "file";
-      await createIngdDocument({
-        file_name: governmentPriorityFile.name,
-        file_url: fileUrl,
-        file_type: fileType,
-        description: governmentPriorityDescription,
-        type: "government_priority",
-        uploaded_by: user?.email || "admin",
-      });
-
-      // Reload documents
-      await loadGovernmentDocuments();
-
-      // Clear form
-      setGovernmentPriorityFile(null);
-      setGovernmentPriorityDescription("");
-      alert("Government priority document uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading government priority document:", error);
-      alert(`Error uploading document: ${error instanceof Error ? error.message : "Unknown error"}`);
-    } finally {
-      setIsUploadingPriority(false);
-    }
-  };
-
-  const deleteGovernmentDocument = async (id: number) => {
-    if (confirm("Are you sure you want to delete this government priority document?")) {
-      try {
-        await deleteIngdDocument(id);
-        await loadGovernmentDocuments();
-      } catch (error) {
-        console.error("Error deleting government document:", error);
-        alert("Error deleting document");
-      }
-    }
-  };
 
   const handleEditIngdRequest = (request: RelieRequest) => {
     setEditingIngdId(request.id || null);
@@ -517,8 +447,7 @@ export default function Admin() {
               { id: "dashboard", label: "Dashboard", shortLabel: "Dashboard", icon: BarChart3 },
               { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
               { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
-              { id: "documents", label: "INGD Documents", shortLabel: "Docs", icon: Download },
-              { id: "government-priorities", label: "Government Priorities", shortLabel: "Priorities", icon: Download },
+              { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
               { id: "users", label: "Users", shortLabel: "Users", icon: Users },
               { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
             ].map((tab) => (
@@ -1529,14 +1458,29 @@ export default function Admin() {
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
                 <h2 className="text-xl font-bold text-slate-900">
-                  Upload INGD Document
+                  Upload Document
                 </h2>
                 <p className="text-sm text-slate-600 mt-1">
-                  Add PDFs (INGD protocols) or Excel spreadsheets (Master List)
+                  Select document type, choose a file, and add a description
                 </p>
               </div>
 
               <div className="p-6 space-y-4">
+                <div>
+                  <label htmlFor="document-type" className="block text-sm font-medium text-slate-700 mb-2">
+                    Document Type
+                  </label>
+                  <select
+                    id="document-type"
+                    value={documentType}
+                    onChange={(e) => setDocumentType(e.target.value as "ingd" | "government_priority")}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="ingd">INGD Documents (protocols, Master List)</option>
+                    <option value="government_priority">Government Priorities</option>
+                  </select>
+                </div>
+
                 <div>
                   <label htmlFor="document-file" className="block text-sm font-medium text-slate-700 mb-2">
                     Select File (PDF, XLSX, XLS)
@@ -1563,7 +1507,7 @@ export default function Admin() {
                     id="document-description"
                     value={documentDescription}
                     onChange={(e) => setDocumentDescription(e.target.value)}
-                    placeholder="E.g., INGD Protocol v2.0, Master List - Jan 2024"
+                    placeholder={documentType === "government_priority" ? "E.g., Government Priorities - January 2026" : "E.g., INGD Protocol v2.0, Master List - Jan 2024"}
                     rows={3}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                   />
@@ -1588,10 +1532,10 @@ export default function Admin() {
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
                 <h2 className="text-xl font-bold text-slate-900">
-                  Available Documents ({ingdDocuments.length})
+                  All Documents ({allDocuments.length})
                 </h2>
                 <p className="text-sm text-slate-600 mt-1">
-                  Documents displayed below will be available for download in the INGD Relief Requests section
+                  View and manage all uploaded documents across all categories
                 </p>
               </div>
 
@@ -1599,57 +1543,70 @@ export default function Admin() {
                 <div className="p-6 text-center text-slate-600">
                   Loading documents...
                 </div>
-              ) : ingdDocuments.length === 0 ? (
+              ) : allDocuments.length === 0 ? (
                 <div className="p-6 text-center text-slate-600">
                   No documents uploaded yet. Upload your first document to get started.
                 </div>
               ) : (
                 <div className="divide-y divide-slate-200">
-                  {ingdDocuments.map((doc) => (
-                    <div key={doc.id} className="p-6 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Download size={18} className="text-blue-600" />
-                            <h3 className="font-semibold text-slate-900 break-words">
-                              {doc.file_name}
-                            </h3>
-                            <span className="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                              {doc.file_type.toUpperCase()}
-                            </span>
-                          </div>
-                          {doc.description && (
-                            <p className="text-sm text-slate-600 mb-2">
-                              {doc.description}
+                  {allDocuments.map((doc) => {
+                    const isGovernmentDoc = doc.type === "government_priority";
+                    const typeColor = isGovernmentDoc ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700";
+                    const typeLabel = isGovernmentDoc ? "Government Priority" : "INGD";
+
+                    return (
+                      <div key={doc.id} className="p-6 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <Download size={18} className={isGovernmentDoc ? "text-purple-600" : "text-blue-600"} />
+                              <h3 className="font-semibold text-slate-900 break-words">
+                                {doc.file_name}
+                              </h3>
+                              <span className={`text-xs px-2 py-1 rounded ${typeColor}`}>
+                                {typeLabel}
+                              </span>
+                              <span className="text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded">
+                                {doc.file_type.toUpperCase()}
+                              </span>
+                            </div>
+                            {doc.description && (
+                              <p className="text-sm text-slate-600 mb-2">
+                                {doc.description}
+                              </p>
+                            )}
+                            <p className="text-xs text-slate-500">
+                              Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Unknown"}
+                              {doc.uploaded_by && ` by ${doc.uploaded_by}`}
                             </p>
-                          )}
-                          <p className="text-xs text-slate-500">
-                            Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Unknown"}
-                            {doc.uploaded_by && ` by ${doc.uploaded_by}`}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 flex-shrink-0">
-                          <a
-                            href={doc.file_url}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-                          >
-                            <Download size={16} />
-                            Download
-                          </a>
-                          <button
-                            onClick={() => handleDeleteDocument(doc.id || 0)}
-                            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-                          >
-                            <Trash2 size={16} />
-                            Delete
-                          </button>
+                          </div>
+                          <div className="flex gap-2 flex-shrink-0">
+                            <a
+                              href={doc.file_url}
+                              download
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                                isGovernmentDoc
+                                  ? "bg-purple-100 hover:bg-purple-200 text-purple-700"
+                                  : "bg-blue-100 hover:bg-blue-200 text-blue-700"
+                              }`}
+                            >
+                              <Download size={16} />
+                              Download
+                            </a>
+                            <button
+                              onClick={() => handleDeleteDocument(doc.id || 0)}
+                              className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                            >
+                              <Trash2 size={16} />
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1657,127 +1614,15 @@ export default function Admin() {
             {/* Info Box */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
               <p className="text-lg font-semibold text-blue-900 mb-2">
-                📄 INGD Documents Management
+                📄 Document Management
               </p>
               <p className="text-blue-800">
-                Upload and manage INGD protocol documents and Excel spreadsheets. These documents will be displayed in the INGD Relief Requests section for members to reference and download.
+                Upload and manage all documents from one central location. Select the document type when uploading, and documents will be organized and displayed in their respective sections.
               </p>
             </div>
           </div>
         )}
 
-        {/* Government Priorities Tab */}
-        {activeTab === "government-priorities" && (
-          <div className="space-y-6">
-            {/* Upload Section */}
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Upload Government Priority Document
-                </h2>
-                <p className="text-sm text-slate-600 mt-1">
-                  Add official government priority documents for disaster response
-                </p>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <div>
-                  <label htmlFor="priority-file" className="block text-sm font-medium text-slate-700 mb-2">
-                    Select File (PDF, Excel)
-                  </label>
-                  <input
-                    id="priority-file"
-                    type="file"
-                    accept=".pdf,.xlsx,.xls"
-                    onChange={(e) => setGovernmentPriorityFile(e.target.files?.[0] || null)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                  {governmentPriorityFile && (
-                    <p className="text-sm text-slate-600 mt-2">
-                      Selected: {governmentPriorityFile.name}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="priority-description" className="block text-sm font-medium text-slate-700 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    id="priority-description"
-                    value={governmentPriorityDescription}
-                    onChange={(e) => setGovernmentPriorityDescription(e.target.value)}
-                    placeholder="E.g., Government Priorities - January 2026, INGD Humanitarian Assistance List"
-                    rows={3}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                  />
-                </div>
-
-                <button
-                  onClick={handleUploadPriorityDocument}
-                  disabled={isUploadingPriority || !governmentPriorityFile}
-                  className="w-full bg-primary hover:bg-primary/90 disabled:bg-slate-300 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  {isUploadingPriority ? "Uploading..." : (
-                    <>
-                      <Plus size={18} />
-                      Upload Document
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Documents List */}
-            <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Published Priorities ({governmentDocuments.length})
-                </h2>
-              </div>
-
-              {isLoadingGovernmentDocs ? (
-                <div className="p-6 text-center text-slate-500">Loading documents...</div>
-              ) : governmentDocuments.length === 0 ? (
-                <div className="p-6 text-center text-slate-500">
-                  No government priority documents uploaded yet.
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-200">
-                  {governmentDocuments.map((doc) => (
-                    <div key={doc.id} className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="font-semibold text-slate-900">{doc.file_name}</p>
-                          <p className="text-sm text-slate-600 mt-1">{doc.description}</p>
-                          <p className="text-xs text-slate-500 mt-2">
-                            Type: {doc.type?.toUpperCase() || "PDF"}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => deleteGovernmentDocument(doc.id!)}
-                          className="ml-4 px-3 py-1 text-red-600 hover:bg-red-50 rounded font-medium text-sm transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-              <p className="text-lg font-semibold text-blue-900 mb-2">
-                📋 Government Priorities Management
-              </p>
-              <p className="text-blue-800">
-                Upload official government disaster response priority documents. These will be visible on the public Government Priorities page to guide humanitarian assistance efforts.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   );
