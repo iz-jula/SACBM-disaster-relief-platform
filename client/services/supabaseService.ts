@@ -697,7 +697,11 @@ export async function getIngdActiveSetting(): Promise<boolean> {
       return true; // Default to true if error
     }
 
-    return data?.setting_value === true;
+    // Handle both direct boolean and JSONB stored boolean
+    const value = data?.setting_value;
+    const isActive = value === true || value === 'true';
+    console.log("INGD setting value:", value, "isActive:", isActive);
+    return isActive;
   } catch (error) {
     console.error("Error fetching INGD setting:", error);
     return true; // Default to true if error
@@ -709,10 +713,18 @@ export async function setIngdActiveSetting(isActive: boolean): Promise<boolean> 
   try {
     const { error } = await supabase
       .from("admin_settings")
-      .update({ setting_value: isActive, updated_at: new Date().toISOString() })
+      .update({
+        setting_value: isActive,
+        updated_at: new Date().toISOString()
+      })
       .eq("setting_key", "ingd_active");
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error updating INGD setting:", error);
+      throw error;
+    }
+
+    console.log("INGD setting updated to:", isActive);
     return true;
   } catch (error) {
     console.error("Error updating INGD setting:", error);

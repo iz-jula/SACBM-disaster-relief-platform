@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import { getIngdRequests, createIngdCommitment, resolveIngdRequest, revertIngdToPending, getIngdDocuments } from "@/services/supabaseService";
+import { getIngdRequests, createIngdCommitment, resolveIngdRequest, revertIngdToPending, getIngdDocuments, getIngdActiveSetting } from "@/services/supabaseService";
 import type { IngdRequest, IngdDocument } from "@/services/supabaseService";
 import { ChevronDown } from "lucide-react";
 import { AlertCircle } from "lucide-react";
@@ -39,10 +39,7 @@ function getStatusLabel(status: boolean) {
 
 export default function INGDDashboard() {
   const navigate = useNavigate();
-  const [ingdActive] = useState(() => {
-    const stored = localStorage.getItem("ingd_active");
-    return stored !== null ? JSON.parse(stored) : true;
-  });
+  const [ingdActive, setIngdActive] = useState(true);
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "requests">("dashboard");
   const [ingdRequests, setIngdRequests] = useState<IngdRequest[]>([]);
@@ -64,6 +61,20 @@ export default function INGDDashboard() {
   const [commitmentError, setCommitmentError] = useState("");
   const [isSubmittingCommitment, setIsSubmittingCommitment] = useState(false);
   const [pendingActionType, setPendingActionType] = useState<"commitment" | "resolved" | null>(null);
+
+  // Load INGD active state from database
+  useEffect(() => {
+    const loadIngdSetting = async () => {
+      const isActive = await getIngdActiveSetting();
+      setIngdActive(isActive);
+    };
+
+    loadIngdSetting();
+
+    // Poll for changes every 2 seconds
+    const interval = setInterval(loadIngdSetting, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (!ingdActive) {
     return (
