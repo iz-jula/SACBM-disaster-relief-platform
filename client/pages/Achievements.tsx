@@ -11,6 +11,7 @@ import {
   Trash2,
   Lock,
   AlertCircle,
+  Download,
 } from "lucide-react";
 import {
   getAchievements,
@@ -21,6 +22,8 @@ import {
   Achievement,
   AchievementsMetrics,
 } from "@/services/achievementsService";
+import { getIngdDocuments } from "@/services/supabaseService";
+import type { IngdDocument } from "@/services/supabaseService";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Food: "bg-blue-100 text-blue-800",
@@ -121,10 +124,28 @@ export default function Achievements() {
 
   const [customTypeAction, setCustomTypeAction] = useState("");
   const [customPartnerOrg, setCustomPartnerOrg] = useState("");
+  const [actionDocuments, setActionDocuments] = useState<IngdDocument[]>([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
 
   useEffect(() => {
     loadData();
+    loadActionDocuments();
   }, [selectedCategory]);
+
+  const loadActionDocuments = async () => {
+    setIsLoadingDocuments(true);
+    try {
+      const documents = await getIngdDocuments();
+      // Filter for action documents
+      const actionDocs = documents?.filter(doc => doc.type === "actions") || [];
+      setActionDocuments(actionDocs);
+    } catch (error) {
+      console.error("Error loading action documents:", error);
+      setActionDocuments([]);
+    } finally {
+      setIsLoadingDocuments(false);
+    }
+  };
 
   const loadData = async () => {
     setIsLoading(true);
@@ -1230,6 +1251,67 @@ export default function Achievements() {
               >
                 Load More ({displayedAchievementsCount} of {achievements.length})
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* Action Documents Section */}
+        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+          <div className="px-4 sm:px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+              📄 Action Resources & Guidelines
+            </h2>
+            <p className="text-sm text-slate-600 mt-1">
+              Download documentation and guidelines for action submissions
+            </p>
+          </div>
+
+          {isLoadingDocuments ? (
+            <div className="p-6 text-center text-slate-600">
+              Loading documents...
+            </div>
+          ) : actionDocuments.length === 0 ? (
+            <div className="p-6 text-center text-slate-600">
+              <p className="font-medium">No resources available yet</p>
+              <p className="text-sm mt-2">Check back soon for action guidelines and documentation</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-200">
+              {actionDocuments.map((doc) => (
+                <div key={doc.id} className="p-4 sm:p-6 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Download size={18} className="text-amber-600 flex-shrink-0" />
+                        <h3 className="font-semibold text-slate-900 break-words">
+                          {doc.file_name}
+                        </h3>
+                        <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded whitespace-nowrap">
+                          {doc.file_type.toUpperCase()}
+                        </span>
+                      </div>
+                      {doc.description && (
+                        <p className="text-sm text-slate-600 mb-2">
+                          {doc.description}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500">
+                        Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Unknown"}
+                      </p>
+                    </div>
+                    <a
+                      href={doc.file_url}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap flex-shrink-0"
+                    >
+                      <Download size={16} />
+                      Download
+                    </a>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
