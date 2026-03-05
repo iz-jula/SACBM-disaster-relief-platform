@@ -120,12 +120,14 @@ export default function Achievements() {
     amount: "",
     hide_amount: false,
     media: null as string | null,
+    documents: null as string | null,
   });
 
   const [customTypeAction, setCustomTypeAction] = useState("");
   const [customPartnerOrg, setCustomPartnerOrg] = useState("");
   const [actionDocuments, setActionDocuments] = useState<IngdDocument[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
 
   useEffect(() => {
     loadData();
@@ -172,6 +174,30 @@ export default function Achievements() {
 
   const removeMedia = (index: number) => {
     setUploadedMedia(uploadedMedia.filter((_, i) => i !== index));
+  };
+
+  const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      // Filter for document types only (PDF, DOC, XLS, etc.)
+      const documentFiles = Array.from(files).filter(file => {
+        const validTypes = [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'text/plain',
+          'application/vnd.oasis.opendocument.text'
+        ];
+        return validTypes.includes(file.type) || file.name.match(/\.(pdf|doc|docx|xls|xlsx|txt|odt)$/i);
+      });
+      setUploadedDocuments([...uploadedDocuments, ...documentFiles]);
+    }
+  };
+
+  const removeDocument = (index: number) => {
+    setUploadedDocuments(uploadedDocuments.filter((_, i) => i !== index));
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -241,6 +267,36 @@ export default function Achievements() {
           console.log("Images converted to base64 array");
         }
 
+        // Convert all uploaded documents to base64 array
+        let documentData: string | null = null;
+        if (uploadedDocuments.length > 0) {
+          console.log("Processing", uploadedDocuments.length, "documents...");
+          const documentArray: string[] = [];
+
+          for (const file of uploadedDocuments) {
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                resolve(reader.result as string);
+              };
+              reader.onerror = () => {
+                console.error("FileReader error:", reader.error);
+                reject(reader.error);
+              };
+              reader.readAsDataURL(file);
+            });
+            documentArray.push(base64);
+          }
+
+          // Store as JSON array with file metadata
+          documentData = JSON.stringify(documentArray.map((doc, idx) => ({
+            data: doc,
+            name: uploadedDocuments[idx].name,
+            type: uploadedDocuments[idx].type,
+          })));
+          console.log("Documents converted to base64 array");
+        }
+
         // Combine custom values with "Other -" prefix
         const typeActionValue =
           formData.type_action === "Other - please specify"
@@ -270,6 +326,7 @@ export default function Achievements() {
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
           media: imageData || null,
+          documents: documentData || null,
         };
 
         console.log("Sending achievement data:", newAchievementData);
@@ -289,10 +346,12 @@ export default function Achievements() {
             amount: "",
             hide_amount: false,
     media: null as string | null,
+            documents: null as string | null,
           });
           setCustomTypeAction("");
           setCustomPartnerOrg("");
           setUploadedMedia([]);
+          setUploadedDocuments([]);
           setShowForm(false);
           await loadData();
           alert("Action submitted successfully!");
@@ -332,6 +391,7 @@ export default function Achievements() {
       amount: achievement.amount.toString(),
       hide_amount: false,
       media: achievement.media || null,
+      documents: (achievement as any).documents || null,
     });
     setShowEditModal(true);
   };
@@ -421,6 +481,34 @@ export default function Achievements() {
           console.log("Converted", uploadedMedia.length, "files to base64 array");
         }
 
+        // Handle newly uploaded documents - convert all files to base64
+        let documentData: string | null | undefined = undefined;
+        if (uploadedDocuments.length > 0) {
+          const documentArray: string[] = [];
+
+          for (const file of uploadedDocuments) {
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                resolve(reader.result as string);
+              };
+              reader.onerror = () => {
+                reject(reader.error);
+              };
+              reader.readAsDataURL(file);
+            });
+            documentArray.push(base64);
+          }
+
+          // Store as JSON array with metadata
+          documentData = JSON.stringify(documentArray.map((doc, idx) => ({
+            data: doc,
+            name: uploadedDocuments[idx].name,
+            type: uploadedDocuments[idx].type,
+          })));
+          console.log("Converted", uploadedDocuments.length, "documents to base64 array");
+        }
+
         // Validate custom fields
         if (formData.type_action === "Other - please specify" && !customTypeAction.trim()) {
           setAuthError("Please specify the type of action");
@@ -477,6 +565,21 @@ export default function Achievements() {
           console.log("Removing media");
         }
 
+        // Handle document updates
+        if (documentData !== undefined) {
+          // User uploaded new documents
+          updateData.documents = documentData;
+          console.log("Updating with new documents");
+        } else if (formData.documents !== null && uploadedDocuments.length === 0) {
+          // Keep existing documents - only include if they didn't upload new files
+          updateData.documents = formData.documents;
+          console.log("Keeping existing documents");
+        } else if (formData.documents === null && uploadedDocuments.length === 0) {
+          // Documents were removed
+          updateData.documents = null;
+          console.log("Removing documents");
+        }
+
         console.log("Updating achievement with id:", pendingAction.achievementId, "Data:", updateData);
 
         try {
@@ -506,9 +609,12 @@ export default function Achievements() {
           amount: "",
           hide_amount: false,
     media: null as string | null,
+            documents: null as string | null,
         });
         setCustomTypeAction("");
         setCustomPartnerOrg("");
+        setUploadedMedia([]);
+        setUploadedDocuments([]);
         setShowForm(false);
         setShowEditModal(false);
         setEditingAchievement(null);
@@ -647,7 +753,10 @@ export default function Achievements() {
                   amount: "",
                   hide_amount: false,
     media: null as string | null,
+                  documents: null as string | null,
                 });
+                setUploadedMedia([]);
+                setUploadedDocuments([]);
               }
               setShowForm(!showForm);
             }}
@@ -952,6 +1061,59 @@ export default function Achievements() {
                 )}
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Attach Documents (Optional)
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Upload supporting documents like receipts, invoices, or reports (PDF, DOC, XLS)
+                </p>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4">
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleDocumentUpload}
+                    className="hidden"
+                    id="document-upload"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.odt"
+                  />
+                  <label
+                    htmlFor="document-upload"
+                    className="flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Download size={20} className="text-slate-600" />
+                    <span className="text-sm text-slate-600">
+                      Click to upload documents
+                    </span>
+                  </label>
+                </div>
+
+                {uploadedDocuments.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs font-medium text-slate-600">
+                      Uploaded Files ({uploadedDocuments.length})
+                    </p>
+                    {uploadedDocuments.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-slate-50 rounded"
+                      >
+                        <span className="text-sm text-slate-700">
+                          {file.name}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeDocument(index)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="submit"
@@ -964,6 +1126,7 @@ export default function Achievements() {
                   onClick={() => {
                     setShowForm(false);
                     setUploadedMedia([]);
+                    setUploadedDocuments([]);
                     setEditingAchievementId("");
                     setFormData({
                       company_name: "",
@@ -977,6 +1140,7 @@ export default function Achievements() {
                       amount: "",
                       hide_amount: false,
     media: null as string | null,
+                      documents: null as string | null,
                     });
                   }}
                   className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium"
@@ -1760,6 +1924,73 @@ export default function Achievements() {
                     </div>
                   )}
                 </div>
+
+                {/* Document Upload Section */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">
+                    Attach Documents (Optional)
+                  </label>
+                  <p className="text-xs text-slate-500 mb-3">
+                    Upload supporting documents like receipts, invoices, or reports
+                  </p>
+                  <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={handleDocumentUpload}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.odt"
+                      className="hidden"
+                      id="document-upload-edit"
+                    />
+                    <label
+                      htmlFor="document-upload-edit"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <Download size={20} className="text-slate-600" />
+                      <span className="text-sm text-slate-600">
+                        Click to upload or drag and drop
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        PDF, DOC, XLS and other documents
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Uploaded Documents Preview */}
+                  {uploadedDocuments.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm font-medium text-slate-700">
+                        Uploaded Files ({uploadedDocuments.length})
+                      </p>
+                      {uploadedDocuments.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200"
+                        >
+                          <span className="text-sm text-slate-700 truncate">
+                            {file.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeDocument(index)}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                            title="Remove file"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setUploadedDocuments([])}
+                        className="text-sm text-slate-500 hover:text-slate-700 mt-2"
+                      >
+                        Clear all files
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-3 pt-4 border-t border-slate-200">
                   <button
                     type="submit"
