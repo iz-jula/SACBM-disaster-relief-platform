@@ -220,10 +220,13 @@ function generateGovernmentPrioritiesSection(context: ReportContext): string {
   if (context.governmentPriorities.length === 0) return '';
 
   let narrative = `\n6. GOVERNMENT PRIORITY NEEDS\n\n`;
-  
-  narrative += `Government priority submissions represent needs identified by public institutions involved in disaster response coordination.
 
-These priorities provide guidance for aligning private sector initiatives with national disaster response and recovery strategies.`;
+  narrative += `Government priority submissions represent needs identified by public institutions involved in disaster response coordination.\n\nThese priorities provide guidance for aligning private sector initiatives with national disaster response and recovery strategies.\n\n`;
+
+  narrative += `Selected Government Priority Items:\n`;
+  context.governmentPriorities.forEach((priority, index) => {
+    narrative += `${index + 1}. ${priority.item}\n`;
+  });
 
   return narrative;
 }
@@ -233,10 +236,17 @@ function generateMediaSection(context: ReportContext): string {
   if (context.mediaFiles.length === 0) return '';
 
   let narrative = `\n7. MEDIA DOCUMENTATION\n\n`;
-  
-  narrative += `This section includes media documentation associated with actions and requests recorded through the SACBM platform.
 
-Media files are selected individually during report generation and may include images, documents, or other supporting materials.`;
+  narrative += `This section includes media documentation associated with actions and requests recorded through the SACBM platform.\n\nMedia files are selected individually during report generation and may include images, documents, or other supporting materials.\n\n`;
+
+  narrative += `Included Media Files:\n`;
+  context.mediaFiles.forEach((file, index) => {
+    narrative += `${index + 1}. ${file.file_name}\n`;
+    if (file.description) {
+      narrative += `   Description: ${file.description}\n`;
+    }
+    narrative += `   Source: ${file.source === 'action' ? 'From Action' : 'Document'}\n\n`;
+  });
 
   return narrative;
 }
@@ -443,7 +453,73 @@ export async function generatePDFReport(
       yPosition += 5;
     });
   }
-  
+
+  // Add media files if present
+  if (context.mediaFiles.length > 0) {
+    yPosition += 10;
+    checkPageBreak(20);
+
+    pdf.setFontSize(12);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.text('MEDIA DOCUMENTATION GALLERY', margin, yPosition);
+    yPosition += 10;
+
+    context.mediaFiles.forEach((file, index) => {
+      checkPageBreak(80); // More space needed for images
+
+      // File header
+      pdf.setFontSize(11);
+      pdf.setFont('Helvetica', 'bold');
+      pdf.text(`${index + 1}. ${file.file_name}`, margin, yPosition);
+      yPosition += 6;
+
+      // File details
+      pdf.setFont('Helvetica', 'normal');
+      pdf.setFontSize(9);
+
+      const fileDetails = [
+        file.description ? `Description: ${file.description}` : null,
+        file.source === 'action' ? 'Source: From Action' : 'Source: Document',
+        file.file_type ? `Type: ${file.file_type.toUpperCase()}` : null,
+      ].filter(Boolean);
+
+      fileDetails.forEach(detail => {
+        if (yPosition + 4 > pageHeight - 10) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+        pdf.text(detail!, margin + 5, yPosition);
+        yPosition += 4;
+      });
+
+      // Embed image if available
+      if (file.data_url) {
+        yPosition += 3;
+        try {
+          const imgWidth = maxWidth - 10;
+          const imgHeight = 60; // Fixed height for thumbnail
+
+          if (yPosition + imgHeight > pageHeight - 15) {
+            pdf.addPage();
+            yPosition = margin;
+          }
+
+          // Add the image
+          pdf.addImage(file.data_url, 'JPEG', margin + 5, yPosition, imgWidth, imgHeight);
+          yPosition += imgHeight + 5;
+        } catch (error) {
+          console.error('Error embedding image:', error);
+          pdf.setFontSize(9);
+          pdf.setFont('Helvetica', 'italic');
+          pdf.text('[Image could not be embedded]', margin + 5, yPosition);
+          yPosition += 5;
+        }
+      }
+
+      yPosition += 5;
+    });
+  }
+
   // Footer
   if (config.footer) {
     checkPageBreak(5);
