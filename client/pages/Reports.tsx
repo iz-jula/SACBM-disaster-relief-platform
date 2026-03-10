@@ -644,47 +644,77 @@ export default function Reports() {
                   {expandedFilters.governmentPriorities ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
                 {expandedFilters.governmentPriorities && (
-                  <div className="p-4 bg-white space-y-4 max-h-96 overflow-y-auto">
-                    {PRIORITY_CATEGORIES.map((category, catIdx) => (
-                      <div key={catIdx} className="border border-slate-200 rounded-lg p-3">
-                        <h4 className="font-semibold text-slate-900 mb-3 text-sm">{category.title}</h4>
-                        <div className="space-y-2">
-                          {category.items.map((item, itemIdx) => (
-                            <label key={itemIdx} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
-                              <input
-                                type="checkbox"
-                                checked={govPriorityFilters.selectedItems.has(item)}
-                                onChange={(e) => {
-                                  const newSelected = new Set(govPriorityFilters.selectedItems);
-                                  const newCategories = new Set(govPriorityFilters.selectedCategories);
+                  <div className="p-4 bg-white space-y-3">
+                    {/* Select All Button */}
+                    <button
+                      onClick={() => {
+                        const allItems = PRIORITY_CATEGORIES.flatMap(cat => cat.items);
+                        const allSelected = allItems.every(item => govPriorityFilters.selectedItems.has(item));
 
-                                  if (e.target.checked) {
-                                    newSelected.add(item);
-                                    newCategories.add(catIdx);
-                                  } else {
-                                    newSelected.delete(item);
-                                    // Remove category if no items from it are selected
-                                    const categoryHasSelection = category.items.some(i =>
-                                      i !== item && newSelected.has(i)
-                                    );
-                                    if (!categoryHasSelection) {
-                                      newCategories.delete(catIdx);
+                        if (allSelected) {
+                          // Deselect all
+                          setGovPriorityFilters({
+                            selectedCategories: new Set(),
+                            selectedItems: new Set(),
+                          });
+                        } else {
+                          // Select all
+                          const newSelected = new Set(allItems);
+                          const newCategories = new Set(PRIORITY_CATEGORIES.map((_, idx) => idx));
+                          setGovPriorityFilters({
+                            selectedCategories: newCategories,
+                            selectedItems: newSelected,
+                          });
+                        }
+                      }}
+                      className="w-full px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-900 font-medium rounded-lg transition-colors text-sm"
+                    >
+                      {PRIORITY_CATEGORIES.flatMap(cat => cat.items).every(item => govPriorityFilters.selectedItems.has(item)) ? 'Deselect All' : 'Select All'}
+                    </button>
+
+                    {/* Categories List */}
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {PRIORITY_CATEGORIES.map((category, catIdx) => (
+                        <div key={catIdx} className="border border-slate-200 rounded-lg p-3">
+                          <h4 className="font-semibold text-slate-900 mb-3 text-sm">{category.title}</h4>
+                          <div className="space-y-2">
+                            {category.items.map((item, itemIdx) => (
+                              <label key={itemIdx} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                                <input
+                                  type="checkbox"
+                                  checked={govPriorityFilters.selectedItems.has(item)}
+                                  onChange={(e) => {
+                                    const newSelected = new Set(govPriorityFilters.selectedItems);
+                                    const newCategories = new Set(govPriorityFilters.selectedCategories);
+
+                                    if (e.target.checked) {
+                                      newSelected.add(item);
+                                      newCategories.add(catIdx);
+                                    } else {
+                                      newSelected.delete(item);
+                                      // Remove category if no items from it are selected
+                                      const categoryHasSelection = category.items.some(i =>
+                                        i !== item && newSelected.has(i)
+                                      );
+                                      if (!categoryHasSelection) {
+                                        newCategories.delete(catIdx);
+                                      }
                                     }
-                                  }
 
-                                  setGovPriorityFilters({
-                                    selectedCategories: newCategories,
-                                    selectedItems: newSelected,
-                                  });
-                                }}
-                                className="w-4 h-4 rounded cursor-pointer"
-                              />
-                              <span className="text-sm text-slate-700">{item}</span>
-                            </label>
-                          ))}
+                                    setGovPriorityFilters({
+                                      selectedCategories: newCategories,
+                                      selectedItems: newSelected,
+                                    });
+                                  }}
+                                  className="w-4 h-4 rounded cursor-pointer"
+                                />
+                                <span className="text-sm text-slate-700">{item}</span>
+                              </label>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -727,8 +757,30 @@ export default function Reports() {
                         <p className="text-xs text-slate-500">Check if images were properly uploaded with your actions</p>
                       </div>
                     ) : (
-                      <div className="space-y-2 max-h-80 overflow-y-auto">
-                        {getImageFiles().map((doc) => (
+                      <div className="space-y-3">
+                        {/* Select All Button */}
+                        <button
+                          onClick={() => {
+                            const allFiles = getImageFiles();
+                            const allSelected = allFiles.every(file => selectedMedia.has(file.id));
+
+                            if (allSelected) {
+                              // Deselect all
+                              setSelectedMedia(new Set());
+                            } else {
+                              // Select all
+                              const newSelected = new Set(allFiles.map(f => f.id));
+                              setSelectedMedia(newSelected);
+                            }
+                          }}
+                          className="w-full px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-900 font-medium rounded-lg transition-colors text-sm"
+                        >
+                          {getImageFiles().every(file => selectedMedia.has(file.id)) ? 'Deselect All' : 'Select All'}
+                        </button>
+
+                        {/* Files List */}
+                        <div className="space-y-2 max-h-80 overflow-y-auto">
+                          {getImageFiles().map((doc) => (
                           <div key={doc.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 transition-colors group">
                             <input
                               type="checkbox"
@@ -772,7 +824,8 @@ export default function Reports() {
                               {doc.source === 'action' ? 'ACTION' : doc.file_type?.toUpperCase()}
                             </span>
                           </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
