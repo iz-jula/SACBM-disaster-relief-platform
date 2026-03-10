@@ -73,11 +73,12 @@ const getDateRangeString = (filters: ReportContext['filters']): string => {
 };
 
 // Generate Report Header
-function generateReportHeader(): string {
+function generateReportHeader(context: ReportContext): string {
+  const dateRange = getDateRangeString(context.filters);
   return `SACBM PRIVATE SECTOR DISASTER RESPONSE REPORT
 South African Chamber of Business in Mozambique
 
-Reporting Period: [Date Range]
+Reporting Period: ${dateRange}
 Report Generated: ${formatDate(new Date())}
 Platform: SACBM Disaster Response Coordination Platform`;
 }
@@ -141,12 +142,12 @@ The report may include the following categories:\n\n`;
 function generatePlatformActivitySummary(context: ReportContext): string {
   let narrative = `\n3. PLATFORM ACTIVITY SUMMARY\n\n`;
   narrative += `During the reporting period, the SACBM platform recorded the following entries:\n\n`;
-  
+
   narrative += `Private Sector Actions: ${context.actions.length}\n`;
   narrative += `Relief Requests: ${context.reliefRequests.length}\n`;
   narrative += `Government Priority Submissions: ${context.governmentPriorities.length}\n`;
   narrative += `Media Files Included: ${context.mediaFiles.length}\n\n`;
-  
+
   narrative += `These entries represent submissions made by Chamber members, partner organizations, and institutional stakeholders.`;
 
   return narrative;
@@ -195,7 +196,7 @@ function generateReliefRequestsSection(context: ReportContext): string {
   if (context.reliefRequests.length === 0) return '';
 
   let narrative = `\n5. RELIEF REQUESTS\n\n`;
-  
+
   // Base narrative
   narrative += `Relief requests represent humanitarian needs identified through the SACBM platform and submitted by Chamber members, partner organizations, or institutional stakeholders.
 
@@ -203,11 +204,11 @@ These requests provide visibility into areas where additional assistance may be 
 
   // Conditional narrative based on originator
   const hasGovernmentRequests = context.reliefRequests.some(r => r.originator === 'INGD');
-  const onlyMemberRequests = !context.filters.reliefRequests.excludeINGD === false;
+  const excludeINGD = context.filters.reliefRequests.excludeINGD;
 
-  if (hasGovernmentRequests && !onlyMemberRequests) {
-    narrative += `Some requests included in this section originate from government institutions responsible for disaster response coordination.`;
-  } else if (onlyMemberRequests) {
+  if (hasGovernmentRequests && !excludeINGD) {
+    narrative += `This section includes requests from both government institutions (INGD) and SACBM member organizations.`;
+  } else if (!hasGovernmentRequests || excludeINGD) {
     narrative += `This report includes requests submitted directly by SACBM members and partner organizations.`;
   }
 
@@ -252,8 +253,8 @@ The South African Chamber of Business in Mozambique remains committed to encoura
 // Build complete narrative
 export function generateComprehensiveNarrative(context: ReportContext): string {
   let narrative = '';
-  
-  narrative += generateReportHeader();
+
+  narrative += generateReportHeader(context);
   narrative += generateExecutiveOverview(context.actions.length);
   narrative += generateReportScope(context);
   narrative += generatePlatformActivitySummary(context);

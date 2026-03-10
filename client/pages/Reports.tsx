@@ -101,14 +101,18 @@ export default function Reports() {
 
       // Always load documents if government priorities or media is selected
       if (includeData.governmentPriorities || includeData.media) {
-        const docs = await getIngdDocuments();
-        setAllDocuments(docs);
+        try {
+          const docs = await getIngdDocuments();
+          setAllDocuments(docs);
 
-        // Extract government priority submitters
-        if (includeData.governmentPriorities) {
-          const govPriorities = docs.filter(d => d.type === 'government_priority');
-          const submitters = [...new Set(govPriorities.map(d => d.uploaded_by))].filter(Boolean).sort();
-          setGovPrioritySubmitterOptions(submitters);
+          // Extract government priority submitters
+          if (includeData.governmentPriorities) {
+            const govPriorities = docs.filter(d => d.type === 'government_priority');
+            const submitters = [...new Set(govPriorities.map(d => d.uploaded_by))].filter(Boolean).sort();
+            setGovPrioritySubmitterOptions(submitters);
+          }
+        } catch (error) {
+          console.error("Error loading documents:", error);
         }
       }
     } catch (error) {
@@ -206,6 +210,12 @@ export default function Reports() {
   const handleGenerateReport = async () => {
     if (!includeData.actions && !includeData.reliefRequests && !includeData.governmentPriorities && !includeData.media) {
       alert("Please select at least one data type to include in the report");
+      return;
+    }
+
+    // Check if date range is set
+    if (!actionFilters.startDate || !actionFilters.endDate) {
+      alert("Please set a reporting date range (Start Date and End Date are required)");
       return;
     }
 
@@ -372,18 +382,20 @@ export default function Reports() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Start Date <span className="text-red-600">*</span></label>
                         <input
                           type="date"
+                          required
                           value={actionFilters.startDate}
                           onChange={(e) => setActionFilters({ ...actionFilters, startDate: e.target.value })}
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">End Date</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">End Date <span className="text-red-600">*</span></label>
                         <input
                           type="date"
+                          required
                           value={actionFilters.endDate}
                           onChange={(e) => setActionFilters({ ...actionFilters, endDate: e.target.value })}
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
