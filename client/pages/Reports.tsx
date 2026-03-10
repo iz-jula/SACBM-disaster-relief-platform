@@ -19,6 +19,73 @@ import { downloadReport, ReportContext, ReportFilters } from "@/services/reportS
 import type { Achievement } from "@/services/achievementsService";
 import type { RelieRequest, IngdDocument } from "@/services/supabaseService";
 
+// Government Priority Categories (same as GovernmentPriorities.tsx)
+const PRIORITY_CATEGORIES = [
+  {
+    title: "1) Bens Alimentares diversos",
+    items: [
+      "Arroz",
+      "Farinha de milho",
+      "Feijão",
+      "Açúcar",
+      "Óleo",
+      "Sal",
+      "Alimentos fortificados",
+    ],
+  },
+  {
+    title: "2) Material para conservação e tratamento de água",
+    items: [
+      "Tanques flexíveis",
+      "Tanques rígidos",
+      "Purificadores de agua",
+      "Certeza",
+      "Cloro",
+    ],
+  },
+  {
+    title: "3) Bens para Saneamento",
+    items: [
+      "Lonas",
+      "Rolos Plásticos",
+      "Estacas",
+      "Arrame queimado",
+      "Pregos",
+      "Lajes",
+    ],
+  },
+  {
+    title: "4) Sementes",
+    items: [
+      "Hortícolas diversas: couve, alface, cebola, tomate e Quiabo",
+      "Cereais: Milho e Mapira",
+    ],
+  },
+  {
+    title: "5) Material de Construção",
+    items: [
+      "Cimento",
+      "Areia grossa",
+      "Areia fina",
+      "Chapas de zinco",
+      "Pregos",
+      "Arrame queimado",
+      "Barrotes",
+      "Portas e Janelas",
+    ],
+  },
+  {
+    title: "6) Kits de Abrigo / Ferramentas",
+    items: [
+      "Martelos",
+      "Enxadas",
+      "Catanas",
+      "Alicates",
+      "Serrotes",
+    ],
+  },
+];
+
 export default function Reports() {
   const [allActions, setAllActions] = useState<Achievement[]>([]);
   const [allRequests, setAllRequests] = useState<RelieRequest[]>([]);
@@ -63,9 +130,13 @@ export default function Reports() {
   // Relief request help types
   const [reliefHelpTypes, setReliefHelpTypes] = useState<string[]>([]);
 
-  // Government Priorities filters
-  const [govPriorityFilters, setGovPriorityFilters] = useState({
-    submitter: "",
+  // Government Priorities filters - track selected categories and items
+  const [govPriorityFilters, setGovPriorityFilters] = useState<{
+    selectedCategories: Set<number>;
+    selectedItems: Set<string>;
+  }>({
+    selectedCategories: new Set(),
+    selectedItems: new Set(),
   });
 
   // Media selection
@@ -77,7 +148,6 @@ export default function Reports() {
   // Dropdown options
   const [actionSubmitterOptions, setActionSubmitterOptions] = useState<string[]>([]);
   const [reliefSubmitterOptions, setReliefSubmitterOptions] = useState<string[]>([]);
-  const [govPrioritySubmitterOptions, setGovPrioritySubmitterOptions] = useState<string[]>([]);
 
   // Load data on mount and when includeData changes
   useEffect(() => {
@@ -104,33 +174,11 @@ export default function Reports() {
         setReliefHelpTypes(helpTypes);
       }
 
-      // Always load documents if government priorities or media is selected
-      if (includeData.governmentPriorities || includeData.media) {
+      // Load documents if media is selected
+      if (includeData.media) {
         try {
           const docs = await getIngdDocuments();
           setAllDocuments(docs);
-
-          // Extract government priority submitters (using same logic as GovernmentPriorities.tsx page)
-          if (includeData.governmentPriorities) {
-            const govPriorities = docs.filter(d =>
-              d.description?.toLowerCase().includes("government") ||
-              d.description?.toLowerCase().includes("priority") ||
-              d.type === 'government_priority'
-            );
-            const submitters = [...new Set(govPriorities.map(d => d.uploaded_by))].filter(Boolean).sort();
-            setGovPrioritySubmitterOptions(submitters);
-            console.log("Government Priorities Debug:", {
-              totalDocuments: docs.length,
-              govPrioritiesCount: govPriorities.length,
-              submitters,
-              matchingByType: docs.filter(d => d.type === 'government_priority').length,
-              matchingByDescription: docs.filter(d =>
-                d.description?.toLowerCase().includes("government") ||
-                d.description?.toLowerCase().includes("priority")
-              ).length,
-              allDocTypes: [...new Set(docs.map(d => d.type))],
-            });
-          }
         } catch (error) {
           console.error("Error loading documents:", error);
         }
@@ -213,27 +261,13 @@ export default function Reports() {
   };
 
   const getFilteredGovPriorities = () => {
-    // Match the filtering logic from GovernmentPriorities.tsx page
-    let filtered = allDocuments.filter(d =>
-      d.description?.toLowerCase().includes("government") ||
-      d.description?.toLowerCase().includes("priority") ||
-      d.type === "government_priority"
-    );
+    // Return selected items as array of strings
+    return Array.from(govPriorityFilters.selectedItems);
+  };
 
-    if (govPriorityFilters.submitter) {
-      filtered = filtered.filter(d => d.uploaded_by === govPriorityFilters.submitter);
-    }
-
-    if (includeData.governmentPriorities) {
-      console.log("Filtered Government Priorities:", {
-        allDocuments: allDocuments.length,
-        filtered: filtered.length,
-        submitterFilter: govPriorityFilters.submitter,
-        documentTypes: allDocuments.map(d => ({ type: d.type, description: d.description, uploaded_by: d.uploaded_by, file_name: d.file_name })),
-      });
-    }
-
-    return filtered;
+  const getGovPriorityCount = () => {
+    // Total count of selected items across all categories
+    return govPriorityFilters.selectedItems.size;
   };
 
   const getImageFiles = () => {
@@ -328,7 +362,10 @@ export default function Reports() {
       const reportContext: ReportContext = {
         actions: includeData.actions ? getFilteredActions() : [],
         reliefRequests: includeData.reliefRequests ? getFilteredReliefs() : [],
-        governmentPriorities: includeData.governmentPriorities ? getFilteredGovPriorities() : [],
+        governmentPriorities: includeData.governmentPriorities ? getFilteredGovPriorities().map(item => ({
+          title: "Government Priority Item",
+          item: item,
+        })) : [],
         mediaFiles: includeData.media ? getSelectedMediaList() : [],
         filters: {
           actions: {
@@ -345,7 +382,7 @@ export default function Reports() {
             excludeINGD: !reliefFilters.includeINGD,
           },
           governmentPriorities: {
-            submitter: govPriorityFilters.submitter,
+            itemsCount: govPriorityFilters.selectedItems.size,
           },
         },
       };
@@ -370,7 +407,7 @@ export default function Reports() {
     let count = 0;
     if (includeData.actions) count += getFilteredActions().length;
     if (includeData.reliefRequests) count += getFilteredReliefs().length;
-    if (includeData.governmentPriorities) count += getFilteredGovPriorities().length;
+    if (includeData.governmentPriorities) count += getGovPriorityCount();
     if (includeData.media) count += selectedMedia.size;
     return count;
   };
@@ -601,26 +638,53 @@ export default function Reports() {
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-900">Government Priorities</span>
                     <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">
-                      {getFilteredGovPriorities().length} of {allDocuments.filter(d => d.type === 'government_priority').length}
+                      {getGovPriorityCount()} selected
                     </span>
                   </div>
                   {expandedFilters.governmentPriorities ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
                 {expandedFilters.governmentPriorities && (
-                  <div className="p-4 space-y-4 bg-white">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Submitter</label>
-                      <select
-                        value={govPriorityFilters.submitter}
-                        onChange={(e) => setGovPriorityFilters({ ...govPriorityFilters, submitter: e.target.value })}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      >
-                        <option value="">All Submitters</option>
-                        {govPrioritySubmitterOptions.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div className="p-4 bg-white space-y-4 max-h-96 overflow-y-auto">
+                    {PRIORITY_CATEGORIES.map((category, catIdx) => (
+                      <div key={catIdx} className="border border-slate-200 rounded-lg p-3">
+                        <h4 className="font-semibold text-slate-900 mb-3 text-sm">{category.title}</h4>
+                        <div className="space-y-2">
+                          {category.items.map((item, itemIdx) => (
+                            <label key={itemIdx} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={govPriorityFilters.selectedItems.has(item)}
+                                onChange={(e) => {
+                                  const newSelected = new Set(govPriorityFilters.selectedItems);
+                                  const newCategories = new Set(govPriorityFilters.selectedCategories);
+
+                                  if (e.target.checked) {
+                                    newSelected.add(item);
+                                    newCategories.add(catIdx);
+                                  } else {
+                                    newSelected.delete(item);
+                                    // Remove category if no items from it are selected
+                                    const categoryHasSelection = category.items.some(i =>
+                                      i !== item && newSelected.has(i)
+                                    );
+                                    if (!categoryHasSelection) {
+                                      newCategories.delete(catIdx);
+                                    }
+                                  }
+
+                                  setGovPriorityFilters({
+                                    selectedCategories: newCategories,
+                                    selectedItems: newSelected,
+                                  });
+                                }}
+                                className="w-4 h-4 rounded cursor-pointer"
+                              />
+                              <span className="text-sm text-slate-700">{item}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -726,7 +790,7 @@ export default function Reports() {
               <div className="text-xs text-green-800 mt-2 space-y-1">
                 {includeData.actions && <p>• {getFilteredActions().length} Actions</p>}
                 {includeData.reliefRequests && <p>• {getFilteredReliefs().length} Relief Requests</p>}
-                {includeData.governmentPriorities && <p>• {getFilteredGovPriorities().length} Government Priorities</p>}
+                {includeData.governmentPriorities && <p>• {getGovPriorityCount()} Government Priorities</p>}
                 {includeData.media && <p>• {selectedMedia.size} Media Files</p>}
               </div>
             </div>
