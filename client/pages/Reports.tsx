@@ -14,7 +14,7 @@ import {
 import { getAchievements } from "@/services/achievementsService";
 import { getRequests } from "@/services/supabaseService";
 import { getIngdDocuments } from "@/services/supabaseService";
-import { downloadReport, filterActions, generateSummaryNarrative, ReportFilters } from "@/services/reportService";
+import { downloadReport, ReportContext, ReportFilters } from "@/services/reportService";
 import type { Achievement } from "@/services/achievementsService";
 import type { RelieRequest, IngdDocument } from "@/services/supabaseService";
 
@@ -73,6 +73,7 @@ export default function Reports() {
   // Dropdown options
   const [actionSubmitterOptions, setActionSubmitterOptions] = useState<string[]>([]);
   const [reliefSubmitterOptions, setReliefSubmitterOptions] = useState<string[]>([]);
+  const [govPrioritySubmitterOptions, setGovPrioritySubmitterOptions] = useState<string[]>([]);
 
   // Load data on mount and when includeData changes
   useEffect(() => {
@@ -102,6 +103,13 @@ export default function Reports() {
       if (includeData.governmentPriorities || includeData.media) {
         const docs = await getIngdDocuments();
         setAllDocuments(docs);
+
+        // Extract government priority submitters
+        if (includeData.governmentPriorities) {
+          const govPriorities = docs.filter(d => d.type === 'government_priority');
+          const submitters = [...new Set(govPriorities.map(d => d.uploaded_by))].filter(Boolean).sort();
+          setGovPrioritySubmitterOptions(submitters);
+        }
       }
     } catch (error) {
       console.error("Error loading data for report:", error);
@@ -196,26 +204,46 @@ export default function Reports() {
   };
 
   const handleGenerateReport = async () => {
-    if (!includeData.actions && !includeData.reliefRequests && !includeData.governmentPriorities) {
+    if (!includeData.actions && !includeData.reliefRequests && !includeData.governmentPriorities && !includeData.media) {
       alert("Please select at least one data type to include in the report");
       return;
     }
 
     setIsGenerating(true);
     try {
-      const filteredActions = includeData.actions ? getFilteredActions() : [];
+      // Build report context with all selected data
+      const reportContext: ReportContext = {
+        actions: includeData.actions ? getFilteredActions() : [],
+        reliefRequests: includeData.reliefRequests ? getFilteredReliefs() : [],
+        governmentPriorities: includeData.governmentPriorities ? getFilteredGovPriorities() : [],
+        mediaFiles: includeData.media ? getSelectedMediaList() : [],
+        filters: {
+          actions: {
+            submitter: actionFilters.submitter,
+            category: actionFilters.category,
+            startDate: actionFilters.startDate,
+            endDate: actionFilters.endDate,
+          },
+          reliefRequests: {
+            submitter: reliefFilters.submitter,
+            helpType: reliefFilters.helpType,
+            startDate: reliefFilters.startDate,
+            endDate: reliefFilters.endDate,
+            excludeINGD: !reliefFilters.includeINGD,
+          },
+          governmentPriorities: {
+            submitter: govPriorityFilters.submitter,
+          },
+        },
+      };
 
-      if (filteredActions.length > 0) {
-        await downloadReport(filteredActions, {}, {
-          title: "Comprehensive Report",
-          organizationName: "SABCM Disaster Relief",
-          footer: `Generated on ${new Date().toLocaleDateString()}`,
-          includeMetrics: true,
-        });
-      } else if (includeData.reliefRequests) {
-        const csv = generateReliefsCSV(getFilteredReliefs());
-        downloadCSV(csv, `relief-requests-report-${new Date().toISOString().split('T')[0]}.csv`);
-      }
+      // Generate and download PDF report
+      await downloadReport(reportContext, {
+        title: "SACBM Disaster Response Report",
+        organizationName: "South African Chamber of Business in Mozambique",
+        footer: `Generated on ${new Date().toLocaleDateString()}`,
+        includeMetrics: true,
+      });
     } catch (error) {
       console.error("Error generating report:", error);
       alert(`Error generating report: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -224,39 +252,6 @@ export default function Reports() {
     }
   };
 
-  const generateReliefsCSV = (requests: RelieRequest[]): string => {
-    const headers = ["Originator", "Full Name", "Email", "Location", "Help Type", "People", "Value", "Status", "Date"];
-    const rows = requests.map(req => [
-      req.originator,
-      req.full_name,
-      req.email,
-      req.location,
-      req.help_type,
-      req.people,
-      req.value,
-      req.status ? "Met" : "Pending",
-      new Date(req.created_at || '').toLocaleDateString(),
-    ]);
-
-    const content = [
-      headers.join(","),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(",")),
-    ].join("\n");
-
-    return content;
-  };
-
-  const downloadCSV = (content: string, fileName: string) => {
-    const blob = new Blob([content], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
 
   const getTotalCount = () => {
     let count = 0;
@@ -473,6 +468,41 @@ export default function Reports() {
                         />
                         <span className="text-sm font-medium text-slate-700">Include INGD relief requests</span>
                       </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Government Priorities Filters */}
+            {includeData.governmentPriorities && (
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setExpandedFilters({ ...expandedFilters, governmentPriorities: !expandedFilters.governmentPriorities })}
+                  className="w-full flex items-center justify-between p-4 bg-orange-50 hover:bg-orange-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-900">Government Priorities</span>
+                    <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">
+                      {getFilteredGovPriorities().length} of {allDocuments.filter(d => d.type === 'government_priority').length}
+                    </span>
+                  </div>
+                  {expandedFilters.governmentPriorities ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </button>
+                {expandedFilters.governmentPriorities && (
+                  <div className="p-4 space-y-4 bg-white">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Submitter</label>
+                      <select
+                        value={govPriorityFilters.submitter}
+                        onChange={(e) => setGovPriorityFilters({ ...govPriorityFilters, submitter: e.target.value })}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      >
+                        <option value="">All Submitters</option>
+                        {govPrioritySubmitterOptions.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}

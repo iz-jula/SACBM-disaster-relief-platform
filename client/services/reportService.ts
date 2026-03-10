@@ -17,6 +17,31 @@ export interface ReportConfig {
   includeMetrics?: boolean;
 }
 
+export interface ReportContext {
+  actions: Action[];
+  reliefRequests: any[];
+  governmentPriorities: any[];
+  mediaFiles: any[];
+  filters: {
+    actions: {
+      submitter?: string;
+      category?: string;
+      startDate?: string;
+      endDate?: string;
+    };
+    reliefRequests: {
+      submitter?: string;
+      helpType?: string;
+      startDate?: string;
+      endDate?: string;
+      excludeINGD?: boolean;
+    };
+    governmentPriorities: {
+      submitter?: string;
+    };
+  };
+}
+
 // Format numbers with . for thousands (European format)
 const formatNumber = (value: number): string => {
   return value.toLocaleString('de-DE', {
@@ -34,55 +59,210 @@ const formatDate = (date: string | Date): string => {
   });
 };
 
-// Template-based narrative generation
-export function generateSummaryNarrative(
-  actions: Action[],
-  filters: ReportFilters
-): string {
-  if (actions.length === 0) {
-    return 'No actions found for the selected criteria.';
+// Get date range string
+const getDateRangeString = (filters: ReportContext['filters']): string => {
+  const actionFilters = filters.actions;
+  if (actionFilters.startDate && actionFilters.endDate) {
+    return `${formatDate(actionFilters.startDate)} to ${formatDate(actionFilters.endDate)}`;
+  } else if (actionFilters.startDate) {
+    return `From ${formatDate(actionFilters.startDate)}`;
+  } else if (actionFilters.endDate) {
+    return `Until ${formatDate(actionFilters.endDate)}`;
+  }
+  return formatDate(new Date());
+};
+
+// Generate Report Header
+function generateReportHeader(): string {
+  return `SACBM PRIVATE SECTOR DISASTER RESPONSE REPORT
+South African Chamber of Business in Mozambique
+
+Reporting Period: [Date Range]
+Report Generated: ${formatDate(new Date())}
+Platform: SACBM Disaster Response Coordination Platform`;
+}
+
+// Generate Executive Overview with conditional narratives
+function generateExecutiveOverview(actionCount: number): string {
+  let narrative = `\n1. EXECUTIVE OVERVIEW\n\n`;
+  
+  // Base narrative - always included
+  narrative += `This report provides a consolidated overview of disaster response activities recorded through the South African Chamber of Business in Mozambique (SACBM) Disaster Response Platform during the selected reporting period.
+
+The platform enables coordination between SACBM members, government institutions, and partner organizations by providing visibility into private sector actions, humanitarian needs, and priority interventions identified during emergency response and recovery phases.
+
+The information presented reflects submissions made directly through the platform and represents only the data captured within the filters applied for this report.\n\n`;
+
+  // Conditional paragraph based on action count
+  if (actionCount >= 20) {
+    narrative += `During the reporting period, SACBM members demonstrated strong operational engagement across affected communities, contributing multiple relief initiatives through coordinated private sector support.
+
+This level of activity reflects the continued commitment of Chamber members to complement national disaster response efforts and support recovery in areas where needs remain significant.`;
+  } else if (actionCount >= 8 && actionCount < 20) {
+    narrative += `During the reporting period, SACBM members maintained consistent engagement in supporting affected communities through targeted relief initiatives and coordinated private sector contributions.
+
+These efforts continue to support stabilization and recovery efforts following earlier emergency response phases.`;
+  } else if (actionCount >= 1 && actionCount < 8) {
+    narrative += `A limited number of actions were recorded during the reporting period. This reflects a transition from earlier concentrated response efforts toward a stabilization phase, where fewer but more targeted interventions are taking place.`;
+  } else {
+    narrative += `No private sector actions were recorded through the platform during the selected reporting period. The platform remains active to capture emerging needs and support coordination between Chamber members and partner institutions should new response initiatives arise.`;
   }
 
-  const totalActions = actions.length;
-  const totalPeopleImpacted = actions.reduce((sum, a) => sum + (a.people_impacted || 0), 0);
-  const totalAmount = actions.reduce((sum, a) => sum + (a.amount || 0), 0);
+  return narrative;
+}
+
+// Generate Report Scope
+function generateReportScope(context: ReportContext): string {
+  let narrative = `\n2. REPORT SCOPE\n\n`;
+  narrative += `This report includes information recorded in the SACBM Disaster Response Platform based on the filters applied during report generation.
+
+The report may include the following categories:\n\n`;
+
+  const includedCategories = [];
+  if (context.actions.length > 0) includedCategories.push('Private Sector Actions');
+  if (context.reliefRequests.length > 0) includedCategories.push('Relief Requests');
+  if (context.governmentPriorities.length > 0) includedCategories.push('Government Priority Needs');
+  if (context.mediaFiles.length > 0) includedCategories.push('Media Documentation');
+
+  if (includedCategories.length > 0) {
+    includedCategories.forEach(cat => {
+      narrative += `• ${cat}\n`;
+    });
+  } else {
+    narrative += `• No data categories selected\n`;
+  }
+
+  narrative += `\nOnly the categories selected during report generation are included in the sections below.`;
+
+  return narrative;
+}
+
+// Generate Platform Activity Summary
+function generatePlatformActivitySummary(context: ReportContext): string {
+  let narrative = `\n3. PLATFORM ACTIVITY SUMMARY\n\n`;
+  narrative += `During the reporting period, the SACBM platform recorded the following entries:\n\n`;
   
-  // Get unique categories
-  const categories = [...new Set(actions.map(a => a.category))];
-  const categoryCount: Record<string, number> = {};
-  actions.forEach(a => {
-    categoryCount[a.category] = (categoryCount[a.category] || 0) + 1;
-  });
+  narrative += `Private Sector Actions: ${context.actions.length}\n`;
+  narrative += `Relief Requests: ${context.reliefRequests.length}\n`;
+  narrative += `Government Priority Submissions: ${context.governmentPriorities.length}\n`;
+  narrative += `Media Files Included: ${context.mediaFiles.length}\n\n`;
   
-  // Get unique submitters
-  const submitters = new Set(actions.map(a => a.company_name)).size;
+  narrative += `These entries represent submissions made by Chamber members, partner organizations, and institutional stakeholders.`;
+
+  return narrative;
+}
+
+// Generate Private Sector Actions Section
+function generateActionsSection(context: ReportContext): string {
+  if (context.actions.length === 0) return '';
+
+  let narrative = `\n4. PRIVATE SECTOR ACTIONS\n\n`;
   
-  // Build narrative
+  // Base narrative
+  narrative += `This section summarizes relief initiatives undertaken by SACBM member companies and partner organizations during the selected reporting period.
+
+The actions recorded below represent private sector contributions submitted through the SACBM platform.\n\n`;
+
+  // Conditional category description
+  const categories = [...new Set(context.actions.map(a => a.category))].filter(Boolean);
+  if (categories.length > 0) {
+    narrative += `Actions undertaken during this period included contributions across the following categories:\n\n`;
+    categories.forEach(cat => {
+      narrative += `• ${cat}\n`;
+    });
+    narrative += '\n';
+  }
+
+  // Conditional narrative based on activity level
+  if (context.actions.length >= 20) {
+    narrative += `The volume of recorded actions highlights the significant role played by SACBM members in complementing national disaster response efforts. In several cases, companies have remained actively engaged beyond the immediate emergency phase, supporting recovery efforts in affected communities.`;
+  } else if (context.actions.length >= 8) {
+    narrative += `The actions recorded during this reporting period reflect continued private sector engagement in supporting recovery efforts in affected areas.`;
+  } else {
+    narrative += `The reduced number of actions during this reporting period follows an earlier phase of concentrated private sector response. SACBM members continue to support recovery initiatives where needs persist.`;
+  }
+
+  // Conditional organization-specific narrative
+  if (context.filters.actions.submitter) {
+    narrative += `\n\nThis report highlights relief initiatives undertaken by ${context.filters.actions.submitter}, a member of the South African Chamber of Business in Mozambique.`;
+  }
+
+  return narrative;
+}
+
+// Generate Relief Requests Section
+function generateReliefRequestsSection(context: ReportContext): string {
+  if (context.reliefRequests.length === 0) return '';
+
+  let narrative = `\n5. RELIEF REQUESTS\n\n`;
+  
+  // Base narrative
+  narrative += `Relief requests represent humanitarian needs identified through the SACBM platform and submitted by Chamber members, partner organizations, or institutional stakeholders.
+
+These requests provide visibility into areas where additional assistance may be required and help guide private sector support toward priority needs.\n\n`;
+
+  // Conditional narrative based on originator
+  const hasGovernmentRequests = context.reliefRequests.some(r => r.originator === 'INGD');
+  const onlyMemberRequests = !context.filters.reliefRequests.excludeINGD === false;
+
+  if (hasGovernmentRequests && !onlyMemberRequests) {
+    narrative += `Some requests included in this section originate from government institutions responsible for disaster response coordination.`;
+  } else if (onlyMemberRequests) {
+    narrative += `This report includes requests submitted directly by SACBM members and partner organizations.`;
+  }
+
+  return narrative;
+}
+
+// Generate Government Priority Needs Section
+function generateGovernmentPrioritiesSection(context: ReportContext): string {
+  if (context.governmentPriorities.length === 0) return '';
+
+  let narrative = `\n6. GOVERNMENT PRIORITY NEEDS\n\n`;
+  
+  narrative += `Government priority submissions represent needs identified by public institutions involved in disaster response coordination.
+
+These priorities provide guidance for aligning private sector initiatives with national disaster response and recovery strategies.`;
+
+  return narrative;
+}
+
+// Generate Media Documentation Section
+function generateMediaSection(context: ReportContext): string {
+  if (context.mediaFiles.length === 0) return '';
+
+  let narrative = `\n7. MEDIA DOCUMENTATION\n\n`;
+  
+  narrative += `This section includes media documentation associated with actions and requests recorded through the SACBM platform.
+
+Media files are selected individually during report generation and may include images, documents, or other supporting materials.`;
+
+  return narrative;
+}
+
+// Generate Closing Note
+function generateClosingNote(): string {
+  return `\n8. CLOSING NOTE\n\nThe SACBM Disaster Response Platform continues to support structured coordination between the private sector, government institutions, and partner organizations during humanitarian response and recovery operations.
+
+By consolidating information from multiple stakeholders, the platform provides greater transparency and visibility into private sector contributions supporting affected communities across Mozambique.
+
+The South African Chamber of Business in Mozambique remains committed to encouraging responsible private sector engagement in disaster response and recovery efforts.`;
+}
+
+// Build complete narrative
+export function generateComprehensiveNarrative(context: ReportContext): string {
   let narrative = '';
   
-  if (filters.startDate && filters.endDate) {
-    narrative += `Between ${formatDate(filters.startDate)} and ${formatDate(filters.endDate)}, `;
-  } else if (filters.startDate) {
-    narrative += `Starting from ${formatDate(filters.startDate)}, `;
-  }
-  
-  narrative += `a total of ${totalActions} action${totalActions !== 1 ? 's' : ''} ${totalActions === 1 ? 'was' : 'were'} submitted. `;
-  
-  narrative += `These actions were submitted by ${submitters} different organization${submitters !== 1 ? 's' : ''}, `;
-  narrative += `impacting ${formatNumber(totalPeopleImpacted)} people and contributing ${totalAmount > 0 ? `a total value of ${formatNumber(totalAmount)}` : 'resources'}. `;
-  
-  if (categories.length > 0) {
-    narrative += `The actions covered ${categories.length} category/categories: `;
-    const categoryStrings = categories.map(cat => {
-      const count = categoryCount[cat];
-      return `${cat} (${count} action${count !== 1 ? 's' : ''})`;
-    });
-    narrative += categoryStrings.join(', ') + '. ';
-  }
-  
-  const avgImpact = Math.round(totalPeopleImpacted / totalActions);
-  narrative += `On average, each action impacted ${formatNumber(avgImpact)} people.`;
-  
+  narrative += generateReportHeader();
+  narrative += generateExecutiveOverview(context.actions.length);
+  narrative += generateReportScope(context);
+  narrative += generatePlatformActivitySummary(context);
+  narrative += generateActionsSection(context);
+  narrative += generateReliefRequestsSection(context);
+  narrative += generateGovernmentPrioritiesSection(context);
+  narrative += generateMediaSection(context);
+  narrative += generateClosingNote();
+
   return narrative;
 }
 
@@ -150,10 +330,9 @@ export function filterActions(actions: Action[], filters: ReportFilters): Action
   return filtered;
 }
 
-// Generate PDF report
+// Generate PDF report with SACBM narrative engine
 export async function generatePDFReport(
-  actions: Action[],
-  filters: ReportFilters,
+  context: ReportContext,
   config: ReportConfig
 ): Promise<Blob> {
   const pdf = new jsPDF();
@@ -191,53 +370,22 @@ export async function generatePDFReport(
     }
   };
   
-  // Title
-  addWrappedText(config.title, 18, true);
-  yPosition += 5;
+  // Generate and add complete narrative
+  const narrative = generateComprehensiveNarrative(context);
+  addWrappedText(narrative, 10);
   
-  // Organization name
-  if (config.organizationName) {
-    addWrappedText(config.organizationName, 12);
-    yPosition += 2;
-  }
-  
-  // Report date
-  addWrappedText(`Report Generated: ${formatDate(new Date())}`, 10);
-  yPosition += 8;
-  
-  // Summary Section
+  yPosition += 10;
   checkPageBreak(20);
-  addWrappedText('Summary', 14, true);
-  yPosition += 3;
   
-  const filtered = filterActions(actions, filters);
-  const summary = generateSummaryNarrative(filtered, filters);
-  addWrappedText(summary, 11);
-  yPosition += 8;
-  
-  // Metrics Section (if enabled)
-  if (config.includeMetrics && filtered.length > 0) {
-    checkPageBreak(15);
-    addWrappedText('Key Metrics', 14, true);
-    yPosition += 3;
-    
-    const totalPeople = filtered.reduce((sum, a) => sum + (a.people_impacted || 0), 0);
-    const totalAmount = filtered.reduce((sum, a) => sum + (a.amount || 0), 0);
-    const avgPeople = Math.round(totalPeople / filtered.length);
-    
-    const metricsText = `Total Actions: ${filtered.length} | People Impacted: ${formatNumber(totalPeople)} | Total Amount: ${formatNumber(totalAmount)} | Average Impact per Action: ${formatNumber(avgPeople)} people`;
-    addWrappedText(metricsText, 10);
+  // Add detailed actions if present
+  if (context.actions.length > 0) {
+    pdf.setFontSize(12);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.text('DETAILED ACTIONS', margin, yPosition);
     yPosition += 8;
-  }
-  
-  // Detailed Actions Section
-  if (filtered.length > 0) {
-    checkPageBreak(15);
-    addWrappedText('Detailed Actions', 14, true);
-    yPosition += 5;
     
-    filtered.forEach((action, index) => {
-      checkPageBreak(20);
+    context.actions.forEach((action, index) => {
+      checkPageBreak(15);
       
       // Action header
       pdf.setFontSize(11);
@@ -308,7 +456,7 @@ export async function generatePDFReport(
 
 // Generate report file name
 export function generateReportFileName(filters: ReportFilters): string {
-  let name = 'actions-report';
+  let name = 'sacbm-report';
   
   if (filters.startDate) {
     name += `-from-${filters.startDate.toISOString().split('T')[0]}`;
@@ -327,15 +475,14 @@ export function generateReportFileName(filters: ReportFilters): string {
 
 // Download PDF report
 export async function downloadReport(
-  actions: Action[],
-  filters: ReportFilters,
+  context: ReportContext,
   config: ReportConfig
 ) {
-  const blob = await generatePDFReport(actions, filters, config);
+  const blob = await generatePDFReport(context, config);
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = generateReportFileName(filters);
+  link.download = `sacbm-disaster-response-report-${new Date().toISOString().split('T')[0]}.pdf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
