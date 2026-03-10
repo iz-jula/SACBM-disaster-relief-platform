@@ -345,7 +345,9 @@ export function filterActions(actions: Action[], filters: ReportFilters): Action
 // Helper function to fetch and convert image to base64
 async function imageUrlToBase64(url: string): Promise<string> {
   try {
-    const response = await fetch(url);
+    // Fetch as PNG format for better compatibility with jsPDF
+    const pngUrl = url.replace('format=webp', 'format=png');
+    const response = await fetch(pngUrl);
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -450,8 +452,11 @@ export async function generatePDFReport(
     const logoBase64 = await imageUrlToBase64(logoUrl);
 
     if (logoBase64) {
-      // Add the logo image - 25mm wide to fit in header space
-      pdf.addImage(logoBase64, 'WEBP', margin, 2, 25, 26);
+      // Add the logo image with better dimensions
+      // Logo is 800x1200 (2:3 ratio), adjust to fit header nicely
+      const logoWidth = 20; // mm
+      const logoHeight = 28; // mm (maintains aspect ratio)
+      pdf.addImage(logoBase64, 'PNG', margin + 1, 1, logoWidth, logoHeight);
     } else {
       // Fallback if image fetch fails
       pdf.setDrawColor(150, 150, 150);
