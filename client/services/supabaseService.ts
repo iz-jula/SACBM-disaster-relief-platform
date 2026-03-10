@@ -690,12 +690,23 @@ export async function updateIngdDocument(
   updates: { type?: string | null; file_name?: string; description?: string }
 ): Promise<boolean> {
   try {
-    console.log(`[updateIngdDocument] Updating document ID ${id}:`, updates);
+    console.log(`[updateIngdDocument] Updating document ID ${id}`);
+    console.log(`[updateIngdDocument] Updates object:`, updates);
+    console.log(`[updateIngdDocument] Updates.type: ${updates.type}`);
+    console.log(`[updateIngdDocument] Updates.file_name: ${updates.file_name}`);
+    console.log(`[updateIngdDocument] Updates.description: ${updates.description}`);
 
-    const { error } = await supabase
+    // Build the update object with all provided fields
+    const updatePayload = { ...updates };
+    console.log(`[updateIngdDocument] Final payload being sent to Supabase:`, updatePayload);
+
+    const { error, data } = await supabase
       .from("ingd_documents")
-      .update(updates)
-      .eq("id", id);
+      .update(updatePayload)
+      .eq("id", id)
+      .select();
+
+    console.log(`[updateIngdDocument] Supabase response:`, { error, data });
 
     if (error) {
       console.error(`[updateIngdDocument] Supabase error for document ${id}:`, {
@@ -708,7 +719,7 @@ export async function updateIngdDocument(
       throw new Error(`Supabase error: ${error.message}`);
     }
 
-    console.log(`[updateIngdDocument] Successfully updated document ${id}`);
+    console.log(`[updateIngdDocument] Successfully updated document ${id}`, data);
     return true;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);

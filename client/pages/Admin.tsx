@@ -313,19 +313,36 @@ export default function Admin() {
 
   const handleEditDocumentType = async (id: number, newType: string | null, newName?: string, newDescription?: string) => {
     try {
-      console.log(`Updating document ${id} - type: ${newType}, name: ${newName}, description: ${newDescription}`);
+      console.log(`[handleEditDocumentType] Starting update for document ${id}`);
+      console.log(`[handleEditDocumentType] newType: ${newType}, newName: ${newName}, newDescription: ${newDescription}`);
 
       const updates: { type?: string | null; file_name?: string; description?: string } = {};
-      if (newType !== undefined) updates.type = newType;
-      if (newName !== undefined && newName.trim()) updates.file_name = newName;
-      if (newDescription !== undefined) updates.description = newDescription;
+
+      // Always update type if provided
+      if (newType !== undefined) {
+        updates.type = newType;
+        console.log(`[handleEditDocumentType] Adding type to updates: ${newType}`);
+      }
+
+      if (newName !== undefined && newName.trim()) {
+        updates.file_name = newName;
+        console.log(`[handleEditDocumentType] Adding file_name to updates: ${newName}`);
+      }
+
+      if (newDescription !== undefined) {
+        updates.description = newDescription;
+        console.log(`[handleEditDocumentType] Adding description to updates: ${newDescription}`);
+      }
+
+      console.log(`[handleEditDocumentType] Final updates object:`, updates);
 
       const result = await updateIngdDocument(id, updates);
       if (!result) {
         throw new Error("Failed to update document in database");
       }
-      console.log("Document updated successfully, reloading documents...");
+      console.log("[handleEditDocumentType] Document updated successfully, reloading documents...");
       await loadAllDocuments();
+      console.log("[handleEditDocumentType] Documents reloaded");
       alert("Document updated successfully!");
     } catch (error) {
       console.error("Error updating document:", error);

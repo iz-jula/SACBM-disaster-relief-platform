@@ -322,8 +322,16 @@ export default function DocumentUploadForm({
                 <button
                   onClick={() => {
                     const typeValue = editingDocType === "ingd" ? null : editingDocType;
-                    console.log(`[DocumentUploadForm] Updating document ${editingDocId}: name="${editingDocName}", description="${editingDocDescription}", type="${typeValue}"`);
+                    console.log(`[DocumentUploadForm.Update] Starting update`);
+                    console.log(`[DocumentUploadForm.Update] editingDocId: ${editingDocId}`);
+                    console.log(`[DocumentUploadForm.Update] editingDocType (raw): ${editingDocType}`);
+                    console.log(`[DocumentUploadForm.Update] typeValue (converted): ${typeValue}`);
+                    console.log(`[DocumentUploadForm.Update] editingDocName: ${editingDocName}`);
+                    console.log(`[DocumentUploadForm.Update] editingDocDescription: ${editingDocDescription}`);
+                    console.log(`[DocumentUploadForm.Update] onEditType exists: ${!!onEditType}`);
+
                     if (onEditType) {
+                      console.log(`[DocumentUploadForm.Update] Calling onEditType with: ${editingDocId}, ${typeValue}, ${editingDocName}, ${editingDocDescription}`);
                       onEditType(editingDocId || 0, typeValue, editingDocName, editingDocDescription);
                     }
                     setEditingDocId(null);
