@@ -474,29 +474,29 @@ export async function generatePDFReport(
 
     if (logoBase64) {
       // Add the logo image with custom dimensions
-      const logoWidth = 30; // mm
-      const logoHeight = 27; // mm
+      const logoWidth = 32; // mm
+      const logoHeight = 25; // mm
       pdf.addImage(logoBase64, 'PNG', margin + 1.5, 1.5, logoWidth, logoHeight);
     } else {
       // Fallback if image fetch fails
       pdf.setDrawColor(150, 150, 150);
       pdf.setFillColor(240, 240, 240);
-      pdf.rect(margin, 3, 32, 29, 'FD');
+      pdf.rect(margin, 3, 34, 27, 'FD');
       pdf.setFontSize(8);
       pdf.setTextColor(100, 100, 100);
       pdf.setFont('Helvetica', 'bold');
-      pdf.text('SACBM', margin + 16, 18, { align: 'center' });
+      pdf.text('SACBM', margin + 17, 17, { align: 'center' });
     }
   } catch (error) {
     console.error('Error adding logo:', error);
     // Fallback placeholder
     pdf.setDrawColor(150, 150, 150);
     pdf.setFillColor(240, 240, 240);
-    pdf.rect(margin, 3, 32, 29, 'FD');
+    pdf.rect(margin, 3, 34, 27, 'FD');
     pdf.setFontSize(8);
     pdf.setTextColor(100, 100, 100);
     pdf.setFont('Helvetica', 'bold');
-    pdf.text('SACBM', margin + 16, 18, { align: 'center' });
+    pdf.text('SACBM', margin + 17, 17, { align: 'center' });
   }
 
   // Add title on colored header
