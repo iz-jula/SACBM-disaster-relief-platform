@@ -115,6 +115,12 @@ export default function Reports() {
             const govPriorities = docs.filter(d => d.type === 'government_priority');
             const submitters = [...new Set(govPriorities.map(d => d.uploaded_by))].filter(Boolean).sort();
             setGovPrioritySubmitterOptions(submitters);
+            console.log("Government Priorities Debug:", {
+              totalDocuments: docs.length,
+              govPrioritiesCount: govPriorities.length,
+              submitters,
+              allDocTypes: [...new Set(docs.map(d => d.type))],
+            });
           }
         } catch (error) {
           console.error("Error loading documents:", error);
@@ -204,6 +210,15 @@ export default function Reports() {
       filtered = filtered.filter(d => d.uploaded_by === govPriorityFilters.submitter);
     }
 
+    if (includeData.governmentPriorities) {
+      console.log("Filtered Government Priorities:", {
+        allDocuments: allDocuments.length,
+        filtered: filtered.length,
+        submitterFilter: govPriorityFilters.submitter,
+        documentTypes: allDocuments.map(d => ({ type: d.type, uploaded_by: d.uploaded_by, file_name: d.file_name })),
+      });
+    }
+
     return filtered;
   };
 
@@ -281,9 +296,15 @@ export default function Reports() {
       return;
     }
 
-    // Check if date range is set
-    if (!actionFilters.startDate || !actionFilters.endDate) {
-      alert("Please set a reporting date range (Start Date and End Date are required)");
+    // Check if date range is set for actions
+    if (includeData.actions && (!actionFilters.startDate || !actionFilters.endDate)) {
+      alert("Please set a reporting date range for Actions (Start Date and End Date are required)");
+      return;
+    }
+
+    // Check if date range is set for relief requests
+    if (includeData.reliefRequests && (!reliefFilters.startDate || !reliefFilters.endDate)) {
+      alert("Please set a reporting date range for Relief Requests (Start Date and End Date are required)");
       return;
     }
 
@@ -520,18 +541,20 @@ export default function Reports() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Start Date <span className="text-red-600">*</span></label>
                         <input
                           type="date"
+                          required
                           value={reliefFilters.startDate}
                           onChange={(e) => setReliefFilters({ ...reliefFilters, startDate: e.target.value })}
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">End Date</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">End Date <span className="text-red-600">*</span></label>
                         <input
                           type="date"
+                          required
                           value={reliefFilters.endDate}
                           onChange={(e) => setReliefFilters({ ...reliefFilters, endDate: e.target.value })}
                           className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
