@@ -356,24 +356,65 @@ export async function generatePDFReport(
   // Add header background/styling
   pdf.setFillColor(41, 84, 127); // Professional blue
   pdf.rect(0, 0, pageWidth, 30, 'F');
-  
+
+  // Helper function to add section header with styling
+  const addSectionHeader = (title: string, yPos: number): number => {
+    // Background
+    pdf.setFillColor(220, 220, 220);
+    pdf.rect(margin, yPos - 4, maxWidth, 8, 'F');
+
+    // Text
+    pdf.setFontSize(13);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.setTextColor(41, 84, 127);
+    pdf.text(title, margin + 3, yPos + 1);
+    pdf.setTextColor(0, 0, 0);
+
+    return yPos + 10;
+  };
+
   // Helper function to add text with wrapping
   const addWrappedText = (text: string, fontSize: number = 11, bold: boolean = false) => {
-    pdf.setFontSize(fontSize);
-    pdf.setFont('Helvetica', bold ? 'bold' : 'normal');
-    
     const lines = pdf.splitTextToSize(text, maxWidth);
     const lineHeight = fontSize * 0.3527; // Convert to mm
-    
+
+    // Regex to detect section headers (e.g., "6. GOVERNMENT PRIORITY NEEDS")
+    const sectionHeaderRegex = /^(\d+\.\s+[A-Z\s]+)$/;
+
     for (const line of lines) {
-      if (yPosition + lineHeight > pageHeight - 10) {
-        pdf.addPage();
-        yPosition = margin;
+      // Check if this line is a section header
+      const isSectionHeader = sectionHeaderRegex.test(line.trim());
+
+      if (isSectionHeader) {
+        // Apply section header styling
+        yPosition += 4; // Add space before section
+        checkPageBreak(10);
+
+        pdf.setFillColor(220, 220, 220);
+        pdf.rect(margin, yPosition - 4, maxWidth, 8, 'F');
+
+        pdf.setFontSize(12);
+        pdf.setFont('Helvetica', 'bold');
+        pdf.setTextColor(41, 84, 127);
+        pdf.text(line, margin + 3, yPosition + 1);
+        pdf.setTextColor(0, 0, 0);
+
+        yPosition += 10;
+      } else {
+        // Regular text
+        pdf.setFontSize(fontSize);
+        pdf.setFont('Helvetica', bold ? 'bold' : 'normal');
+        pdf.setTextColor(0, 0, 0);
+
+        if (yPosition + lineHeight > pageHeight - 10) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+        pdf.text(line, margin, yPosition);
+        yPosition += lineHeight + 2;
       }
-      pdf.text(line, margin, yPosition);
-      yPosition += lineHeight + 2;
     }
-    
+
     return yPosition;
   };
   
@@ -385,6 +426,14 @@ export async function generatePDFReport(
     }
   };
   
+  // Add logo area placeholder
+  pdf.setDrawColor(200, 200, 200);
+  pdf.rect(margin, 3, 20, 24);
+  pdf.setFontSize(7);
+  pdf.setTextColor(200, 200, 200);
+  pdf.setFont('Helvetica', 'normal');
+  pdf.text('LOGO', margin + 10, 16, { align: 'center' });
+
   // Add title on colored header
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(14);
