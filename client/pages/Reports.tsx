@@ -110,15 +110,24 @@ export default function Reports() {
           const docs = await getIngdDocuments();
           setAllDocuments(docs);
 
-          // Extract government priority submitters
+          // Extract government priority submitters (using same logic as GovernmentPriorities.tsx page)
           if (includeData.governmentPriorities) {
-            const govPriorities = docs.filter(d => d.type === 'government_priority');
+            const govPriorities = docs.filter(d =>
+              d.description?.toLowerCase().includes("government") ||
+              d.description?.toLowerCase().includes("priority") ||
+              d.type === 'government_priority'
+            );
             const submitters = [...new Set(govPriorities.map(d => d.uploaded_by))].filter(Boolean).sort();
             setGovPrioritySubmitterOptions(submitters);
             console.log("Government Priorities Debug:", {
               totalDocuments: docs.length,
               govPrioritiesCount: govPriorities.length,
               submitters,
+              matchingByType: docs.filter(d => d.type === 'government_priority').length,
+              matchingByDescription: docs.filter(d =>
+                d.description?.toLowerCase().includes("government") ||
+                d.description?.toLowerCase().includes("priority")
+              ).length,
               allDocTypes: [...new Set(docs.map(d => d.type))],
             });
           }
@@ -204,7 +213,12 @@ export default function Reports() {
   };
 
   const getFilteredGovPriorities = () => {
-    let filtered = allDocuments.filter(d => d.type === "government_priority");
+    // Match the filtering logic from GovernmentPriorities.tsx page
+    let filtered = allDocuments.filter(d =>
+      d.description?.toLowerCase().includes("government") ||
+      d.description?.toLowerCase().includes("priority") ||
+      d.type === "government_priority"
+    );
 
     if (govPriorityFilters.submitter) {
       filtered = filtered.filter(d => d.uploaded_by === govPriorityFilters.submitter);
@@ -215,7 +229,7 @@ export default function Reports() {
         allDocuments: allDocuments.length,
         filtered: filtered.length,
         submitterFilter: govPriorityFilters.submitter,
-        documentTypes: allDocuments.map(d => ({ type: d.type, uploaded_by: d.uploaded_by, file_name: d.file_name })),
+        documentTypes: allDocuments.map(d => ({ type: d.type, description: d.description, uploaded_by: d.uploaded_by, file_name: d.file_name })),
       });
     }
 
