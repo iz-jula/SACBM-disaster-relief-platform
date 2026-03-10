@@ -122,13 +122,14 @@ export default function Reports() {
     }
   };
 
-  // Load documents when media is selected
+  // Load documents when media is selected (ensures fresh load)
   useEffect(() => {
-    if (includeData.media && allDocuments.length === 0) {
+    if (includeData.media) {
       const loadMediaFiles = async () => {
         try {
           const docs = await getIngdDocuments();
           setAllDocuments(docs);
+          console.log("Loaded documents for media:", docs);
         } catch (error) {
           console.error("Error loading media files:", error);
         }
@@ -195,10 +196,20 @@ export default function Reports() {
   const getImageFiles = () => {
     // Filter for image files only (can be embedded in PDF)
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
-    return allDocuments.filter(d => {
+    const imageFiles = allDocuments.filter(d => {
       const fileName = d.file_name?.toLowerCase() || '';
-      return imageExtensions.some(ext => fileName.endsWith(ext));
+      const fileType = d.file_type?.toLowerCase() || '';
+      // Check by extension OR by file_type field
+      const hasByExtension = imageExtensions.some(ext => fileName.endsWith(ext));
+      const hasByType = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].some(type => fileType.includes(type) || fileType === type);
+      return hasByExtension || hasByType;
     });
+
+    if (includeData.media && allDocuments.length > 0) {
+      console.log(`Total documents: ${allDocuments.length}, Image files: ${imageFiles.length}`, allDocuments);
+    }
+
+    return imageFiles;
   };
 
   const getSelectedMediaList = () => {
@@ -537,19 +548,26 @@ export default function Reports() {
                   {expandedFilters.media ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
                 {expandedFilters.media && (
-                  <div className="p-4 bg-white max-h-80 overflow-y-auto">
+                  <div className="p-4 bg-white">
                     {isLoading ? (
                       <div className="flex items-center justify-center py-8">
                         <Loader size={18} className="animate-spin text-blue-600 mr-2" />
                         <p className="text-sm text-slate-600">Loading image files...</p>
                       </div>
+                    ) : allDocuments.length === 0 ? (
+                      <div className="py-4">
+                        <p className="text-sm text-slate-600 mb-2">No documents available</p>
+                        <p className="text-xs text-slate-500 mb-3">Click "Refresh Data" to load media files from the system</p>
+                        <p className="text-xs text-slate-500">Supported formats: JPG, PNG, GIF, WebP, BMP, SVG</p>
+                      </div>
                     ) : getImageFiles().length === 0 ? (
                       <div className="py-4">
-                        <p className="text-sm text-slate-600 mb-2">No image files available</p>
+                        <p className="text-sm text-slate-600 mb-2">No image files found</p>
+                        <p className="text-xs text-slate-500 mb-3">Loaded {allDocuments.length} document(s), but none are images</p>
                         <p className="text-xs text-slate-500">Supported formats: JPG, PNG, GIF, WebP, BMP, SVG</p>
                       </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-2 max-h-80 overflow-y-auto">
                         {getImageFiles().map((doc) => (
                           <label key={doc.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
                             <input
@@ -628,11 +646,22 @@ export default function Reports() {
               {isGenerating ? "Generating..." : "Download Report"}
             </button>
             <button
-              onClick={loadAllData}
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  const docs = await getIngdDocuments();
+                  setAllDocuments(docs);
+                  console.log("Refreshed documents:", docs);
+                } catch (error) {
+                  console.error("Error refreshing documents:", error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
               disabled={isLoading}
               className="px-6 py-3 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
             >
-              {isLoading ? "Refreshing..." : "Refresh"}
+              {isLoading ? "Refreshing..." : "Refresh Data"}
             </button>
           </div>
         </div>
