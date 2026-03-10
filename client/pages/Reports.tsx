@@ -397,6 +397,7 @@ export default function Reports() {
             itemsCount: govPriorityFilters.selectedItems.size,
           },
         },
+        selectedOrganization: actionFilters.submitter || undefined,
       };
 
       // Generate and download PDF report

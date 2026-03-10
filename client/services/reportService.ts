@@ -40,6 +40,7 @@ export interface ReportContext {
       submitter?: string;
     };
   };
+  selectedOrganization?: string;
 }
 
 // Format numbers with . for thousands (European format)
@@ -135,6 +136,11 @@ The report may include the following categories:\n\n`;
 
   narrative += `\nOnly the categories selected during report generation are included in the sections below.`;
 
+  // Add organization-specific information if a single organization is selected
+  if (context.selectedOrganization) {
+    narrative += `\n\nThis report highlights relief initiatives undertaken by ${context.selectedOrganization}, a member of the South African Chamber of Business in Mozambique.`;
+  }
+
   return narrative;
 }
 
@@ -181,11 +187,6 @@ The actions recorded below represent private sector contributions submitted thro
     narrative += `The actions recorded during this reporting period reflect continued private sector engagement in supporting recovery efforts in affected areas.`;
   } else {
     narrative += `The reduced number of actions during this reporting period follows an earlier phase of concentrated private sector response. SACBM members continue to support recovery initiatives where needs persist.`;
-  }
-
-  // Conditional organization-specific narrative
-  if (context.filters.actions.submitter) {
-    narrative += `\n\nThis report highlights relief initiatives undertaken by ${context.filters.actions.submitter}, a member of the South African Chamber of Business in Mozambique.`;
   }
 
   return narrative;
@@ -426,13 +427,21 @@ export async function generatePDFReport(
     }
   };
   
-  // Add logo area placeholder
-  pdf.setDrawColor(200, 200, 200);
-  pdf.rect(margin, 3, 20, 24);
-  pdf.setFontSize(7);
-  pdf.setTextColor(200, 200, 200);
-  pdf.setFont('Helvetica', 'normal');
-  pdf.text('LOGO', margin + 10, 16, { align: 'center' });
+  // Add SACBM logo
+  try {
+    const logoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Ff3bcff56461143fc9ceab7576d8e9223?format=webp&width=800&height=1200';
+    // Note: jsPDF addImage requires base64 or image path, not external URLs
+    // For now, we'll use a placeholder box with text
+    pdf.setDrawColor(150, 150, 150);
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(margin, 3, 22, 24, 'FD');
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 100, 100);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.text('SACBM', margin + 11, 16, { align: 'center' });
+  } catch (error) {
+    console.error('Error adding logo:', error);
+  }
 
   // Add title on colored header
   pdf.setTextColor(255, 255, 255);
