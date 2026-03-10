@@ -215,6 +215,11 @@ export default function Reports() {
     }
   }, [includeData.media]);
 
+  // Clear media selection when organization filter changes
+  useEffect(() => {
+    setSelectedMedia(new Set());
+  }, [actionFilters.submitter]);
+
   const getFilteredActions = () => {
     let filtered = allActions;
 
@@ -276,6 +281,13 @@ export default function Reports() {
     // 1. Extract images from action.media field (base64 data stored as JSON array)
     const actionImages = allActions
       .filter(action => action.media)
+      .filter(action => {
+        // Filter by selected organization if one is chosen
+        if (actionFilters.submitter) {
+          return action.company_name === actionFilters.submitter;
+        }
+        return true;
+      })
       .flatMap((action, actionIdx) => {
         try {
           const mediaArray = JSON.parse(action.media as string);
