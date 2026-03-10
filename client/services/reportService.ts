@@ -342,6 +342,23 @@ export function filterActions(actions: Action[], filters: ReportFilters): Action
   return filtered;
 }
 
+// Helper function to fetch and convert image to base64
+async function imageUrlToBase64(url: string): Promise<string> {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Error converting image to base64:', error);
+    return '';
+  }
+}
+
 // Generate PDF report with SACBM narrative engine
 export async function generatePDFReport(
   context: ReportContext,
@@ -430,8 +447,24 @@ export async function generatePDFReport(
   // Add SACBM logo
   try {
     const logoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Ff3bcff56461143fc9ceab7576d8e9223?format=webp&width=800&height=1200';
-    // Note: jsPDF addImage requires base64 or image path, not external URLs
-    // For now, we'll use a placeholder box with text
+    const logoBase64 = await imageUrlToBase64(logoUrl);
+
+    if (logoBase64) {
+      // Add the logo image - 25mm wide to fit in header space
+      pdf.addImage(logoBase64, 'WEBP', margin, 2, 25, 26);
+    } else {
+      // Fallback if image fetch fails
+      pdf.setDrawColor(150, 150, 150);
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, 3, 22, 24, 'FD');
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+      pdf.setFont('Helvetica', 'bold');
+      pdf.text('SACBM', margin + 11, 16, { align: 'center' });
+    }
+  } catch (error) {
+    console.error('Error adding logo:', error);
+    // Fallback placeholder
     pdf.setDrawColor(150, 150, 150);
     pdf.setFillColor(240, 240, 240);
     pdf.rect(margin, 3, 22, 24, 'FD');
@@ -439,8 +472,6 @@ export async function generatePDFReport(
     pdf.setTextColor(100, 100, 100);
     pdf.setFont('Helvetica', 'bold');
     pdf.text('SACBM', margin + 11, 16, { align: 'center' });
-  } catch (error) {
-    console.error('Error adding logo:', error);
   }
 
   // Add title on colored header
