@@ -468,35 +468,37 @@ export async function generatePDFReport(
   
   // Add SACBM logo
   try {
-    const logoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fdc141d40aa684196b2211f2c32db7b6e?format=webp&width=800&height=1200';
+    // Fetch at higher resolution for better quality
+    const logoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fdc141d40aa684196b2211f2c32db7b6e?format=webp&width=1200&height=1800';
     const logoBase64 = await imageUrlToBase64(logoUrl);
 
     if (logoBase64) {
       // Add the logo image with correct aspect ratio
       // Original logo is 800x1200 pixels (aspect ratio 1:1.5)
-      const logoWidth = 18; // mm
-      const logoHeight = 27; // mm (18 * 1.5 = 27 to maintain aspect ratio)
-      pdf.addImage(logoBase64, 'PNG', margin + 1.5, 1.5, logoWidth, logoHeight);
+      // Increased size for better visibility and clarity
+      const logoWidth = 22; // mm (increased from 18mm for better quality)
+      const logoHeight = 33; // mm (22 * 1.5 = 33 to maintain aspect ratio)
+      pdf.addImage(logoBase64, 'PNG', margin + 1, 1.5, logoWidth, logoHeight);
     } else {
       // Fallback if image fetch fails
       pdf.setDrawColor(150, 150, 150);
       pdf.setFillColor(240, 240, 240);
-      pdf.rect(margin, 3, 22, 24, 'FD');
+      pdf.rect(margin, 3, 25, 30, 'FD');
       pdf.setFontSize(8);
       pdf.setTextColor(100, 100, 100);
       pdf.setFont('Helvetica', 'bold');
-      pdf.text('SACBM', margin + 11, 16, { align: 'center' });
+      pdf.text('SACBM', margin + 12.5, 19, { align: 'center' });
     }
   } catch (error) {
     console.error('Error adding logo:', error);
     // Fallback placeholder
     pdf.setDrawColor(150, 150, 150);
     pdf.setFillColor(240, 240, 240);
-    pdf.rect(margin, 3, 22, 24, 'FD');
+    pdf.rect(margin, 3, 25, 30, 'FD');
     pdf.setFontSize(8);
     pdf.setTextColor(100, 100, 100);
     pdf.setFont('Helvetica', 'bold');
-    pdf.text('SACBM', margin + 11, 16, { align: 'center' });
+    pdf.text('SACBM', margin + 12.5, 19, { align: 'center' });
   }
 
   // Add title on colored header
