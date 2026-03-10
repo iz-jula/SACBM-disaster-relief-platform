@@ -302,9 +302,9 @@ export function generateActionSummary(action: Action): string {
   }
   
   if (action.amount) {
-    summary += `Amount contributed: ${formatNumber(action.amount)}. `;
+    summary += `Amount contributed: ${formatNumber(action.amount)} Metical. `;
   }
-  
+
   return summary;
 }
 
@@ -347,11 +347,15 @@ export async function generatePDFReport(
   config: ReportConfig
 ): Promise<Blob> {
   const pdf = new jsPDF();
-  let yPosition = 20;
+  let yPosition = 25;
   const pageHeight = pdf.internal.pageSize.getHeight();
   const pageWidth = pdf.internal.pageSize.getWidth();
   const margin = 15;
   const maxWidth = pageWidth - 2 * margin;
+
+  // Add header background/styling
+  pdf.setFillColor(41, 84, 127); // Professional blue
+  pdf.rect(0, 0, pageWidth, 30, 'F');
   
   // Helper function to add text with wrapping
   const addWrappedText = (text: string, fontSize: number = 11, bold: boolean = false) => {
@@ -381,19 +385,42 @@ export async function generatePDFReport(
     }
   };
   
+  // Add title on colored header
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(14);
+  pdf.setFont('Helvetica', 'bold');
+  pdf.text('SACBM DISASTER RESPONSE REPORT', pageWidth / 2, 12, { align: 'center' });
+  pdf.setFontSize(10);
+  pdf.setFont('Helvetica', 'normal');
+  pdf.text('South African Chamber of Business in Mozambique', pageWidth / 2, 19, { align: 'center' });
+
+  // Reset text color
+  pdf.setTextColor(0, 0, 0);
+  yPosition = 35;
+
   // Generate and add complete narrative
   const narrative = generateComprehensiveNarrative(context);
   addWrappedText(narrative, 10);
-  
-  yPosition += 10;
+
+  yPosition += 8;
   checkPageBreak(20);
   
   // Add detailed actions if present
   if (context.actions.length > 0) {
-    pdf.setFontSize(12);
+    yPosition += 5;
+    checkPageBreak(15);
+
+    // Section header with background
+    pdf.setFillColor(220, 220, 220);
+    pdf.rect(margin, yPosition - 4, maxWidth, 8, 'F');
+
+    pdf.setFontSize(13);
     pdf.setFont('Helvetica', 'bold');
-    pdf.text('DETAILED ACTIONS', margin, yPosition);
-    yPosition += 8;
+    pdf.setTextColor(41, 84, 127);
+    pdf.text('DETAILED ACTIONS', margin + 3, yPosition + 1);
+    pdf.setTextColor(0, 0, 0);
+
+    yPosition += 10;
     
     context.actions.forEach((action, index) => {
       checkPageBreak(15);
@@ -414,7 +441,7 @@ export async function generatePDFReport(
         action.location ? `Location: ${action.location}` : null,
         action.partner_organisation ? `Partner: ${action.partner_organisation}` : null,
         action.people_impacted ? `People Impacted: ${formatNumber(action.people_impacted)}` : null,
-        action.amount ? `Amount: ${formatNumber(action.amount)}` : null,
+        action.amount ? `Amount: ${formatNumber(action.amount)} Metical` : null,
         action.created_at ? `Date: ${formatDate(action.created_at)}` : null,
       ].filter(Boolean);
       
@@ -456,12 +483,19 @@ export async function generatePDFReport(
 
   // Add media files if present
   if (context.mediaFiles.length > 0) {
-    yPosition += 10;
+    yPosition += 8;
     checkPageBreak(20);
 
-    pdf.setFontSize(12);
+    // Section header with background
+    pdf.setFillColor(220, 220, 220);
+    pdf.rect(margin, yPosition - 4, maxWidth, 8, 'F');
+
+    pdf.setFontSize(13);
     pdf.setFont('Helvetica', 'bold');
-    pdf.text('MEDIA DOCUMENTATION GALLERY', margin, yPosition);
+    pdf.setTextColor(41, 84, 127);
+    pdf.text('MEDIA DOCUMENTATION GALLERY', margin + 3, yPosition + 1);
+    pdf.setTextColor(0, 0, 0);
+
     yPosition += 10;
 
     context.mediaFiles.forEach((file, index) => {
@@ -494,15 +528,21 @@ export async function generatePDFReport(
 
       // Embed image if available
       if (file.data_url) {
-        yPosition += 3;
+        yPosition += 4;
         try {
-          const imgWidth = maxWidth - 10;
-          const imgHeight = 60; // Fixed height for thumbnail
+          // Use better dimensions for images - 100mm width maintains good aspect ratio
+          const imgWidth = 100; // Better width for professional appearance
+          const imgHeight = 75; // 4:3 aspect ratio
 
-          if (yPosition + imgHeight > pageHeight - 15) {
+          // Add border/frame for better presentation
+          if (yPosition + imgHeight + 4 > pageHeight - 15) {
             pdf.addPage();
             yPosition = margin;
           }
+
+          // Add subtle border around image
+          pdf.setDrawColor(200, 200, 200);
+          pdf.rect(margin + 5, yPosition, imgWidth, imgHeight);
 
           // Add the image
           pdf.addImage(file.data_url, 'JPEG', margin + 5, yPosition, imgWidth, imgHeight);
@@ -520,14 +560,29 @@ export async function generatePDFReport(
     });
   }
 
-  // Footer
-  if (config.footer) {
-    checkPageBreak(5);
-    pdf.setFontSize(9);
-    pdf.setFont('Helvetica', 'italic');
-    pdf.text(config.footer, margin, pageHeight - 10);
+  // Footer with date and page numbers
+  const totalPages = pdf.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    pdf.setPage(i);
+
+    // Footer line
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+
+    // Footer text
+    pdf.setFontSize(8);
+    pdf.setFont('Helvetica', 'normal');
+    pdf.setTextColor(120, 120, 120);
+
+    if (config.footer) {
+      pdf.text(config.footer, margin, pageHeight - 10);
+    }
+
+    // Page numbers
+    pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin - 20, pageHeight - 10, { align: 'right' });
   }
-  
+
+  pdf.setTextColor(0, 0, 0);
   return pdf.output('blob');
 }
 
