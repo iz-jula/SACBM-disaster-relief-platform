@@ -83,7 +83,8 @@ export default function Reports() {
   const loadAllData = async () => {
     setIsLoading(true);
     try {
-      if (includeData.actions) {
+      // Load actions if actions included OR if media is included (to extract action images)
+      if (includeData.actions || includeData.media) {
         const actions = await getAchievements();
         setAllActions(actions);
         const submitters = [...new Set(actions.map(a => a.company_name))].filter(Boolean).sort();
@@ -122,14 +123,23 @@ export default function Reports() {
     }
   };
 
-  // Load documents when media is selected (ensures fresh load)
+  // Load documents and actions when media is selected (ensures fresh load)
   useEffect(() => {
     if (includeData.media) {
       const loadMediaFiles = async () => {
         try {
-          const docs = await getIngdDocuments();
+          // Load both actions (for action images) and documents
+          const [actions, docs] = await Promise.all([
+            getAchievements(),
+            getIngdDocuments()
+          ]);
+          setAllActions(actions);
           setAllDocuments(docs);
-          console.log("Loaded documents for media:", docs);
+          console.log("Loaded media files:", {
+            actionCount: actions.length,
+            actionsWithMedia: actions.filter(a => a.media).length,
+            documentCount: docs.length,
+          });
         } catch (error) {
           console.error("Error loading media files:", error);
         }
@@ -194,28 +204,71 @@ export default function Reports() {
   };
 
   const getImageFiles = () => {
-    // Filter for image files only (can be embedded in PDF)
+    let mediaItems: any[] = [];
+
+    // 1. Extract images from action.media field (base64 data stored as JSON array)
+    const actionImages = allActions
+      .filter(action => action.media)
+      .flatMap((action, actionIdx) => {
+        try {
+          const mediaArray = JSON.parse(action.media as string);
+          if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+            return mediaArray.map((imageData: string, imgIdx: number) => ({
+              id: `action-${action.id}-${imgIdx}`,
+              file_name: `${action.type_action} - ${action.company_name}`,
+              description: `Image from: ${action.type_action}`,
+              file_type: 'image',
+              data_url: imageData,
+              source: 'action',
+            }));
+          }
+        } catch (e) {
+          // Fallback for single image stored as string
+          if (action.media && typeof action.media === 'string' && action.media.startsWith('data:image')) {
+            return [{
+              id: `action-${action.id}-0`,
+              file_name: `${action.type_action} - ${action.company_name}`,
+              description: `Image from: ${action.type_action}`,
+              file_type: 'image',
+              data_url: action.media,
+              source: 'action',
+            }];
+          }
+        }
+        return [];
+      });
+
+    mediaItems = [...actionImages];
+
+    // 2. Also include images from IngdDocuments if available
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
-    const imageFiles = allDocuments.filter(d => {
+    const documentImages = allDocuments.filter(d => {
       const fileName = d.file_name?.toLowerCase() || '';
       const fileType = d.file_type?.toLowerCase() || '';
-      // Check by extension OR by file_type field
       const hasByExtension = imageExtensions.some(ext => fileName.endsWith(ext));
       const hasByType = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].some(type => fileType.includes(type) || fileType === type);
       return hasByExtension || hasByType;
-    });
+    }).map(d => ({
+      ...d,
+      source: 'document',
+    }));
 
-    if (includeData.media && allDocuments.length > 0) {
-      console.log(`Total documents: ${allDocuments.length}, Image files: ${imageFiles.length}`, allDocuments);
+    mediaItems = [...mediaItems, ...documentImages];
+
+    if (includeData.media && (allDocuments.length > 0 || allActions.length > 0)) {
+      console.log(`Found ${actionImages.length} action images + ${documentImages.length} document images = ${mediaItems.length} total`, {
+        actionImages,
+        documentImages,
+      });
     }
 
-    return imageFiles;
+    return mediaItems;
   };
 
   const getSelectedMediaList = () => {
     return Array.from(selectedMedia)
       .map(id => getImageFiles().find(m => m.id === id))
-      .filter(Boolean) as IngdDocument[];
+      .filter(Boolean);
   };
 
   const handleGenerateReport = async () => {
@@ -554,42 +607,60 @@ export default function Reports() {
                         <Loader size={18} className="animate-spin text-blue-600 mr-2" />
                         <p className="text-sm text-slate-600">Loading image files...</p>
                       </div>
-                    ) : allDocuments.length === 0 ? (
+                    ) : allActions.length === 0 && allDocuments.length === 0 ? (
                       <div className="py-4">
-                        <p className="text-sm text-slate-600 mb-2">No documents available</p>
-                        <p className="text-xs text-slate-500 mb-3">Click "Refresh Data" to load media files from the system</p>
-                        <p className="text-xs text-slate-500">Supported formats: JPG, PNG, GIF, WebP, BMP, SVG</p>
+                        <p className="text-sm text-slate-600 mb-2">No media files available</p>
+                        <p className="text-xs text-slate-500 mb-3">Click "Refresh Data" to load images from actions and documents</p>
+                        <p className="text-xs text-slate-500">Supported sources:</p>
+                        <p className="text-xs text-slate-500">• Images uploaded with Actions</p>
+                        <p className="text-xs text-slate-500">• Image documents (JPG, PNG, GIF, WebP, BMP, SVG)</p>
                       </div>
                     ) : getImageFiles().length === 0 ? (
                       <div className="py-4">
                         <p className="text-sm text-slate-600 mb-2">No image files found</p>
-                        <p className="text-xs text-slate-500 mb-3">Loaded {allDocuments.length} document(s), but none are images</p>
-                        <p className="text-xs text-slate-500">Supported formats: JPG, PNG, GIF, WebP, BMP, SVG</p>
+                        <p className="text-xs text-slate-500 mb-3">Loaded {allActions.length} action(s) and {allDocuments.length} document(s), but no images detected</p>
+                        <p className="text-xs text-slate-500">Check if images were properly uploaded with your actions</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-80 overflow-y-auto">
                         {getImageFiles().map((doc) => (
-                          <label key={doc.id} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
+                          <label key={doc.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer border border-transparent hover:border-slate-200 transition-colors">
                             <input
                               type="checkbox"
-                              checked={selectedMedia.has(doc.id || 0)}
+                              checked={selectedMedia.has(doc.id)}
                               onChange={(e) => {
                                 const newSelected = new Set(selectedMedia);
                                 if (e.target.checked) {
-                                  newSelected.add(doc.id || 0);
+                                  newSelected.add(doc.id);
                                 } else {
-                                  newSelected.delete(doc.id || 0);
+                                  newSelected.delete(doc.id);
                                 }
                                 setSelectedMedia(newSelected);
                               }}
                               className="w-4 h-4 rounded"
                             />
+                            {/* Image Thumbnail Preview */}
+                            {(doc.data_url || doc.source === 'document') && (
+                              <div className="w-12 h-12 flex-shrink-0 rounded bg-slate-100 overflow-hidden">
+                                <img
+                                  src={doc.data_url || ''}
+                                  alt={doc.file_name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            )}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-slate-900 truncate">{doc.file_name}</p>
                               <p className="text-xs text-slate-600">{doc.description}</p>
+                              {doc.source === 'action' && (
+                                <p className="text-xs text-blue-600 font-medium">From Action</p>
+                              )}
                             </div>
-                            <span className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded whitespace-nowrap">
-                              {doc.file_type?.toUpperCase()}
+                            <span className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded whitespace-nowrap flex-shrink-0">
+                              {doc.source === 'action' ? 'ACTION' : doc.file_type?.toUpperCase()}
                             </span>
                           </label>
                         ))}
@@ -649,11 +720,18 @@ export default function Reports() {
               onClick={async () => {
                 setIsLoading(true);
                 try {
-                  const docs = await getIngdDocuments();
+                  const [actions, docs] = await Promise.all([
+                    getAchievements(),
+                    getIngdDocuments()
+                  ]);
+                  setAllActions(actions);
                   setAllDocuments(docs);
-                  console.log("Refreshed documents:", docs);
+                  console.log("Refreshed all data:", {
+                    actions: actions.length,
+                    documents: docs.length,
+                  });
                 } catch (error) {
-                  console.error("Error refreshing documents:", error);
+                  console.error("Error refreshing data:", error);
                 } finally {
                   setIsLoading(false);
                 }
