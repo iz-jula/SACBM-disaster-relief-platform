@@ -76,12 +76,15 @@ const getDateRangeString = (filters: ReportContext['filters']): string => {
 // Generate Report Header
 function generateReportHeader(context: ReportContext): string {
   const dateRange = getDateRangeString(context.filters);
+  const focus = context.selectedOrganization || 'General';
+
   return `SACBM PRIVATE SECTOR DISASTER RESPONSE REPORT
 South African Chamber of Business in Mozambique
 
 Reporting Period: ${dateRange}
 Report Generated: ${formatDate(new Date())}
-Platform: SACBM Disaster Response Coordination Platform`;
+Platform: SACBM Disaster Response Coordination Platform
+Focus: ${focus}`;
 }
 
 // Generate Executive Overview with conditional narratives
