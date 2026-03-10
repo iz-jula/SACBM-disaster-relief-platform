@@ -311,13 +311,14 @@ export default function Admin() {
     }
   };
 
-  const handleEditDocumentType = async (id: number, newType: string | null, newName?: string) => {
+  const handleEditDocumentType = async (id: number, newType: string | null, newName?: string, newDescription?: string) => {
     try {
-      console.log(`Updating document ${id} - type: ${newType}, name: ${newName}`);
+      console.log(`Updating document ${id} - type: ${newType}, name: ${newName}, description: ${newDescription}`);
 
-      const updates: { type?: string | null; file_name?: string } = {};
+      const updates: { type?: string | null; file_name?: string; description?: string } = {};
       if (newType !== undefined) updates.type = newType;
       if (newName !== undefined && newName.trim()) updates.file_name = newName;
+      if (newDescription !== undefined) updates.description = newDescription;
 
       const result = await updateIngdDocument(id, updates);
       if (!result) {

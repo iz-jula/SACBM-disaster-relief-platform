@@ -15,7 +15,7 @@ export interface UploadFormProps {
   onDocumentTypeChange: (type: "ingd" | "government_priority" | "actions" | "relief_requests") => void;
   onUpload: () => void;
   onDelete: (id: number) => void;
-  onEditType?: (id: number, newType: string | null, newName?: string) => void;
+  onEditType?: (id: number, newType: string | null, newName?: string, newDescription?: string) => void;
 }
 
 export default function DocumentUploadForm({
@@ -37,6 +37,7 @@ export default function DocumentUploadForm({
   const [editingDocId, setEditingDocId] = useState<number | null>(null);
   const [editingDocType, setEditingDocType] = useState("");
   const [editingDocName, setEditingDocName] = useState("");
+  const [editingDocDescription, setEditingDocDescription] = useState("");
   const getDocumentTypeLabel = (type: string) => {
     switch (type) {
       case "government_priority":
@@ -231,6 +232,7 @@ export default function DocumentUploadForm({
                           setEditingDocId(doc.id || null);
                           setEditingDocType(doc.type || "ingd");
                           setEditingDocName(doc.file_name || "");
+                          setEditingDocDescription(doc.description || "");
                         }}
                         className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
                       >
@@ -283,6 +285,19 @@ export default function DocumentUploadForm({
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={editingDocDescription}
+                  onChange={(e) => setEditingDocDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                  placeholder="Enter document description"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Destination Page
                 </label>
                 <select
@@ -307,9 +322,9 @@ export default function DocumentUploadForm({
                 <button
                   onClick={() => {
                     const typeValue = editingDocType === "ingd" ? null : editingDocType;
-                    console.log(`[DocumentUploadForm] Updating document ${editingDocId}: name="${editingDocName}", type="${typeValue}"`);
+                    console.log(`[DocumentUploadForm] Updating document ${editingDocId}: name="${editingDocName}", description="${editingDocDescription}", type="${typeValue}"`);
                     if (onEditType) {
-                      onEditType(editingDocId || 0, typeValue, editingDocName);
+                      onEditType(editingDocId || 0, typeValue, editingDocName, editingDocDescription);
                     }
                     setEditingDocId(null);
                   }}

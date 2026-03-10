@@ -684,10 +684,10 @@ export async function deleteIngdDocument(id: number): Promise<boolean> {
   }
 }
 
-// Update an INGD document's type (destination page) and/or name
+// Update an INGD document's type (destination page), name, and/or description
 export async function updateIngdDocument(
   id: number,
-  updates: { type?: string | null; file_name?: string }
+  updates: { type?: string | null; file_name?: string; description?: string }
 ): Promise<boolean> {
   try {
     console.log(`[updateIngdDocument] Updating document ID ${id}:`, updates);
