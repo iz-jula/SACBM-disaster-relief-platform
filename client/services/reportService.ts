@@ -455,11 +455,11 @@ export async function generatePDFReport(
     const logoBase64 = await imageUrlToBase64(logoUrl);
 
     if (logoBase64) {
-      // Add the logo image with better dimensions
-      // Logo is 800x1200 (2:3 ratio), adjust to fit header nicely
-      const logoWidth = 20; // mm
-      const logoHeight = 28; // mm (maintains aspect ratio)
-      pdf.addImage(logoBase64, 'PNG', margin + 1, 1, logoWidth, logoHeight);
+      // Add the logo image with correct aspect ratio
+      // Original logo is 800x1200 pixels (aspect ratio 1:1.5)
+      const logoWidth = 18; // mm
+      const logoHeight = 27; // mm (18 * 1.5 = 27 to maintain aspect ratio)
+      pdf.addImage(logoBase64, 'PNG', margin + 1.5, 1.5, logoWidth, logoHeight);
     } else {
       // Fallback if image fetch fails
       pdf.setDrawColor(150, 150, 150);
