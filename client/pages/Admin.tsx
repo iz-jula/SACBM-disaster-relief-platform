@@ -315,13 +315,17 @@ export default function Admin() {
 
   const handleEditDocumentType = async (id: number, newType: string | null) => {
     try {
-      await updateIngdDocumentType(id, newType);
+      console.log(`Updating document ${id} to type: ${newType}`);
+      const result = await updateIngdDocumentType(id, newType);
+      if (!result) {
+        throw new Error("Failed to update document type in database");
+      }
+      console.log("Document type updated successfully, reloading documents...");
       await loadAllDocuments();
-      setEditingDocId(null);
-      setEditingDocType("");
+      alert("Document destination updated successfully!");
     } catch (error) {
       console.error("Error updating document type:", error);
-      alert("Error updating document type");
+      alert(`Error updating document type: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   };
 

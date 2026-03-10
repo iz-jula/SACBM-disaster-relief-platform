@@ -292,7 +292,10 @@ export default function DocumentUploadForm({
                 <button
                   onClick={() => {
                     const typeValue = editingDocType === "ingd" ? null : editingDocType;
-                    onEditType(editingDocId, typeValue);
+                    console.log(`[DocumentUploadForm] Calling onEditType with id: ${editingDocId}, type: ${typeValue}`);
+                    if (onEditType) {
+                      onEditType(editingDocId || 0, typeValue);
+                    }
                     setEditingDocId(null);
                   }}
                   className="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"

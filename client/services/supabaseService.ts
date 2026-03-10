@@ -687,15 +687,23 @@ export async function deleteIngdDocument(id: number): Promise<boolean> {
 // Update an INGD document's type (destination page)
 export async function updateIngdDocumentType(id: number, type: string | null): Promise<boolean> {
   try {
-    const { error } = await supabase
+    console.log(`[updateIngdDocumentType] Updating document ${id}, setting type to: ${type}`);
+    const { error, data } = await supabase
       .from("ingd_documents")
       .update({ type })
-      .eq("id", id);
+      .eq("id", id)
+      .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error(`[updateIngdDocumentType] Supabase error for document ${id}:`, error);
+      throw error;
+    }
+
+    console.log(`[updateIngdDocumentType] Successfully updated document ${id}`, data);
     return true;
   } catch (error) {
-    console.error("Error updating INGD document type:", error);
+    const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error("Error updating INGD document type:", errorMsg);
     return false;
   }
 }
