@@ -1,39 +1,49 @@
-import { Plus, Download, Trash2 } from "lucide-react";
+import { Plus, Download, Trash2, Edit2, X } from "lucide-react";
 import { useState } from "react";
 
 export interface UploadFormProps {
-  documentType: "ingd" | "government_priority" | "actions";
+  documentType: "ingd" | "government_priority" | "actions" | "relief_requests";
   documentFile: File | null;
+  documentName: string;
   documentDescription: string;
   isUploading: boolean;
   allDocuments: any[];
   isLoadingDocuments: boolean;
   onFileChange: (file: File | null) => void;
+  onDocumentNameChange: (name: string) => void;
   onDescriptionChange: (description: string) => void;
-  onDocumentTypeChange: (type: "ingd" | "government_priority" | "actions") => void;
+  onDocumentTypeChange: (type: "ingd" | "government_priority" | "actions" | "relief_requests") => void;
   onUpload: () => void;
   onDelete: (id: number) => void;
+  onEditType?: (id: number, newType: string) => void;
 }
 
 export default function DocumentUploadForm({
   documentType,
   documentFile,
+  documentName,
   documentDescription,
   isUploading,
   allDocuments,
   isLoadingDocuments,
   onFileChange,
+  onDocumentNameChange,
   onDescriptionChange,
   onDocumentTypeChange,
   onUpload,
   onDelete,
+  onEditType,
 }: UploadFormProps) {
+  const [editingDocId, setEditingDocId] = useState<number | null>(null);
+  const [editingDocType, setEditingDocType] = useState("");
   const getDocumentTypeLabel = (type: string) => {
     switch (type) {
       case "government_priority":
         return "Government Priority";
       case "actions":
         return "Actions";
+      case "relief_requests":
+        return "Relief Requests";
       default:
         return "INGD";
     }
@@ -45,6 +55,8 @@ export default function DocumentUploadForm({
         return { badge: "bg-purple-100 text-purple-700", button: "bg-purple-100 hover:bg-purple-200 text-purple-700", icon: "text-purple-600" };
       case "actions":
         return { badge: "bg-amber-100 text-amber-700", button: "bg-amber-100 hover:bg-amber-200 text-amber-700", icon: "text-amber-600" };
+      case "relief_requests":
+        return { badge: "bg-green-100 text-green-700", button: "bg-green-100 hover:bg-green-200 text-green-700", icon: "text-green-600" };
       default:
         return { badge: "bg-blue-100 text-blue-700", button: "bg-blue-100 hover:bg-blue-200 text-blue-700", icon: "text-blue-600" };
     }
@@ -59,6 +71,7 @@ export default function DocumentUploadForm({
     ingd: "E.g., INGD Protocol v2.0, Master List - Jan 2024",
     government_priority: "E.g., Government Priorities - January 2026",
     actions: "E.g., Action Guidelines, Partner Documentation",
+    relief_requests: "E.g., Relief Request Guidelines, Standard Forms",
   };
 
   return (
@@ -77,7 +90,7 @@ export default function DocumentUploadForm({
         <div className="p-6 space-y-4">
           <div>
             <label htmlFor="document-type" className="block text-sm font-medium text-slate-700 mb-2">
-              Document Type
+              Destination Page
             </label>
             <select
               id="document-type"
@@ -88,7 +101,22 @@ export default function DocumentUploadForm({
               <option value="ingd">INGD Documents (protocols, Master List)</option>
               <option value="government_priority">Government Priorities</option>
               <option value="actions">Actions Documentation</option>
+              <option value="relief_requests">Relief Requests</option>
             </select>
+          </div>
+
+          <div>
+            <label htmlFor="document-name" className="block text-sm font-medium text-slate-700 mb-2">
+              Document Name
+            </label>
+            <input
+              id="document-name"
+              type="text"
+              value={documentName}
+              onChange={(e) => onDocumentNameChange(e.target.value)}
+              placeholder="E.g., Relief Form Template, Guidelines v2.0"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
           </div>
 
           <div>
@@ -196,6 +224,18 @@ export default function DocumentUploadForm({
                       <Download size={16} />
                       Download
                     </a>
+                    {onEditType && (
+                      <button
+                        onClick={() => {
+                          setEditingDocId(doc.id || null);
+                          setEditingDocType(doc.type || "ingd");
+                        }}
+                        className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                      >
+                        <Edit2 size={16} />
+                        Edit
+                      </button>
+                    )}
                     <button
                       onClick={() => onDelete(doc.id || 0)}
                       className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
@@ -211,13 +251,67 @@ export default function DocumentUploadForm({
         )}
       </div>
 
+      {/* Edit Document Type Modal */}
+      {editingDocId !== null && onEditType && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-900">Edit Destination Page</h3>
+              <button
+                onClick={() => setEditingDocId(null)}
+                className="text-slate-500 hover:text-slate-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Select New Destination
+                </label>
+                <select
+                  value={editingDocType}
+                  onChange={(e) => setEditingDocType(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="ingd">INGD Documents</option>
+                  <option value="government_priority">Government Priorities</option>
+                  <option value="actions">Actions Documentation</option>
+                  <option value="relief_requests">Relief Requests</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setEditingDocId(null)}
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const typeValue = editingDocType === "ingd" ? null : editingDocType;
+                    onEditType(editingDocId, typeValue);
+                    setEditingDocId(null);
+                  }}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                >
+                  Update
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Info Box */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
         <p className="text-lg font-semibold text-blue-900 mb-2">
           📄 Document Management
         </p>
         <p className="text-blue-800">
-          Upload and manage documents from one central location. Select the document type when uploading, and documents will be organized and displayed in their respective sections.
+          Upload and manage documents from one central location. Select the destination page when uploading, and documents will be organized and displayed in their respective sections. You can edit the destination page of uploaded documents without re-uploading.
         </p>
       </div>
     </div>

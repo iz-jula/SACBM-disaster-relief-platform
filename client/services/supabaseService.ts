@@ -646,6 +646,7 @@ export async function createIngdDocument(
         file_type: document.file_type,
         description: document.description,
         uploaded_by: document.uploaded_by,
+        type: document.type,
       }])
       .select();
 
@@ -679,6 +680,22 @@ export async function deleteIngdDocument(id: number): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error deleting INGD document:", error);
+    return false;
+  }
+}
+
+// Update an INGD document's type (destination page)
+export async function updateIngdDocumentType(id: number, type: string | null): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("ingd_documents")
+      .update({ type })
+      .eq("id", id);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error updating INGD document type:", error);
     return false;
   }
 }

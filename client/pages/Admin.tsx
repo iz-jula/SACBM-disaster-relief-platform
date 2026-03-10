@@ -18,7 +18,7 @@ import Layout from "@/components/Layout";
 import DocumentUploadForm from "@/components/DocumentUploadForm";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
-import { getIngdDocuments, createIngdDocument, deleteIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
+import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocumentType, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -86,11 +86,14 @@ export default function Admin() {
   const [allDocuments, setAllDocuments] = useState<IngdDocument[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [documentName, setDocumentName] = useState("");
   const [documentDescription, setDocumentDescription] = useState("");
-  const [documentType, setDocumentType] = useState<"ingd" | "government_priority" | "actions">("ingd");
+  const [documentType, setDocumentType] = useState<"ingd" | "government_priority" | "actions" | "relief_requests">("ingd");
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [ingdActive, setIngdActive] = useState(true);
   const [isUpdatingIngd, setIsUpdatingIngd] = useState(false);
+  const [editingDocId, setEditingDocId] = useState<number | null>(null);
+  const [editingDocType, setEditingDocType] = useState("");
 
   // Load INGD active state from database
   useEffect(() => {
@@ -251,13 +254,14 @@ export default function Admin() {
       let storagePath = "ingd";
       if (documentType === "government_priority") storagePath = "government-priorities";
       if (documentType === "actions") storagePath = "actions";
+      if (documentType === "relief_requests") storagePath = "relief-requests";
 
       const fileUrl = await uploadDocumentToStorage(documentFile, storagePath);
 
       // Create document record in database
       const fileType = documentFile.name.split(".").pop() || "file";
       const documentData: any = {
-        file_name: documentFile.name,
+        file_name: documentName || documentFile.name,
         file_url: fileUrl,
         file_type: fileType,
         description: documentDescription,
@@ -269,6 +273,8 @@ export default function Admin() {
         documentData.type = "government_priority";
       } else if (documentType === "actions") {
         documentData.type = "actions";
+      } else if (documentType === "relief_requests") {
+        documentData.type = "relief_requests";
       }
 
       await createIngdDocument(documentData);
@@ -278,11 +284,13 @@ export default function Admin() {
 
       // Clear form
       setDocumentFile(null);
+      setDocumentName("");
       setDocumentDescription("");
       const typeLabels: Record<string, string> = {
         ingd: "INGD",
         government_priority: "Government Priority",
         actions: "Actions",
+        relief_requests: "Relief Requests",
       };
       alert(`${typeLabels[documentType]} document uploaded successfully!`);
     } catch (error) {
@@ -302,6 +310,18 @@ export default function Admin() {
         console.error("Error deleting document:", error);
         alert("Error deleting document");
       }
+    }
+  };
+
+  const handleEditDocumentType = async (id: number, newType: string | null) => {
+    try {
+      await updateIngdDocumentType(id, newType);
+      await loadAllDocuments();
+      setEditingDocId(null);
+      setEditingDocType("");
+    } catch (error) {
+      console.error("Error updating document type:", error);
+      alert("Error updating document type");
     }
   };
 
@@ -1472,15 +1492,18 @@ export default function Admin() {
           <DocumentUploadForm
             documentType={documentType as any}
             documentFile={documentFile}
+            documentName={documentName}
             documentDescription={documentDescription}
             isUploading={isUploadingDocument}
             allDocuments={allDocuments}
             isLoadingDocuments={isLoadingDocuments}
             onFileChange={setDocumentFile}
+            onDocumentNameChange={setDocumentName}
             onDescriptionChange={setDocumentDescription}
             onDocumentTypeChange={setDocumentType}
             onUpload={handleUploadDocument}
             onDelete={handleDeleteDocument}
+            onEditType={handleEditDocumentType}
           />
         )}
 

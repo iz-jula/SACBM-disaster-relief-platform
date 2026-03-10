@@ -297,6 +297,7 @@ export default function Requests() {
   const [displayedRelieRequests, setDisplayedRelieRequests] = useState(15);
   const [displayedIngdRequests, setDisplayedIngdRequests] = useState(15);
   const [displayedIngdDocuments, setDisplayedIngdDocuments] = useState(15);
+  const [displayedReliefDocuments, setDisplayedReliefDocuments] = useState(15);
 
   // Load requests on mount
   useEffect(() => {
@@ -336,6 +337,10 @@ export default function Requests() {
     const interval = setInterval(loadIngdSetting, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  // Filter documents by type
+  const ingdDocsFiltered = ingdDocuments.filter((doc) => !doc.type || doc.type === "ingd");
+  const reliefRequestDocs = ingdDocuments.filter((doc) => doc.type === "relief_requests");
 
   const toggleSelectRequest = (id: number) => {
     const newSelected = new Set(selectedRequests);
@@ -958,13 +963,13 @@ export default function Requests() {
               <div className="p-6 text-center text-slate-600">
                 Loading documents...
               </div>
-            ) : ingdDocuments.length === 0 ? (
+            ) : ingdDocsFiltered.length === 0 ? (
               <div className="p-6 text-center text-slate-600">
                 No documents available yet. Check back soon for INGD protocols and spreadsheets.
               </div>
             ) : (
               <div className="divide-y divide-slate-200">
-                {ingdDocuments.slice(0, displayedIngdDocuments).map((doc) => (
+                {ingdDocsFiltered.slice(0, displayedIngdDocuments).map((doc) => (
                   <div key={doc.id} className="p-4 sm:p-6 hover:bg-slate-50 transition-colors">
                     <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
                       <div className="flex-1 min-w-0">
@@ -1003,18 +1008,90 @@ export default function Requests() {
                 ))}
               </div>
             )}
-            {ingdDocuments.length > displayedIngdDocuments && (
+            {ingdDocsFiltered.length > displayedIngdDocuments && (
               <div className="p-4 border-t border-slate-200 text-center">
                 <button
                   onClick={() => setDisplayedIngdDocuments(prev => prev + 15)}
                   className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
                 >
-                  Load More ({displayedIngdDocuments} of {ingdDocuments.length})
+                  Load More ({displayedIngdDocuments} of {ingdDocsFiltered.length})
                 </button>
               </div>
             )}
           </div>
         )}
+
+        {/* Relief Requests Documents Section */}
+        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50">
+            <h2 className="text-lg font-bold text-slate-900">
+              📋 Relief Requests Documents
+            </h2>
+            <p className="text-sm text-slate-600 mt-1">
+              Download relief request templates, guidelines, and supporting documents
+            </p>
+          </div>
+
+          {isLoadingDocuments ? (
+            <div className="p-6 text-center text-slate-600">
+              Loading documents...
+            </div>
+          ) : reliefRequestDocs.length === 0 ? (
+            <div className="p-6 text-center text-slate-600">
+              No relief request documents available yet.
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-200">
+              {reliefRequestDocs.slice(0, displayedReliefDocuments).map((doc) => (
+                <div key={doc.id} className="p-4 sm:p-6 hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="text-lg">📋</span>
+                          <h3 className="font-semibold text-slate-900 break-words">
+                            {doc.file_name}
+                          </h3>
+                        </span>
+                        <span className="ml-auto sm:ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded whitespace-nowrap">
+                          {doc.file_type.toUpperCase()}
+                        </span>
+                      </div>
+                      {doc.description && (
+                        <p className="text-sm text-slate-600 mb-2">
+                          {doc.description}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500">
+                        Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Unknown"}
+                      </p>
+                    </div>
+                    <a
+                      href={doc.file_url}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                    >
+                      <Download size={16} />
+                      Download
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {reliefRequestDocs.length > displayedReliefDocuments && (
+            <div className="p-4 border-t border-slate-200 text-center">
+              <button
+                onClick={() => setDisplayedReliefDocuments(prev => prev + 15)}
+                className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+              >
+                Load More ({displayedReliefDocuments} of {reliefRequestDocs.length})
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Authentication Modal */}
         {showAuthModal && (
