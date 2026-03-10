@@ -684,18 +684,21 @@ export async function deleteIngdDocument(id: number): Promise<boolean> {
   }
 }
 
-// Update an INGD document's type (destination page)
-export async function updateIngdDocumentType(id: number, type: string | null): Promise<boolean> {
+// Update an INGD document's type (destination page) and/or name
+export async function updateIngdDocument(
+  id: number,
+  updates: { type?: string | null; file_name?: string }
+): Promise<boolean> {
   try {
-    console.log(`[updateIngdDocumentType] Updating document ID ${id}, setting type to: ${type}`);
+    console.log(`[updateIngdDocument] Updating document ID ${id}:`, updates);
 
     const { error } = await supabase
       .from("ingd_documents")
-      .update({ type })
+      .update(updates)
       .eq("id", id);
 
     if (error) {
-      console.error(`[updateIngdDocumentType] Supabase error for document ${id}:`, {
+      console.error(`[updateIngdDocument] Supabase error for document ${id}:`, {
         message: error.message,
         code: (error as any).code,
         details: (error as any).details,
@@ -705,13 +708,18 @@ export async function updateIngdDocumentType(id: number, type: string | null): P
       throw new Error(`Supabase error: ${error.message}`);
     }
 
-    console.log(`[updateIngdDocumentType] Successfully updated document ${id}`);
+    console.log(`[updateIngdDocument] Successfully updated document ${id}`);
     return true;
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
-    console.error("[updateIngdDocumentType] Error updating INGD document type:", errorMsg);
+    console.error("[updateIngdDocument] Error updating INGD document:", errorMsg);
     return false;
   }
+}
+
+// Update an INGD document's type (destination page) - DEPRECATED, use updateIngdDocument instead
+export async function updateIngdDocumentType(id: number, type: string | null): Promise<boolean> {
+  return updateIngdDocument(id, { type });
 }
 
 // Get INGD active setting from database

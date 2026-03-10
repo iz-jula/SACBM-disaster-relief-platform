@@ -15,7 +15,7 @@ export interface UploadFormProps {
   onDocumentTypeChange: (type: "ingd" | "government_priority" | "actions" | "relief_requests") => void;
   onUpload: () => void;
   onDelete: (id: number) => void;
-  onEditType?: (id: number, newType: string) => void;
+  onEditType?: (id: number, newType: string | null, newName?: string) => void;
 }
 
 export default function DocumentUploadForm({
@@ -36,6 +36,7 @@ export default function DocumentUploadForm({
 }: UploadFormProps) {
   const [editingDocId, setEditingDocId] = useState<number | null>(null);
   const [editingDocType, setEditingDocType] = useState("");
+  const [editingDocName, setEditingDocName] = useState("");
   const getDocumentTypeLabel = (type: string) => {
     switch (type) {
       case "government_priority":
@@ -229,6 +230,7 @@ export default function DocumentUploadForm({
                         onClick={() => {
                           setEditingDocId(doc.id || null);
                           setEditingDocType(doc.type || "ingd");
+                          setEditingDocName(doc.file_name || "");
                         }}
                         className="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
                       >
@@ -251,12 +253,12 @@ export default function DocumentUploadForm({
         )}
       </div>
 
-      {/* Edit Document Type Modal */}
+      {/* Edit Document Modal */}
       {editingDocId !== null && onEditType && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-900">Edit Destination Page</h3>
+              <h3 className="text-lg font-bold text-slate-900">Edit Document</h3>
               <button
                 onClick={() => setEditingDocId(null)}
                 className="text-slate-500 hover:text-slate-700"
@@ -268,7 +270,20 @@ export default function DocumentUploadForm({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Select New Destination
+                  Document Title
+                </label>
+                <input
+                  type="text"
+                  value={editingDocName}
+                  onChange={(e) => setEditingDocName(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Enter document title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Destination Page
                 </label>
                 <select
                   value={editingDocType}
@@ -292,9 +307,9 @@ export default function DocumentUploadForm({
                 <button
                   onClick={() => {
                     const typeValue = editingDocType === "ingd" ? null : editingDocType;
-                    console.log(`[DocumentUploadForm] Calling onEditType with id: ${editingDocId}, type: ${typeValue}`);
+                    console.log(`[DocumentUploadForm] Updating document ${editingDocId}: name="${editingDocName}", type="${typeValue}"`);
                     if (onEditType) {
-                      onEditType(editingDocId || 0, typeValue);
+                      onEditType(editingDocId || 0, typeValue, editingDocName);
                     }
                     setEditingDocId(null);
                   }}

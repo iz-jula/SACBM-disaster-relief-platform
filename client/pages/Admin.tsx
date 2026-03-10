@@ -18,7 +18,7 @@ import Layout from "@/components/Layout";
 import DocumentUploadForm from "@/components/DocumentUploadForm";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
-import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocumentType, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
+import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
@@ -92,8 +92,6 @@ export default function Admin() {
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [ingdActive, setIngdActive] = useState(true);
   const [isUpdatingIngd, setIsUpdatingIngd] = useState(false);
-  const [editingDocId, setEditingDocId] = useState<number | null>(null);
-  const [editingDocType, setEditingDocType] = useState("");
 
   // Load INGD active state from database
   useEffect(() => {
@@ -313,19 +311,24 @@ export default function Admin() {
     }
   };
 
-  const handleEditDocumentType = async (id: number, newType: string | null) => {
+  const handleEditDocumentType = async (id: number, newType: string | null, newName?: string) => {
     try {
-      console.log(`Updating document ${id} to type: ${newType}`);
-      const result = await updateIngdDocumentType(id, newType);
+      console.log(`Updating document ${id} - type: ${newType}, name: ${newName}`);
+
+      const updates: { type?: string | null; file_name?: string } = {};
+      if (newType !== undefined) updates.type = newType;
+      if (newName !== undefined && newName.trim()) updates.file_name = newName;
+
+      const result = await updateIngdDocument(id, updates);
       if (!result) {
-        throw new Error("Failed to update document type in database");
+        throw new Error("Failed to update document in database");
       }
-      console.log("Document type updated successfully, reloading documents...");
+      console.log("Document updated successfully, reloading documents...");
       await loadAllDocuments();
-      alert("Document destination updated successfully!");
+      alert("Document updated successfully!");
     } catch (error) {
-      console.error("Error updating document type:", error);
-      alert(`Error updating document type: ${error instanceof Error ? error.message : "Unknown error"}`);
+      console.error("Error updating document:", error);
+      alert(`Error updating document: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   };
 
