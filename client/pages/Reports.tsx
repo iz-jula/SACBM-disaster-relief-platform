@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   Check,
+  X,
 } from "lucide-react";
 import { getAchievements } from "@/services/achievementsService";
 import { getRequests } from "@/services/supabaseService";
@@ -69,6 +70,9 @@ export default function Reports() {
 
   // Media selection
   const [selectedMedia, setSelectedMedia] = useState<Set<number>>(new Set());
+
+  // Image preview modal
+  const [previewImage, setPreviewImage] = useState<any>(null);
 
   // Dropdown options
   const [actionSubmitterOptions, setActionSubmitterOptions] = useState<string[]>([]);
@@ -624,7 +628,7 @@ export default function Reports() {
                     ) : (
                       <div className="space-y-2 max-h-80 overflow-y-auto">
                         {getImageFiles().map((doc) => (
-                          <label key={doc.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer border border-transparent hover:border-slate-200 transition-colors">
+                          <div key={doc.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 transition-colors group">
                             <input
                               type="checkbox"
                               checked={selectedMedia.has(doc.id)}
@@ -637,20 +641,24 @@ export default function Reports() {
                                 }
                                 setSelectedMedia(newSelected);
                               }}
-                              className="w-4 h-4 rounded"
+                              className="w-4 h-4 rounded cursor-pointer"
                             />
-                            {/* Image Thumbnail Preview */}
+                            {/* Image Thumbnail Preview - Clickable */}
                             {(doc.data_url || doc.source === 'document') && (
-                              <div className="w-12 h-12 flex-shrink-0 rounded bg-slate-100 overflow-hidden">
+                              <button
+                                onClick={() => setPreviewImage(doc)}
+                                className="w-12 h-12 flex-shrink-0 rounded bg-slate-100 overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all"
+                                title="Click to preview"
+                              >
                                 <img
                                   src={doc.data_url || ''}
                                   alt={doc.file_name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover cursor-pointer"
                                   onError={(e) => {
                                     (e.target as HTMLImageElement).style.display = 'none';
                                   }}
                                 />
-                              </div>
+                              </button>
                             )}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-slate-900 truncate">{doc.file_name}</p>
@@ -662,7 +670,7 @@ export default function Reports() {
                             <span className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded whitespace-nowrap flex-shrink-0">
                               {doc.source === 'action' ? 'ACTION' : doc.file_type?.toUpperCase()}
                             </span>
-                          </label>
+                          </div>
                         ))}
                       </div>
                     )}
@@ -765,6 +773,79 @@ export default function Reports() {
             </p>
           </div>
         </div>
+
+        {/* Image Preview Modal */}
+        {previewImage && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setPreviewImage(null)}
+          >
+            <div
+              className="bg-white rounded-lg shadow-xl max-w-2xl max-h-[90vh] overflow-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50 sticky top-0">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-slate-900">{previewImage.file_name}</h3>
+                  <p className="text-xs text-slate-600 mt-1">{previewImage.description}</p>
+                </div>
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="p-2 hover:bg-slate-200 rounded-lg transition-colors flex-shrink-0"
+                  title="Close preview"
+                >
+                  <X size={20} className="text-slate-600" />
+                </button>
+              </div>
+
+              {/* Modal Body - Image */}
+              <div className="p-6 flex items-center justify-center bg-slate-50">
+                <img
+                  src={previewImage.data_url || ''}
+                  alt={previewImage.file_name}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '';
+                  }}
+                />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-between p-4 border-t border-slate-200 bg-slate-50">
+                <div className="flex gap-2">
+                  {previewImage.source === 'action' && (
+                    <span className="inline-block text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+                      From Action
+                    </span>
+                  )}
+                  <span className="inline-block text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
+                    {previewImage.source === 'action' ? 'ACTION' : previewImage.file_type?.toUpperCase()}
+                  </span>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer p-3 hover:bg-white rounded-lg">
+                  <input
+                    type="checkbox"
+                    checked={selectedMedia.has(previewImage.id)}
+                    onChange={(e) => {
+                      const newSelected = new Set(selectedMedia);
+                      if (e.target.checked) {
+                        newSelected.add(previewImage.id);
+                      } else {
+                        newSelected.delete(previewImage.id);
+                      }
+                      setSelectedMedia(newSelected);
+                    }}
+                    className="w-4 h-4 rounded cursor-pointer"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {selectedMedia.has(previewImage.id) ? 'Included in Report' : 'Include in Report'}
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
