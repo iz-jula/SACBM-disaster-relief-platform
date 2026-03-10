@@ -348,14 +348,31 @@ export function filterActions(actions: Action[], filters: ReportFilters): Action
 // Helper function to fetch and convert image to base64
 async function imageUrlToBase64(url: string): Promise<string> {
   try {
-    // Fetch as PNG format for better compatibility with jsPDF
-    const pngUrl = url.replace('format=webp', 'format=png');
-    const response = await fetch(pngUrl);
+    // Try PNG format first for better jsPDF compatibility
+    let fetchUrl = url.replace('format=webp', 'format=png');
+    let response = await fetch(fetchUrl);
+
+    // If PNG fails, try the original URL
+    if (!response.ok) {
+      response = await fetch(url);
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        console.log('Successfully converted image to base64');
+        resolve(result);
+      };
+      reader.onerror = () => {
+        console.error('FileReader error:', reader.error);
+        reject(reader.error);
+      };
       reader.readAsDataURL(blob);
     });
   } catch (error) {
@@ -451,7 +468,7 @@ export async function generatePDFReport(
   
   // Add SACBM logo
   try {
-    const logoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Ff3bcff56461143fc9ceab7576d8e9223?format=webp&width=800&height=1200';
+    const logoUrl = 'https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fdc141d40aa684196b2211f2c32db7b6e?format=webp&width=800&height=1200';
     const logoBase64 = await imageUrlToBase64(logoUrl);
 
     if (logoBase64) {
