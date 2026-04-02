@@ -55,7 +55,7 @@ export default function Layout({ children }: LayoutProps) {
                     SACBM
                   </h1>
                   <p className="text-xs text-slate-500 leading-tight">
-                    Disaster Relief
+                    Social Impact Cluster
                   </p>
                 </div>
               )}
@@ -156,7 +156,7 @@ export default function Layout({ children }: LayoutProps) {
                   SACBM
                 </p>
                 <p className="text-xs text-slate-500 leading-tight">
-                  Disaster Relief
+                  Social Impact Cluster
                 </p>
               </div>
             </Link>

@@ -160,10 +160,10 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">
-                  Members Actions Dashboard
+                  Members Social Impact Actions Dashboard
                 </h1>
                 <p className="text-base sm:text-lg text-slate-600 mt-2 max-w-2xl">
-                  Track and celebrate member contributions to disaster relief efforts
+                  Track and celebrate member contributions to Social Impact efforts
                 </p>
               </div>
             </div>
