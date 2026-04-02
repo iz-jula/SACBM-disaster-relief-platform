@@ -111,7 +111,9 @@ export async function createAchievement(
     console.log("Achievement created successfully");
     return result;
   } catch (error) {
-    console.error("Error creating achievement:", error);
+    const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+    console.error("Error creating achievement:", errorMsg);
+    console.error("Full error object:", error);
     return null;
   }
 }

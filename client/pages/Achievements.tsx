@@ -356,16 +356,12 @@ export default function Achievements() {
           await loadData();
           alert("Action submitted successfully!");
         } else {
-          alert("Failed to submit action. Please try again.");
+          alert("Failed to submit action. Please check the browser console (F12) for detailed error information and try again.");
         }
       } catch (error) {
         console.error("Error submitting achievement:", error);
-        alert(
-          "Error: " +
-            (error instanceof Error
-              ? error.message
-              : "Failed to submit action"),
-        );
+        const errorMessage = error instanceof Error ? error.message : "Failed to submit action";
+        alert("Error: " + errorMessage);
       }
     }
   };
