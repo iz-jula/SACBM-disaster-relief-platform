@@ -452,7 +452,7 @@ export default function Reports() {
             <div className="space-y-3">
               {[
                 { key: "actions", label: "Actions", description: "Include submitted actions" },
-                { key: "reliefRequests", label: "Relief Requests", description: "Include relief requests" },
+                { key: "reliefRequests", label: "Social Impact and Relief Requests", description: "Include social impact and relief requests" },
                 { key: "governmentPriorities", label: "Government Priorities", description: "Include government priorities documents" },
                 { key: "media", label: "Media", description: "Include specific media files from actions" },
               ].map((item) => (
