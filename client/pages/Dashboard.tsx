@@ -179,7 +179,7 @@ export default function Dashboard() {
                   MEMBERS ACTIONS
                 </h2>
                 <p className="text-slate-600 mt-2">
-                  Member actions and contributions beyond relief requests
+                  Member social impact actions and contributions beyond relief request
                 </p>
               </div>
               <Link
@@ -266,7 +266,7 @@ export default function Dashboard() {
                 RELIEF REQUESTS
               </h2>
               <p className="text-slate-600 mt-2">
-                Combined overview of disaster relief operations and INGD relief items
+                Combined overview of Social impact and disaster relief operations and INGD relief items
               </p>
             </div>
             <Link

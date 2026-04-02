@@ -670,7 +670,7 @@ export default function Achievements() {
             Member Actions
           </h1>
           <p className="text-sm sm:text-base text-slate-600 mt-1">
-            Track community work and contributions beyond relief requests
+            Track the members social impact work and contributions beyond relief request
           </p>
         </div>
 

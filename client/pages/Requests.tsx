@@ -540,10 +540,10 @@ export default function Requests() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
-              Relief Requests
+              Social impact partnerships and Relief Requests
             </h1>
             <p className="text-slate-600 mt-1">
-              Manage all disaster relief requests
+              Manage all Social Impact partnerships and Relief Requests
             </p>
           </div>
           <div className="flex gap-3">
@@ -1025,7 +1025,7 @@ export default function Requests() {
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-green-50">
             <h2 className="text-lg font-bold text-slate-900">
-              📋 Relief Requests Documents
+              📋 Social Impact partnerships and Relief Requests Documents
             </h2>
             <p className="text-sm text-slate-600 mt-1">
               Download relief request templates, guidelines, and supporting documents
