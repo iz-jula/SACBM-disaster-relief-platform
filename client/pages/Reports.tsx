@@ -924,13 +924,13 @@ export default function Reports() {
           <h3 className="font-bold text-slate-900 mb-4">How to Use</h3>
           <div className="space-y-3 text-sm text-slate-700">
             <p>
-              <span className="font-medium">Step 1:</span> Check the data types you want to include (Actions, Relief Requests, Government Priorities, Media)
+              <span className="font-medium">Step 1:</span> Check the data types you want to include (Actions, Social Impact and Relief Requests, Government Priorities, Media)
             </p>
             <p>
               <span className="font-medium">Step 2:</span> Each selected data type shows its own filters - customize organization, category, date range, etc.
             </p>
             <p>
-              <span className="font-medium">Step 3:</span> For Relief Requests, you can exclude INGD requests and include only member requests
+              <span className="font-medium">Step 3:</span> For Social Impact and Relief Requests, you can exclude INGD requests and include only member requests
             </p>
             <p>
               <span className="font-medium">Step 4:</span> For Media, individually select which files to include in the report
