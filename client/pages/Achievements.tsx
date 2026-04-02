@@ -114,6 +114,7 @@ export default function Achievements() {
   const [filterMaxAmount, setFilterMaxAmount] = useState("");
   const [filterMinPeople, setFilterMinPeople] = useState("");
   const [filterMaxPeople, setFilterMaxPeople] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "highest-contribution" | "lowest-contribution" | "most-people" | "least-people">("newest");
   const [formData, setFormData] = useState({
     company_name: "",
     type_action: "",
@@ -1271,7 +1272,7 @@ export default function Achievements() {
         {/* Member Work List */}
         <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
-            <div className="flex items-center gap-3 justify-between">
+            <div className="flex items-center gap-3 justify-between flex-wrap">
               <div className="flex items-center gap-3 flex-1">
                 {achievements.length > 0 && (
                   <input
@@ -1306,11 +1307,31 @@ export default function Achievements() {
                   </p>
                 </div>
               </div>
-              {selectedAchievements.size > 0 && (
-                <span className="text-sm font-medium text-slate-600">
-                  {selectedAchievements.size} selected
-                </span>
-              )}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div>
+                  <label htmlFor="sort-select" className="text-xs sm:text-sm font-medium text-slate-600 mr-2">
+                    Sort by:
+                  </label>
+                  <select
+                    id="sort-select"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="highest-contribution">Highest Contribution</option>
+                    <option value="lowest-contribution">Lowest Contribution</option>
+                    <option value="most-people">Most People Impacted</option>
+                    <option value="least-people">Least People Impacted</option>
+                  </select>
+                </div>
+                {selectedAchievements.size > 0 && (
+                  <span className="text-xs sm:text-sm font-medium text-slate-600">
+                    {selectedAchievements.size} selected
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1339,6 +1360,24 @@ export default function Achievements() {
                   if (filterMaxPeople && a.people_impacted > parseInt(filterMaxPeople)) return false;
 
                   return true;
+                })
+                .sort((a, b) => {
+                  switch (sortBy) {
+                    case "newest":
+                      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                    case "oldest":
+                      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                    case "highest-contribution":
+                      return b.amount - a.amount;
+                    case "lowest-contribution":
+                      return a.amount - b.amount;
+                    case "most-people":
+                      return b.people_impacted - a.people_impacted;
+                    case "least-people":
+                      return a.people_impacted - b.people_impacted;
+                    default:
+                      return 0;
+                  }
                 })
                 .slice(0, displayedAchievementsCount)
                 .map((achievement) => (
