@@ -406,7 +406,7 @@ export default function Upload() {
             {/* Relief Details Section */}
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-6">
-                Relief Details
+                Social Impact and Relief Details
               </h2>
               <div className="space-y-6">
                 {/* Type of Help */}

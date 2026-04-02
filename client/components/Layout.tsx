@@ -19,7 +19,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/", label: "Dashboard" },
     { href: "/requests", label: "Relief Requests" },
     { href: "/actions", label: "Actions" },
-    { href: "/upload", label: "Upload Social Impact Requests" },
+    { href: "/upload", label: "Upload Social Impact" },
     { href: "/government-priorities", label: "Government Priorities" },
     { href: "/reports", label: "Reports" },
   ];
