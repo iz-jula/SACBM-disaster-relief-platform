@@ -1536,7 +1536,7 @@ export default function Achievements() {
                     {/* Upload Date - Bottom Right */}
                     <div className="pt-2 flex justify-end">
                       <p className="text-xs text-slate-400">
-                        {new Date(achievement.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        Uploaded on: {new Date(achievement.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </p>
                     </div>
                   </div>
