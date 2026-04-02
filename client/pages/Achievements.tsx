@@ -108,6 +108,12 @@ export default function Achievements() {
   const [selectedAchievements, setSelectedAchievements] = useState<Set<string>>(new Set());
   const [displayedAchievementsCount, setDisplayedAchievementsCount] = useState(15);
   const [hiddenContributions, setHiddenContributions] = useState<Set<string>>(new Set());
+  const [filterStartDate, setFilterStartDate] = useState("");
+  const [filterEndDate, setFilterEndDate] = useState("");
+  const [filterMinAmount, setFilterMinAmount] = useState("");
+  const [filterMaxAmount, setFilterMaxAmount] = useState("");
+  const [filterMinPeople, setFilterMinPeople] = useState("");
+  const [filterMaxPeople, setFilterMaxPeople] = useState("");
   const [formData, setFormData] = useState({
     company_name: "",
     type_action: "",
@@ -1193,6 +1199,72 @@ export default function Achievements() {
                   ))}
               </select>
             </div>
+
+            <div>
+              <p className="text-sm font-medium text-slate-700 mb-2">
+                Date of Upload
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={filterStartDate}
+                  onChange={(e) => setFilterStartDate(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  placeholder="Start date"
+                />
+                <input
+                  type="date"
+                  value={filterEndDate}
+                  onChange={(e) => setFilterEndDate(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  placeholder="End date"
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-slate-700 mb-2">
+                Contribution Size (MZN)
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={filterMinAmount}
+                  onChange={(e) => setFilterMinAmount(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  placeholder="Min amount"
+                />
+                <input
+                  type="number"
+                  value={filterMaxAmount}
+                  onChange={(e) => setFilterMaxAmount(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  placeholder="Max amount"
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-slate-700 mb-2">
+                People Impacted
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={filterMinPeople}
+                  onChange={(e) => setFilterMinPeople(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  placeholder="Min people"
+                />
+                <input
+                  type="number"
+                  value={filterMaxPeople}
+                  onChange={(e) => setFilterMaxPeople(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  placeholder="Max people"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1216,9 +1288,19 @@ export default function Achievements() {
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-600 mt-1">
                     {(() => {
-                      const filtered = selectedCompany
-                        ? achievements.filter((a) => a.company_name === selectedCompany)
-                        : achievements;
+                      const filtered = achievements.filter((a) => {
+                        if (selectedCompany && a.company_name !== selectedCompany) return false;
+                        if (filterStartDate || filterEndDate) {
+                          const achievementDate = new Date(a.created_at).toISOString().split('T')[0];
+                          if (filterStartDate && achievementDate < filterStartDate) return false;
+                          if (filterEndDate && achievementDate > filterEndDate) return false;
+                        }
+                        if (filterMinAmount && a.amount < parseInt(filterMinAmount)) return false;
+                        if (filterMaxAmount && a.amount > parseInt(filterMaxAmount)) return false;
+                        if (filterMinPeople && a.people_impacted < parseInt(filterMinPeople)) return false;
+                        if (filterMaxPeople && a.people_impacted > parseInt(filterMaxPeople)) return false;
+                        return true;
+                      });
                       return `${filtered.length} action${filtered.length !== 1 ? "s" : ""}`;
                     })()}
                   </p>
@@ -1237,7 +1319,27 @@ export default function Achievements() {
               <div className="p-6 text-center text-slate-600">Loading...</div>
             ) : achievements.length > 0 ? (
               achievements
-                .filter((a) => (selectedCompany ? a.company_name === selectedCompany : true))
+                .filter((a) => {
+                  // Company filter
+                  if (selectedCompany && a.company_name !== selectedCompany) return false;
+
+                  // Date filter
+                  if (filterStartDate || filterEndDate) {
+                    const achievementDate = new Date(a.created_at).toISOString().split('T')[0];
+                    if (filterStartDate && achievementDate < filterStartDate) return false;
+                    if (filterEndDate && achievementDate > filterEndDate) return false;
+                  }
+
+                  // Amount filter
+                  if (filterMinAmount && a.amount < parseInt(filterMinAmount)) return false;
+                  if (filterMaxAmount && a.amount > parseInt(filterMaxAmount)) return false;
+
+                  // People impacted filter
+                  if (filterMinPeople && a.people_impacted < parseInt(filterMinPeople)) return false;
+                  if (filterMaxPeople && a.people_impacted > parseInt(filterMaxPeople)) return false;
+
+                  return true;
+                })
                 .slice(0, displayedAchievementsCount)
                 .map((achievement) => (
                 <div
