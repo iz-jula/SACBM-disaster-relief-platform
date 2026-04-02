@@ -217,15 +217,14 @@ export default function Achievements() {
         console.log("Creating new achievement with data:", formData);
 
         // Validate required fields
-        if (
-          !formData.company_name ||
-          !formData.type_action ||
-          !formData.description ||
-          !formData.province
-        ) {
-          alert(
-            "Please fill in all required fields: Company Name, Type of Action, Province, and Description",
-          );
+        const missingFields = [];
+        if (!formData.company_name) missingFields.push("Company Name");
+        if (!formData.type_action) missingFields.push("Type of Action");
+        if (!formData.description) missingFields.push("Description");
+        if (!formData.province) missingFields.push("Province");
+
+        if (missingFields.length > 0) {
+          alert(`Missing required field(s): ${missingFields.join(", ")}`);
           return;
         }
 
