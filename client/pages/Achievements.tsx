@@ -127,7 +127,6 @@ export default function Achievements() {
     amount: "",
     hide_amount: false,
     media: null as string | null,
-    documents: null as string | null,
   });
 
   const [customTypeAction, setCustomTypeAction] = useState("");
@@ -332,7 +331,6 @@ export default function Achievements() {
           people_impacted: parseInt(formData.people_impacted) || 0,
           amount: parseInt(formData.amount) || 0,
           media: imageData || null,
-          documents: documentData || null,
         };
 
         console.log("Sending achievement data:", newAchievementData);
@@ -352,7 +350,6 @@ export default function Achievements() {
             amount: "",
             hide_amount: false,
     media: null as string | null,
-            documents: null as string | null,
           });
           setCustomTypeAction("");
           setCustomPartnerOrg("");
@@ -393,7 +390,6 @@ export default function Achievements() {
       amount: achievement.amount.toString(),
       hide_amount: false,
       media: achievement.media || null,
-      documents: (achievement as any).documents || null,
     });
     setShowEditModal(true);
   };
@@ -567,20 +563,7 @@ export default function Achievements() {
           console.log("Removing media");
         }
 
-        // Handle document updates
-        if (documentData !== undefined) {
-          // User uploaded new documents
-          updateData.documents = documentData;
-          console.log("Updating with new documents");
-        } else if (formData.documents !== null && uploadedDocuments.length === 0) {
-          // Keep existing documents - only include if they didn't upload new files
-          updateData.documents = formData.documents;
-          console.log("Keeping existing documents");
-        } else if (formData.documents === null && uploadedDocuments.length === 0) {
-          // Documents were removed
-          updateData.documents = null;
-          console.log("Removing documents");
-        }
+        // Note: Document column not yet available in database - skipping document updates for now
 
         console.log("Updating achievement with id:", pendingAction.achievementId, "Data:", updateData);
 
@@ -611,7 +594,6 @@ export default function Achievements() {
           amount: "",
           hide_amount: false,
     media: null as string | null,
-            documents: null as string | null,
         });
         setCustomTypeAction("");
         setCustomPartnerOrg("");
@@ -755,7 +737,6 @@ export default function Achievements() {
                   amount: "",
                   hide_amount: false,
     media: null as string | null,
-                  documents: null as string | null,
                 });
                 setUploadedMedia([]);
                 setUploadedDocuments([]);
@@ -1142,7 +1123,6 @@ export default function Achievements() {
                       amount: "",
                       hide_amount: false,
     media: null as string | null,
-                      documents: null as string | null,
                     });
                   }}
                   className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-lg font-medium"
