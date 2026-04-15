@@ -21,6 +21,7 @@ import {
   handleAddUser,
   handleRemoveUser,
 } from "./routes/users";
+import { handleGetDashboardData } from "./routes/dashboard";
 
 export function createServer() {
   const app = express();
@@ -40,6 +41,9 @@ export function createServer() {
 
   // News alerts proxy
   app.get("/api/news/alerts", handleNewsAlerts);
+
+  // Dashboard consolidated data endpoint
+  app.get("/api/dashboard-data", handleGetDashboardData);
 
   // Requests endpoints
   app.get("/api/requests", handleGetRequests);

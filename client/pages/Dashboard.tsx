@@ -1,19 +1,10 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, Suspense, lazy } from "react";
 import Layout from "@/components/Layout";
-import {
-  getRecentRequests,
-  getMetrics,
-  Metrics,
-} from "@/services/requestsService";
-import {
-  getAchievementsMetrics,
-  Achievement,
-  getAchievements,
-  AchievementsMetrics,
-  Achievement,
-} from "@/services/achievementsService";
-import { getIngdMetrics, getIngdRequests, IngdRequest, getIngdDocuments, IngdDocument, getIngdActiveSetting } from "@/services/supabaseService";
+import { getDashboardData } from "@/services/dashboardService";
+import type { Achievement } from "@/services/achievementsService";
+import type { Metrics } from "@/services/requestsService";
+import type { IngdRequest, IngdDocument } from "@/services/supabaseService";
 import { Download } from "lucide-react";
 
 import ActionsImageGrid from "@/components/ActionsImageGrid";
@@ -45,38 +36,23 @@ export default function Dashboard() {
   const [ingdActive, setIngdActive] = useState(true);
 
   useEffect(() => {
-    // Fetch data from API
+    // Fetch data from consolidated API endpoint
     const loadData = async () => {
       setIsLoading(true);
       try {
         console.time("Dashboard data load");
-        const [requests, metricsData, achievementsData, ingdMetricsData, ingdRecentData, achievementsImages, allDocuments] = await Promise.all([
-          getRecentRequests(5),
-          getMetrics(),
-          getAchievementsMetrics(),
-          getIngdMetrics(),
-          getIngdRequests(),
-          getAchievements(),
-          getIngdDocuments(),
-        ]);
+        const dashboardData = await getDashboardData();
         console.timeEnd("Dashboard data load");
 
-        setRecentRequests(requests);
-        setMetrics(metricsData);
-        setAchievementsMetrics(achievementsData);
-        setIngdMetrics(ingdMetricsData);
-        // Get first 5 INGD requests
-        setRecentIngdRequests(ingdRecentData.slice(0, 5));
-        setAchievements(achievementsImages || []);
-
-        // Get latest government priority document
-        const govDocs = allDocuments?.filter(doc =>
-          doc.type === "government_priority" ||
-          doc.description?.toLowerCase().includes("government") ||
-          doc.description?.toLowerCase().includes("priority")
-        ) || [];
-        if (govDocs.length > 0) {
-          setGovernmentDocument(govDocs[0]); // Get most recent/first one
+        if (dashboardData) {
+          setRecentRequests(dashboardData.recentRequests);
+          setMetrics(dashboardData.metrics);
+          setAchievementsMetrics(dashboardData.achievementsMetrics);
+          setIngdMetrics(dashboardData.ingdMetrics);
+          setRecentIngdRequests(dashboardData.recentIngdRequests);
+          setAchievements(dashboardData.achievements || []);
+          setGovernmentDocument(dashboardData.governmentDocument);
+          setIngdActive(dashboardData.ingdActive);
         }
       } catch (error) {
         console.error("Error loading dashboard data:", error);
@@ -87,16 +63,11 @@ export default function Dashboard() {
 
     loadData();
 
-    // Load INGD setting from database
-    const loadIngdSetting = async () => {
-      const isActive = await getIngdActiveSetting();
-      setIngdActive(isActive);
-    };
-
-    loadIngdSetting();
-
-    // Poll for changes every 2 seconds
-    const interval = setInterval(loadIngdSetting, 2000);
+    // Poll for dashboard data refresh every 30 seconds
+    const interval = setInterval(() => {
+      console.log("Dashboard: Polling for updated data...");
+      loadData();
+    }, 30 * 1000);
 
     // Set up Tableau visualization on dashboard with responsive sizing
     const resizeDashboardViz = () => {
