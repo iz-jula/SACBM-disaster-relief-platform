@@ -48,19 +48,23 @@ export default function Dashboard() {
         if (!dashboardData) {
           console.warn("Dashboard: Consolidated endpoint unavailable, falling back to individual queries");
           try {
-            const [recentReqsData, metricsData, achievementsMetricsData, ingdMetricsData, ingdReqsData, achievementsData, ingdDocsData, ingdActiveData] =
-              await Promise.all([
-                getRecentRequests(5),
-                getMetrics(),
-                getAchievementsMetrics(),
-                getIngdMetrics(),
-                getIngdRequests(),
-                getAchievements(),
-                getIngdDocuments(),
-                getIngdActiveSetting(),
-              ]);
+            // Use Promise.allSettled instead of Promise.all to prevent one slow query from blocking all others
+            const results = await Promise.allSettled([
+              getRecentRequests(5),
+              getMetrics(),
+              getAchievementsMetrics(),
+              getIngdMetrics(),
+              getIngdRequests(),
+              getAchievements(),
+              getIngdDocuments(),
+              getIngdActiveSetting(),
+            ]);
 
-            const govDocs = ingdDocsData?.filter(doc =>
+            // Extract values from settled promises, using null for rejected ones
+            const [recentReqsData, metricsData, achievementsMetricsData, ingdMetricsData, ingdReqsData, achievementsData, ingdDocsData, ingdActiveData] =
+              results.map(result => result.status === "fulfilled" ? result.value : null);
+
+            const govDocs = ingdDocsData?.filter((doc: any) =>
               doc.type === "government_priority" ||
               doc.description?.toLowerCase().includes("government") ||
               doc.description?.toLowerCase().includes("priority")
@@ -96,7 +100,7 @@ export default function Dashboard() {
               governmentDocument: govDocs.length > 0 ? govDocs[0] : null,
               ingdActive: ingdActiveData || false,
             };
-            console.log("Dashboard: Fallback data loaded successfully");
+            console.log("Dashboard: Fallback data loaded successfully (some queries may have failed, showing defaults for those)");
           } catch (fallbackError) {
             console.error("Dashboard: Fallback data loading also failed:", fallbackError);
             // If all else fails, show empty state with zeros

@@ -52,16 +52,28 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     console.log("getDashboardData: Fetching from /api/dashboard-data endpoint");
     console.time("getDashboardData");
 
-    const response = await fetch("/api/dashboard-data");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    const response = await fetch("/api/dashboard-data", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
     }
 
     const data: DashboardData = await response.json();
 
     console.timeEnd("getDashboardData");
-    console.log("getDashboardData: Successfully fetched consolidated data");
+    console.log("getDashboardData: Successfully fetched consolidated data", data);
 
     // Cache the result
     dashboardCache = data;
@@ -69,9 +81,11 @@ export async function getDashboardData(): Promise<DashboardData | null> {
 
     return data;
   } catch (error) {
+    console.timeEnd("getDashboardData");
     const errorMsg =
       error instanceof Error ? error.message : JSON.stringify(error);
-    console.error("getDashboardData: Error fetching dashboard data:", errorMsg);
+    console.warn("getDashboardData: Failed to fetch consolidated endpoint - will use fallback", errorMsg);
+    console.warn("getDashboardData: Returning null to trigger Dashboard fallback mechanism");
     return null;
   }
 }
