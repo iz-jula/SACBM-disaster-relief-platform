@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { useEffect, useState, Suspense, lazy } from "react";
 import Layout from "@/components/Layout";
 import { getDashboardData } from "@/services/dashboardService";
-import type { Achievement, AchievementsMetrics } from "@/services/achievementsService";
-import type { Metrics } from "@/services/requestsService";
-import type { IngdRequest, IngdDocument } from "@/services/supabaseService";
+import { getAchievementsMetrics, getAchievements, type Achievement, type AchievementsMetrics } from "@/services/achievementsService";
+import { getMetrics, getRecentRequests, type Metrics } from "@/services/requestsService";
+import { getIngdMetrics, getIngdRequests, getIngdDocuments, getIngdActiveSetting, type IngdRequest, type IngdDocument } from "@/services/supabaseService";
 import { Download } from "lucide-react";
 
 import ActionsImageGrid from "@/components/ActionsImageGrid";
@@ -36,24 +36,111 @@ export default function Dashboard() {
   const [ingdActive, setIngdActive] = useState(true);
 
   useEffect(() => {
-    // Fetch data from consolidated API endpoint
+    // Fetch data from consolidated API endpoint with fallback to individual queries
     const loadData = async () => {
       setIsLoading(true);
       try {
         console.time("Dashboard data load");
-        const dashboardData = await getDashboardData();
+        let dashboardData = await getDashboardData();
         console.timeEnd("Dashboard data load");
 
-        if (dashboardData) {
-          setRecentRequests(dashboardData.recentRequests);
-          setMetrics(dashboardData.metrics);
-          setAchievementsMetrics(dashboardData.achievementsMetrics);
-          setIngdMetrics(dashboardData.ingdMetrics);
-          setRecentIngdRequests(dashboardData.recentIngdRequests);
-          setAchievements(dashboardData.achievements || []);
-          setGovernmentDocument(dashboardData.governmentDocument);
-          setIngdActive(dashboardData.ingdActive);
+        // If consolidated endpoint fails, load individual data as fallback
+        if (!dashboardData) {
+          console.warn("Dashboard: Consolidated endpoint unavailable, falling back to individual queries");
+          try {
+            const [recentReqsData, metricsData, achievementsMetricsData, ingdMetricsData, ingdReqsData, achievementsData, ingdDocsData, ingdActiveData] =
+              await Promise.all([
+                getRecentRequests(5),
+                getMetrics(),
+                getAchievementsMetrics(),
+                getIngdMetrics(),
+                getIngdRequests(),
+                getAchievements(),
+                getIngdDocuments(),
+                getIngdActiveSetting(),
+              ]);
+
+            const govDocs = ingdDocsData?.filter(doc =>
+              doc.type === "government_priority" ||
+              doc.description?.toLowerCase().includes("government") ||
+              doc.description?.toLowerCase().includes("priority")
+            ) || [];
+
+            dashboardData = {
+              recentRequests: recentReqsData || [],
+              metrics: metricsData || {
+                totalRequests: 0,
+                totalPeopleAssisted: 0,
+                totalValueDeployed: 0,
+                averagePerRequest: 0,
+                metRequests: 0,
+                pendingRequests: 0,
+                partiallyMet: 0,
+              },
+              achievementsMetrics: achievementsMetricsData || {
+                totalAchievements: 0,
+                completedAchievements: 0,
+                inProgressAchievements: 0,
+                totalPeopleImpacted: 0,
+                totalContributed: 0,
+                averageImpact: 0,
+              },
+              ingdMetrics: ingdMetricsData || {
+                totalRequests: 0,
+                totalPeople: 0,
+                totalValue: 0,
+                averagePerRequest: 0,
+              },
+              recentIngdRequests: (ingdReqsData || []).slice(0, 5),
+              achievements: achievementsData || [],
+              governmentDocument: govDocs.length > 0 ? govDocs[0] : null,
+              ingdActive: ingdActiveData || false,
+            };
+            console.log("Dashboard: Fallback data loaded successfully");
+          } catch (fallbackError) {
+            console.error("Dashboard: Fallback data loading also failed:", fallbackError);
+            // If all else fails, show empty state with zeros
+            dashboardData = {
+              recentRequests: [],
+              metrics: {
+                totalRequests: 0,
+                totalPeopleAssisted: 0,
+                totalValueDeployed: 0,
+                averagePerRequest: 0,
+                metRequests: 0,
+                pendingRequests: 0,
+                partiallyMet: 0,
+              },
+              achievementsMetrics: {
+                totalAchievements: 0,
+                completedAchievements: 0,
+                inProgressAchievements: 0,
+                totalPeopleImpacted: 0,
+                totalContributed: 0,
+                averageImpact: 0,
+              },
+              ingdMetrics: {
+                totalRequests: 0,
+                totalPeople: 0,
+                totalValue: 0,
+                averagePerRequest: 0,
+              },
+              recentIngdRequests: [],
+              achievements: [],
+              governmentDocument: null,
+              ingdActive: false,
+            };
+          }
         }
+
+        setRecentRequests(dashboardData.recentRequests);
+        setMetrics(dashboardData.metrics);
+        setAchievementsMetrics(dashboardData.achievementsMetrics);
+        setIngdMetrics(dashboardData.ingdMetrics);
+        setRecentIngdRequests(dashboardData.recentIngdRequests);
+        setAchievements(dashboardData.achievements || []);
+        setGovernmentDocument(dashboardData.governmentDocument);
+        setIngdActive(dashboardData.ingdActive);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
