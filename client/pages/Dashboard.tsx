@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState, Suspense, lazy } from "react";
 import Layout from "@/components/Layout";
 import { getDashboardData } from "@/services/dashboardService";
-import type { Achievement } from "@/services/achievementsService";
+import type { Achievement, AchievementsMetrics } from "@/services/achievementsService";
 import type { Metrics } from "@/services/requestsService";
 import type { IngdRequest, IngdDocument } from "@/services/supabaseService";
 import { Download } from "lucide-react";
