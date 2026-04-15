@@ -231,8 +231,47 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Community Actions Summary - Modern Section */}
-        {achievementsMetrics && (
+        {/* Community Actions Summary - Modern Section with Loading State */}
+        {isLoading ? (
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  MEMBERS ACTIONS
+                </h2>
+                <p className="text-slate-600 mt-2">
+                  Loading member social impact actions...
+                </p>
+              </div>
+            </div>
+
+            {/* Loading Skeleton */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="relative bg-gradient-to-br from-blue-50 to-blue-50/40 rounded-2xl p-6 border border-blue-200/40 animate-pulse"
+                >
+                  <div className="space-y-4">
+                    <div className="h-3 bg-blue-200/40 rounded w-24"></div>
+                    <div className="h-8 bg-blue-200/40 rounded w-16"></div>
+                    <div className="h-3 bg-blue-200/40 rounded w-20"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Loading Indicator */}
+            <div className="flex justify-center py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                <div className="w-4 h-4 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.15s" }}></div>
+                <div className="w-4 h-4 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>
+                <span className="text-slate-600 ml-2 text-sm font-medium">Loading data...</span>
+              </div>
+            </div>
+          </div>
+        ) : achievementsMetrics ? (
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
@@ -317,7 +356,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* Relief Requests Summary - Combined with INGD */}
         <div className="space-y-6">
