@@ -305,11 +305,42 @@ export default function Requests() {
       setIsLoading(true);
       setIsLoadingDocuments(true);
       try {
-        const [reliefData, ingdData, documentsData] = await Promise.all([
+        console.log("Requests: Loading relief requests, INGD requests, and documents...");
+        console.time("Requests data load");
+
+        // Use Promise.allSettled to prevent timeout in one query from blocking others
+        const results = await Promise.allSettled([
           getRequests(),
           getIngdRequests(),
           getIngdDocuments(),
         ]);
+
+        console.timeEnd("Requests data load");
+
+        // Extract values from settled promises
+        const reliefData = results[0].status === "fulfilled" ? results[0].value : [];
+        const ingdData = results[1].status === "fulfilled" ? results[1].value : [];
+        const documentsData = results[2].status === "fulfilled" ? results[2].value : [];
+
+        // Log results for debugging
+        if (results[0].status === "rejected") {
+          console.error("Relief requests failed to load:", results[0].reason);
+        } else {
+          console.log("Relief requests loaded:", reliefData.length, "items");
+        }
+
+        if (results[1].status === "rejected") {
+          console.error("INGD requests failed to load:", results[1].reason);
+        } else {
+          console.log("INGD requests loaded:", ingdData.length, "items");
+        }
+
+        if (results[2].status === "rejected") {
+          console.error("Documents failed to load:", results[2].reason);
+        } else {
+          console.log("Documents loaded:", documentsData.length, "items");
+        }
+
         setRequests(reliefData);
         setIngdRequests(ingdData);
         setIngdDocuments(documentsData);
@@ -327,14 +358,19 @@ export default function Requests() {
   // Load INGD active state from database
   useEffect(() => {
     const loadIngdSetting = async () => {
-      const isActive = await getIngdActiveSetting();
-      setIngdActive(isActive);
+      try {
+        const isActive = await getIngdActiveSetting();
+        setIngdActive(isActive);
+      } catch (error) {
+        console.error("Error loading INGD setting:", error);
+        // Keep previous state if failed
+      }
     };
 
     loadIngdSetting();
 
-    // Poll for changes every 2 seconds
-    const interval = setInterval(loadIngdSetting, 2000);
+    // Poll for changes every 5 seconds (increased from 2 to reduce load)
+    const interval = setInterval(loadIngdSetting, 5 * 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -636,8 +672,17 @@ export default function Requests() {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-center">
-            <p className="text-slate-600">Loading requests...</p>
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                  <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.15s" }}></div>
+                  <div className="w-3 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>
+                </div>
+              </div>
+              <p className="text-slate-600 font-medium">Loading relief requests and INGD relief items...</p>
+            </div>
           </div>
         )}
 
@@ -695,11 +740,19 @@ export default function Requests() {
           </div>
         )}
 
-        {requests.length === 0 && !isLoading && (
+        {requests.length === 0 && !isLoading && ingdRequests.length === 0 && (
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 px-6 py-12 text-center">
-            <p className="text-slate-500 text-lg">No relief requests yet.</p>
+            <p className="text-slate-500 text-lg">No relief requests or INGD items available.</p>
             <p className="text-slate-400 mt-2">
-              Click "New Request" to add your first relief request.
+              Click "New Request" to add a relief request, or check back later for INGD relief items.
+            </p>
+          </div>
+        )}
+
+        {requests.length === 0 && !isLoading && ingdRequests.length > 0 && (
+          <div className="bg-blue-50 rounded-xl border border-blue-200 px-6 py-8 text-center">
+            <p className="text-blue-700 font-medium">
+              ✓ No relief requests from your organization yet, but INGD relief items are available below.
             </p>
           </div>
         )}
