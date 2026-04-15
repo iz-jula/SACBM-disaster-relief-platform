@@ -24,15 +24,20 @@ interface AchievementsCache {
   achievements: Achievement[];
   metrics: AchievementsMetrics | null;
   timestamp: number;
+  lastFetch: number;
 }
 
 const achievementsCache: AchievementsCache = {
   achievements: [],
   metrics: null,
   timestamp: 0,
+  lastFetch: 0,
 };
 
-const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+// Shorter cache for frequently accessed data (5 minutes)
+const CACHE_DURATION = 5 * 60 * 1000;
+// Longer cache for less frequently accessed data (30 minutes)
+const LONG_CACHE_DURATION = 30 * 60 * 1000;
 
 export async function getAchievements(
   status?: string,
@@ -40,11 +45,12 @@ export async function getAchievements(
 ): Promise<Achievement[]> {
   const now = Date.now();
 
-  // Return cached data if still valid
+  // Return cached data if still valid (use shorter cache for frequently accessed data)
   if (
     achievementsCache.achievements.length > 0 &&
     now - achievementsCache.timestamp < CACHE_DURATION
   ) {
+    console.log("Returning cached achievements");
     let filtered = [...achievementsCache.achievements];
     if (category) {
       filtered = filtered.filter((a) => a.category === category);
@@ -53,11 +59,13 @@ export async function getAchievements(
   }
 
   try {
+    console.log("Fetching achievements from database...");
     const achievements = await getSupabaseActions(undefined, category);
 
     // Update cache
     achievementsCache.achievements = achievements;
     achievementsCache.timestamp = now;
+    achievementsCache.lastFetch = now;
 
     console.log("Fetched", achievements.length, "achievements");
     return achievements;
@@ -77,17 +85,20 @@ export async function getAchievementsMetrics(): Promise<AchievementsMetrics | nu
     achievementsCache.metrics &&
     now - achievementsCache.timestamp < CACHE_DURATION
   ) {
+    console.log("Returning cached achievement metrics");
     return achievementsCache.metrics;
   }
 
   try {
+    console.log("Fetching achievement metrics from database...");
     const metrics = await getSupabaseActionsMetrics();
 
     // Update cache
     achievementsCache.metrics = metrics;
     achievementsCache.timestamp = now;
+    achievementsCache.lastFetch = now;
 
-    console.log("Fetched achievement metrics");
+    console.log("Fetched achievement metrics:", metrics);
     return metrics;
   } catch (error) {
     console.error("Error fetching achievement metrics:", error);

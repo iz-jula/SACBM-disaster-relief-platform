@@ -23,6 +23,23 @@ export interface Metrics {
   partiallyMet?: number;
 }
 
+// Cache metrics and requests to avoid duplicate API calls
+interface RequestsCache {
+  metrics: Metrics | null;
+  requests: RelieRequest[];
+  ingdRequests: IngdRequest[];
+  timestamp: number;
+}
+
+const requestsCache: RequestsCache = {
+  metrics: null,
+  requests: [],
+  ingdRequests: [],
+  timestamp: 0,
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 // Fetch all requests from Supabase
 export async function getRequests(
   status?: string,
@@ -123,10 +140,28 @@ export async function deleteRequest(id: number): Promise<boolean> {
   }
 }
 
-// Fetch metrics (aggregates) from Supabase
+// Fetch metrics (aggregates) from Supabase with caching
 export async function getMetrics(): Promise<Metrics | null> {
+  const now = Date.now();
+
+  // Return cached data if still valid
+  if (
+    requestsCache.metrics &&
+    now - requestsCache.timestamp < CACHE_DURATION
+  ) {
+    console.log("Returning cached request metrics");
+    return requestsCache.metrics;
+  }
+
   try {
+    console.log("Fetching request metrics from database...");
     const metrics = await getSupabaseMetrics();
+
+    // Update cache
+    requestsCache.metrics = metrics;
+    requestsCache.timestamp = now;
+
+    console.log("Fetched request metrics:", metrics);
     return metrics;
   } catch (error) {
     console.error("Error fetching metrics:", error);
@@ -134,10 +169,28 @@ export async function getMetrics(): Promise<Metrics | null> {
   }
 }
 
-// Fetch INGD relief requests from INGD_table
+// Fetch INGD relief requests from INGD_table with caching
 export async function getIngdRequests(): Promise<IngdRequest[]> {
+  const now = Date.now();
+
+  // Return cached data if still valid
+  if (
+    requestsCache.ingdRequests.length > 0 &&
+    now - requestsCache.timestamp < CACHE_DURATION
+  ) {
+    console.log("Returning cached INGD requests");
+    return requestsCache.ingdRequests;
+  }
+
   try {
+    console.log("Fetching INGD requests from database...");
     const requests = await getSupabaseIngdRequests();
+
+    // Update cache
+    requestsCache.ingdRequests = requests;
+    requestsCache.timestamp = now;
+
+    console.log("Fetched", requests.length, "INGD requests");
     return requests;
   } catch (error) {
     console.error("Error fetching INGD requests:", error);

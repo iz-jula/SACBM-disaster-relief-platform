@@ -124,10 +124,14 @@ export async function deleteRequest(id: number): Promise<boolean> {
   }
 }
 
-// Get metrics for dashboard
+// Get metrics for dashboard - optimized query
 export async function getMetrics() {
   try {
-    const { data, error } = await supabase.from("relief_requests").select("*");
+    // Only select necessary columns, not all
+    const { data, error } = await supabase
+      .from("relief_requests")
+      .select("id,status,people,value")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
@@ -136,7 +140,7 @@ export async function getMetrics() {
       data?.filter((r: RelieRequest) => r.status === true).length || 0;
     const pendingRequests =
       data?.filter((r: RelieRequest) => r.status === false).length || 0;
-    const partiallyMet = 0; // Based on your schema, you may want to add a separate column for this
+    const partiallyMet = 0;
 
     // Calculate total people assisted - only from met requests
     const totalPeopleAssisted =
@@ -156,7 +160,7 @@ export async function getMetrics() {
           return sum + (isNaN(value) ? 0 : value);
         }, 0) || 0;
 
-    // Calculate average per request (based on total requests, not just met)
+    // Calculate average per request
     const averagePerRequest =
       totalRequests > 0 ? totalValueDeployed / totalRequests : 0;
 
@@ -218,7 +222,7 @@ export interface Action {
   created_at?: string;
 }
 
-// Fetch all actions
+// Fetch all actions - optimized query
 export async function getActions(
   status?: string,
   category?: string,
@@ -226,7 +230,7 @@ export async function getActions(
   try {
     let query = supabase
       .from("actions_table")
-      .select("*")
+      .select("id,company_name,type_action,description,category,location,partner_organisation,people_impacted,amount,media,created_at")
       .order("created_at", { ascending: false });
 
     if (category) {
@@ -248,10 +252,13 @@ export async function getActions(
   }
 }
 
-// Get action metrics
+// Get action metrics - optimized query (only essential columns)
 export async function getActionsMetrics() {
   try {
-    const { data, error } = await supabase.from("actions_table").select("*");
+    // Only select the columns needed for metrics calculation
+    const { data, error } = await supabase
+      .from("actions_table")
+      .select("id,people_impacted,amount");
 
     if (error) {
       console.error("Supabase error in getActionsMetrics:", error.message);
@@ -397,12 +404,12 @@ export interface IngdRequest {
   email_resolution?: string;
 }
 
-// Fetch all INGD relief requests from INGD_table
+// Fetch all INGD relief requests from INGD_table - optimized query
 export async function getIngdRequests(): Promise<IngdRequest[]> {
   try {
     const { data, error } = await supabase
       .from("INGD_table")
-      .select("*")
+      .select("id,created_at,Item,category,people_impacted,Total,quantity,status,resolved_by,company_name_action")
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -413,10 +420,13 @@ export async function getIngdRequests(): Promise<IngdRequest[]> {
   }
 }
 
-// Get INGD metrics for dashboard
+// Get INGD metrics for dashboard - optimized query (only essential columns)
 export async function getIngdMetrics() {
   try {
-    const { data, error } = await supabase.from("INGD_table").select("*");
+    // Only select the columns needed for metrics calculation
+    const { data, error } = await supabase
+      .from("INGD_table")
+      .select("id,people_impacted,Total");
 
     if (error) throw error;
 

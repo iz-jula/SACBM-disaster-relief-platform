@@ -49,6 +49,7 @@ export default function Dashboard() {
     const loadData = async () => {
       setIsLoading(true);
       try {
+        console.time("Dashboard data load");
         const [requests, metricsData, achievementsData, ingdMetricsData, ingdRecentData, achievementsImages, allDocuments] = await Promise.all([
           getRecentRequests(5),
           getMetrics(),
@@ -58,6 +59,8 @@ export default function Dashboard() {
           getAchievements(),
           getIngdDocuments(),
         ]);
+        console.timeEnd("Dashboard data load");
+
         setRecentRequests(requests);
         setMetrics(metricsData);
         setAchievementsMetrics(achievementsData);
