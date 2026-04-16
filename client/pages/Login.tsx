@@ -84,12 +84,24 @@ export default function Login() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@sacbm.co.mz"
+                onChange={(e) => {
+                  console.log("Email input changed:", e.target.value);
+                  setEmail(e.target.value);
+                }}
+                onBlur={(e) => {
+                  console.log("Email input blur - final value:", email);
+                }}
+                placeholder="Enter an email address"
                 required
                 disabled={isLoading}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-slate-100"
+                autoComplete="email"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-slate-100 disabled:border-slate-200 text-slate-900 placeholder:text-slate-400"
               />
+              {email && (
+                <p className="mt-1 text-xs text-slate-500">
+                  ✓ Email set: {email}
+                </p>
+              )}
             </div>
 
             <div>
@@ -103,17 +115,26 @@ export default function Login() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                onChange={(e) => {
+                  console.log("Password input changed");
+                  setPassword(e.target.value);
+                }}
+                placeholder="Enter your password"
                 required
                 disabled={isLoading}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-slate-100"
+                autoComplete="current-password"
+                className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary disabled:bg-slate-100 disabled:border-slate-200 text-slate-900 placeholder:text-slate-400"
               />
+              {password && (
+                <p className="mt-1 text-xs text-slate-500">
+                  ✓ Password entered
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !email || !password}
               className="w-full bg-gradient-to-r from-primary to-orange-600 hover:from-orange-600 hover:to-primary text-white font-medium py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
