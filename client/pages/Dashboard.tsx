@@ -221,13 +221,13 @@ export default function Dashboard() {
         {/* Modern Page Header */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-blue-500/5 rounded-2xl" />
-          <div className="relative px-6 sm:px-8 py-8">
+          <div className="relative px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-slate-900 tracking-tight break-words">
                   Members Social Impact Actions Dashboard
                 </h1>
-                <p className="text-base sm:text-lg text-slate-600 mt-2 max-w-2xl">
+                <p className="text-sm sm:text-base lg:text-lg text-slate-600 mt-2 max-w-2xl">
                   Track and celebrate member contributions to Social Impact efforts
                 </p>
               </div>
@@ -239,11 +239,11 @@ export default function Dashboard() {
         {isLoading ? (
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">
+              <div className="min-w-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 break-words">
                   MEMBERS ACTIONS
                 </h2>
-                <p className="text-slate-600 mt-2">
+                <p className="text-sm sm:text-base text-slate-600 mt-2">
                   Loading member social impact actions...
                 </p>
               </div>
@@ -365,11 +365,11 @@ export default function Dashboard() {
         {/* Relief Requests Summary - Combined with INGD */}
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 break-words">
                 RELIEF REQUESTS
               </h2>
-              <p className="text-slate-600 mt-2">
+              <p className="text-sm sm:text-base text-slate-600 mt-2">
                 Combined overview of Social impact and disaster relief operations and INGD relief items
               </p>
             </div>
@@ -462,12 +462,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* INGD Dashboard - Left Side */}
           <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
-            <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">
+            <div className="px-4 sm:px-6 lg:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 break-words">
                   INGD Disaster Impact Analytics
                 </h2>
-                <p className="text-slate-600 mt-1">
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
                   Real-time impact data and insights from INGD
                 </p>
               </div>
@@ -486,7 +486,7 @@ export default function Dashboard() {
 
             <div
               className="w-full bg-white overflow-x-auto"
-              style={{ minHeight: "400px" }}
+              style={{ minHeight: "300px", minWidth: "0" }}
             >
               <div
                 className="tableauPlaceholder"
@@ -532,12 +532,12 @@ export default function Dashboard() {
 
           {/* Government Priorities - Right Side */}
           <div className="rounded-2xl bg-white/50 backdrop-blur border border-slate-200/50 overflow-hidden">
-            <div className="px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900">
+            <div className="px-4 sm:px-6 lg:px-8 py-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-transparent flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 break-words">
                   Government Priorities
                 </h2>
-                <p className="text-slate-600 mt-1">
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
                   Official disaster response priorities
                 </p>
               </div>
@@ -552,7 +552,7 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            <div className="w-full bg-white p-6" style={{ minHeight: "400px" }}>
+            <div className="w-full bg-white p-4 sm:p-6" style={{ minHeight: "400px" }}>
               {governmentDocument ? (
                 <div className="flex flex-col items-center justify-center h-full gap-6">
                   <button
