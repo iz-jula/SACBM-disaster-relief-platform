@@ -124,16 +124,39 @@ export async function deleteRequest(id: number): Promise<boolean> {
   }
 }
 
-// Get metrics for dashboard - optimized query
+// Get metrics for dashboard - optimized query with timeout
 export async function getMetrics() {
   try {
     // Only select necessary columns, not all
-    const { data, error } = await supabase
+    const query = supabase
       .from("relief_requests")
       .select("id,status,people,value")
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    // Wrap in timeout to prevent hanging
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+      setTimeout(() => {
+        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
+      }, 8000);
+    });
+
+    const { data, error } = await Promise.race([
+      query,
+      timeoutPromise,
+    ]) as any;
+
+    if (error) {
+      console.warn("Supabase getMetrics:", error.message || error);
+      return {
+        totalRequests: 0,
+        totalPeopleAssisted: 0,
+        totalValueDeployed: 0,
+        averagePerRequest: 0,
+        metRequests: 0,
+        pendingRequests: 0,
+        partiallyMet: 0,
+      };
+    }
 
     const totalRequests = data?.length || 0;
     const metRequests =
@@ -174,7 +197,7 @@ export async function getMetrics() {
       partiallyMet,
     };
   } catch (error) {
-    console.error("Error fetching metrics:", error);
+    console.warn("Error fetching metrics (returning zeros):", error instanceof Error ? error.message : error);
     return {
       totalRequests: 0,
       totalPeopleAssisted: 0,
@@ -222,7 +245,7 @@ export interface Action {
   created_at?: string;
 }
 
-// Fetch all actions - optimized query
+// Fetch all actions - optimized query with timeout
 export async function getActions(
   status?: string,
   category?: string,
@@ -237,32 +260,62 @@ export async function getActions(
       query = query.eq("category", category);
     }
 
-    const { data, error } = await query;
+    // Wrap in timeout to prevent hanging
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+      setTimeout(() => {
+        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
+      }, 8000);
+    });
+
+    const { data, error } = await Promise.race([
+      query,
+      timeoutPromise,
+    ]) as any;
 
     if (error) {
-      console.error("Supabase error in getActions:", error.message);
-      throw error;
+      console.warn("Supabase getActions:", error.message || error);
+      return [];
     }
     return data || [];
   } catch (error) {
     const errorMsg =
       error instanceof Error ? error.message : JSON.stringify(error);
-    console.error("Error fetching actions:", errorMsg);
+    console.warn("Error fetching actions (returning empty):", errorMsg);
     return [];
   }
 }
 
-// Get action metrics - optimized query (only essential columns)
+// Get action metrics - optimized query with timeout
 export async function getActionsMetrics() {
   try {
     // Only select the columns needed for metrics calculation
-    const { data, error } = await supabase
+    const query = supabase
       .from("actions_table")
       .select("id,people_impacted,amount");
 
+    // Wrap in timeout to prevent hanging
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+      setTimeout(() => {
+        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
+      }, 8000);
+    });
+
+    const { data, error } = await Promise.race([
+      query,
+      timeoutPromise,
+    ]) as any;
+
     if (error) {
-      console.error("Supabase error in getActionsMetrics:", error.message);
-      throw error;
+      console.warn("Supabase getActionsMetrics:", error.message || error);
+      // Return zeros on error instead of crashing
+      return {
+        totalAchievements: 0,
+        completedAchievements: 0,
+        inProgressAchievements: 0,
+        totalPeopleImpacted: 0,
+        totalContributed: 0,
+        averageImpact: 0,
+      };
     }
 
     const actions = data || [];
@@ -288,7 +341,7 @@ export async function getActionsMetrics() {
           : 0,
     };
   } catch (error) {
-    console.error("Error fetching action metrics:", error);
+    console.warn("Error fetching action metrics (returning zeros):", error instanceof Error ? error.message : error);
     return {
       totalAchievements: 0,
       completedAchievements: 0,
@@ -404,31 +457,66 @@ export interface IngdRequest {
   email_resolution?: string;
 }
 
-// Fetch all INGD relief requests from INGD_table - optimized query
+// Fetch all INGD relief requests from INGD_table - optimized query with timeout
 export async function getIngdRequests(): Promise<IngdRequest[]> {
   try {
-    const { data, error } = await supabase
+    const query = supabase
       .from("INGD_table")
       .select("id,created_at,Item,category,people_impacted,Total,quantity,status,resolved_by,company_name_action")
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    // Wrap in timeout to prevent hanging
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+      setTimeout(() => {
+        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
+      }, 8000);
+    });
+
+    const { data, error } = await Promise.race([
+      query,
+      timeoutPromise,
+    ]) as any;
+
+    if (error) {
+      console.warn("Supabase getIngdRequests:", error.message || error);
+      return [];
+    }
     return data || [];
   } catch (error) {
-    console.error("Error fetching INGD requests:", error);
+    console.warn("Error fetching INGD requests (returning empty):", error instanceof Error ? error.message : error);
     return [];
   }
 }
 
-// Get INGD metrics for dashboard - optimized query (only essential columns)
+// Get INGD metrics for dashboard - optimized query with timeout
 export async function getIngdMetrics() {
   try {
     // Only select the columns needed for metrics calculation
-    const { data, error } = await supabase
+    const query = supabase
       .from("INGD_table")
       .select("id,people_impacted,Total");
 
-    if (error) throw error;
+    // Wrap in timeout to prevent hanging
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+      setTimeout(() => {
+        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
+      }, 8000);
+    });
+
+    const { data, error } = await Promise.race([
+      query,
+      timeoutPromise,
+    ]) as any;
+
+    if (error) {
+      console.warn("Supabase getIngdMetrics:", error.message || error);
+      return {
+        totalRequests: 0,
+        totalPeople: 0,
+        totalValue: 0,
+        averagePerRequest: 0,
+      };
+    }
 
     const totalRequests = data?.length || 0;
     const totalPeople = data?.reduce((sum: number, r: IngdRequest) => sum + (r.people_impacted || 0), 0) || 0;
@@ -442,7 +530,7 @@ export async function getIngdMetrics() {
       averagePerRequest: totalRequests > 0 ? totalValue / totalRequests : 0,
     };
   } catch (error) {
-    console.error("Error fetching INGD metrics:", error);
+    console.warn("Error fetching INGD metrics (returning zeros):", error instanceof Error ? error.message : error);
     return {
       totalRequests: 0,
       totalPeople: 0,

@@ -48,12 +48,16 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     return dashboardCache;
   }
 
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
   try {
     console.log("getDashboardData: Fetching from /api/dashboard-data endpoint");
     console.time("getDashboardData");
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    timeoutId = setTimeout(() => {
+      console.warn("getDashboardData: Request timeout after 10 seconds");
+      controller.abort();
+    }, 10000); // 10 second timeout
 
     const response = await fetch("/api/dashboard-data", {
       method: "GET",
@@ -63,17 +67,18 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       signal: controller.signal,
     });
 
-    clearTimeout(timeoutId);
+    if (timeoutId) clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+      const errorText = await response.text().catch(() => "No response body");
+      console.warn(`getDashboardData: HTTP error ${response.status}`, errorText);
+      return null; // Return null instead of throwing
     }
 
     const data: DashboardData = await response.json();
 
     console.timeEnd("getDashboardData");
-    console.log("getDashboardData: Successfully fetched consolidated data", data);
+    console.log("getDashboardData: Successfully fetched consolidated data");
 
     // Cache the result
     dashboardCache = data;
@@ -81,12 +86,12 @@ export async function getDashboardData(): Promise<DashboardData | null> {
 
     return data;
   } catch (error) {
+    if (timeoutId) clearTimeout(timeoutId);
     console.timeEnd("getDashboardData");
     const errorMsg =
       error instanceof Error ? error.message : JSON.stringify(error);
-    console.warn("getDashboardData: Failed to fetch consolidated endpoint - will use fallback", errorMsg);
-    console.warn("getDashboardData: Returning null to trigger Dashboard fallback mechanism");
-    return null;
+    console.warn("getDashboardData: Network error (will use fallback)", errorMsg);
+    return null; // Return null to trigger fallback
   }
 }
 
