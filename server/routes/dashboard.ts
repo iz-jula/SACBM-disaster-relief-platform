@@ -33,16 +33,8 @@ export async function handleGetDashboardData(req: any, res: any) {
     console.log("[Dashboard] Fetching fresh dashboard data from Supabase...");
     console.time("Dashboard data fetch");
 
-    // Make all Supabase calls in parallel - focus on essential data only
-    const [
-      recentRequestsData,
-      achievementsCountData,
-      achievementsData,
-      ingdCountData,
-      ingdRequestsData,
-      ingdDocumentsData,
-      ingdActiveData,
-    ] = await Promise.all([
+    // Use Promise.allSettled to handle individual query timeouts gracefully
+    const results = await Promise.allSettled([
       // Recent relief requests (limited to 5)
       supabase
         .from("relief_requests")
@@ -88,6 +80,22 @@ export async function handleGetDashboardData(req: any, res: any) {
         .eq("setting_key", "ingd_active")
         .single(),
     ]);
+
+    // Extract values from settled promises
+    const recentRequestsData = results[0].status === "fulfilled" ? results[0].value : { data: null, error: null };
+    const achievementsCountData = results[1].status === "fulfilled" ? results[1].value : { data: null, error: null };
+    const achievementsData = results[2].status === "fulfilled" ? results[2].value : { data: null, error: null };
+    const ingdCountData = results[3].status === "fulfilled" ? results[3].value : { data: null, error: null };
+    const ingdRequestsData = results[4].status === "fulfilled" ? results[4].value : { data: null, error: null };
+    const ingdDocumentsData = results[5].status === "fulfilled" ? results[5].value : { data: null, error: null };
+    const ingdActiveData = results[6].status === "fulfilled" ? results[6].value : { data: null, error: null };
+
+    // Log any failures
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.warn(`[Dashboard] Query ${index} failed:`, result.reason);
+      }
+    });
 
     // Check for errors
     if (recentRequestsData.error) throw recentRequestsData.error;
