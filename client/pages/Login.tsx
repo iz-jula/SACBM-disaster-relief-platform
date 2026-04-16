@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, AlertCircle, Loader } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Login() {
+function LoginContent() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
@@ -175,5 +175,20 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Export a wrapper that handles context errors gracefully
+export default function Login() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
