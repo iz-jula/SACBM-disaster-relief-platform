@@ -752,7 +752,7 @@ export default function Requests() {
         {requests.length === 0 && !isLoading && ingdRequests.length > 0 && (
           <div className="bg-blue-50 rounded-xl border border-blue-200 px-6 py-8 text-center">
             <p className="text-blue-700 font-medium">
-              ✓ No relief requests from your organization yet, but INGD relief items are available below.
+              No relief requests at this time
             </p>
           </div>
         )}
