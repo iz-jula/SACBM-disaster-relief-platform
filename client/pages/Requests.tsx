@@ -355,23 +355,23 @@ export default function Requests() {
     loadRequests();
   }, []);
 
-  // Load INGD active state from database
+  // Load INGD active state from database (once on mount, not polling)
   useEffect(() => {
     const loadIngdSetting = async () => {
       try {
         const isActive = await getIngdActiveSetting();
         setIngdActive(isActive);
       } catch (error) {
-        console.error("Error loading INGD setting:", error);
-        // Keep previous state if failed
+        // Silently fail - keep previous state, INGD setting is not critical
+        console.debug("INGD setting check:", error instanceof Error ? error.message : "Unknown error");
       }
     };
 
+    // Load once on mount
     loadIngdSetting();
 
-    // Poll for changes every 5 seconds (increased from 2 to reduce load)
-    const interval = setInterval(loadIngdSetting, 5 * 1000);
-    return () => clearInterval(interval);
+    // Don't poll - INGD setting rarely changes, and polling causes network errors
+    // If needed in future, use longer interval like 60 seconds, not 5
   }, []);
 
   // Filter documents by type
