@@ -47,7 +47,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities" | "members"
+    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities" | "members" | "carousel" | "member-access"
   >("dashboard");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -107,6 +107,32 @@ export default function Admin() {
   const [editingMember, setEditingMember] = useState<MemberData | null>(null);
   const [memberImageFile, setMemberImageFile] = useState<File | null>(null);
   const [isSavingMember, setIsSavingMember] = useState(false);
+
+  // Carousel management state
+  interface CarouselImage {
+    id: string;
+    url: string;
+    title: string;
+    description: string;
+  }
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [isLoadingCarousel, setIsLoadingCarousel] = useState(false);
+  const [newCarouselUrl, setNewCarouselUrl] = useState("");
+  const [newCarouselTitle, setNewCarouselTitle] = useState("");
+  const [newCarouselDescription, setNewCarouselDescription] = useState("");
+
+  // Member access management state
+  interface ApprovedMember {
+    id: string;
+    email: string;
+    name: string;
+    company: string;
+  }
+  const [approvedMembers, setApprovedMembers] = useState<ApprovedMember[]>([]);
+  const [isLoadingApprovedMembers, setIsLoadingApprovedMembers] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState("");
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberCompany, setNewMemberCompany] = useState("");
 
   // Load INGD active state from database
   useEffect(() => {
@@ -173,6 +199,20 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === "members") {
       loadMembers();
+    }
+  }, [activeTab]);
+
+  // Load carousel images when carousel tab is activated
+  useEffect(() => {
+    if (activeTab === "carousel") {
+      loadCarouselImages();
+    }
+  }, [activeTab]);
+
+  // Load approved members when member-access tab is activated
+  useEffect(() => {
+    if (activeTab === "member-access") {
+      loadApprovedMembers();
     }
   }, [activeTab]);
 
@@ -266,6 +306,96 @@ export default function Admin() {
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const loadCarouselImages = async () => {
+    setIsLoadingCarousel(true);
+    try {
+      const stored = localStorage.getItem("carouselImages");
+      if (stored) {
+        setCarouselImages(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error("Error loading carousel images:", error);
+    } finally {
+      setIsLoadingCarousel(false);
+    }
+  };
+
+  const handleAddCarouselImage = () => {
+    if (!newCarouselUrl || !newCarouselTitle) {
+      alert("Please fill in image URL and title");
+      return;
+    }
+
+    const newImage: CarouselImage = {
+      id: Date.now().toString(),
+      url: newCarouselUrl,
+      title: newCarouselTitle,
+      description: newCarouselDescription,
+    };
+
+    const updatedImages = [...carouselImages, newImage];
+    setCarouselImages(updatedImages);
+    localStorage.setItem("carouselImages", JSON.stringify(updatedImages));
+
+    setNewCarouselUrl("");
+    setNewCarouselTitle("");
+    setNewCarouselDescription("");
+    alert("Image added successfully!");
+  };
+
+  const handleDeleteCarouselImage = (id: string) => {
+    if (confirm("Are you sure you want to delete this image?")) {
+      const updatedImages = carouselImages.filter(img => img.id !== id);
+      setCarouselImages(updatedImages);
+      localStorage.setItem("carouselImages", JSON.stringify(updatedImages));
+    }
+  };
+
+  const loadApprovedMembers = async () => {
+    setIsLoadingApprovedMembers(true);
+    try {
+      const stored = localStorage.getItem("approvedMembers");
+      if (stored) {
+        setApprovedMembers(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error("Error loading approved members:", error);
+    } finally {
+      setIsLoadingApprovedMembers(false);
+    }
+  };
+
+  const handleAddApprovedMember = () => {
+    if (!newMemberEmail || !newMemberName || !newMemberCompany) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    const newMember: ApprovedMember = {
+      id: Date.now().toString(),
+      email: newMemberEmail,
+      name: newMemberName,
+      company: newMemberCompany,
+    };
+
+    const updatedMembers = [...approvedMembers, newMember];
+    setApprovedMembers(updatedMembers);
+    localStorage.setItem("approvedMembers", JSON.stringify(updatedMembers));
+
+    setNewMemberEmail("");
+    setNewMemberName("");
+    setNewMemberCompany("");
+    alert("Member approved successfully!");
+  };
+
+  const handleDeleteApprovedMember = (id: string) => {
+    if (confirm("Are you sure you want to remove this member's access?")) {
+      const updatedMembers = approvedMembers.filter(m => m.id !== id);
+      setApprovedMembers(updatedMembers);
+      localStorage.setItem("approvedMembers", JSON.stringify(updatedMembers));
     }
   };
 
@@ -624,6 +754,8 @@ export default function Admin() {
               { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
               { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
               { id: "members", label: "Members", shortLabel: "Members", icon: Users },
+              { id: "carousel", label: "Home Carousel", shortLabel: "Carousel", icon: Download },
+              { id: "member-access", label: "Member Access", shortLabel: "Access", icon: Users },
               { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
               { id: "users", label: "Users", shortLabel: "Users", icon: Users },
               { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
@@ -1624,6 +1756,177 @@ export default function Admin() {
               <p className="text-blue-800">
                 This section allows you to manage all relief requests stored in the INGD_table. You can add new requests, update existing ones, or delete records as needed.
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* Carousel Tab */}
+        {activeTab === "carousel" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Home Page Carousel Management</h2>
+
+              {/* Add New Image Section */}
+              <div className="border border-slate-200 rounded-lg p-6 mb-8 bg-slate-50">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Add New Image</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Image URL</label>
+                    <input
+                      type="url"
+                      value={newCarouselUrl}
+                      onChange={(e) => setNewCarouselUrl(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
+                    <input
+                      type="text"
+                      value={newCarouselTitle}
+                      onChange={(e) => setNewCarouselTitle(e.target.value)}
+                      placeholder="e.g., Community Relief Efforts"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                    <textarea
+                      value={newCarouselDescription}
+                      onChange={(e) => setNewCarouselDescription(e.target.value)}
+                      placeholder="Describe the image..."
+                      rows={3}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddCarouselImage}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Add Image
+                  </button>
+                </div>
+              </div>
+
+              {/* Current Images List */}
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Current Carousel Images</h3>
+              {isLoadingCarousel ? (
+                <p className="text-slate-600">Loading images...</p>
+              ) : carouselImages.length === 0 ? (
+                <p className="text-slate-600">No images yet. Add one above!</p>
+              ) : (
+                <div className="space-y-4">
+                  {carouselImages.map((img) => (
+                    <div key={img.id} className="border border-slate-200 rounded-lg p-4 flex gap-4">
+                      <div className="flex-shrink-0 h-24 w-24 rounded-lg overflow-hidden bg-slate-100">
+                        <img src={img.url} alt={img.title} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-slate-900">{img.title}</h4>
+                        <p className="text-sm text-slate-600 mt-1">{img.description}</p>
+                        <p className="text-xs text-slate-500 mt-2 truncate">{img.url}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteCarouselImage(img.id)}
+                        className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors flex-shrink-0"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Member Access Tab */}
+        {activeTab === "member-access" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Member Access Management</h2>
+
+              {/* Add New Member Section */}
+              <div className="border border-slate-200 rounded-lg p-6 mb-8 bg-slate-50">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Approve New Member</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={newMemberEmail}
+                      onChange={(e) => setNewMemberEmail(e.target.value)}
+                      placeholder="member@company.com"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                    <input
+                      type="text"
+                      value={newMemberName}
+                      onChange={(e) => setNewMemberName(e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Company</label>
+                    <input
+                      type="text"
+                      value={newMemberCompany}
+                      onChange={(e) => setNewMemberCompany(e.target.value)}
+                      placeholder="Company Name"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddApprovedMember}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Approve Member
+                  </button>
+                </div>
+              </div>
+
+              {/* Approved Members List */}
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Approved Members</h3>
+              {isLoadingApprovedMembers ? (
+                <p className="text-slate-600">Loading members...</p>
+              ) : approvedMembers.length === 0 ? (
+                <p className="text-slate-600">No approved members yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-semibold text-slate-700">Email</th>
+                        <th className="px-4 py-3 text-left font-semibold text-slate-700">Name</th>
+                        <th className="px-4 py-3 text-left font-semibold text-slate-700">Company</th>
+                        <th className="px-4 py-3 text-center font-semibold text-slate-700">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {approvedMembers.map((member) => (
+                        <tr key={member.id} className="border-b border-slate-200 hover:bg-slate-50">
+                          <td className="px-4 py-3 text-slate-600">{member.email}</td>
+                          <td className="px-4 py-3 text-slate-600">{member.name}</td>
+                          <td className="px-4 py-3 text-slate-600">{member.company}</td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => handleDeleteApprovedMember(member.id)}
+                              className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-medium text-sm rounded transition-colors"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

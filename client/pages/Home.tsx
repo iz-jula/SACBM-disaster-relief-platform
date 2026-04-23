@@ -1,11 +1,45 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 
+interface CarouselImage {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+}
+
 const Home = () => {
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    // Load carousel images from localStorage
+    const stored = localStorage.getItem("carouselImages");
+    if (stored) {
+      try {
+        setCarouselImages(JSON.parse(stored));
+      } catch (error) {
+        console.error("Error loading carousel images:", error);
+      }
+    }
+  }, []);
+
+  const goToPreviousImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? carouselImages.length - 1 : prev - 1
+    );
+  };
+
+  const goToNextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === carouselImages.length - 1 ? 0 : prev + 1
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -20,7 +54,7 @@ const Home = () => {
             alt="Community volunteers in action"
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/75 to-slate-900/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/50 via-slate-800/45 to-slate-900/50" />
         </div>
 
         {/* Content */}
@@ -60,13 +94,71 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Carousel Placeholder */}
-        <div className="rounded-lg overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 h-96 sm:h-[28rem] flex items-center justify-center border border-slate-300">
-          <div className="text-center">
-            <p className="text-slate-600 text-sm font-medium">Photo carousel - Admin uploads here</p>
-            <p className="text-xs text-slate-500 mt-2">Featured community impact photos and initiatives</p>
+        {/* Carousel */}
+        {carouselImages.length > 0 ? (
+          <div className="relative rounded-lg overflow-hidden h-96 sm:h-[28rem]">
+            {/* Current Image */}
+            <img
+              src={carouselImages[currentImageIndex].url}
+              alt={carouselImages[currentImageIndex].title}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+            {/* Image Info */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white">
+              <h3 className="text-2xl sm:text-3xl font-light mb-2">
+                {carouselImages[currentImageIndex].title}
+              </h3>
+              <p className="text-sm sm:text-base text-slate-100">
+                {carouselImages[currentImageIndex].description}
+              </p>
+            </div>
+
+            {/* Navigation Buttons */}
+            {carouselImages.length > 1 && (
+              <>
+                <button
+                  onClick={goToPreviousImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-slate-900 p-2 rounded-full transition-all"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={goToNextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-slate-900 p-2 rounded-full transition-all"
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={24} />
+                </button>
+
+                {/* Dot Indicators */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                  {carouselImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`h-2 rounded-full transition-all ${
+                        idx === currentImageIndex ? "bg-white w-8" : "bg-white/50 w-2"
+                      }`}
+                      aria-label={`Go to image ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="rounded-lg overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 h-96 sm:h-[28rem] flex items-center justify-center border border-slate-300">
+            <div className="text-center">
+              <p className="text-slate-600 text-sm font-medium">Photo carousel - Admin uploads here</p>
+              <p className="text-xs text-slate-500 mt-2">Featured community impact photos and initiatives</p>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Contact CTA Section */}
