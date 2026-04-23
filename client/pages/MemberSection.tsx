@@ -15,7 +15,7 @@ import {
 import PublicNavbar from "@/components/PublicNavbar";
 import MemberGate from "@/components/MemberGate";
 import { LogOut, User, Building2, Plus, FileText, Download, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Circle, Loader, X } from "lucide-react";
-import { createAchievement } from "@/services/achievementsService";
+import { createAchievement, getAchievements } from "@/services/achievementsService";
 
 const MemberSection = () => {
   const navigate = useNavigate();
@@ -70,13 +70,17 @@ const MemberSection = () => {
   // Load member's actions when entering reports view
   useEffect(() => {
     if (currentView === "reports") {
-      // Get all actions from localStorage (achievements stored by the app)
-      const storedActions = localStorage.getItem("memberActions");
-      if (storedActions) {
-        const actions = JSON.parse(storedActions);
-        // Filter by member's company (or could use email)
-        setMemberActions(actions);
-      }
+      // Load all achievements from the service (same as Our Impact page)
+      const loadActions = async () => {
+        try {
+          const actions = await getAchievements();
+          setMemberActions(actions);
+        } catch (error) {
+          console.error("Error loading actions:", error);
+          setMemberActions([]);
+        }
+      };
+      loadActions();
     }
   }, [currentView]);
 
@@ -274,23 +278,6 @@ const MemberSection = () => {
 
       if (result) {
         setSubmitSuccess(true);
-
-        // Store the action in localStorage for reports
-        const existingActions = JSON.parse(localStorage.getItem("memberActions") || "[]");
-        const newAction = {
-          company_name: companyName,
-          type_action: actionType,
-          category,
-          location: `${district}${province ? `, ${province}` : ""}`,
-          partner_organisation: partnerOrganisation,
-          people_impacted: peopleImpacted ? parseInt(peopleImpacted) : 0,
-          amount: amount ? parseInt(amount) : 0,
-          description,
-          created_at: new Date().toISOString(),
-          hide_amount: hideAmount,
-        };
-        existingActions.push(newAction);
-        localStorage.setItem("memberActions", JSON.stringify(existingActions));
 
         // Reset form
         setCompanyName("");
