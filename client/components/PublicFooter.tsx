@@ -78,22 +78,22 @@ const PublicFooter = () => {
             <h3 className="text-sm font-semibold text-white">For Members</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link to="/login" className="text-sm text-slate-300 hover:text-white">
-                  Login
+                <Link to="/members" className="text-sm text-slate-300 hover:text-white">
+                  Member Section
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-slate-300 hover:text-white">
+                <Link to="/members" className="text-sm text-slate-300 hover:text-white">
                   Submit Action
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-slate-300 hover:text-white">
-                  View Dashboard
-                </a>
+                <Link to="/admin" className="text-sm text-slate-300 hover:text-white">
+                  Admin Dashboard
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-slate-300 hover:text-white">
+                <a href="mailto:support@sacbm.co.mz" className="text-sm text-slate-300 hover:text-white">
                   Contact Support
                 </a>
               </li>
