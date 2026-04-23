@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, ChevronLeft, ChevronRight, Calendar, MapPin, Heart, Droplet, Home, Package, Utensils, Stethoscope, Gift, Users } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ImpactDetailModalProps {
@@ -7,20 +7,22 @@ interface ImpactDetailModalProps {
   onClose: () => void;
 }
 
-// Map categories to icons and colors
-const getCategoryDisplay = (category: string) => {
-  const categoryMap: Record<string, { icon: React.ReactNode; bgGradient: string; textColor: string }> = {
-    Food: { icon: <Utensils className="h-20 w-20" />, bgGradient: "from-orange-100 to-amber-100", textColor: "text-orange-600" },
-    Clothing: { icon: <Package className="h-20 w-20" />, bgGradient: "from-blue-100 to-cyan-100", textColor: "text-blue-600" },
-    Materials: { icon: <Package className="h-20 w-20" />, bgGradient: "from-slate-100 to-gray-100", textColor: "text-slate-600" },
-    Medical: { icon: <Stethoscope className="h-20 w-20" />, bgGradient: "from-red-100 to-rose-100", textColor: "text-red-600" },
-    Shelter: { icon: <Home className="h-20 w-20" />, bgGradient: "from-yellow-100 to-orange-100", textColor: "text-yellow-700" },
-    Water: { icon: <Droplet className="h-20 w-20" />, bgGradient: "from-blue-100 to-teal-100", textColor: "text-blue-600" },
-    Evacuation: { icon: <Users className="h-20 w-20" />, bgGradient: "from-purple-100 to-pink-100", textColor: "text-purple-600" },
-    Multiple: { icon: <Gift className="h-20 w-20" />, bgGradient: "from-indigo-100 to-purple-100", textColor: "text-indigo-600" },
+// Map categories to Unsplash search queries for placeholder images
+const getPlaceholderImageUrl = (category: string): string => {
+  const categoryMap: Record<string, string> = {
+    Food: "food+distribution+aid",
+    Clothing: "clothing+donation+humanitarian",
+    Materials: "construction+materials+disaster",
+    Medical: "medical+aid+humanitarian",
+    Shelter: "refugee+shelter+emergency",
+    Water: "water+crisis+humanitarian",
+    Evacuation: "emergency+evacuation+disaster",
+    Multiple: "disaster+relief+humanitarian",
   };
 
-  return categoryMap[category] || { icon: <Heart className="h-20 w-20" />, bgGradient: "from-slate-100 to-slate-200", textColor: "text-slate-600" };
+  const searchQuery = categoryMap[category] || "humanitarian+aid+relief";
+  // Using Unsplash source API which doesn't require authentication
+  return `https://source.unsplash.com/1200x1000/?${encodeURIComponent(searchQuery)}&sig=${Date.now()}`;
 };
 
 const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
@@ -133,17 +135,16 @@ const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
                 )}
               </div>
             ) : (() => {
-              const display = getCategoryDisplay(impact.category || "Multiple");
+              const placeholderUrl = getPlaceholderImageUrl(impact.category || "Multiple");
               return (
-              <div className={`aspect-square rounded-lg bg-gradient-to-br ${display.bgGradient} flex items-center justify-center`}>
-                <div className="text-center">
-                  <div className={`flex justify-center mb-4 ${display.textColor}`}>
-                    {display.icon}
-                  </div>
-                  <p className={`text-lg font-semibold ${display.textColor}`}>
-                    {impact.category || "Impact Initiative"}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">No images available</p>
+              <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
+                <img
+                  src={placeholderUrl}
+                  alt={`${impact.category || "Impact"} placeholder`}
+                  className="h-full w-full object-cover opacity-75"
+                />
+                <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                  <p className="text-white text-center font-medium">No images uploaded</p>
                 </div>
               </div>
               );
