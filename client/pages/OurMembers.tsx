@@ -307,130 +307,119 @@ const OurMembers = () => {
       {/* Member Detail Modal */}
       {selectedMember && (
         <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-          {/* Header */}
-          <div className="sticky top-0 z-50 border-b border-slate-200 bg-white">
-            <div className="mx-auto max-w-6xl px-6 sm:px-8 py-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-light tracking-tight text-slate-900">
-                  {selectedMember.company}
-                </h1>
-                {selectedMember.sector && (
-                  <p className="mt-1 text-sm text-slate-600">{selectedMember.sector}</p>
-                )}
+          {/* Large Hero Image */}
+          <div className="relative h-96 sm:h-[500px] w-full overflow-hidden bg-slate-100">
+            {selectedMember.image ? (
+              <img
+                src={selectedMember.image}
+                alt={selectedMember.company}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+                <p className="text-slate-500 text-lg">No image available</p>
               </div>
-              <button
-                onClick={() => setSelectedMember(null)}
-                className="rounded-full p-2 hover:bg-slate-100 transition-colors"
-                aria-label="Close"
-              >
-                <X className="h-6 w-6 text-slate-600" />
-              </button>
+            )}
+
+            {/* Dark overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+            {/* Close Button - Top Right */}
+            <button
+              onClick={() => setSelectedMember(null)}
+              className="absolute top-6 right-6 z-10 rounded-full p-2 bg-white/95 hover:bg-white shadow-lg transition-all"
+              aria-label="Close"
+            >
+              <X className="h-6 w-6 text-slate-900" />
+            </button>
+
+            {/* Company Info Overlay - Bottom Left */}
+            <div className="absolute bottom-0 left-0 right-0 px-6 sm:px-8 py-8">
+              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white mb-2">
+                {selectedMember.company}
+              </h1>
+              {selectedMember.sector && (
+                <p className="text-sm sm:text-base text-slate-100">{selectedMember.sector}</p>
+              )}
             </div>
           </div>
 
-          {/* Content */}
-          <div className="mx-auto max-w-6xl px-6 sm:px-8 py-12 lg:py-16">
-            <div className="grid gap-12 lg:grid-cols-3">
-              {/* Image - Left Column */}
-              <div className="lg:col-span-1">
-                {selectedMember.image ? (
-                  <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
-                    <img
-                      src={selectedMember.image}
-                      alt={selectedMember.company}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="aspect-square rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                    <p className="text-slate-500">No image available</p>
-                  </div>
-                )}
-              </div>
+          {/* Content Section */}
+          <div className="mx-auto max-w-4xl px-6 sm:px-8 py-16">
+            <div className="space-y-12">
+              {/* Description */}
+              {selectedMember.description && (
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
+                    About
+                  </h2>
+                  <p className="text-lg leading-relaxed text-slate-700">
+                    {selectedMember.description}
+                  </p>
+                </div>
+              )}
 
-              {/* Details - Right Column */}
-              <div className="lg:col-span-2 space-y-8">
-                {/* Description */}
-                {selectedMember.description && (
+              {/* Impact Summary */}
+              <div className="border-t border-slate-200 pt-12">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-8">
+                  Impact Summary
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
+                  {/* Total Actions */}
                   <div>
-                    <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
-                      About
-                    </h2>
-                    <p className="text-base leading-relaxed text-slate-700">
-                      {selectedMember.description}
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                      Total Actions
+                    </p>
+                    <p className="text-5xl font-light text-slate-900">
+                      {selectedMember.actionCount}
                     </p>
                   </div>
-                )}
 
-                {/* Impact Summary */}
-                <div className="border-t border-slate-200 pt-8">
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-6">
-                    Impact Summary
-                  </h2>
-                  <div className="grid grid-cols-1 gap-6">
-                    {/* Total Actions */}
+                  {/* People Impacted */}
+                  {selectedMember.totalPeopleImpacted > 0 && (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                        Total Actions
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                        Total People Impacted
                       </p>
-                      <p className="text-4xl font-light text-slate-900">
-                        {selectedMember.actionCount}
+                      <p className="text-5xl font-light text-slate-900">
+                        {selectedMember.totalPeopleImpacted.toLocaleString()}
                       </p>
                     </div>
+                  )}
 
-                    {/* People Impacted */}
-                    {selectedMember.totalPeopleImpacted > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                          Total People Impacted
-                        </p>
-                        <p className="text-4xl font-light text-slate-900">
-                          {selectedMember.totalPeopleImpacted.toLocaleString()}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Total Contribution */}
-                    {selectedMember.totalContribution > 0 && (
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                          Total Contribution
-                        </p>
-                        <p className="text-4xl font-light text-slate-900">
-                          {(selectedMember.totalContribution / 1000).toFixed(0)}K MZN
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  {/* Total Contribution */}
+                  {selectedMember.totalContribution > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                        Total Contribution
+                      </p>
+                      <p className="text-4xl font-light text-slate-900">
+                        {(selectedMember.totalContribution / 1000).toFixed(0)}K MZN
+                      </p>
+                    </div>
+                  )}
                 </div>
+              </div>
 
-                {/* View Their Impact Link */}
-                <div className="border-t border-slate-200 pt-8">
-                  <Link to={`/gallery?company=${encodeURIComponent(selectedMember.company)}`}>
-                    <Button
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium"
-                      onClick={() => setSelectedMember(null)}
-                    >
-                      View Their Impact Actions
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
+              {/* View Their Impact Link */}
+              <div className="border-t border-slate-200 pt-12">
+                <Link to={`/gallery?company=${encodeURIComponent(selectedMember.company)}`}>
+                  <Button
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-8 py-3"
+                    onClick={() => setSelectedMember(null)}
+                  >
+                    View Their Impact Actions
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t border-slate-200 bg-white py-8 mt-12">
-            <div className="mx-auto max-w-6xl px-6 sm:px-8 flex justify-between items-center">
-              <Button
-                onClick={() => setSelectedMember(null)}
-                variant="outline"
-                className="text-slate-700 border-slate-300 hover:bg-slate-50"
-              >
-                Close
-              </Button>
-              <p className="text-xs text-slate-500">Or press ESC</p>
+          <div className="border-t border-slate-200 bg-slate-50 py-8">
+            <div className="mx-auto max-w-4xl px-6 sm:px-8 flex justify-center">
+              <p className="text-xs text-slate-500">Press ESC to close</p>
             </div>
           </div>
         </div>
