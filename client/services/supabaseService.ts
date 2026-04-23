@@ -879,3 +879,126 @@ export async function setIngdActiveSetting(isActive: boolean): Promise<boolean> 
     return false;
   }
 }
+
+// Carousel Images Interface
+export interface CarouselImage {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Fetch all carousel images
+export async function getCarouselImages(): Promise<CarouselImage[]> {
+  try {
+    const { data, error } = await supabase
+      .from("carousel_images")
+      .select("*")
+      .order("display_order", { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching carousel images:", error);
+    return [];
+  }
+}
+
+// Create a new carousel image
+export async function createCarouselImage(
+  image: Omit<CarouselImage, "id" | "created_at" | "updated_at">
+): Promise<CarouselImage | null> {
+  try {
+    const { data, error } = await supabase
+      .from("carousel_images")
+      .insert([image])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error creating carousel image:", error);
+    return null;
+  }
+}
+
+// Delete a carousel image
+export async function deleteCarouselImage(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("carousel_images")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error deleting carousel image:", error);
+    return false;
+  }
+}
+
+// Approved Members Interface
+export interface ApprovedMember {
+  id: string;
+  email: string;
+  full_name: string;
+  company: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Fetch all approved members
+export async function getApprovedMembers(): Promise<ApprovedMember[]> {
+  try {
+    const { data, error } = await supabase
+      .from("approved_members")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching approved members:", error);
+    return [];
+  }
+}
+
+// Create a new approved member
+export async function createApprovedMember(
+  member: Omit<ApprovedMember, "id" | "created_at" | "updated_at">
+): Promise<ApprovedMember | null> {
+  try {
+    const { data, error } = await supabase
+      .from("approved_members")
+      .insert([member])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error creating approved member:", error);
+    return null;
+  }
+}
+
+// Delete an approved member
+export async function deleteApprovedMember(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("approved_members")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error deleting approved member:", error);
+    return false;
+  }
+}

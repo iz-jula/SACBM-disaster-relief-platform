@@ -12,14 +12,16 @@ import {
   Trash2,
   Edit2,
   X,
+  Upload,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import DocumentUploadForm from "@/components/DocumentUploadForm";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
-import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
-import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
+import { getAchievements } from "@/services/achievementsService";
+import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember } from "@/services/supabaseService";
+import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -45,8 +47,8 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities"
-  >("dashboard");
+    "menu" | "ingd" | "carousel" | "documents" | "member-access" | "users" | "connectivity" | "requests"
+  >("menu");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
     totalPeopleAssisted: 0,
@@ -92,6 +94,33 @@ export default function Admin() {
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [ingdActive, setIngdActive] = useState(true);
   const [isUpdatingIngd, setIsUpdatingIngd] = useState(false);
+
+  // Members management state
+  interface MemberData {
+    company: string;
+    sector: string;
+    description: string;
+    image?: string;
+  }
+  const [members, setMembers] = useState<MemberData[]>([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [editingMember, setEditingMember] = useState<MemberData | null>(null);
+  const [memberImageFile, setMemberImageFile] = useState<File | null>(null);
+  const [isSavingMember, setIsSavingMember] = useState(false);
+
+  // Carousel management state
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [isLoadingCarousel, setIsLoadingCarousel] = useState(false);
+  const [newCarouselUrl, setNewCarouselUrl] = useState("");
+  const [newCarouselTitle, setNewCarouselTitle] = useState("");
+  const [newCarouselDescription, setNewCarouselDescription] = useState("");
+
+  // Member access management state
+  const [approvedMembers, setApprovedMembers] = useState<ApprovedMember[]>([]);
+  const [isLoadingApprovedMembers, setIsLoadingApprovedMembers] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState("");
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberCompany, setNewMemberCompany] = useState("");
 
   // Load INGD active state from database
   useEffect(() => {
@@ -153,6 +182,237 @@ export default function Admin() {
       loadAllDocuments();
     }
   }, [activeTab]);
+
+  // Load members when members tab is activated
+  useEffect(() => {
+    if (activeTab === "members") {
+      loadMembers();
+    }
+  }, [activeTab]);
+
+  // Load carousel images when carousel tab is activated
+  useEffect(() => {
+    if (activeTab === "carousel") {
+      loadCarouselImages();
+    }
+  }, [activeTab]);
+
+  // Load approved members when member-access tab is activated
+  useEffect(() => {
+    if (activeTab === "member-access") {
+      loadApprovedMembers();
+    }
+  }, [activeTab]);
+
+  const loadMembers = async () => {
+    setIsLoadingMembers(true);
+    try {
+      const achievements = await getAchievements();
+
+      // Group by company and get unique members with their aggregated data
+      const memberMap = new Map<string, MemberData>();
+
+      achievements.forEach((achievement: any) => {
+        const company = achievement.company_name || "Unknown Company";
+
+        if (!memberMap.has(company)) {
+          memberMap.set(company, {
+            company,
+            sector: "",
+            description: "",
+            image: achievement.media && achievement.media.length > 0 ? (Array.isArray(achievement.media) ? achievement.media[0] : achievement.media) : undefined,
+          });
+        }
+      });
+
+      const membersList = Array.from(memberMap.values());
+      setMembers(membersList);
+    } catch (error) {
+      console.error("Error loading members:", error);
+      setMembers([]);
+    } finally {
+      setIsLoadingMembers(false);
+    }
+  };
+
+  const handleStartEditMember = (member: MemberData) => {
+    setEditingMember({ ...member });
+    setMemberImageFile(null);
+  };
+
+  const handleSaveMember = async () => {
+    if (!editingMember) return;
+
+    setIsSavingMember(true);
+    try {
+      // Save member customization to localStorage for now
+      // (In production, you'd save to a database)
+      const memberCustomizations = JSON.parse(
+        localStorage.getItem("memberCustomizations") || "{}"
+      );
+
+      memberCustomizations[editingMember.company] = {
+        sector: editingMember.sector,
+        description: editingMember.description,
+        image: editingMember.image,
+      };
+
+      localStorage.setItem("memberCustomizations", JSON.stringify(memberCustomizations));
+
+      // Update local state
+      setMembers(members.map(m =>
+        m.company === editingMember.company ? editingMember : m
+      ));
+
+      setEditingMember(null);
+      setMemberImageFile(null);
+      alert("Member updated successfully!");
+    } catch (error) {
+      console.error("Error saving member:", error);
+      alert("Error saving member");
+    } finally {
+      setIsSavingMember(false);
+    }
+  };
+
+  const handleCancelEditMember = () => {
+    setEditingMember(null);
+    setMemberImageFile(null);
+  };
+
+  const handleMemberImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMemberImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (editingMember && event.target?.result) {
+          setEditingMember({
+            ...editingMember,
+            image: event.target.result as string,
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const loadCarouselImages = async () => {
+    setIsLoadingCarousel(true);
+    try {
+      const images = await getCarouselImages();
+      setCarouselImages(images);
+    } catch (error) {
+      console.error("Error loading carousel images:", error);
+    } finally {
+      setIsLoadingCarousel(false);
+    }
+  };
+
+  const handleAddCarouselImage = async () => {
+    if (!newCarouselUrl || !newCarouselTitle) {
+      alert("Please fill in image URL and title");
+      return;
+    }
+
+    try {
+      const newImage = await createCarouselImage({
+        url: newCarouselUrl,
+        title: newCarouselTitle,
+        description: newCarouselDescription,
+        display_order: carouselImages.length,
+      });
+
+      if (newImage) {
+        setCarouselImages([...carouselImages, newImage]);
+        setNewCarouselUrl("");
+        setNewCarouselTitle("");
+        setNewCarouselDescription("");
+        alert("Image added successfully!");
+      } else {
+        alert("Failed to add image");
+      }
+    } catch (error) {
+      console.error("Error adding carousel image:", error);
+      alert("Error adding image");
+    }
+  };
+
+  const handleDeleteCarouselImage = async (id: string) => {
+    if (confirm("Are you sure you want to delete this image?")) {
+      try {
+        const success = await deleteCarouselImage(id);
+        if (success) {
+          const updatedImages = carouselImages.filter(img => img.id !== id);
+          setCarouselImages(updatedImages);
+          alert("Image deleted successfully!");
+        } else {
+          alert("Failed to delete image");
+        }
+      } catch (error) {
+        console.error("Error deleting carousel image:", error);
+        alert("Error deleting image");
+      }
+    }
+  };
+
+  const loadApprovedMembers = async () => {
+    setIsLoadingApprovedMembers(true);
+    try {
+      const members = await getApprovedMembers();
+      setApprovedMembers(members);
+    } catch (error) {
+      console.error("Error loading approved members:", error);
+    } finally {
+      setIsLoadingApprovedMembers(false);
+    }
+  };
+
+  const handleAddApprovedMember = async () => {
+    if (!newMemberEmail || !newMemberName || !newMemberCompany) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const newMember = await createApprovedMember({
+        email: newMemberEmail,
+        full_name: newMemberName,
+        company: newMemberCompany,
+      });
+
+      if (newMember) {
+        setApprovedMembers([...approvedMembers, newMember]);
+        setNewMemberEmail("");
+        setNewMemberName("");
+        setNewMemberCompany("");
+        alert("Member approved successfully!");
+      } else {
+        alert("Failed to add member");
+      }
+    } catch (error) {
+      console.error("Error adding approved member:", error);
+      alert("Error adding member");
+    }
+  };
+
+  const handleDeleteApprovedMember = async (id: string) => {
+    if (confirm("Are you sure you want to remove this member's access?")) {
+      try {
+        const success = await deleteApprovedMember(id);
+        if (success) {
+          const updatedMembers = approvedMembers.filter(m => m.id !== id);
+          setApprovedMembers(updatedMembers);
+          alert("Member access removed successfully!");
+        } else {
+          alert("Failed to remove member");
+        }
+      } catch (error) {
+        console.error("Error removing approved member:", error);
+        alert("Error removing member");
+      }
+    }
+  };
 
   const loadAllRequests = async () => {
     setIsLoadingRequests(true);
@@ -472,254 +732,127 @@ export default function Admin() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
+            {activeTab !== "menu" && (
+              <button
+                onClick={() => setActiveTab("menu")}
+                className="text-sm text-slate-600 hover:text-slate-900 mb-3 flex items-center gap-1 transition-colors"
+              >
+                ← Back to Dashboard
+              </button>
+            )}
             <h1 className="text-3xl font-bold text-slate-900">
-              Admin Dashboard
+              {activeTab === "menu" ? "Admin Dashboard" : "Manage Settings"}
             </h1>
-            <p className="text-slate-600 mt-1">
-              Manage SABCM disaster relief operations
-            </p>
-            {user && (
+            {activeTab === "menu" && (
+              <p className="text-slate-600 mt-1">
+                Organize and manage your website
+              </p>
+            )}
+            {user && activeTab === "menu" && (
               <p className="text-xs text-slate-500 mt-2">
                 Logged in as: {user.name}
               </p>
             )}
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              ← Back
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              <LogOut size={16} />
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-slate-200 bg-white overflow-x-auto">
-          <div className="flex gap-1 sm:gap-2 min-w-min">
-            {[
-              { id: "dashboard", label: "Dashboard", shortLabel: "Dashboard", icon: BarChart3 },
-              { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
-              { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
-              { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
-              { id: "users", label: "Users", shortLabel: "Users", icon: Users },
-              { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
-            ].map((tab) => (
+        {/* Navigation removed for minimalist design - use sidebar buttons to navigate */}
+
+        {/* Menu/Home Tab */}
+        {activeTab === "menu" && (
+          <div className="space-y-12">
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900 mb-3">Admin Dashboard</h1>
+              <p className="text-base text-slate-600 max-w-2xl">Organize and manage your website, members, and content</p>
+            </div>
+
+            {/* Edit Website Section */}
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Edit Website</h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <button
+                  onClick={() => setActiveTab("members")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🏢</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Members</h3>
+                  <p className="text-xs text-slate-500 mt-1">Company info</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("carousel")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📸</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Uploaded Media</h3>
+                  <p className="text-xs text-slate-500 mt-1">Home images</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("ingd")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📊</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Relief Data</h3>
+                  <p className="text-xs text-slate-500 mt-1">INGD requests</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("documents")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📄</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Documents</h3>
+                  <p className="text-xs text-slate-500 mt-1">Files & docs</p>
+                </button>
+              </div>
+            </div>
+
+            {/* User Access Section */}
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">User Access</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button
+                  onClick={() => setActiveTab("member-access")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🎟️</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Member Access</h3>
+                  <p className="text-xs text-slate-500 mt-1">Approve members</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("users")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🔐</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Admin Users</h3>
+                  <p className="text-xs text-slate-500 mt-1">Manage team</p>
+                </button>
+              </div>
+            </div>
+
+            {/* Connectivity Section */}
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Connectivity</h2>
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                title={tab.label}
-                className={`px-2 sm:px-4 py-4 font-medium flex items-center gap-1 sm:gap-2 border-b-2 transition-all whitespace-nowrap flex-shrink-0 ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-slate-600 hover:text-slate-900"
-                }`}
+                onClick={() => setActiveTab("connectivity")}
+                className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group max-w-xs"
               >
-                <tab.icon size={18} />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden text-xs">{tab.shortLabel}</span>
+                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">⚙️</div>
+                <h3 className="text-sm font-semibold text-slate-900">Settings</h3>
+                <p className="text-xs text-slate-500 mt-1">System config</p>
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Dashboard Tab */}
-        {activeTab === "dashboard" && (
-          <div className="space-y-8">
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {stats.map((stat, idx) => {
-                const Icon = stat.icon;
-                const colorClasses: Record<string, string> = {
-                  blue: "bg-blue-100 text-blue-600",
-                  green: "bg-green-100 text-green-600",
-                  yellow: "bg-yellow-100 text-yellow-600",
-                  orange: "bg-orange-100 text-orange-600",
-                };
-                return (
-                  <div
-                    key={idx}
-                    className="bg-white rounded-xl shadow-md p-6 border border-slate-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-slate-600 text-sm font-medium">
-                          {stat.label}
-                        </p>
-                        <p className="text-3xl font-bold text-slate-900 mt-2">
-                          {isLoadingMetrics ? "—" : stat.value}
-                        </p>
-                      </div>
-                      <div
-                        className={`rounded-lg p-3 ${colorClasses[stat.color]}`}
-                      >
-                        <Icon size={24} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
 
-            {/* Quick Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                  Request Status Breakdown
-                </h3>
-                <div className="space-y-4">
-                  {isLoadingMetrics ? (
-                    <p className="text-slate-500 text-sm">Loading...</p>
-                  ) : (
-                    <>
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="text-sm font-medium text-slate-700">
-                            Met
-                          </p>
-                          <p className="text-sm font-bold text-green-600">
-                            {metrics.totalRequests > 0
-                              ? Math.round(
-                                  (metrics.metRequests /
-                                    metrics.totalRequests) *
-                                    100,
-                                )
-                              : 0}
-                            %
-                          </p>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{
-                              width:
-                                metrics.totalRequests > 0
-                                  ? `${Math.round((metrics.metRequests / metrics.totalRequests) * 100)}%`
-                                  : "0%",
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="text-sm font-medium text-slate-700">
-                            Pending
-                          </p>
-                          <p className="text-sm font-bold text-blue-600">
-                            {metrics.totalRequests > 0
-                              ? Math.round(
-                                  (metrics.pendingRequests /
-                                    metrics.totalRequests) *
-                                    100,
-                                )
-                              : 0}
-                            %
-                          </p>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-500 h-2 rounded-full"
-                            style={{
-                              width:
-                                metrics.totalRequests > 0
-                                  ? `${Math.round((metrics.pendingRequests / metrics.totalRequests) * 100)}%`
-                                  : "0%",
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                  Data Summary
-                </h3>
-                <div className="space-y-3">
-                  {isLoadingMetrics ? (
-                    <p className="text-slate-500 text-sm">Loading...</p>
-                  ) : (
-                    <>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total People Assisted</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber(metrics.totalPeopleAssisted)}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total Funds Deployed</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber((metrics.totalValueDeployed || 0) / 1000000, 2)}
-                          M MZN
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Average per Request</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber((metrics.averagePerRequest || 0) / 1000, 0)}
-                          K MZN
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <p className="text-slate-600">Active Cities</p>
-                        <p className="font-bold text-slate-900">
-                          {allRequests && allRequests.length > 0
-                            ? new Set(allRequests.map((r) => r.location)).size
-                            : 0}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                  INGD Data Summary
-                </h3>
-                <div className="space-y-3">
-                  {isLoadingMetrics ? (
-                    <p className="text-slate-500 text-sm">Loading...</p>
-                  ) : (
-                    <>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total Items</p>
-                        <p className="font-bold text-slate-900">
-                          {ingdMetrics.totalItems}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total Quantity</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber(ingdMetrics.totalQuantity)}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">People Impacted</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber(ingdMetrics.totalPeopleImpacted)}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <p className="text-slate-600">Total Value</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber((ingdMetrics.totalAmount || 0) / 1000, 0)}K MZN
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+            {/* Placeholder to delete old metrics code below */}
           </div>
         )}
 
@@ -931,8 +1064,8 @@ export default function Admin() {
           </div>
         )}
 
-        {/* Settings Tab */}
-        {activeTab === "settings" && (
+        {/* Connectivity Tab */}
+        {activeTab === "connectivity" && (
           <div className="space-y-6">
             {/* Supabase Connection Status */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-6">
@@ -1512,6 +1645,177 @@ export default function Admin() {
           </div>
         )}
 
+        {/* Carousel Tab */}
+        {activeTab === "carousel" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Home Page Carousel Management</h2>
+
+              {/* Add New Image Section */}
+              <div className="border border-slate-200 rounded-lg p-6 mb-8 bg-slate-50">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Add New Image</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Image URL</label>
+                    <input
+                      type="url"
+                      value={newCarouselUrl}
+                      onChange={(e) => setNewCarouselUrl(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
+                    <input
+                      type="text"
+                      value={newCarouselTitle}
+                      onChange={(e) => setNewCarouselTitle(e.target.value)}
+                      placeholder="e.g., Community Relief Efforts"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                    <textarea
+                      value={newCarouselDescription}
+                      onChange={(e) => setNewCarouselDescription(e.target.value)}
+                      placeholder="Describe the image..."
+                      rows={3}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddCarouselImage}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Add Image
+                  </button>
+                </div>
+              </div>
+
+              {/* Current Images List */}
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Current Carousel Images</h3>
+              {isLoadingCarousel ? (
+                <p className="text-slate-600">Loading images...</p>
+              ) : carouselImages.length === 0 ? (
+                <p className="text-slate-600">No images yet. Add one above!</p>
+              ) : (
+                <div className="space-y-4">
+                  {carouselImages.map((img) => (
+                    <div key={img.id} className="border border-slate-200 rounded-lg p-4 flex gap-4">
+                      <div className="flex-shrink-0 h-24 w-24 rounded-lg overflow-hidden bg-slate-100">
+                        <img src={img.url} alt={img.title} className="h-full w-full object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-slate-900">{img.title}</h4>
+                        <p className="text-sm text-slate-600 mt-1">{img.description}</p>
+                        <p className="text-xs text-slate-500 mt-2 truncate">{img.url}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteCarouselImage(img.id)}
+                        className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors flex-shrink-0"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Member Access Tab */}
+        {activeTab === "member-access" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Member Access Management</h2>
+
+              {/* Add New Member Section */}
+              <div className="border border-slate-200 rounded-lg p-6 mb-8 bg-slate-50">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Approve New Member</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      value={newMemberEmail}
+                      onChange={(e) => setNewMemberEmail(e.target.value)}
+                      placeholder="member@company.com"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                    <input
+                      type="text"
+                      value={newMemberName}
+                      onChange={(e) => setNewMemberName(e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Company</label>
+                    <input
+                      type="text"
+                      value={newMemberCompany}
+                      onChange={(e) => setNewMemberCompany(e.target.value)}
+                      placeholder="Company Name"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddApprovedMember}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Approve Member
+                  </button>
+                </div>
+              </div>
+
+              {/* Approved Members List */}
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Approved Members</h3>
+              {isLoadingApprovedMembers ? (
+                <p className="text-slate-600">Loading members...</p>
+              ) : approvedMembers.length === 0 ? (
+                <p className="text-slate-600">No approved members yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-semibold text-slate-700">Email</th>
+                        <th className="px-4 py-3 text-left font-semibold text-slate-700">Name</th>
+                        <th className="px-4 py-3 text-left font-semibold text-slate-700">Company</th>
+                        <th className="px-4 py-3 text-center font-semibold text-slate-700">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {approvedMembers.map((member) => (
+                        <tr key={member.id} className="border-b border-slate-200 hover:bg-slate-50">
+                          <td className="px-4 py-3 text-slate-600">{member.email}</td>
+                          <td className="px-4 py-3 text-slate-600">{member.full_name}</td>
+                          <td className="px-4 py-3 text-slate-600">{member.company}</td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => handleDeleteApprovedMember(member.id)}
+                              className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-medium text-sm rounded transition-colors"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Documents Tab */}
         {activeTab === "documents" && (
           <DocumentUploadForm
@@ -1530,6 +1834,198 @@ export default function Admin() {
             onDelete={handleDeleteDocument}
             onEditType={handleEditDocumentType}
           />
+        )}
+
+        {/* Members Tab */}
+        {activeTab === "members" && (
+          <div className="space-y-6">
+            {isLoadingMembers ? (
+              <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                Loading members...
+              </div>
+            ) : members.length === 0 ? (
+              <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                <p>No members with submitted actions found.</p>
+                <p className="text-sm mt-2">Members will appear here once they submit impact actions.</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {members.map((member) => (
+                    <div key={member.company} className="bg-white rounded-xl shadow hover:shadow-lg transition-shadow">
+                      {/* Member Image */}
+                      {member.image ? (
+                        <div className="relative h-48 bg-slate-100 overflow-hidden rounded-t-xl">
+                          <img
+                            src={member.image}
+                            alt={member.company}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-48 bg-gradient-to-br from-slate-100 to-slate-200 rounded-t-xl flex items-center justify-center">
+                          <p className="text-slate-400 text-sm">No image</p>
+                        </div>
+                      )}
+
+                      {/* Member Info */}
+                      <div className="p-4 space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-slate-900">{member.company}</h3>
+                          <p className="text-xs text-slate-500 mt-1">{member.sector || "—"}</p>
+                        </div>
+                        <p className="text-sm text-slate-600 line-clamp-2">{member.description || "No description"}</p>
+                        <button
+                          onClick={() => handleStartEditMember(member)}
+                          className="w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Edit2 size={14} />
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Edit Member Modal */}
+            {editingMember && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                  {/* Modal Header */}
+                  <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-slate-900">Edit {editingMember.company}</h2>
+                    <button
+                      onClick={handleCancelEditMember}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  {/* Modal Content */}
+                  <div className="p-6 space-y-6">
+                    {/* Company Name (Read-only) */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Company Name
+                      </label>
+                      <input
+                        type="text"
+                        value={editingMember.company}
+                        disabled
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Sector */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Sector
+                      </label>
+                      <select
+                        value={editingMember.sector}
+                        onChange={(e) =>
+                          setEditingMember({
+                            ...editingMember,
+                            sector: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">Select a sector...</option>
+                        <option value="Mining">Mining</option>
+                        <option value="Oil & Gas">Oil & Gas</option>
+                        <option value="Financial Services">Financial Services</option>
+                        <option value="Logistics">Logistics</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Telecommunications">Telecommunications</option>
+                        <option value="Security">Security</option>
+                        <option value="Retail">Retail</option>
+                        <option value="Food & Beverage">Food & Beverage</option>
+                        <option value="Engineering & Consulting">Engineering & Consulting</option>
+                        <option value="Investment">Investment</option>
+                      </select>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={editingMember.description}
+                        onChange={(e) =>
+                          setEditingMember({
+                            ...editingMember,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder="Enter company description..."
+                        rows={4}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Cover Image */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Cover Image
+                      </label>
+                      <div className="space-y-3">
+                        {editingMember.image && (
+                          <div className="relative h-40 rounded-lg overflow-hidden bg-slate-100">
+                            <img
+                              src={editingMember.image}
+                              alt={editingMember.company}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer hover:border-slate-400 transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleMemberImageSelect}
+                            className="hidden"
+                            id={`image-input-${editingMember.company}`}
+                          />
+                          <label
+                            htmlFor={`image-input-${editingMember.company}`}
+                            className="cursor-pointer flex flex-col items-center gap-2"
+                          >
+                            <Upload size={24} className="text-slate-400" />
+                            <span className="text-sm font-medium text-slate-600">
+                              Click to upload new image
+                            </span>
+                            <span className="text-xs text-slate-500">PNG, JPG up to 10MB</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="border-t border-slate-200 p-6 flex gap-3">
+                    <button
+                      onClick={handleCancelEditMember}
+                      className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveMember}
+                      disabled={isSavingMember}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      {isSavingMember ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
       </div>

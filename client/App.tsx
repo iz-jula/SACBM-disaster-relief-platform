@@ -5,6 +5,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// Public pages
+import Home from "./pages/Home";
+import PublicGallery from "./pages/PublicGallery";
+import About from "./pages/About";
+import OurMembers from "./pages/OurMembers";
+import MemberSection from "./pages/MemberSection";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+
+// Member/Admin pages
 import Dashboard from "./pages/Dashboard";
 import Requests from "./pages/Requests";
 import Upload from "./pages/Upload";
@@ -13,10 +24,9 @@ import INGDDashboard from "./pages/INGDDashboard";
 import GovernmentPriorities from "./pages/GovernmentPriorities";
 import Reports from "./pages/Reports";
 import Admin from "./pages/Admin";
-import Login from "./pages/Login";
 import DataRepository from "./pages/DataRepository";
 import Achievements from "./pages/Achievements";
-import NotFound from "./pages/NotFound";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -30,16 +40,90 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* PUBLIC ROUTES */}
+            <Route path="/" element={<Home />} />
+            <Route path="/impact" element={<Home />} />
+            <Route path="/gallery" element={<PublicGallery />} />
+            <Route path="/our-members" element={<OurMembers />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/members" element={<MemberSection />} />
+
+            {/* AUTHENTICATION */}
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/requests" element={<Requests />} />
-            <Route path="/actions" element={<Achievements />} />
-            <Route path="/upload" element={<Upload />} />
-            <Route path="/weather" element={<Weather />} />
-            <Route path="/ingd-dashboard" element={<INGDDashboard />} />
-            <Route path="/government-priorities" element={<GovernmentPriorities />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/data-repository" element={<DataRepository />} />
+
+            {/* MEMBER/ADMIN ROUTES */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/requests"
+              element={
+                <ProtectedRoute>
+                  <Requests />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/actions"
+              element={
+                <ProtectedRoute>
+                  <Achievements />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/upload"
+              element={
+                <ProtectedRoute>
+                  <Upload />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/weather"
+              element={
+                <ProtectedRoute>
+                  <Weather />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ingd-dashboard"
+              element={
+                <ProtectedRoute>
+                  <INGDDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/government-priorities"
+              element={
+                <ProtectedRoute>
+                  <GovernmentPriorities />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/data-repository"
+              element={
+                <ProtectedRoute>
+                  <DataRepository />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin"
               element={
@@ -48,6 +132,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

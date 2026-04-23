@@ -4,7 +4,10 @@ import {
   Menu,
   X,
   ChevronLeft,
+  ExternalLink,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,19 +15,12 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const navItems = [
-    { href: "/", label: "Dashboard" },
-    { href: "/requests", label: "Relief Requests" },
-    { href: "/actions", label: "Actions" },
-    { href: "/upload", label: "Upload Social Impact" },
-    { href: "/government-priorities", label: "Government Priorities" },
-    { href: "/reports", label: "Reports" },
-  ];
-
-  const adminItems = [{ href: "/admin", label: "Admin Panel" }];
+  // Navigation items removed - admin panel is streamlined
+  // Users access specific features via tabs in Admin.tsx
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
@@ -38,12 +34,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="flex-1 overflow-y-auto">
           <div className={`p-6 ${sidebarCollapsed ? "md:p-3" : ""}`}>
             {/* Logo */}
-            <Link
-              to="/"
-              className="flex flex-col items-center gap-2 mb-8"
-              onClick={() => setSidebarOpen(false)}
-              title="SACBM - South African Chamber of Business in Mozambique"
-            >
+            <div className="flex flex-col items-center gap-2 mb-8">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
                 alt="SACBM Logo"
@@ -52,74 +43,53 @@ export default function Layout({ children }: LayoutProps) {
               {!sidebarCollapsed && (
                 <div className="text-center">
                   <h1 className="text-sm font-bold text-slate-900 leading-tight">
-                    SACBM
+                    Admin Panel
                   </h1>
                   <p className="text-xs text-slate-500 leading-tight">
-                    Social Impact Cluster
+                    SACBM
                   </p>
                 </div>
               )}
-            </Link>
+            </div>
 
-            {/* Navigation */}
-            <nav className="space-y-2">
-              {navItems.map(({ href, label }) => {
-                const isActive = location.pathname === href;
-
-                return (
-                  <Link
-                    key={href}
-                    to={href}
-                    onClick={() => setSidebarOpen(false)}
-                    title={label}
-                    className={`block px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
-                      isActive
-                        ? "bg-primary text-white shadow-md"
-                        : "text-slate-600 hover:bg-slate-100"
-                    }`}
-                  >
-                    {!sidebarCollapsed && <span className="truncate">{label}</span>}
-                  </Link>
-                );
-              })}
-
-              {/* Admin Separator */}
-              <div className="my-4 border-t border-slate-200" />
-
-              {/* Admin Items */}
-              {adminItems.map(({ href, label }) => {
-                const isActive = location.pathname === href;
-                return (
-                  <Link
-                    key={href}
-                    to={href}
-                    onClick={() => setSidebarOpen(false)}
-                    title={label}
-                    className={`block px-4 py-3 rounded-lg font-medium transition-all overflow-hidden ${
-                      isActive
-                        ? "bg-red-100 text-red-700 shadow-md"
-                        : "text-slate-600 hover:bg-slate-100"
-                    }`}
-                  >
-                    {!sidebarCollapsed && <span className="truncate">{label}</span>}
-                  </Link>
-                );
-              })}
-            </nav>
+            {/* Navigation removed - admin features accessed via tabs */}
           </div>
         </div>
 
-        {/* Collapse Button - Bottom of Sidebar */}
-        <div
-          className={`border-t border-slate-200 p-4 ${sidebarCollapsed ? "md:p-2" : ""}`}
-        >
+        {/* Bottom Actions - Bottom of Sidebar */}
+        <div className={`border-t border-slate-200 space-y-2 p-4 ${sidebarCollapsed ? "md:p-2" : ""}`}>
+          {/* Back to Public Site */}
+          <Link
+            to="/"
+            target="_blank"
+            className="flex items-center justify-center w-full px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium transition-colors text-sm"
+            title="View public website"
+          >
+            <ExternalLink size={16} />
+            {!sidebarCollapsed && <span className="ml-2">Public Site</span>}
+          </Link>
+
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              logout();
+              setSidebarOpen(false);
+            }}
+            className="flex items-center justify-center w-full px-4 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-medium transition-colors text-sm"
+            title="Logout"
+          >
+            <LogOut size={16} />
+            {!sidebarCollapsed && <span className="ml-2">Logout</span>}
+          </button>
+
+          {/* Collapse Button - Desktop only */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden md:flex items-center justify-center w-full px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors"
+            className="hidden md:flex items-center justify-center w-full px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors text-sm"
             title={sidebarCollapsed ? "Expand" : "Collapse"}
           >
             <ChevronLeft
-              size={20}
+              size={16}
               className={`transition-transform ${sidebarCollapsed ? "rotate-180" : ""}`}
             />
             {!sidebarCollapsed && <span className="ml-2">Collapse</span>}
@@ -140,11 +110,9 @@ export default function Layout({ children }: LayoutProps) {
         {/* Mobile Header */}
         <header className="md:hidden bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
           <div className="px-4 py-3 flex items-center justify-between gap-3">
-            <Link
-              to="/"
+            <div
               className="flex items-center gap-2 flex-1"
-              onClick={() => setSidebarOpen(false)}
-              title="SACBM - South African Chamber of Business in Mozambique"
+              title="SACBM Admin Panel"
             >
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
@@ -153,13 +121,13 @@ export default function Layout({ children }: LayoutProps) {
               />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 leading-tight">
-                  SACBM
+                  Admin Panel
                 </p>
                 <p className="text-xs text-slate-500 leading-tight">
-                  Social Impact Cluster
+                  Management
                 </p>
               </div>
-            </Link>
+            </div>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="text-slate-600 hover:text-slate-900 transition-colors flex-shrink-0"
