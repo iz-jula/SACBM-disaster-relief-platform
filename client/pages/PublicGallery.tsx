@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, Filter, Users, Calendar, X, TrendingUp, DollarSign } from "lucide-react";
+import { Search, Filter, Users, Calendar, X, TrendingUp, DollarSign, Heart, Droplet, Home, Package, Utensils, Stethoscope, Gift } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,22 @@ import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import ImpactDetailModal from "@/components/ImpactDetailModal";
 import { getAchievements } from "@/services/achievementsService";
+
+// Map categories to icons and colors
+const getCategoryDisplay = (category: string) => {
+  const categoryMap: Record<string, { icon: React.ReactNode; bgGradient: string; textColor: string }> = {
+    Food: { icon: <Utensils className="h-16 w-16" />, bgGradient: "from-orange-100 to-amber-100", textColor: "text-orange-600" },
+    Clothing: { icon: <Package className="h-16 w-16" />, bgGradient: "from-blue-100 to-cyan-100", textColor: "text-blue-600" },
+    Materials: { icon: <Package className="h-16 w-16" />, bgGradient: "from-slate-100 to-gray-100", textColor: "text-slate-600" },
+    Medical: { icon: <Stethoscope className="h-16 w-16" />, bgGradient: "from-red-100 to-rose-100", textColor: "text-red-600" },
+    Shelter: { icon: <Home className="h-16 w-16" />, bgGradient: "from-yellow-100 to-orange-100", textColor: "text-yellow-700" },
+    Water: { icon: <Droplet className="h-16 w-16" />, bgGradient: "from-blue-100 to-teal-100", textColor: "text-blue-600" },
+    Evacuation: { icon: <Users className="h-16 w-16" />, bgGradient: "from-purple-100 to-pink-100", textColor: "text-purple-600" },
+    Multiple: { icon: <Gift className="h-16 w-16" />, bgGradient: "from-indigo-100 to-purple-100", textColor: "text-indigo-600" },
+  };
+
+  return categoryMap[category] || { icon: <Heart className="h-16 w-16" />, bgGradient: "from-slate-100 to-slate-200", textColor: "text-slate-600" };
+};
 
 const PublicGallery = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -276,10 +292,18 @@ const PublicGallery = () => {
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="relative h-56 w-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                  ) : (() => {
+                    const display = getCategoryDisplay(achievement.category || "Multiple");
+                    return (
+                    <div className={`relative h-56 w-full bg-gradient-to-br ${display.bgGradient} flex items-center justify-center`}>
                       <div className="text-center">
-                        <p className="text-xs font-medium text-slate-600">No Image</p>
+                        <div className={`flex justify-center mb-3 ${display.textColor}`}>
+                          {display.icon}
+                        </div>
+                        <p className={`text-sm font-semibold ${display.textColor}`}>
+                          {achievement.category || "Impact Initiative"}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">No image available</p>
                       </div>
                       {achievement.category && (
                         <div className="absolute top-4 right-4 bg-slate-900/80 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white rounded">
@@ -287,7 +311,8 @@ const PublicGallery = () => {
                         </div>
                       )}
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Card Content */}
                   <CardHeader className="pb-4 border-b border-slate-200">

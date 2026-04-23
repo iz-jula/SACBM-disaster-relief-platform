@@ -1,11 +1,27 @@
 import { useState } from "react";
-import { X, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Calendar, MapPin, Heart, Droplet, Home, Package, Utensils, Stethoscope, Gift, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ImpactDetailModalProps {
   impact: any;
   onClose: () => void;
 }
+
+// Map categories to icons and colors
+const getCategoryDisplay = (category: string) => {
+  const categoryMap: Record<string, { icon: React.ReactNode; bgGradient: string; textColor: string }> = {
+    Food: { icon: <Utensils className="h-20 w-20" />, bgGradient: "from-orange-100 to-amber-100", textColor: "text-orange-600" },
+    Clothing: { icon: <Package className="h-20 w-20" />, bgGradient: "from-blue-100 to-cyan-100", textColor: "text-blue-600" },
+    Materials: { icon: <Package className="h-20 w-20" />, bgGradient: "from-slate-100 to-gray-100", textColor: "text-slate-600" },
+    Medical: { icon: <Stethoscope className="h-20 w-20" />, bgGradient: "from-red-100 to-rose-100", textColor: "text-red-600" },
+    Shelter: { icon: <Home className="h-20 w-20" />, bgGradient: "from-yellow-100 to-orange-100", textColor: "text-yellow-700" },
+    Water: { icon: <Droplet className="h-20 w-20" />, bgGradient: "from-blue-100 to-teal-100", textColor: "text-blue-600" },
+    Evacuation: { icon: <Users className="h-20 w-20" />, bgGradient: "from-purple-100 to-pink-100", textColor: "text-purple-600" },
+    Multiple: { icon: <Gift className="h-20 w-20" />, bgGradient: "from-indigo-100 to-purple-100", textColor: "text-indigo-600" },
+  };
+
+  return categoryMap[category] || { icon: <Heart className="h-20 w-20" />, bgGradient: "from-slate-100 to-slate-200", textColor: "text-slate-600" };
+};
 
 const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -116,11 +132,22 @@ const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                <p className="text-slate-500 text-sm">No images available</p>
+            ) : (() => {
+              const display = getCategoryDisplay(impact.category || "Multiple");
+              return (
+              <div className={`aspect-square rounded-lg bg-gradient-to-br ${display.bgGradient} flex items-center justify-center`}>
+                <div className="text-center">
+                  <div className={`flex justify-center mb-4 ${display.textColor}`}>
+                    {display.icon}
+                  </div>
+                  <p className={`text-lg font-semibold ${display.textColor}`}>
+                    {impact.category || "Impact Initiative"}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">No images available</p>
+                </div>
               </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* Details Sidebar - Right Column */}
