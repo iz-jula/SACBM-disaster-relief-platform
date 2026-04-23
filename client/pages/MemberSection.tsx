@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import PublicNavbar from "@/components/PublicNavbar";
 import MemberGate from "@/components/MemberGate";
-import { LogOut, User, Building2, Plus, FileText, Download, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Circle } from "lucide-react";
+import { LogOut, User, Building2, Plus, FileText, Download, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Circle, Loader, X } from "lucide-react";
 import { createAchievement } from "@/services/achievementsService";
 
 const MemberSection = () => {
@@ -111,6 +111,59 @@ const MemberSection = () => {
     return [...new Set(memberActions.map(a => a.category))].filter(Boolean).sort();
   };
 
+  const getMediaFiles = () => {
+    const mediaItems: any[] = [];
+
+    // Extract images from action.media field (base64 data stored as JSON array)
+    const actionImages = memberActions
+      .flatMap((action, actionIdx) => {
+        try {
+          const mediaArray = JSON.parse(action.media as string);
+          if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+            return mediaArray.map((imageData: string, imgIdx: number) => ({
+              id: `action-${actionIdx}-${imgIdx}`,
+              file_name: `${action.type_action} - ${action.company_name}`,
+              description: `Image from: ${action.type_action}`,
+              file_type: 'image',
+              data_url: imageData,
+              source: 'action',
+            }));
+          }
+        } catch (e) {
+          // Fallback for single image stored as string
+          if (action.media && typeof action.media === 'string' && action.media.startsWith('data:image')) {
+            return [{
+              id: `action-${actionIdx}-0`,
+              file_name: `${action.type_action} - ${action.company_name}`,
+              description: `Image from: ${action.type_action}`,
+              file_type: 'image',
+              data_url: action.media,
+              source: 'action',
+            }];
+          }
+        }
+        return [];
+      });
+
+    return actionImages;
+  };
+
+  const getSelectedMediaList = () => {
+    return Array.from(selectedReportMedia)
+      .map(id => {
+        const allMedia = getMediaFiles();
+        return allMedia.find((m: any) => m.id === id);
+      })
+      .filter(Boolean);
+  };
+
+  const getTotalReportCount = () => {
+    let count = 0;
+    if (includeReportData.actions) count += getFilteredReportActions().length;
+    if (includeReportData.media) count += selectedReportMedia.size;
+    return count;
+  };
+
   const handleGenerateReport = async () => {
     if (!includeReportData.actions && !includeReportData.media) {
       alert("Please select at least one data type to include in the report");
@@ -125,6 +178,7 @@ const MemberSection = () => {
     setIsGeneratingReport(true);
     try {
       const filteredActions = getFilteredReportActions();
+      const selectedMedia = getSelectedMediaList();
 
       // Create comprehensive report text
       const reportText = [
@@ -143,6 +197,7 @@ const MemberSection = () => {
         `Total Actions Submitted: ${filteredActions.length}`,
         `Total People Impacted: ${filteredActions.reduce((sum, a) => sum + (a.people_impacted || 0), 0).toLocaleString()}`,
         `Total Contribution: MZN ${filteredActions.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}`,
+        selectedMedia.length > 0 ? `Media Files Included: ${selectedMedia.length}` : "",
         "",
         "═".repeat(70),
         "SUBMITTED ACTIONS",
@@ -162,10 +217,18 @@ const MemberSection = () => {
           `Date Submitted: ${action.created_at ? new Date(action.created_at).toLocaleDateString() : "N/A"}`,
           "",
         ].join("\n")),
+        selectedMedia.length > 0 ? [
+          "═".repeat(70),
+          "MEDIA FILES INCLUDED",
+          "═".repeat(70),
+          "",
+          ...selectedMedia.map((media: any, idx: number) => `${idx + 1}. ${media.file_name}`),
+          "",
+        ].join("\n") : "",
         "═".repeat(70),
         "END OF REPORT",
         "═".repeat(70),
-      ].join("\n");
+      ].filter(line => line !== "").join("\n");
 
       // Create blob and download
       const blob = new Blob([reportText], { type: "text/plain;charset=utf-8;" });
@@ -692,17 +755,131 @@ const MemberSection = () => {
                       )}
                     </div>
                   )}
+
+                  {/* Media Selection */}
+                  {includeReportData.media && (
+                    <div className="border border-slate-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setExpandedReportFilters({ ...expandedReportFilters, media: !expandedReportFilters.media })}
+                        className="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900">Media Files</span>
+                          <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded">
+                            {selectedReportMedia.size} selected
+                          </span>
+                        </div>
+                        {expandedReportFilters.media ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      </button>
+                      {expandedReportFilters.media && (
+                        <div className="p-4 bg-white">
+                          {getMediaFiles().length === 0 ? (
+                            <div className="py-4">
+                              <p className="text-sm text-slate-600 mb-2">No media files available</p>
+                              <p className="text-xs text-slate-500">Upload images with your actions to include them in reports</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {/* Select All Button */}
+                              <button
+                                onClick={() => {
+                                  const allFiles = getMediaFiles();
+                                  const allSelected = allFiles.every((file: any) => selectedReportMedia.has(parseInt(file.id.split('-')[1])));
+
+                                  if (allSelected) {
+                                    setSelectedReportMedia(new Set());
+                                  } else {
+                                    const newSelected = new Set(allFiles.map((f: any, idx: number) => idx));
+                                    setSelectedReportMedia(newSelected);
+                                  }
+                                }}
+                                className="w-full px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-900 font-medium rounded-lg transition-colors text-sm"
+                              >
+                                {getMediaFiles().length > 0 && selectedReportMedia.size === getMediaFiles().length ? 'Deselect All' : 'Select All'}
+                              </button>
+
+                              {/* Files List */}
+                              <div className="space-y-2 max-h-80 overflow-y-auto">
+                                {getMediaFiles().map((doc: any, idx: number) => (
+                                  <div key={doc.id} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 transition-colors group">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedReportMedia.has(idx)}
+                                      onChange={(e) => {
+                                        const newSelected = new Set(selectedReportMedia);
+                                        if (e.target.checked) {
+                                          newSelected.add(idx);
+                                        } else {
+                                          newSelected.delete(idx);
+                                        }
+                                        setSelectedReportMedia(newSelected);
+                                      }}
+                                      className="w-4 h-4 rounded cursor-pointer"
+                                    />
+                                    {/* Image Thumbnail Preview - Clickable */}
+                                    {doc.data_url && (
+                                      <button
+                                        onClick={() => setPreviewImage(doc)}
+                                        className="w-12 h-12 flex-shrink-0 rounded bg-slate-100 overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all"
+                                        title="Click to preview"
+                                      >
+                                        <img
+                                          src={doc.data_url}
+                                          alt={doc.file_name}
+                                          className="w-full h-full object-cover cursor-pointer"
+                                          onError={(e) => {
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                          }}
+                                        />
+                                      </button>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-slate-900 truncate">{doc.file_name}</p>
+                                      <p className="text-xs text-slate-600">{doc.description}</p>
+                                      <p className="text-xs text-purple-600 font-medium">From Action</p>
+                                    </div>
+                                    <span className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded whitespace-nowrap flex-shrink-0">
+                                      IMAGE
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Summary */}
-                {getFilteredReportActions().length > 0 && (
+                {getTotalReportCount() > 0 && (
                   <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-sm text-green-900 font-medium">
-                      ✓ {getFilteredReportActions().length} action(s) selected for report
+                      ✓ {getTotalReportCount()} total items selected for report
                     </p>
                     <div className="text-xs text-green-800 mt-2 space-y-1">
-                      <p>• Total People Impacted: {getFilteredReportActions().reduce((sum, a) => sum + (a.people_impacted || 0), 0).toLocaleString()}</p>
-                      <p>• Total Contribution: MZN {getFilteredReportActions().reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}</p>
+                      {includeReportData.actions && (
+                        <>
+                          <p>• {getFilteredReportActions().length} Actions</p>
+                          <p>• Total People Impacted: {getFilteredReportActions().reduce((sum, a) => sum + (a.people_impacted || 0), 0).toLocaleString()}</p>
+                          <p>• Total Contribution: MZN {getFilteredReportActions().reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}</p>
+                        </>
+                      )}
+                      {includeReportData.media && selectedReportMedia.size > 0 && (
+                        <p>• {selectedReportMedia.size} Media Files</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Error State */}
+                {getTotalReportCount() === 0 && (
+                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+                    <AlertCircle size={18} className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">No data selected</p>
+                      <p className="text-xs text-yellow-700 mt-1">Select at least one data type above to generate a report</p>
                     </div>
                   </div>
                 )}
@@ -711,7 +888,7 @@ const MemberSection = () => {
                 <div className="flex gap-3">
                   <Button
                     onClick={handleGenerateReport}
-                    disabled={isGeneratingReport || !includeReportData.actions || getFilteredReportActions().length === 0}
+                    disabled={isGeneratingReport || getTotalReportCount() === 0}
                     className="flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 text-white"
                   >
                     <FileText size={18} className="mr-2" />
@@ -721,6 +898,84 @@ const MemberSection = () => {
               </div>
             )}
           </>
+        )}
+
+        {/* Image Preview Modal */}
+        {previewImage && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setPreviewImage(null)}
+          >
+            <div
+              className="bg-white rounded-lg shadow-xl max-w-2xl max-h-[90vh] overflow-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50 sticky top-0">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-slate-900">{previewImage.file_name}</h3>
+                  <p className="text-xs text-slate-600 mt-1">{previewImage.description}</p>
+                </div>
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="p-2 hover:bg-slate-200 rounded-lg transition-colors flex-shrink-0"
+                  title="Close preview"
+                >
+                  <X size={20} className="text-slate-600" />
+                </button>
+              </div>
+
+              {/* Modal Body - Image */}
+              <div className="p-6 flex items-center justify-center bg-slate-50">
+                <img
+                  src={previewImage.data_url}
+                  alt={previewImage.file_name}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '';
+                  }}
+                />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-between p-4 border-t border-slate-200 bg-slate-50">
+                <div className="flex gap-2">
+                  <span className="inline-block text-xs bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-medium">
+                    From Action
+                  </span>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer p-3 hover:bg-white rounded-lg">
+                  <input
+                    type="checkbox"
+                    checked={Array.from(selectedReportMedia).some((id) => {
+                      const allMedia = getMediaFiles();
+                      return allMedia[id as any]?.id === previewImage.id;
+                    })}
+                    onChange={(e) => {
+                      const allMedia = getMediaFiles();
+                      const idx = allMedia.findIndex((m: any) => m.id === previewImage.id);
+                      if (idx !== -1) {
+                        const newSelected = new Set(selectedReportMedia);
+                        if (e.target.checked) {
+                          newSelected.add(idx);
+                        } else {
+                          newSelected.delete(idx);
+                        }
+                        setSelectedReportMedia(newSelected);
+                      }
+                    }}
+                    className="w-4 h-4 rounded cursor-pointer"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    {Array.from(selectedReportMedia).some((id) => {
+                      const allMedia = getMediaFiles();
+                      return allMedia[id as any]?.id === previewImage.id;
+                    }) ? 'Included in Report' : 'Include in Report'}
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
