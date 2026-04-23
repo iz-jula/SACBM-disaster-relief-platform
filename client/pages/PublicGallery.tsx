@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
+import ImpactDetailModal from "@/components/ImpactDetailModal";
 import { getAchievements } from "@/services/achievementsService";
 
 const PublicGallery = () => {
@@ -21,6 +22,7 @@ const PublicGallery = () => {
   const [sortBy, setSortBy] = useState<string>("recent");
   const [categories, setCategories] = useState<string[]>([]);
   const [companies, setCompanies] = useState<string[]>([]);
+  const [selectedImpact, setSelectedImpact] = useState<any>(null);
 
   useEffect(() => {
     const loadAchievements = async () => {
@@ -211,7 +213,8 @@ const PublicGallery = () => {
               {filteredAchievements.map((achievement) => (
                 <Card
                   key={achievement.id}
-                  className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all flex flex-col"
+                  className="overflow-hidden border-0 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all flex flex-col cursor-pointer"
+                  onClick={() => setSelectedImpact(achievement)}
                 >
                   {/* Image Container */}
                   {achievement.media && achievement.media.length > 0 ? (
@@ -322,8 +325,16 @@ const PublicGallery = () => {
         )}
       </div>
 
+      {/* Impact Detail Modal */}
+      {selectedImpact && (
+        <ImpactDetailModal
+          impact={selectedImpact}
+          onClose={() => setSelectedImpact(null)}
+        />
+      )}
+
       {/* Footer */}
-      <PublicFooter />
+      {!selectedImpact && <PublicFooter />}
     </div>
   );
 };
