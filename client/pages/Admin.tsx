@@ -12,12 +12,14 @@ import {
   Trash2,
   Edit2,
   X,
+  Upload,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import DocumentUploadForm from "@/components/DocumentUploadForm";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
+import { getAchievements } from "@/services/achievementsService";
 import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
 
@@ -45,7 +47,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities"
+    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities" | "members"
   >("dashboard");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -92,6 +94,19 @@ export default function Admin() {
   const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [ingdActive, setIngdActive] = useState(true);
   const [isUpdatingIngd, setIsUpdatingIngd] = useState(false);
+
+  // Members management state
+  interface MemberData {
+    company: string;
+    sector: string;
+    description: string;
+    image?: string;
+  }
+  const [members, setMembers] = useState<MemberData[]>([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [editingMember, setEditingMember] = useState<MemberData | null>(null);
+  const [memberImageFile, setMemberImageFile] = useState<File | null>(null);
+  const [isSavingMember, setIsSavingMember] = useState(false);
 
   // Load INGD active state from database
   useEffect(() => {
@@ -153,6 +168,93 @@ export default function Admin() {
       loadAllDocuments();
     }
   }, [activeTab]);
+
+  // Load members when members tab is activated
+  useEffect(() => {
+    if (activeTab === "members") {
+      loadMembers();
+    }
+  }, [activeTab]);
+
+  const loadMembers = async () => {
+    setIsLoadingMembers(true);
+    try {
+      const achievements = await getAchievements();
+
+      // Group by company and get unique members with their aggregated data
+      const memberMap = new Map<string, MemberData>();
+
+      achievements.forEach((achievement: any) => {
+        const company = achievement.company_name || "Unknown Company";
+
+        if (!memberMap.has(company)) {
+          memberMap.set(company, {
+            company,
+            sector: "",
+            description: "",
+            image: achievement.media && achievement.media.length > 0 ? (Array.isArray(achievement.media) ? achievement.media[0] : achievement.media) : undefined,
+          });
+        }
+      });
+
+      const membersList = Array.from(memberMap.values());
+      setMembers(membersList);
+    } catch (error) {
+      console.error("Error loading members:", error);
+      setMembers([]);
+    } finally {
+      setIsLoadingMembers(false);
+    }
+  };
+
+  const handleStartEditMember = (member: MemberData) => {
+    setEditingMember({ ...member });
+    setMemberImageFile(null);
+  };
+
+  const handleSaveMember = async () => {
+    if (!editingMember) return;
+
+    setIsSavingMember(true);
+    try {
+      // In a real app, you would save this to a database
+      // For now, we'll just update the local state
+      setMembers(members.map(m =>
+        m.company === editingMember.company ? editingMember : m
+      ));
+
+      setEditingMember(null);
+      setMemberImageFile(null);
+      alert("Member updated successfully!");
+    } catch (error) {
+      console.error("Error saving member:", error);
+      alert("Error saving member");
+    } finally {
+      setIsSavingMember(false);
+    }
+  };
+
+  const handleCancelEditMember = () => {
+    setEditingMember(null);
+    setMemberImageFile(null);
+  };
+
+  const handleMemberImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMemberImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (editingMember && event.target?.result) {
+          setEditingMember({
+            ...editingMember,
+            image: event.target.result as string,
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const loadAllRequests = async () => {
     setIsLoadingRequests(true);
@@ -508,6 +610,7 @@ export default function Admin() {
               { id: "dashboard", label: "Dashboard", shortLabel: "Dashboard", icon: BarChart3 },
               { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
               { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
+              { id: "members", label: "Members", shortLabel: "Members", icon: Users },
               { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
               { id: "users", label: "Users", shortLabel: "Users", icon: Users },
               { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
@@ -1530,6 +1633,187 @@ export default function Admin() {
             onDelete={handleDeleteDocument}
             onEditType={handleEditDocumentType}
           />
+        )}
+
+        {/* Members Tab */}
+        {activeTab === "members" && (
+          <div className="space-y-6">
+            {isLoadingMembers ? (
+              <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                Loading members...
+              </div>
+            ) : members.length === 0 ? (
+              <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                <p>No members with submitted actions found.</p>
+                <p className="text-sm mt-2">Members will appear here once they submit impact actions.</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {members.map((member) => (
+                    <div key={member.company} className="bg-white rounded-xl shadow hover:shadow-lg transition-shadow">
+                      {/* Member Image */}
+                      {member.image ? (
+                        <div className="relative h-48 bg-slate-100 overflow-hidden rounded-t-xl">
+                          <img
+                            src={member.image}
+                            alt={member.company}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-48 bg-gradient-to-br from-slate-100 to-slate-200 rounded-t-xl flex items-center justify-center">
+                          <p className="text-slate-400 text-sm">No image</p>
+                        </div>
+                      )}
+
+                      {/* Member Info */}
+                      <div className="p-4 space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-slate-900">{member.company}</h3>
+                          <p className="text-xs text-slate-500 mt-1">{member.sector || "—"}</p>
+                        </div>
+                        <p className="text-sm text-slate-600 line-clamp-2">{member.description || "No description"}</p>
+                        <button
+                          onClick={() => handleStartEditMember(member)}
+                          className="w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Edit2 size={14} />
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Edit Member Modal */}
+            {editingMember && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                  {/* Modal Header */}
+                  <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-slate-900">Edit {editingMember.company}</h2>
+                    <button
+                      onClick={handleCancelEditMember}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  {/* Modal Content */}
+                  <div className="p-6 space-y-6">
+                    {/* Company Name (Read-only) */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Company Name
+                      </label>
+                      <input
+                        type="text"
+                        value={editingMember.company}
+                        disabled
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Sector */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Sector
+                      </label>
+                      <input
+                        type="text"
+                        value={editingMember.sector}
+                        onChange={(e) =>
+                          setEditingMember({
+                            ...editingMember,
+                            sector: e.target.value,
+                          })
+                        }
+                        placeholder="e.g., Energy, Mining, Agriculture, Financial Services"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={editingMember.description}
+                        onChange={(e) =>
+                          setEditingMember({
+                            ...editingMember,
+                            description: e.target.value,
+                          })
+                        }
+                        placeholder="Enter company description..."
+                        rows={4}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Cover Image */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Cover Image
+                      </label>
+                      <div className="space-y-3">
+                        {editingMember.image && (
+                          <div className="relative h-40 rounded-lg overflow-hidden bg-slate-100">
+                            <img
+                              src={editingMember.image}
+                              alt={editingMember.company}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer hover:border-slate-400 transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleMemberImageSelect}
+                            className="hidden"
+                            id={`image-input-${editingMember.company}`}
+                          />
+                          <label
+                            htmlFor={`image-input-${editingMember.company}`}
+                            className="cursor-pointer flex flex-col items-center gap-2"
+                          >
+                            <Upload size={24} className="text-slate-400" />
+                            <span className="text-sm font-medium text-slate-600">
+                              Click to upload new image
+                            </span>
+                            <span className="text-xs text-slate-500">PNG, JPG up to 10MB</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="border-t border-slate-200 p-6 flex gap-3">
+                    <button
+                      onClick={handleCancelEditMember}
+                      className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveMember}
+                      disabled={isSavingMember}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      {isSavingMember ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
       </div>
