@@ -55,7 +55,13 @@ const About = () => {
               We believe that businesses have a responsibility to give back, and that collective action amplifies our ability to help those in need.
             </p>
           </div>
-          <div className="relative h-96 rounded-lg bg-gradient-to-br from-emerald-100 to-slate-100" />
+          <div className="relative h-96 rounded-lg overflow-hidden">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F1856f84030a242f78ae906b091ce2e3e?format=webp&width=800&height=1200"
+              alt="Community members working together"
+              className="h-full w-full object-cover"
+            />
+          </div>
         </div>
       </section>
 

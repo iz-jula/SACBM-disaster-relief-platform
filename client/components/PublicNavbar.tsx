@@ -25,10 +25,6 @@ const PublicNavbar = () => {
               alt="SACBM Logo"
               className="h-10 w-auto"
             />
-            <div className="hidden sm:block">
-              <p className="text-sm font-bold text-foreground">SACBM</p>
-              <p className="text-xs text-muted-foreground">Social Responsibility</p>
-            </div>
           </Link>
 
           {/* Desktop Navigation */}
