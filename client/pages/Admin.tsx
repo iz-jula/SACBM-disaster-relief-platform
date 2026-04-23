@@ -20,8 +20,8 @@ import DocumentUploadForm from "@/components/DocumentUploadForm";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
 import { getAchievements } from "@/services/achievementsService";
-import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting } from "@/services/supabaseService";
-import type { RelieRequest, IngdRequest, IngdDocument } from "@/services/supabaseService";
+import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember } from "@/services/supabaseService";
+import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -109,12 +109,6 @@ export default function Admin() {
   const [isSavingMember, setIsSavingMember] = useState(false);
 
   // Carousel management state
-  interface CarouselImage {
-    id: string;
-    url: string;
-    title: string;
-    description: string;
-  }
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [isLoadingCarousel, setIsLoadingCarousel] = useState(false);
   const [newCarouselUrl, setNewCarouselUrl] = useState("");
@@ -122,12 +116,6 @@ export default function Admin() {
   const [newCarouselDescription, setNewCarouselDescription] = useState("");
 
   // Member access management state
-  interface ApprovedMember {
-    id: string;
-    email: string;
-    name: string;
-    company: string;
-  }
   const [approvedMembers, setApprovedMembers] = useState<ApprovedMember[]>([]);
   const [isLoadingApprovedMembers, setIsLoadingApprovedMembers] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState("");
@@ -312,10 +300,8 @@ export default function Admin() {
   const loadCarouselImages = async () => {
     setIsLoadingCarousel(true);
     try {
-      const stored = localStorage.getItem("carouselImages");
-      if (stored) {
-        setCarouselImages(JSON.parse(stored));
-      }
+      const images = await getCarouselImages();
+      setCarouselImages(images);
     } catch (error) {
       console.error("Error loading carousel images:", error);
     } finally {
@@ -323,44 +309,58 @@ export default function Admin() {
     }
   };
 
-  const handleAddCarouselImage = () => {
+  const handleAddCarouselImage = async () => {
     if (!newCarouselUrl || !newCarouselTitle) {
       alert("Please fill in image URL and title");
       return;
     }
 
-    const newImage: CarouselImage = {
-      id: Date.now().toString(),
-      url: newCarouselUrl,
-      title: newCarouselTitle,
-      description: newCarouselDescription,
-    };
+    try {
+      const newImage = await createCarouselImage({
+        url: newCarouselUrl,
+        title: newCarouselTitle,
+        description: newCarouselDescription,
+        display_order: carouselImages.length,
+      });
 
-    const updatedImages = [...carouselImages, newImage];
-    setCarouselImages(updatedImages);
-    localStorage.setItem("carouselImages", JSON.stringify(updatedImages));
-
-    setNewCarouselUrl("");
-    setNewCarouselTitle("");
-    setNewCarouselDescription("");
-    alert("Image added successfully!");
+      if (newImage) {
+        setCarouselImages([...carouselImages, newImage]);
+        setNewCarouselUrl("");
+        setNewCarouselTitle("");
+        setNewCarouselDescription("");
+        alert("Image added successfully!");
+      } else {
+        alert("Failed to add image");
+      }
+    } catch (error) {
+      console.error("Error adding carousel image:", error);
+      alert("Error adding image");
+    }
   };
 
-  const handleDeleteCarouselImage = (id: string) => {
+  const handleDeleteCarouselImage = async (id: string) => {
     if (confirm("Are you sure you want to delete this image?")) {
-      const updatedImages = carouselImages.filter(img => img.id !== id);
-      setCarouselImages(updatedImages);
-      localStorage.setItem("carouselImages", JSON.stringify(updatedImages));
+      try {
+        const success = await deleteCarouselImage(id);
+        if (success) {
+          const updatedImages = carouselImages.filter(img => img.id !== id);
+          setCarouselImages(updatedImages);
+          alert("Image deleted successfully!");
+        } else {
+          alert("Failed to delete image");
+        }
+      } catch (error) {
+        console.error("Error deleting carousel image:", error);
+        alert("Error deleting image");
+      }
     }
   };
 
   const loadApprovedMembers = async () => {
     setIsLoadingApprovedMembers(true);
     try {
-      const stored = localStorage.getItem("approvedMembers");
-      if (stored) {
-        setApprovedMembers(JSON.parse(stored));
-      }
+      const members = await getApprovedMembers();
+      setApprovedMembers(members);
     } catch (error) {
       console.error("Error loading approved members:", error);
     } finally {
@@ -368,34 +368,49 @@ export default function Admin() {
     }
   };
 
-  const handleAddApprovedMember = () => {
+  const handleAddApprovedMember = async () => {
     if (!newMemberEmail || !newMemberName || !newMemberCompany) {
       alert("Please fill in all fields");
       return;
     }
 
-    const newMember: ApprovedMember = {
-      id: Date.now().toString(),
-      email: newMemberEmail,
-      name: newMemberName,
-      company: newMemberCompany,
-    };
+    try {
+      const newMember = await createApprovedMember({
+        email: newMemberEmail,
+        full_name: newMemberName,
+        company: newMemberCompany,
+      });
 
-    const updatedMembers = [...approvedMembers, newMember];
-    setApprovedMembers(updatedMembers);
-    localStorage.setItem("approvedMembers", JSON.stringify(updatedMembers));
-
-    setNewMemberEmail("");
-    setNewMemberName("");
-    setNewMemberCompany("");
-    alert("Member approved successfully!");
+      if (newMember) {
+        setApprovedMembers([...approvedMembers, newMember]);
+        setNewMemberEmail("");
+        setNewMemberName("");
+        setNewMemberCompany("");
+        alert("Member approved successfully!");
+      } else {
+        alert("Failed to add member");
+      }
+    } catch (error) {
+      console.error("Error adding approved member:", error);
+      alert("Error adding member");
+    }
   };
 
-  const handleDeleteApprovedMember = (id: string) => {
+  const handleDeleteApprovedMember = async (id: string) => {
     if (confirm("Are you sure you want to remove this member's access?")) {
-      const updatedMembers = approvedMembers.filter(m => m.id !== id);
-      setApprovedMembers(updatedMembers);
-      localStorage.setItem("approvedMembers", JSON.stringify(updatedMembers));
+      try {
+        const success = await deleteApprovedMember(id);
+        if (success) {
+          const updatedMembers = approvedMembers.filter(m => m.id !== id);
+          setApprovedMembers(updatedMembers);
+          alert("Member access removed successfully!");
+        } else {
+          alert("Failed to remove member");
+        }
+      } catch (error) {
+        console.error("Error removing approved member:", error);
+        alert("Error removing member");
+      }
     }
   };
 
@@ -1781,7 +1796,7 @@ export default function Admin() {
                       {approvedMembers.map((member) => (
                         <tr key={member.id} className="border-b border-slate-200 hover:bg-slate-50">
                           <td className="px-4 py-3 text-slate-600">{member.email}</td>
-                          <td className="px-4 py-3 text-slate-600">{member.name}</td>
+                          <td className="px-4 py-3 text-slate-600">{member.full_name}</td>
                           <td className="px-4 py-3 text-slate-600">{member.company}</td>
                           <td className="px-4 py-3 text-center">
                             <button

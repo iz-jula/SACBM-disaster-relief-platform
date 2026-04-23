@@ -5,28 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
-
-interface CarouselImage {
-  id: string;
-  url: string;
-  title: string;
-  description: string;
-}
+import { getCarouselImages, CarouselImage } from "@/services/supabaseService";
 
 const Home = () => {
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    // Load carousel images from localStorage
-    const stored = localStorage.getItem("carouselImages");
-    if (stored) {
+    // Load carousel images from Supabase
+    const loadImages = async () => {
       try {
-        setCarouselImages(JSON.parse(stored));
+        const images = await getCarouselImages();
+        setCarouselImages(images);
       } catch (error) {
         console.error("Error loading carousel images:", error);
       }
-    }
+    };
+    loadImages();
   }, []);
 
   const goToPreviousImage = () => {
