@@ -754,77 +754,86 @@ export default function Admin() {
         {activeTab === "menu" && (
           <div className="space-y-12">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
-              <p className="text-slate-600">Manage your website and user access</p>
+              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900 mb-3">Admin Dashboard</h1>
+              <p className="text-base text-slate-600 max-w-2xl">Organize and manage your website, members, and content</p>
             </div>
 
             {/* Edit Website Section */}
             <div>
-              <h2 className="text-xl font-semibold text-slate-900 mb-4 tracking-tight">Edit Website</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Edit Website</h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <button
-                  onClick={() => setActiveTab("ingd")}
-                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                  onClick={() => setActiveTab("members")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">📊</div>
-                  <h3 className="text-base font-semibold text-slate-900">INGD Management</h3>
-                  <p className="text-xs text-slate-500 mt-1">Relief requests</p>
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🏢</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Members</h3>
+                  <p className="text-xs text-slate-500 mt-1">Company info</p>
                 </button>
 
                 <button
                   onClick={() => setActiveTab("carousel")}
-                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🎨</div>
-                  <h3 className="text-base font-semibold text-slate-900">Home Carousel</h3>
-                  <p className="text-xs text-slate-500 mt-1">Carousel images</p>
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📸</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Uploaded Media</h3>
+                  <p className="text-xs text-slate-500 mt-1">Home images</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("ingd")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📊</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Relief Data</h3>
+                  <p className="text-xs text-slate-500 mt-1">INGD requests</p>
                 </button>
 
                 <button
                   onClick={() => setActiveTab("documents")}
-                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">📄</div>
-                  <h3 className="text-base font-semibold text-slate-900">Documents</h3>
-                  <p className="text-xs text-slate-500 mt-1">Upload docs</p>
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📄</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Documents</h3>
+                  <p className="text-xs text-slate-500 mt-1">Files & docs</p>
                 </button>
               </div>
             </div>
 
             {/* User Access Section */}
             <div>
-              <h2 className="text-xl font-semibold text-slate-900 mb-4 tracking-tight">User Access</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">User Access</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <button
                   onClick={() => setActiveTab("member-access")}
-                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👥</div>
-                  <h3 className="text-base font-semibold text-slate-900">Member Access</h3>
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🎟️</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Member Access</h3>
                   <p className="text-xs text-slate-500 mt-1">Approve members</p>
                 </button>
 
                 <button
                   onClick={() => setActiveTab("users")}
-                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👤</div>
-                  <h3 className="text-base font-semibold text-slate-900">Users</h3>
-                  <p className="text-xs text-slate-500 mt-1">Admin users</p>
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🔐</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Admin Users</h3>
+                  <p className="text-xs text-slate-500 mt-1">Manage team</p>
                 </button>
               </div>
             </div>
 
             {/* Connectivity Section */}
             <div>
-              <h2 className="text-xl font-semibold text-slate-900 mb-4 tracking-tight">Connectivity</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Connectivity</h2>
               <button
                 onClick={() => setActiveTab("connectivity")}
-                className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group max-w-sm"
+                className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group max-w-xs"
               >
-                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">⚙️</div>
-                <h3 className="text-base font-semibold text-slate-900">Settings</h3>
-                <p className="text-xs text-slate-500 mt-1">System configuration</p>
+                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">⚙️</div>
+                <h3 className="text-sm font-semibold text-slate-900">Settings</h3>
+                <p className="text-xs text-slate-500 mt-1">System config</p>
               </button>
             </div>
 
