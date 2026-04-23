@@ -717,65 +717,38 @@ export default function Admin() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
+            {activeTab !== "menu" && (
+              <button
+                onClick={() => setActiveTab("menu")}
+                className="text-sm text-slate-600 hover:text-slate-900 mb-3 flex items-center gap-1 transition-colors"
+              >
+                ← Back to Dashboard
+              </button>
+            )}
             <h1 className="text-3xl font-bold text-slate-900">
-              Admin Dashboard
+              {activeTab === "menu" ? "Admin Dashboard" : "Manage Settings"}
             </h1>
-            <p className="text-slate-600 mt-1">
-              Manage SABCM disaster relief operations
-            </p>
-            {user && (
+            {activeTab === "menu" && (
+              <p className="text-slate-600 mt-1">
+                Organize and manage your website
+              </p>
+            )}
+            {user && activeTab === "menu" && (
               <p className="text-xs text-slate-500 mt-2">
                 Logged in as: {user.name}
               </p>
             )}
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              ← Back
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              <LogOut size={16} />
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-slate-200 bg-white overflow-x-auto">
-          <div className="flex gap-1 sm:gap-2 min-w-min">
-            {[
-              { id: "menu", label: "Home", shortLabel: "Home", icon: BarChart3 },
-              { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
-              { id: "carousel", label: "Home Carousel", shortLabel: "Carousel", icon: Download },
-              { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
-              { id: "member-access", label: "Member Access", shortLabel: "Access", icon: Users },
-              { id: "users", label: "Users", shortLabel: "Users", icon: Users },
-              { id: "connectivity", label: "Connectivity", shortLabel: "Settings", icon: Settings },
-              { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                title={tab.label}
-                className={`px-2 sm:px-4 py-4 font-medium flex items-center gap-1 sm:gap-2 border-b-2 transition-all whitespace-nowrap flex-shrink-0 ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                <tab.icon size={18} />
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden text-xs">{tab.shortLabel}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Navigation removed for minimalist design - use sidebar buttons to navigate */}
 
         {/* Menu/Home Tab */}
         {activeTab === "menu" && (
@@ -787,71 +760,71 @@ export default function Admin() {
 
             {/* Edit Website Section */}
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Edit Website</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-4 tracking-tight">Edit Website</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
                   onClick={() => setActiveTab("ingd")}
-                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-4xl font-bold text-blue-600 mb-3">📊</div>
-                  <h3 className="text-lg font-semibold text-slate-900">INGD Management</h3>
-                  <p className="text-sm text-slate-600 mt-2">Manage relief requests and data</p>
+                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">📊</div>
+                  <h3 className="text-base font-semibold text-slate-900">INGD Management</h3>
+                  <p className="text-xs text-slate-500 mt-1">Relief requests</p>
                 </button>
 
                 <button
                   onClick={() => setActiveTab("carousel")}
-                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-4xl font-bold text-purple-600 mb-3">🎨</div>
-                  <h3 className="text-lg font-semibold text-slate-900">Home Carousel</h3>
-                  <p className="text-sm text-slate-600 mt-2">Add and manage carousel images</p>
+                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">🎨</div>
+                  <h3 className="text-base font-semibold text-slate-900">Home Carousel</h3>
+                  <p className="text-xs text-slate-500 mt-1">Carousel images</p>
                 </button>
 
                 <button
                   onClick={() => setActiveTab("documents")}
-                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-4xl font-bold text-green-600 mb-3">📄</div>
-                  <h3 className="text-lg font-semibold text-slate-900">Documents</h3>
-                  <p className="text-sm text-slate-600 mt-2">Upload and manage documents</p>
+                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">📄</div>
+                  <h3 className="text-base font-semibold text-slate-900">Documents</h3>
+                  <p className="text-xs text-slate-500 mt-1">Upload docs</p>
                 </button>
               </div>
             </div>
 
             {/* User Access Section */}
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">User Access</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-4 tracking-tight">User Access</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   onClick={() => setActiveTab("member-access")}
-                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-4xl font-bold text-orange-600 mb-3">👥</div>
-                  <h3 className="text-lg font-semibold text-slate-900">Member Access</h3>
-                  <p className="text-sm text-slate-600 mt-2">Approve and manage member access</p>
+                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👥</div>
+                  <h3 className="text-base font-semibold text-slate-900">Member Access</h3>
+                  <p className="text-xs text-slate-500 mt-1">Approve members</p>
                 </button>
 
                 <button
                   onClick={() => setActiveTab("users")}
-                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-4xl font-bold text-red-600 mb-3">👤</div>
-                  <h3 className="text-lg font-semibold text-slate-900">Users</h3>
-                  <p className="text-sm text-slate-600 mt-2">Manage admin users and permissions</p>
+                  <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">👤</div>
+                  <h3 className="text-base font-semibold text-slate-900">Users</h3>
+                  <p className="text-xs text-slate-500 mt-1">Admin users</p>
                 </button>
               </div>
             </div>
 
             {/* Connectivity Section */}
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Connectivity</h2>
+              <h2 className="text-xl font-semibold text-slate-900 mb-4 tracking-tight">Connectivity</h2>
               <button
                 onClick={() => setActiveTab("connectivity")}
-                className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all max-w-md"
+                className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group max-w-sm"
               >
-                <div className="text-4xl font-bold text-indigo-600 mb-3">⚙️</div>
-                <h3 className="text-lg font-semibold text-slate-900">Settings</h3>
-                <p className="text-sm text-slate-600 mt-2">Configure system settings and integrations</p>
+                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">⚙️</div>
+                <h3 className="text-base font-semibold text-slate-900">Settings</h3>
+                <p className="text-xs text-slate-500 mt-1">System configuration</p>
               </button>
             </div>
 
