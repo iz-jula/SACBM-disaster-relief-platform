@@ -46,10 +46,10 @@ const PublicNavbar = () => {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
-            <Link to="/login">
-              <Button variant="outline" size="sm" className="hidden sm:inline-flex">
+            <Link to="/members">
+              <Button size="sm" className="hidden sm:inline-flex bg-emerald-700 hover:bg-emerald-800 text-white">
                 <LogIn className="h-4 w-4 mr-2" />
-                Member Login
+                Member Section
               </Button>
             </Link>
 
@@ -82,11 +82,11 @@ const PublicNavbar = () => {
                 </Link>
               ))}
               <Link
-                to="/login"
-                className="block rounded-lg px-3 py-2 text-base font-medium text-orange-600 hover:bg-orange-50"
+                to="/members"
+                className="block rounded-lg px-3 py-2 text-base font-medium text-emerald-700 hover:bg-emerald-50"
                 onClick={() => setIsOpen(false)}
               >
-                Member Login
+                Member Section
               </Link>
             </div>
           </div>

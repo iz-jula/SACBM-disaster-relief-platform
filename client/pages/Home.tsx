@@ -35,21 +35,32 @@ const Home = () => {
     <div className="min-h-screen bg-white">
       <PublicNavbar />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-32 lg:px-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="mx-auto max-w-4xl text-center">
+      {/* Hero Section with Background Image */}
+      <section className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-32 lg:px-8">
+        {/* Background image overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.pexels.com/photos/7156187/pexels-photo-7156187.jpeg"
+            alt="Volunteers preparing donation boxes"
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/75 to-slate-900/80" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
             Making a Difference<br />
             <span className="text-yellow-400">
               Together
             </span>
           </h1>
-          <p className="mt-6 text-lg text-slate-200 sm:text-xl">
+          <p className="mt-6 text-lg text-slate-100 sm:text-xl">
             Discover how South African Chamber members are creating meaningful social impact across Mozambique through disaster relief, humanitarian aid, and community support.
           </p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row justify-center sm:gap-6">
             <Link to="/gallery">
-              <Button size="lg" className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800">
+              <Button size="lg" className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white">
                 Explore Actions
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -61,10 +72,6 @@ const Home = () => {
             </Link>
           </div>
         </div>
-
-        {/* Decorative elements */}
-        <div className="absolute -top-40 right-0 h-80 w-80 rounded-full bg-emerald-500 opacity-10 blur-3xl" />
-        <div className="absolute -bottom-40 left-0 h-80 w-80 rounded-full bg-yellow-400 opacity-10 blur-3xl" />
       </section>
 
       {/* Impact Metrics Section */}
@@ -205,9 +212,9 @@ const Home = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/login">
+            <Link to="/members">
               <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-slate-900">
-                Member Portal
+                Access Member Section
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
