@@ -21,16 +21,17 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 34 97% 53%;
+    /* Chamber brand colors: green (#007A4D) and gold (#FFB712) */
+    --primary: 160 100% 24%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 199 100% 50%;
+    --secondary: 45 100% 53%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 199 100% 45%;
+    --accent: 160 100% 24%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -38,7 +39,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 34 97% 53%;
+    --ring: 160 100% 24%;
 
     --radius: 0.75rem;
 

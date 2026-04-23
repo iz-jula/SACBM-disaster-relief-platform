@@ -28,17 +28,17 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-orange-50">
+    <div className="min-h-screen bg-white">
       <PublicNavbar />
 
       {/* Hero Section */}
-      <div className="border-b bg-white">
+      <div className="border-b bg-gradient-to-r from-slate-50 to-white">
         <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <h1 className="text-4xl font-bold text-foreground sm:text-5xl">
-            About Our <span className="text-orange-600">Mission</span>
+          <h1 className="text-4xl font-bold text-slate-900 sm:text-5xl">
+            About Our <span className="text-emerald-700">Mission</span>
           </h1>
-          <p className="mt-6 text-xl text-muted-foreground">
-            The Chamber of Commerce is dedicated to fostering social responsibility across our business community and making lasting positive impact through disaster relief, humanitarian aid, and community support.
+          <p className="mt-6 text-xl text-slate-600">
+            The South African Chamber of Business in Mozambique is dedicated to fostering social responsibility across our business community and making lasting positive impact through disaster relief, humanitarian aid, and community support.
           </p>
         </div>
       </div>
@@ -47,38 +47,38 @@ const About = () => {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
           <div>
-            <h2 className="text-3xl font-bold text-foreground">Our Mission</h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <h2 className="text-3xl font-bold text-slate-900">Our Mission</h2>
+            <p className="mt-4 text-lg text-slate-600">
               To unite our chamber members in meaningful social responsibility initiatives that create measurable, positive impact on individuals and communities affected by disasters and humanitarian challenges.
             </p>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-lg text-slate-600">
               We believe that businesses have a responsibility to give back, and that collective action amplifies our ability to help those in need.
             </p>
           </div>
-          <div className="relative h-96 rounded-lg bg-gradient-to-br from-orange-200 to-blue-200 opacity-70" />
+          <div className="relative h-96 rounded-lg bg-gradient-to-br from-emerald-100 to-slate-100" />
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 bg-slate-50">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Our Values</h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">Our Values</h2>
+          <p className="mt-4 text-lg text-slate-600">
             These principles guide everything we do
           </p>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {values.map((value) => (
-            <Card key={value.title} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+            <Card key={value.title} className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white">
               <CardHeader>
-                <div className="mb-4 inline-flex rounded-lg bg-orange-100 p-3">
-                  <value.icon className="h-6 w-6 text-orange-600" />
+                <div className="mb-4 inline-flex rounded-lg bg-emerald-100 p-3">
+                  <value.icon className="h-6 w-6 text-emerald-700" />
                 </div>
-                <CardTitle className="text-xl">{value.title}</CardTitle>
+                <CardTitle className="text-xl text-slate-900">{value.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{value.description}</p>
+                <p className="text-slate-600">{value.description}</p>
               </CardContent>
             </Card>
           ))}
@@ -88,7 +88,7 @@ const About = () => {
       {/* How We Work Section */}
       <section className="border-t bg-white">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">How We Work</h2>
+          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">How We Work</h2>
           <div className="mt-10 space-y-8">
             {[
               {
@@ -117,12 +117,12 @@ const About = () => {
               },
             ].map((step) => (
               <div key={step.number} className="flex gap-8">
-                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-orange-100">
-                  <span className="text-2xl font-bold text-orange-600">{step.number}</span>
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+                  <span className="text-2xl font-bold text-emerald-700">{step.number}</span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-foreground">{step.title}</h3>
-                  <p className="mt-2 text-muted-foreground">{step.description}</p>
+                  <h3 className="text-xl font-semibold text-slate-900">{step.title}</h3>
+                  <p className="mt-2 text-slate-600">{step.description}</p>
                 </div>
               </div>
             ))}

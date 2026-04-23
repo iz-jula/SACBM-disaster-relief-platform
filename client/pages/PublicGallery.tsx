@@ -53,15 +53,15 @@ const PublicGallery = () => {
   }, [searchTerm, selectedCategory, achievements]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-orange-50">
+    <div className="min-h-screen bg-white">
       <PublicNavbar />
 
       {/* Header */}
-      <div className="border-b bg-white">
+      <div className="border-b bg-gradient-to-r from-slate-50 to-white">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-          <h1 className="text-4xl font-bold text-foreground">Actions Gallery</h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Browse member actions making a real difference in our community
+          <h1 className="text-4xl font-bold text-slate-900">Actions Gallery</h1>
+          <p className="mt-4 text-lg text-slate-600">
+            Browse member actions making a real difference across Mozambique
           </p>
         </div>
       </div>
@@ -105,38 +105,38 @@ const PublicGallery = () => {
           </div>
         ) : filteredAchievements.length > 0 ? (
           <>
-            <p className="mb-8 text-sm text-muted-foreground">
+            <p className="mb-8 text-sm text-slate-600">
               Showing {filteredAchievements.length} action{filteredAchievements.length !== 1 ? "s" : ""}
             </p>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredAchievements.map((achievement) => (
                 <Card
                   key={achievement.id}
-                  className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all hover:scale-105"
+                  className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all"
                 >
                   {/* Image */}
                   {achievement.media && achievement.media.length > 0 ? (
-                    <div className="relative h-48 w-full overflow-hidden bg-muted">
+                    <div className="relative h-48 w-full overflow-hidden bg-slate-200">
                       <img
                         src={achievement.media[0]}
                         alt={achievement.title}
                         className="h-full w-full object-cover"
                       />
                       {achievement.category && (
-                        <div className="absolute top-4 right-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-medium text-white">
+                        <div className="absolute top-4 right-4 rounded-full bg-emerald-700 px-3 py-1 text-xs font-medium text-white">
                           {achievement.category}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="h-48 w-full bg-gradient-to-br from-orange-100 to-blue-100 flex items-center justify-center">
-                      <span className="text-sm font-medium text-muted-foreground">No image</span>
+                    <div className="h-48 w-full bg-gradient-to-br from-emerald-100 to-slate-100 flex items-center justify-center">
+                      <span className="text-sm font-medium text-slate-600">No image</span>
                     </div>
                   )}
 
                   <CardHeader>
-                    <CardTitle className="line-clamp-2 text-lg">{achievement.title}</CardTitle>
-                    <CardDescription className="line-clamp-3">
+                    <CardTitle className="line-clamp-2 text-lg text-slate-900">{achievement.title}</CardTitle>
+                    <CardDescription className="line-clamp-3 text-slate-600">
                       {achievement.description}
                     </CardDescription>
                   </CardHeader>
@@ -144,19 +144,19 @@ const PublicGallery = () => {
                   <CardContent>
                     <div className="space-y-3">
                       {achievement.peopleImpacted && (
-                        <div className="flex items-center text-sm text-muted-foreground">
+                        <div className="flex items-center text-sm text-slate-600">
                           <Users className="mr-2 h-4 w-4" />
                           <span>{achievement.peopleImpacted} people impacted</span>
                         </div>
                       )}
                       {achievement.date && (
-                        <div className="flex items-center text-sm text-muted-foreground">
+                        <div className="flex items-center text-sm text-slate-600">
                           <Calendar className="mr-2 h-4 w-4" />
                           <span>{new Date(achievement.date).toLocaleDateString()}</span>
                         </div>
                       )}
                       {achievement.location && (
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-slate-600">
                           📍 {achievement.location}
                         </div>
                       )}
@@ -167,8 +167,8 @@ const PublicGallery = () => {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
-            <p className="text-muted-foreground">No actions found matching your filters</p>
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-12">
+            <p className="text-slate-600">No actions found matching your filters</p>
           </div>
         )}
       </div>

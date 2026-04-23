@@ -15,16 +15,20 @@ const PublicNavbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600" />
-            <span className="hidden font-semibold text-foreground sm:inline">
-              Chamber Social<br className="hidden sm:block" /> Responsibility
-            </span>
-            <span className="sm:hidden font-semibold text-foreground">CSR</span>
+          <Link to="/" className="flex items-center space-x-3">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
+              alt="SACBM Logo"
+              className="h-10 w-auto"
+            />
+            <div className="hidden sm:block">
+              <p className="text-sm font-bold text-foreground">SACBM</p>
+              <p className="text-xs text-muted-foreground">Social Responsibility</p>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
