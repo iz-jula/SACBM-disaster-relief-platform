@@ -73,28 +73,27 @@ const OurMembers = () => {
         // Map company names to sectors and descriptions
         const sectorMap: Record<string, { sector: string; description: string; image?: string }> = {
           "South32": {
-            sector: "Mining & Natural Resources",
+            sector: "Mining",
             description: "An Australian mining company producing nine commodities including aluminum, with operations in six countries spanning three regions. South32 operates with a focus on sustainable and responsible mining practices across multiple continents.",
-            image: "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Ffd781964b761486d9ddd8f310d955099?format=webp&width=800&height=1200",
           },
           "Sasol": {
-            sector: "Energy & Chemicals",
+            sector: "Oil & Gas",
             description: "A South African integrated energy and chemical company operating in 33 countries with special focus on oil & gas and chemical industries. Sasol is committed to driving energy transition and chemical innovation.",
           },
           "Standard Bank": {
-            sector: "Banking & Financial Services",
+            sector: "Financial Services",
             description: "The largest bank in Africa and the biggest lender by assets, with 160 years of banking experience and a presence in 20 African countries. Standard Bank provides comprehensive financial solutions across the continent.",
           },
           "The Logistics Group": {
-            sector: "Logistics & Transportation",
+            sector: "Logistics",
             description: "A South African private port terminal operator and integrated logistics firm specializing in comprehensive logistics solutions across port, rail, warehousing, and digital transport logistics.",
           },
           "Tongaat Hulett": {
-            sector: "Agri-processing",
+            sector: "Agriculture",
             description: "A South African-based agri-processing company operating in four countries, engaged in sugar, ethanol, animal feeds, and cattle businesses. Tongaat Hulett is a leader in agricultural value creation.",
           },
           "Grindrod Group": {
-            sector: "Logistics & Shipping",
+            sector: "Logistics",
             description: "A South African company providing integrated freight logistics and shipping services, operating in 23 countries primarily in sub-Saharan Africa. Grindrod specializes in supply chain excellence.",
           },
           "Vodacom": {
@@ -102,7 +101,7 @@ const OurMembers = () => {
             description: "A South African mobile communications company providing services to over 130 million customers across Africa. Vodacom is at the forefront of digital connectivity and telecommunications innovation.",
           },
           "G4S": {
-            sector: "Security Services",
+            sector: "Security",
             description: "A British multinational private security company headquartered in London, operating in 29 African countries. G4S provides comprehensive security and risk management solutions across the continent.",
           },
           "Shoprite": {
@@ -110,7 +109,7 @@ const OurMembers = () => {
             description: "A South African retailer and Africa's largest supermarket chain, operating 3,031 stores in 10 countries. Shoprite is committed to providing quality products and services to communities across Africa.",
           },
           "Premier FMCG": {
-            sector: "Food Manufacturing",
+            sector: "Food & Beverage",
             description: "A South African food manufacturer present in 8 countries and 4 different continents with a rich history spanning over 200 years. Premier operates 13 bakeries, 7 wheat mills, and 3 maize mills.",
           },
           "iX Engineers": {
@@ -118,11 +117,11 @@ const OurMembers = () => {
             description: "A South African consulting engineering firm specializing in Water, Energy, Transport, Mining, and Development Services, with operations extending to Africa and the Middle East.",
           },
           "FS Holdings": {
-            sector: "Holding & Investment",
+            sector: "Investment",
             description: "A holding company with interests in Agriculture, Banking, Mining, and Leisure sectors, operating in Mozambique, South Africa, and Hong Kong. FS Holdings drives strategic investments across multiple industries.",
           },
           "Coca Cola": {
-            sector: "Beverages & Consumer Goods",
+            sector: "Food & Beverage",
             image: "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Ffd781964b761486d9ddd8f310d955099?format=webp&width=800&height=1200",
             description: "A global leader in beverages and consumer goods, committed to sustainable and responsible business practices.",
           },
