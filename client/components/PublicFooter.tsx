@@ -88,9 +88,9 @@ const PublicFooter = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/admin" className="text-sm text-slate-300 hover:text-white">
+                <a href="/admin" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-300 hover:text-white">
                   Admin Dashboard
-                </Link>
+                </a>
               </li>
               <li>
                 <a href="mailto:support@sacbm.co.mz" className="text-sm text-slate-300 hover:text-white">
