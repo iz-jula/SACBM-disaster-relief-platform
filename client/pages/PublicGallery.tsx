@@ -232,12 +232,27 @@ const PublicGallery = () => {
                 >
                   {/* Image Container */}
                   {achievement.media && achievement.media.length > 0 ? (
-                    <div className="relative h-56 w-full overflow-hidden bg-slate-200">
+                    <div className="relative h-56 w-full overflow-hidden bg-slate-200 group">
                       <img
                         src={achievement.media[0]}
                         alt={achievement.title}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105 duration-300"
                       />
+
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                        <Button
+                          variant="secondary"
+                          className="bg-white hover:bg-slate-100 text-slate-900 font-medium text-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedImpact(achievement);
+                          }}
+                        >
+                          View More
+                        </Button>
+                      </div>
+
                       {achievement.category && (
                         <div className="absolute top-4 right-4 bg-slate-900/80 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white rounded">
                           {achievement.category}

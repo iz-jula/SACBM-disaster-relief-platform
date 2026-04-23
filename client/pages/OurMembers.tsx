@@ -78,57 +78,59 @@ const OurMembers = () => {
       <PublicNavbar />
 
       {/* Header */}
-      <div className="border-b bg-gradient-to-r from-slate-50 to-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-          <h1 className="text-4xl font-bold text-slate-900">Our Members</h1>
-          <p className="mt-4 text-lg text-slate-600">
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-20">
+          <h1 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900">
+            Our Members
+          </h1>
+          <p className="mt-4 text-base text-slate-600 max-w-2xl">
             Meet the companies and organizations making a difference across Mozambique
           </p>
         </div>
       </div>
 
       {/* Search */}
-      <div className="border-b bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 rounded-lg border bg-white px-4">
-            <Search className="h-4 w-4 text-muted-foreground" />
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 py-8">
+          <div className="flex items-center gap-2 border-b border-slate-200 pb-6">
+            <Search className="h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search members or representatives..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border-0 bg-transparent focus-visible:ring-0"
+              className="border-0 bg-transparent text-sm placeholder-slate-400 focus-visible:ring-0"
             />
           </div>
         </div>
       </div>
 
       {/* Members Grid */}
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-24 lg:py-32">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-muted-foreground">Loading members...</p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-slate-500">Loading members...</p>
           </div>
         ) : filteredMembers.length > 0 ? (
           <>
-            <p className="mb-8 text-sm text-slate-600">
-              Showing {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
+            <p className="mb-12 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {filteredMembers.length} Member{filteredMembers.length !== 1 ? "s" : ""}
             </p>
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
               {filteredMembers.map((member, index) => (
                 <Card
                   key={`${member.company}-${index}`}
-                  className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all flex flex-col"
+                  className="overflow-hidden border border-slate-200 shadow-none hover:shadow-md transition-all flex flex-col"
                 >
-                  <CardHeader className="bg-gradient-to-br from-emerald-50 to-slate-50 border-b">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-lg bg-emerald-100 p-3">
-                        <Building2 className="h-6 w-6 text-emerald-700" />
+                  <CardHeader className="border-b border-slate-200 pb-6">
+                    <div className="flex items-start gap-4">
+                      <div className="rounded p-2.5 bg-slate-100">
+                        <Building2 className="h-5 w-5 text-slate-700" />
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-lg text-slate-900">
+                        <CardTitle className="text-base font-semibold text-slate-900 leading-tight">
                           {member.company}
                         </CardTitle>
-                        <CardDescription className="mt-2 flex items-center gap-2">
+                        <CardDescription className="mt-3 flex items-center gap-2 text-xs text-slate-600 font-medium">
                           <User className="h-4 w-4" />
                           {member.representative}
                         </CardDescription>
@@ -136,30 +138,28 @@ const OurMembers = () => {
                     </div>
                   </CardHeader>
 
-                  <CardContent className="flex-1 pt-6">
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-slate-600 mb-2">Social Impact Actions</p>
-                        <Badge variant="secondary" className="text-base font-semibold">
-                          {member.actionCount} action{member.actionCount !== 1 ? "s" : ""}
-                        </Badge>
-                      </div>
-
-                      <p className="text-sm text-slate-600">
-                        Committed to creating positive social impact through disaster relief,
-                        humanitarian aid, and community support initiatives.
+                  <CardContent className="flex-1 pt-6 space-y-6">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Social Impact Actions</p>
+                      <p className="text-lg font-light text-slate-900">
+                        {member.actionCount}
                       </p>
                     </div>
+
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Committed to creating positive social impact through disaster relief,
+                      humanitarian aid, and community support initiatives.
+                    </p>
                   </CardContent>
 
-                  <div className="border-t p-4">
+                  <div className="border-t border-slate-200 p-4">
                     <Link
                       to={`/gallery?company=${encodeURIComponent(member.company)}`}
-                      className="inline-block"
+                      className="block"
                     >
                       <Button
                         size="sm"
-                        className="w-full bg-emerald-700 hover:bg-emerald-800 text-white"
+                        className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium"
                       >
                         View Their Impact
                         <ArrowRight className="ml-2 h-4 w-4" />
@@ -171,8 +171,8 @@ const OurMembers = () => {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-12">
-            <p className="text-slate-600">No members found matching your search</p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <p className="text-slate-500 text-sm">No members found matching your search</p>
           </div>
         )}
       </div>
