@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useState } from "react";
 import { X, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
