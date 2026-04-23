@@ -168,18 +168,13 @@ const Home = () => {
           <p className="mt-6 text-base text-slate-600 max-w-2xl">
             Interested in becoming a member or partnering with us on social responsibility initiatives? We&apos;d love to hear from you.
           </p>
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <a href="mailto:info@southafricanchamber.co.mz" className="flex-1">
-              <Button size="lg" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium">
+          <div className="mt-10">
+            <a href="mailto:info@southafricanchamber.co.mz">
+              <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium">
                 Contact Us
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </a>
-            <Link to="/members" className="flex-1">
-              <Button size="lg" variant="outline" className="w-full border-slate-300 text-slate-900 hover:bg-slate-50 font-medium">
-                Member Section
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
