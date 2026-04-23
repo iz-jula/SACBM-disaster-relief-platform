@@ -47,8 +47,8 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "requests" | "users" | "settings" | "ingd" | "documents" | "government-priorities" | "members" | "carousel" | "member-access"
-  >("dashboard");
+    "menu" | "ingd" | "carousel" | "documents" | "member-access" | "users" | "connectivity" | "requests"
+  >("menu");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
     totalPeopleAssisted: 0,
@@ -750,15 +750,14 @@ export default function Admin() {
         <div className="border-b border-slate-200 bg-white overflow-x-auto">
           <div className="flex gap-1 sm:gap-2 min-w-min">
             {[
-              { id: "dashboard", label: "Dashboard", shortLabel: "Dashboard", icon: BarChart3 },
-              { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
+              { id: "menu", label: "Home", shortLabel: "Home", icon: BarChart3 },
               { id: "ingd", label: "INGD Management", shortLabel: "INGD", icon: Database },
-              { id: "members", label: "Members", shortLabel: "Members", icon: Users },
               { id: "carousel", label: "Home Carousel", shortLabel: "Carousel", icon: Download },
-              { id: "member-access", label: "Member Access", shortLabel: "Access", icon: Users },
               { id: "documents", label: "Documents", shortLabel: "Docs", icon: Download },
+              { id: "member-access", label: "Member Access", shortLabel: "Access", icon: Users },
               { id: "users", label: "Users", shortLabel: "Users", icon: Users },
-              { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings },
+              { id: "connectivity", label: "Connectivity", shortLabel: "Settings", icon: Settings },
+              { id: "requests", label: "All Requests", shortLabel: "Requests", icon: Database },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -778,196 +777,85 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Dashboard Tab */}
-        {activeTab === "dashboard" && (
-          <div className="space-y-8">
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {stats.map((stat, idx) => {
-                const Icon = stat.icon;
-                const colorClasses: Record<string, string> = {
-                  blue: "bg-blue-100 text-blue-600",
-                  green: "bg-green-100 text-green-600",
-                  yellow: "bg-yellow-100 text-yellow-600",
-                  orange: "bg-orange-100 text-orange-600",
-                };
-                return (
-                  <div
-                    key={idx}
-                    className="bg-white rounded-xl shadow-md p-6 border border-slate-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-slate-600 text-sm font-medium">
-                          {stat.label}
-                        </p>
-                        <p className="text-3xl font-bold text-slate-900 mt-2">
-                          {isLoadingMetrics ? "—" : stat.value}
-                        </p>
-                      </div>
-                      <div
-                        className={`rounded-lg p-3 ${colorClasses[stat.color]}`}
-                      >
-                        <Icon size={24} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Menu/Home Tab */}
+        {activeTab === "menu" && (
+          <div className="space-y-12">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
+              <p className="text-slate-600">Manage your website and user access</p>
             </div>
 
-            {/* Quick Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                  Request Status Breakdown
-                </h3>
-                <div className="space-y-4">
-                  {isLoadingMetrics ? (
-                    <p className="text-slate-500 text-sm">Loading...</p>
-                  ) : (
-                    <>
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="text-sm font-medium text-slate-700">
-                            Met
-                          </p>
-                          <p className="text-sm font-bold text-green-600">
-                            {metrics.totalRequests > 0
-                              ? Math.round(
-                                  (metrics.metRequests /
-                                    metrics.totalRequests) *
-                                    100,
-                                )
-                              : 0}
-                            %
-                          </p>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{
-                              width:
-                                metrics.totalRequests > 0
-                                  ? `${Math.round((metrics.metRequests / metrics.totalRequests) * 100)}%`
-                                  : "0%",
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="text-sm font-medium text-slate-700">
-                            Pending
-                          </p>
-                          <p className="text-sm font-bold text-blue-600">
-                            {metrics.totalRequests > 0
-                              ? Math.round(
-                                  (metrics.pendingRequests /
-                                    metrics.totalRequests) *
-                                    100,
-                                )
-                              : 0}
-                            %
-                          </p>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-500 h-2 rounded-full"
-                            style={{
-                              width:
-                                metrics.totalRequests > 0
-                                  ? `${Math.round((metrics.pendingRequests / metrics.totalRequests) * 100)}%`
-                                  : "0%",
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+            {/* Edit Website Section */}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Edit Website</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <button
+                  onClick={() => setActiveTab("ingd")}
+                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                >
+                  <div className="text-4xl font-bold text-blue-600 mb-3">📊</div>
+                  <h3 className="text-lg font-semibold text-slate-900">INGD Management</h3>
+                  <p className="text-sm text-slate-600 mt-2">Manage relief requests and data</p>
+                </button>
 
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                  Data Summary
-                </h3>
-                <div className="space-y-3">
-                  {isLoadingMetrics ? (
-                    <p className="text-slate-500 text-sm">Loading...</p>
-                  ) : (
-                    <>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total People Assisted</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber(metrics.totalPeopleAssisted)}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total Funds Deployed</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber((metrics.totalValueDeployed || 0) / 1000000, 2)}
-                          M MZN
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Average per Request</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber((metrics.averagePerRequest || 0) / 1000, 0)}
-                          K MZN
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <p className="text-slate-600">Active Cities</p>
-                        <p className="font-bold text-slate-900">
-                          {allRequests && allRequests.length > 0
-                            ? new Set(allRequests.map((r) => r.location)).size
-                            : 0}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+                <button
+                  onClick={() => setActiveTab("carousel")}
+                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                >
+                  <div className="text-4xl font-bold text-purple-600 mb-3">🎨</div>
+                  <h3 className="text-lg font-semibold text-slate-900">Home Carousel</h3>
+                  <p className="text-sm text-slate-600 mt-2">Add and manage carousel images</p>
+                </button>
 
-              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">
-                  INGD Data Summary
-                </h3>
-                <div className="space-y-3">
-                  {isLoadingMetrics ? (
-                    <p className="text-slate-500 text-sm">Loading...</p>
-                  ) : (
-                    <>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total Items</p>
-                        <p className="font-bold text-slate-900">
-                          {ingdMetrics.totalItems}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">Total Quantity</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber(ingdMetrics.totalQuantity)}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-slate-100">
-                        <p className="text-slate-600">People Impacted</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber(ingdMetrics.totalPeopleImpacted)}
-                        </p>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <p className="text-slate-600">Total Value</p>
-                        <p className="font-bold text-slate-900">
-                          {formatNumber((ingdMetrics.totalAmount || 0) / 1000, 0)}K MZN
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <button
+                  onClick={() => setActiveTab("documents")}
+                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                >
+                  <div className="text-4xl font-bold text-green-600 mb-3">📄</div>
+                  <h3 className="text-lg font-semibold text-slate-900">Documents</h3>
+                  <p className="text-sm text-slate-600 mt-2">Upload and manage documents</p>
+                </button>
               </div>
             </div>
+
+            {/* User Access Section */}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">User Access</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <button
+                  onClick={() => setActiveTab("member-access")}
+                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                >
+                  <div className="text-4xl font-bold text-orange-600 mb-3">👥</div>
+                  <h3 className="text-lg font-semibold text-slate-900">Member Access</h3>
+                  <p className="text-sm text-slate-600 mt-2">Approve and manage member access</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("users")}
+                  className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all"
+                >
+                  <div className="text-4xl font-bold text-red-600 mb-3">👤</div>
+                  <h3 className="text-lg font-semibold text-slate-900">Users</h3>
+                  <p className="text-sm text-slate-600 mt-2">Manage admin users and permissions</p>
+                </button>
+              </div>
+            </div>
+
+            {/* Connectivity Section */}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Connectivity</h2>
+              <button
+                onClick={() => setActiveTab("connectivity")}
+                className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-left hover:shadow-xl hover:border-blue-300 transition-all max-w-md"
+              >
+                <div className="text-4xl font-bold text-indigo-600 mb-3">⚙️</div>
+                <h3 className="text-lg font-semibold text-slate-900">Settings</h3>
+                <p className="text-sm text-slate-600 mt-2">Configure system settings and integrations</p>
+              </button>
+            </div>
+
+            {/* Placeholder to delete old metrics code below */}
           </div>
         )}
 
@@ -1179,8 +1067,8 @@ export default function Admin() {
           </div>
         )}
 
-        {/* Settings Tab */}
-        {activeTab === "settings" && (
+        {/* Connectivity Tab */}
+        {activeTab === "connectivity" && (
           <div className="space-y-6">
             {/* Supabase Connection Status */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-6">
