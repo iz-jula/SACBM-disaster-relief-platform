@@ -11,22 +11,18 @@ import PublicFooter from "@/components/PublicFooter";
 import ImpactDetailModal from "@/components/ImpactDetailModal";
 import { getAchievements } from "@/services/achievementsService";
 
-// Map categories to Unsplash search queries for placeholder images
-const getPlaceholderImageUrl = (category: string): string => {
-  const categoryMap: Record<string, string> = {
-    Food: "food+distribution+aid",
-    Clothing: "clothing+donation+humanitarian",
-    Materials: "construction+materials+disaster",
-    Medical: "medical+aid+humanitarian",
-    Shelter: "refugee+shelter+emergency",
-    Water: "water+crisis+humanitarian",
-    Evacuation: "emergency+evacuation+disaster",
-    Multiple: "disaster+relief+humanitarian",
-  };
+// Placeholder images for missing impact photos
+const PLACEHOLDER_IMAGES = [
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F07abbe128c034110a41ea4e30c309f25?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F25973ad568f347639305716ee8338a8e?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fbf99fcd6af1f41fb93bb21a04341ac53?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F75345602b9e943b9983712eafd0894cd?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F1b76db134eb54ee9b4b112888f18b10c?format=webp&width=800&height=1200",
+];
 
-  const searchQuery = categoryMap[category] || "humanitarian+aid+relief";
-  // Using Unsplash source API which doesn't require authentication
-  return `https://source.unsplash.com/800x640/?${encodeURIComponent(searchQuery)}&sig=${Date.now()}`;
+const getPlaceholderImageUrl = (achievementId?: number): string => {
+  const index = achievementId ? achievementId % PLACEHOLDER_IMAGES.length : Math.floor(Math.random() * PLACEHOLDER_IMAGES.length);
+  return PLACEHOLDER_IMAGES[index];
 };
 
 const PublicGallery = () => {
@@ -295,7 +291,7 @@ const PublicGallery = () => {
                       )}
                     </div>
                   ) : (() => {
-                    const placeholderUrl = getPlaceholderImageUrl(achievement.category || "Multiple");
+                    const placeholderUrl = getPlaceholderImageUrl(achievement.id);
                     return (
                     <div className="relative h-56 w-full overflow-hidden bg-slate-200 group">
                       <img
