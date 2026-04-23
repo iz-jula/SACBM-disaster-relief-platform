@@ -62,7 +62,7 @@ const PublicFooter = () => {
               </li>
               <li>
                 <Link to="/gallery" className="text-sm text-slate-300 hover:text-white">
-                  Actions Gallery
+                  Our Impact
                 </Link>
               </li>
               <li>

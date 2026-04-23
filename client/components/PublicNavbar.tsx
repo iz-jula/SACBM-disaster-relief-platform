@@ -10,7 +10,7 @@ const PublicNavbar = () => {
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Our Members", href: "/our-members" },
-    { label: "Actions Gallery", href: "/gallery" },
+    { label: "Our Impact", href: "/gallery" },
     { label: "About", href: "/about" },
   ];
 

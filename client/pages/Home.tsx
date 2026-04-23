@@ -37,7 +37,7 @@ const Home = () => {
           <div className="mt-10 flex flex-col gap-4 sm:flex-row justify-center sm:gap-6">
             <Link to="/gallery">
               <Button size="lg" className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white">
-                Explore Actions
+                Explore Our Impact
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>

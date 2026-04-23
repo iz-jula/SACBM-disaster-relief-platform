@@ -161,7 +161,7 @@ const OurMembers = () => {
                         size="sm"
                         className="w-full bg-emerald-700 hover:bg-emerald-800 text-white"
                       >
-                        View Their Actions
+                        View Their Impact
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
