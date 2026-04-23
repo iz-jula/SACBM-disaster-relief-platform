@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
-import { ArrowRight, Search, Building2, User } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { getAchievements } from "@/services/achievementsService";
 
 interface Member {
   company: string;
-  representative: string;
   actionCount: number;
   description?: string;
 }
@@ -28,14 +25,13 @@ const OurMembers = () => {
         const achievements = await getAchievements();
 
         // Group achievements by company
-        const memberMap = new Map<string, { representative: string; count: number }>();
+        const memberMap = new Map<string, { count: number }>();
 
         achievements.forEach((achievement: any) => {
           const company = achievement.company_name || "Unknown Company";
-          const representative = achievement.submittedBy || "Unknown Representative";
 
           if (!memberMap.has(company)) {
-            memberMap.set(company, { representative, count: 0 });
+            memberMap.set(company, { count: 0 });
           }
 
           const member = memberMap.get(company)!;
@@ -44,9 +40,8 @@ const OurMembers = () => {
 
         // Convert to array
         const membersList: Member[] = Array.from(memberMap.entries()).map(
-          ([company, { representative, count }]) => ({
+          ([company, { count }]) => ({
             company,
-            representative,
             actionCount: count,
           })
         );
@@ -115,59 +110,56 @@ const OurMembers = () => {
             <p className="mb-12 text-xs font-semibold uppercase tracking-wider text-slate-500">
               {filteredMembers.length} Member{filteredMembers.length !== 1 ? "s" : ""}
             </p>
-            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredMembers.map((member, index) => (
-                <Card
-                  key={`${member.company}-${index}`}
-                  className="overflow-hidden border border-slate-200 shadow-none hover:shadow-md transition-all flex flex-col"
-                >
-                  <CardHeader className="border-b border-slate-200 pb-6">
-                    <div className="flex items-start gap-4">
-                      <div className="rounded p-2.5 bg-slate-100">
-                        <Building2 className="h-5 w-5 text-slate-700" />
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredMembers.map((member, index) => {
+                // Generate gradient colors for visual interest
+                const gradients = [
+                  "from-emerald-600 to-teal-700",
+                  "from-slate-800 to-slate-900",
+                  "from-blue-600 to-indigo-700",
+                  "from-amber-600 to-orange-700",
+                  "from-rose-600 to-pink-700",
+                  "from-violet-600 to-purple-700",
+                ];
+                const gradient = gradients[index % gradients.length];
+
+                return (
+                  <Link
+                    key={`${member.company}-${index}`}
+                    to={`/gallery?company=${encodeURIComponent(member.company)}`}
+                    className="group"
+                  >
+                    <div className={`bg-gradient-to-br ${gradient} rounded-lg overflow-hidden h-64 sm:h-72 relative flex flex-col items-end justify-between p-6 sm:p-8 hover:shadow-lg transition-shadow cursor-pointer`}>
+                      {/* Top Right: Action Count */}
+                      <div className="text-right">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-white/80 mb-1">
+                          Impact Actions
+                        </p>
+                        <p className="text-4xl sm:text-5xl font-light text-white">
+                          {member.actionCount}
+                        </p>
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-base font-semibold text-slate-900 leading-tight">
-                          {member.company}
-                        </CardTitle>
-                        <CardDescription className="mt-3 flex items-center gap-2 text-xs text-slate-600 font-medium">
-                          <User className="h-4 w-4" />
-                          {member.representative}
-                        </CardDescription>
+
+                      {/* Bottom: Company Name */}
+                      <h3 className="text-2xl sm:text-3xl font-light text-white leading-tight max-w-full text-left self-start">
+                        {member.company}
+                      </h3>
+
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <Button
+                          variant="secondary"
+                          className="bg-white hover:bg-slate-100 text-slate-900 font-medium"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          View Impact
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                  </CardHeader>
-
-                  <CardContent className="flex-1 pt-6 space-y-6">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Social Impact Actions</p>
-                      <p className="text-lg font-light text-slate-900">
-                        {member.actionCount}
-                      </p>
-                    </div>
-
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      Committed to creating positive social impact through disaster relief,
-                      humanitarian aid, and community support initiatives.
-                    </p>
-                  </CardContent>
-
-                  <div className="border-t border-slate-200 p-4">
-                    <Link
-                      to={`/gallery?company=${encodeURIComponent(member.company)}`}
-                      className="block"
-                    >
-                      <Button
-                        size="sm"
-                        className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium"
-                      >
-                        View Their Impact
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                </Card>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </>
         ) : (
