@@ -54,7 +54,7 @@ const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
       {/* Content */}
       <div className="mx-auto max-w-6xl px-6 sm:px-8 py-12 lg:py-16">
         <div className="grid gap-12 lg:grid-cols-5">
-          {/* Image Gallery - Takes up more space */}
+          {/* Image Gallery - Left Column */}
           <div className="lg:col-span-3">
             {images.length > 0 ? (
               <div className="space-y-6">
@@ -123,7 +123,7 @@ const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
             )}
           </div>
 
-          {/* Details Sidebar */}
+          {/* Details Sidebar - Right Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Category */}
             {impact.category && (
@@ -206,17 +206,19 @@ const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
                 </p>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Full Description */}
-        <div className="mt-16 border-t border-slate-200 pt-12 max-w-3xl">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">
-            Description
-          </h2>
-          <p className="text-base leading-relaxed text-slate-700 whitespace-pre-wrap">
-            {impact.description}
-          </p>
+            {/* Description */}
+            {impact.description && (
+              <div className="border-t border-slate-200 pt-8">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                  Description
+                </p>
+                <p className="text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
+                  {impact.description}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

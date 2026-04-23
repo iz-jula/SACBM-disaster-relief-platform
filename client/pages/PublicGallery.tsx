@@ -97,100 +97,114 @@ const PublicGallery = () => {
       <PublicNavbar />
 
       {/* Header */}
-      <div className="border-b bg-gradient-to-r from-slate-50 to-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-          <h1 className="text-4xl font-bold text-slate-900">Our Impact</h1>
-          <p className="mt-4 text-lg text-slate-600">
-            Explore the measurable difference our members are making across Mozambique
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-20">
+          <h1 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900">
+            Our Impact
+          </h1>
+          <p className="mt-4 text-base text-slate-600 max-w-2xl">
+            Explore the measurable difference our members are making across Mozambique through social responsibility initiatives
           </p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="border-b bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4">
+      {/* Filters & Controls */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 py-8">
+          <div className="flex flex-col gap-6">
             {/* Search */}
-            <div className="flex flex-1 items-center gap-2 rounded-lg border bg-white px-4">
-              <Search className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2 border-b border-slate-200 pb-6">
+              <Search className="h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Search actions..."
+                placeholder="Search by title or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="border-0 bg-transparent focus-visible:ring-0"
+                className="border-0 bg-transparent text-sm placeholder-slate-400 focus-visible:ring-0"
               />
             </div>
 
-            {/* Filter Row */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full sm:flex-1">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Filter Controls */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+              <div className="flex-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  Category
+                </p>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full border-slate-200 text-sm">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                <SelectTrigger className="w-full sm:flex-1">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="All Companies" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Companies</SelectItem>
-                  {companies.map((company) => (
-                    <SelectItem key={company} value={company}>
-                      {company}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  Member
+                </p>
+                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                  <SelectTrigger className="w-full border-slate-200 text-sm">
+                    <SelectValue placeholder="All Members" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Members</SelectItem>
+                    {companies.map((company) => (
+                      <SelectItem key={company} value={company}>
+                        {company}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:flex-1">
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most Recent</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="impact">Most Impact</SelectItem>
-                  <SelectItem value="contribution">Highest Contribution</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  Sort By
+                </p>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full border-slate-200 text-sm">
+                    <SelectValue placeholder="Most Recent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Most Recent</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="impact">Most Impact</SelectItem>
+                    <SelectItem value="contribution">Highest Contribution</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Active Filters */}
+            {/* Active Filters - More Minimal */}
             {(selectedCategory !== "all" || selectedCompany !== "all") && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 pt-2">
                 {selectedCategory !== "all" && (
-                  <Badge variant="secondary">
-                    Category: {selectedCategory}
+                  <span className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded flex items-center gap-2">
+                    {selectedCategory}
                     <button
                       onClick={() => setSelectedCategory("all")}
-                      className="ml-2 hover:text-foreground"
+                      className="hover:text-slate-900"
                     >
                       <X className="h-3 w-3" />
                     </button>
-                  </Badge>
+                  </span>
                 )}
                 {selectedCompany !== "all" && (
-                  <Badge variant="secondary">
-                    Company: {selectedCompany}
+                  <span className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded flex items-center gap-2">
+                    {selectedCompany}
                     <button
                       onClick={() => setSelectedCompany("all")}
-                      className="ml-2 hover:text-foreground"
+                      className="hover:text-slate-900"
                     >
                       <X className="h-3 w-3" />
                     </button>
-                  </Badge>
+                  </span>
                 )}
               </div>
             )}
@@ -199,21 +213,21 @@ const PublicGallery = () => {
       </div>
 
       {/* Gallery */}
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-24 lg:py-32">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-muted-foreground">Loading impact stories...</p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-slate-500">Loading impact stories...</p>
           </div>
         ) : filteredAchievements.length > 0 ? (
           <>
-            <p className="mb-8 text-sm text-slate-600">
-              Showing {filteredAchievements.length} impact{filteredAchievements.length !== 1 ? "s" : ""}
+            <p className="mb-12 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {filteredAchievements.length} Impact{filteredAchievements.length !== 1 ? "s" : ""}
             </p>
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
               {filteredAchievements.map((achievement) => (
                 <Card
                   key={achievement.id}
-                  className="overflow-hidden border-0 shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all flex flex-col cursor-pointer"
+                  className="overflow-hidden border border-slate-200 shadow-none hover:shadow-md transition-all flex flex-col cursor-pointer"
                   onClick={() => setSelectedImpact(achievement)}
                 >
                   {/* Image Container */}
@@ -225,18 +239,18 @@ const PublicGallery = () => {
                         className="h-full w-full object-cover"
                       />
                       {achievement.category && (
-                        <div className="absolute top-4 right-4 bg-emerald-700 px-4 py-1.5 text-xs font-semibold text-white rounded-md">
+                        <div className="absolute top-4 right-4 bg-slate-900/80 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white rounded">
                           {achievement.category}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="relative h-56 w-full bg-gradient-to-br from-emerald-100 to-slate-100 flex items-center justify-center">
+                    <div className="relative h-56 w-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
                       <div className="text-center">
-                        <p className="text-sm font-medium text-slate-600">No Image</p>
+                        <p className="text-xs font-medium text-slate-600">No Image</p>
                       </div>
                       {achievement.category && (
-                        <div className="absolute top-4 right-4 bg-emerald-700 px-4 py-1.5 text-xs font-semibold text-white rounded-md">
+                        <div className="absolute top-4 right-4 bg-slate-900/80 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white rounded">
                           {achievement.category}
                         </div>
                       )}
@@ -244,28 +258,28 @@ const PublicGallery = () => {
                   )}
 
                   {/* Card Content */}
-                  <CardHeader className="pb-3">
-                    <CardTitle className="line-clamp-2 text-lg text-slate-900">
+                  <CardHeader className="pb-4 border-b border-slate-200">
+                    <CardTitle className="line-clamp-2 text-base font-semibold text-slate-900 leading-tight">
                       {achievement.title}
                     </CardTitle>
-                    <CardDescription className="line-clamp-2 text-sm text-slate-600 mt-1">
+                    <CardDescription className="line-clamp-1 text-xs text-slate-500 mt-2 font-medium">
                       {achievement.company_name}
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="flex-1 space-y-4">
+                  <CardContent className="flex-1 space-y-4 pt-4">
                     {/* Description */}
-                    <p className="text-sm text-slate-600 line-clamp-3">
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                       {achievement.description}
                     </p>
 
                     {/* Key Metrics Grid */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-4">
                       {/* People Impacted */}
                       {achievement.people_impacted && (
-                        <div className="bg-blue-50 rounded-lg p-3">
-                          <p className="text-xs font-medium text-slate-600 mb-1">People Impacted</p>
-                          <p className="text-lg font-bold text-blue-700">
+                        <div className="bg-slate-50 rounded p-3 border border-slate-200">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">People</p>
+                          <p className="text-lg font-light text-slate-900">
                             {achievement.people_impacted.toLocaleString()}
                           </p>
                         </div>
@@ -273,9 +287,9 @@ const PublicGallery = () => {
 
                       {/* Contribution */}
                       {achievement.amount && (
-                        <div className="bg-green-50 rounded-lg p-3">
-                          <p className="text-xs font-medium text-slate-600 mb-1">Contribution</p>
-                          <p className="text-lg font-bold text-green-700">
+                        <div className="bg-slate-50 rounded p-3 border border-slate-200">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Contrib.</p>
+                          <p className="text-lg font-light text-slate-900">
                             {(achievement.amount / 1000).toFixed(0)}K MZN
                           </p>
                         </div>
@@ -319,8 +333,8 @@ const PublicGallery = () => {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 py-12">
-            <p className="text-slate-600">No impact stories found matching your filters</p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <p className="text-slate-500 text-sm">No impact stories found matching your filters</p>
           </div>
         )}
       </div>
