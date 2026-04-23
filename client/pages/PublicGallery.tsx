@@ -224,17 +224,34 @@ const PublicGallery = () => {
               {filteredAchievements.length} Impact{filteredAchievements.length !== 1 ? "s" : ""}
             </p>
             <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredAchievements.map((achievement) => (
+              {filteredAchievements.map((achievement) => {
+                // Parse media - handle both string and array formats
+                let mediaArray: string[] = [];
+                if (achievement.media) {
+                  if (Array.isArray(achievement.media)) {
+                    mediaArray = achievement.media;
+                  } else if (typeof achievement.media === "string") {
+                    try {
+                      const parsed = JSON.parse(achievement.media);
+                      mediaArray = Array.isArray(parsed) ? parsed : [achievement.media];
+                    } catch {
+                      mediaArray = [achievement.media];
+                    }
+                  }
+                }
+                const firstImage = mediaArray.length > 0 ? mediaArray[0] : null;
+
+                return (
                 <Card
                   key={achievement.id}
                   className="overflow-hidden border border-slate-200 shadow-none hover:shadow-md transition-all flex flex-col cursor-pointer"
                   onClick={() => setSelectedImpact(achievement)}
                 >
                   {/* Image Container */}
-                  {achievement.media && achievement.media.length > 0 ? (
+                  {firstImage ? (
                     <div className="relative h-56 w-full overflow-hidden bg-slate-200 group">
                       <img
-                        src={achievement.media[0]}
+                        src={firstImage}
                         alt={achievement.title}
                         className="h-full w-full object-cover transition-transform group-hover:scale-105 duration-300"
                       />
@@ -344,7 +361,8 @@ const PublicGallery = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           </>
         ) : (
