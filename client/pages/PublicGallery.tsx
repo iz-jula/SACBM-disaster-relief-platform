@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
-import { Search, Filter, Users, Calendar } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Search, Filter, Users, Calendar, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { getAchievements } from "@/services/achievementsService";
 
 const PublicGallery = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [achievements, setAchievements] = useState<any[]>([]);
   const [filteredAchievements, setFilteredAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
   const [categories, setCategories] = useState<string[]>([]);
+  const [companies, setCompanies] = useState<string[]>([]);
 
   useEffect(() => {
     const loadAchievements = async () => {
@@ -24,6 +29,15 @@ const PublicGallery = () => {
         // Extract unique categories
         const uniqueCategories = [...new Set(data.map((a: any) => a.category).filter(Boolean))];
         setCategories(uniqueCategories as string[]);
+        // Extract unique companies
+        const uniqueCompanies = [...new Set(data.map((a: any) => a.company_name).filter(Boolean))];
+        setCompanies(uniqueCompanies as string[]);
+
+        // Check if company filter is in URL params
+        const companyParam = searchParams.get("company");
+        if (companyParam) {
+          setSelectedCompany(companyParam);
+        }
       } catch (error) {
         console.error("Failed to load achievements:", error);
       } finally {
@@ -31,7 +45,7 @@ const PublicGallery = () => {
       }
     };
     loadAchievements();
-  }, []);
+  }, [searchParams]);
 
   // Filter achievements
   useEffect(() => {
@@ -39,6 +53,10 @@ const PublicGallery = () => {
 
     if (selectedCategory !== "all") {
       filtered = filtered.filter((a) => a.category === selectedCategory);
+    }
+
+    if (selectedCompany !== "all") {
+      filtered = filtered.filter((a) => a.company_name === selectedCompany);
     }
 
     if (searchTerm) {
@@ -50,7 +68,7 @@ const PublicGallery = () => {
     }
 
     setFilteredAchievements(filtered);
-  }, [searchTerm, selectedCategory, achievements]);
+  }, [searchTerm, selectedCategory, selectedCompany, achievements]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -69,7 +87,8 @@ const PublicGallery = () => {
       {/* Filters */}
       <div className="border-b bg-white">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4">
+            {/* Search */}
             <div className="flex flex-1 items-center gap-2 rounded-lg border bg-white px-4">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
@@ -79,20 +98,67 @@ const PublicGallery = () => {
                 className="border-0 bg-transparent focus-visible:ring-0"
               />
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+            {/* Filter Row */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full sm:flex-1">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="w-full sm:flex-1">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="All Companies" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Companies</SelectItem>
+                  {companies.map((company) => (
+                    <SelectItem key={company} value={company}>
+                      {company}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Active Filters */}
+            {(selectedCategory !== "all" || selectedCompany !== "all") && (
+              <div className="flex flex-wrap gap-2">
+                {selectedCategory !== "all" && (
+                  <Badge variant="secondary">
+                    Category: {selectedCategory}
+                    <button
+                      onClick={() => setSelectedCategory("all")}
+                      className="ml-2 hover:text-foreground"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedCompany !== "all" && (
+                  <Badge variant="secondary">
+                    Company: {selectedCompany}
+                    <button
+                      onClick={() => setSelectedCompany("all")}
+                      className="ml-2 hover:text-foreground"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
