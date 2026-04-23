@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import PublicNavbar from "@/components/PublicNavbar";
 import MemberGate from "@/components/MemberGate";
-import { LogOut, User, Building2, Plus } from "lucide-react";
+import { LogOut, User, Building2, Plus, FileText, Download, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Circle } from "lucide-react";
 import { createAchievement } from "@/services/achievementsService";
 
 const MemberSection = () => {
@@ -24,7 +24,27 @@ const MemberSection = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [memberActions, setMemberActions] = useState<any[]>([]);
-  const [reportFormat, setReportFormat] = useState<"csv" | "pdf">("csv");
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
+  // Report builder state
+  const [includeReportData, setIncludeReportData] = useState({
+    actions: true,
+    media: false,
+  });
+
+  const [expandedReportFilters, setExpandedReportFilters] = useState({
+    actions: true,
+    media: false,
+  });
+
+  const [reportActionFilters, setReportActionFilters] = useState({
+    category: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  const [selectedReportMedia, setSelectedReportMedia] = useState<Set<number>>(new Set());
+  const [previewImage, setPreviewImage] = useState<any>(null);
 
   // Form state
   const [companyName, setCompanyName] = useState("");
@@ -69,108 +89,102 @@ const MemberSection = () => {
     setMemberInfo({ name, email });
   };
 
-  const generateCSVReport = () => {
-    if (memberActions.length === 0) {
-      alert("No actions to report");
-      return;
+  const getFilteredReportActions = () => {
+    let filtered = memberActions;
+
+    if (reportActionFilters.category) {
+      filtered = filtered.filter(a => a.category === reportActionFilters.category);
+    }
+    if (reportActionFilters.startDate) {
+      filtered = filtered.filter(a => new Date(a.created_at || '') >= new Date(reportActionFilters.startDate));
+    }
+    if (reportActionFilters.endDate) {
+      const endDate = new Date(reportActionFilters.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(a => new Date(a.created_at || '') <= endDate);
     }
 
-    // Create CSV header
-    const headers = [
-      "Company Name",
-      "Type of Action",
-      "Category",
-      "Location",
-      "Partner Organisation",
-      "People Impacted",
-      "Amount (MZN)",
-      "Description",
-      "Date Submitted",
-    ];
-
-    // Create CSV rows
-    const rows = memberActions.map((action) => [
-      action.company_name || "",
-      action.type_action || "",
-      action.category || "",
-      action.location || "",
-      action.partner_organisation || "",
-      action.people_impacted || "0",
-      action.amount || "0",
-      `"${(action.description || "").replace(/"/g, '""')}"`, // Escape quotes
-      action.created_at || new Date().toISOString(),
-    ]);
-
-    // Combine headers and rows
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-
-    // Create blob and download
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `SACBM-Report-${memberInfo?.name?.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    return filtered;
   };
 
-  const generatePDFReport = () => {
-    if (memberActions.length === 0) {
-      alert("No actions to report");
+  const getActionCategories = () => {
+    return [...new Set(memberActions.map(a => a.category))].filter(Boolean).sort();
+  };
+
+  const handleGenerateReport = async () => {
+    if (!includeReportData.actions && !includeReportData.media) {
+      alert("Please select at least one data type to include in the report");
       return;
     }
 
-    // Create a simple text-based PDF content (note: for production, use a library like jsPDF)
-    const reportText = [
-      "SOUTH AFRICAN CHAMBER OF BUSINESS IN MOZAMBIQUE",
-      "MEMBER IMPACT REPORT",
-      "=".repeat(60),
-      "",
-      `Member: ${memberInfo?.name}`,
-      `Email: ${memberInfo?.email}`,
-      `Generated: ${new Date().toLocaleDateString()}`,
-      "",
-      "=".repeat(60),
-      "SUBMITTED ACTIONS",
-      "=".repeat(60),
-      "",
-      ...memberActions.map(
-        (action, idx) => `
-Action ${idx + 1}: ${action.type_action}
-Company: ${action.company_name}
-Category: ${action.category}
-Location: ${action.location}
-Partner: ${action.partner_organisation || "N/A"}
-People Impacted: ${action.people_impacted || 0}
-Amount (MZN): ${action.amount || 0}
-Description: ${action.description}
-Date: ${action.created_at ? new Date(action.created_at).toLocaleDateString() : ""}
-${"-".repeat(60)}
-`
-      ),
-      "",
-      "=".repeat(60),
-      `Total Actions: ${memberActions.length}`,
-      `Total People Impacted: ${memberActions.reduce((sum, a) => sum + (a.people_impacted || 0), 0)}`,
-      `Total Contribution: MZN ${memberActions.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}`,
-      "=".repeat(60),
-    ].join("\n");
+    if (includeReportData.actions && getFilteredReportActions().length === 0) {
+      alert("No actions match your filters. Please adjust your filters and try again.");
+      return;
+    }
 
-    // Create blob and download as text file (can be printed to PDF)
-    const blob = new Blob([reportText], { type: "text/plain;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `SACBM-Report-${memberInfo?.name?.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.txt`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setIsGeneratingReport(true);
+    try {
+      const filteredActions = getFilteredReportActions();
+
+      // Create comprehensive report text
+      const reportText = [
+        "SOUTH AFRICAN CHAMBER OF BUSINESS IN MOZAMBIQUE",
+        "MEMBER IMPACT REPORT",
+        "═".repeat(70),
+        "",
+        `Member: ${memberInfo?.name}`,
+        `Email: ${memberInfo?.email}`,
+        `Report Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`,
+        "",
+        "═".repeat(70),
+        "EXECUTIVE SUMMARY",
+        "═".repeat(70),
+        "",
+        `Total Actions Submitted: ${filteredActions.length}`,
+        `Total People Impacted: ${filteredActions.reduce((sum, a) => sum + (a.people_impacted || 0), 0).toLocaleString()}`,
+        `Total Contribution: MZN ${filteredActions.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}`,
+        "",
+        "═".repeat(70),
+        "SUBMITTED ACTIONS",
+        "═".repeat(70),
+        "",
+        ...filteredActions.map((action, idx) => [
+          `ACTION ${idx + 1}`,
+          `─`.repeat(70),
+          `Title: ${action.type_action}`,
+          `Company: ${action.company_name}`,
+          `Category: ${action.category}`,
+          `Location: ${action.location}`,
+          `Partner Organization: ${action.partner_organisation || "N/A"}`,
+          `People Impacted: ${action.people_impacted || 0}`,
+          `Contribution: ${action.hide_amount ? "Hidden from Public" : `MZN ${(action.amount || 0).toLocaleString()}`}`,
+          `Description: ${action.description}`,
+          `Date Submitted: ${action.created_at ? new Date(action.created_at).toLocaleDateString() : "N/A"}`,
+          "",
+        ].join("\n")),
+        "═".repeat(70),
+        "END OF REPORT",
+        "═".repeat(70),
+      ].join("\n");
+
+      // Create blob and download
+      const blob = new Blob([reportText], { type: "text/plain;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `SACBM-Member-Report-${memberInfo?.name?.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.txt`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert("Report generated and downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating report:", error);
+      alert("Error generating report. Please try again.");
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   const handleSubmitAction = async (e: React.FormEvent) => {
@@ -544,124 +558,168 @@ ${"-".repeat(60)}
               </button>
             </div>
 
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="bg-slate-50 border-b">
-                <CardTitle className="flex items-center gap-2">
-                  📊 Generate Reports
-                </CardTitle>
-                <CardDescription>
-                  Export your submitted actions and impact data
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                {memberActions.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-slate-600 mb-4">
-                      You haven't submitted any actions yet.
-                    </p>
-                    <Button
-                      onClick={() => setCurrentView("submit-action")}
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white"
-                    >
-                      Submit Your First Action
-                    </Button>
+            {memberActions.length === 0 ? (
+              <Card className="border-0 shadow-sm">
+                <CardContent className="pt-12 pb-12 text-center">
+                  <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                  <p className="text-slate-600 mb-4 text-lg font-medium">
+                    You haven't submitted any actions yet.
+                  </p>
+                  <p className="text-slate-500 mb-6">Submit actions to generate reports</p>
+                  <Button
+                    onClick={() => setCurrentView("submit-action")}
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white"
+                  >
+                    Submit Your First Action
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-6">
+                  <FileText size={24} className="text-emerald-600" />
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">Build Your Report</h2>
+                    <p className="text-sm text-slate-600 mt-1">Select data types and customize filters for each</p>
                   </div>
-                ) : (
-                  <>
-                    {/* Actions Summary */}
-                    <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                        <div className="text-2xl font-bold text-blue-700">{memberActions.length}</div>
-                        <p className="text-sm text-blue-600 mt-1">Total Actions Submitted</p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                        <div className="text-2xl font-bold text-green-700">
-                          {memberActions.reduce((sum, a) => sum + (a.people_impacted || 0), 0).toLocaleString()}
-                        </div>
-                        <p className="text-sm text-green-600 mt-1">Total People Impacted</p>
-                      </div>
-                      <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                        <div className="text-2xl font-bold text-emerald-700">
-                          MZN {memberActions.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}
-                        </div>
-                        <p className="text-sm text-emerald-600 mt-1">Total Contribution</p>
-                      </div>
-                    </div>
+                </div>
 
-                    {/* Report Format Selection */}
-                    <div className="mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                      <Label className="text-sm font-medium mb-4 block">Export Format</Label>
-                      <div className="flex gap-4 flex-wrap">
-                        <button
-                          onClick={() => setReportFormat("csv")}
-                          className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                            reportFormat === "csv"
-                              ? "border-emerald-700 bg-emerald-50 text-emerald-700"
-                              : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
-                          }`}
-                        >
-                          📄 CSV (Spreadsheet)
-                        </button>
-                        <button
-                          onClick={() => setReportFormat("pdf")}
-                          className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                            reportFormat === "pdf"
-                              ? "border-emerald-700 bg-emerald-50 text-emerald-700"
-                              : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
-                          }`}
-                        >
-                          📋 PDF (Printable)
-                        </button>
+                {/* Step 1: Data Selection */}
+                <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <h3 className="font-bold text-slate-900 mb-4">Step 1: Select Data Types</h3>
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => {
+                        const newInclude = { ...includeReportData, actions: !includeReportData.actions };
+                        setIncludeReportData(newInclude);
+                        if (newInclude.actions) {
+                          setExpandedReportFilters({ ...expandedReportFilters, actions: true });
+                        }
+                      }}
+                      className="flex items-center gap-3 w-full p-3 hover:bg-white rounded-lg transition-colors text-left"
+                    >
+                      {includeReportData.actions ? (
+                        <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" />
+                      ) : (
+                        <Circle size={20} className="text-slate-400 flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900">Actions</p>
+                        <p className="text-xs text-slate-600">Include submitted actions</p>
                       </div>
-                    </div>
+                    </button>
 
-                    {/* Recent Actions */}
-                    <div className="mb-8">
-                      <h3 className="text-sm font-semibold text-slate-900 mb-4">Recent Actions</h3>
-                      <div className="space-y-3">
-                        {memberActions.slice(0, 5).map((action, idx) => (
-                          <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-slate-900">{action.type_action}</h4>
-                                <p className="text-xs text-slate-600 mt-1">{action.company_name}</p>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                                    {action.category}
-                                  </span>
-                                  <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
-                                    {action.people_impacted || 0} people
-                                  </span>
-                                  <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
-                                    MZN {action.amount || 0}
-                                  </span>
-                                </div>
-                              </div>
+                    <button
+                      onClick={() => {
+                        const newInclude = { ...includeReportData, media: !includeReportData.media };
+                        setIncludeReportData(newInclude);
+                        if (newInclude.media) {
+                          setExpandedReportFilters({ ...expandedReportFilters, media: true });
+                        }
+                      }}
+                      className="flex items-center gap-3 w-full p-3 hover:bg-white rounded-lg transition-colors text-left"
+                    >
+                      {includeReportData.media ? (
+                        <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" />
+                      ) : (
+                        <Circle size={20} className="text-slate-400 flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900">Media Files</p>
+                        <p className="text-xs text-slate-600">Include specific media from actions</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Step 2: Filter Each Data Type */}
+                <div className="space-y-4 mb-6">
+                  <h3 className="font-bold text-slate-900 px-4">Step 2: Configure Filters</h3>
+
+                  {/* Actions Filters */}
+                  {includeReportData.actions && (
+                    <div className="border border-slate-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setExpandedReportFilters({ ...expandedReportFilters, actions: !expandedReportFilters.actions })}
+                        className="w-full flex items-center justify-between p-4 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900">Actions</span>
+                          <span className="text-xs bg-emerald-200 text-emerald-800 px-2 py-1 rounded">
+                            {getFilteredReportActions().length} of {memberActions.length}
+                          </span>
+                        </div>
+                        {expandedReportFilters.actions ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      </button>
+                      {expandedReportFilters.actions && (
+                        <div className="p-4 space-y-4 bg-white">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+                              <select
+                                value={reportActionFilters.category}
+                                onChange={(e) => setReportActionFilters({ ...reportActionFilters, category: e.target.value })}
+                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                              >
+                                <option value="">All Categories</option>
+                                {getActionCategories().map((cat) => (
+                                  <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div></div>
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
+                              <input
+                                type="date"
+                                value={reportActionFilters.startDate}
+                                onChange={(e) => setReportActionFilters({ ...reportActionFilters, startDate: e.target.value })}
+                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">End Date</label>
+                              <input
+                                type="date"
+                                value={reportActionFilters.endDate}
+                                onChange={(e) => setReportActionFilters({ ...reportActionFilters, endDate: e.target.value })}
+                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                              />
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      )}
                     </div>
+                  )}
+                </div>
 
-                    {/* Export Buttons */}
-                    <div className="flex gap-4">
-                      <Button
-                        onClick={generateCSVReport}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        📥 Download as CSV
-                      </Button>
-                      <Button
-                        onClick={generatePDFReport}
-                        className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white"
-                      >
-                        📥 Download as PDF
-                      </Button>
+                {/* Summary */}
+                {getFilteredReportActions().length > 0 && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-900 font-medium">
+                      ✓ {getFilteredReportActions().length} action(s) selected for report
+                    </p>
+                    <div className="text-xs text-green-800 mt-2 space-y-1">
+                      <p>• Total People Impacted: {getFilteredReportActions().reduce((sum, a) => sum + (a.people_impacted || 0), 0).toLocaleString()}</p>
+                      <p>• Total Contribution: MZN {getFilteredReportActions().reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}</p>
                     </div>
-                  </>
+                  </div>
                 )}
-              </CardContent>
-            </Card>
+
+                {/* Generate Button */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleGenerateReport}
+                    disabled={isGeneratingReport || !includeReportData.actions || getFilteredReportActions().length === 0}
+                    className="flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-slate-300 text-white"
+                  >
+                    <FileText size={18} className="mr-2" />
+                    {isGeneratingReport ? "Generating..." : "Download Report"}
+                  </Button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
