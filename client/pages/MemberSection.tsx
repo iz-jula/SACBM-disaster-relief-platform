@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import PublicNavbar from "@/components/PublicNavbar";
 import MemberGate from "@/components/MemberGate";
-import { LogOut, User, Building2, Plus, FileText, Download, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Circle, Loader, X } from "lucide-react";
+import { LogOut, User, Building2, Plus, FileText, Download, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Circle, Loader, X, BarChart3, Mail } from "lucide-react";
 import { createAchievement, getAchievements } from "@/services/achievementsService";
 
 const MemberSection = () => {
@@ -364,13 +364,13 @@ const MemberSection = () => {
                   onClick={() => setCurrentView("submit-action")}
                   className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-2xl mb-3 group-hover:scale-110 transition-transform">📝</div>
+                  <Plus className="h-5 w-5 text-emerald-600 mb-3 group-hover:text-emerald-700 transition-colors" />
                   <h3 className="text-sm font-semibold text-slate-900">Submit Action</h3>
                   <p className="text-xs text-slate-500 mt-1">Share your social impact</p>
                 </button>
 
                 <div className="bg-white rounded-lg border border-slate-200 p-6 text-left opacity-50 cursor-not-allowed">
-                  <div className="text-2xl mb-3">📰</div>
+                  <Mail className="h-5 w-5 text-slate-400 mb-3" />
                   <h3 className="text-sm font-semibold text-slate-900">Write Newsletter</h3>
                   <p className="text-xs text-slate-500 mt-1">Coming soon</p>
                 </div>
@@ -379,7 +379,7 @@ const MemberSection = () => {
                   onClick={() => setCurrentView("reports")}
                   className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
                 >
-                  <div className="text-2xl mb-3 group-hover:scale-110 transition-transform">📊</div>
+                  <BarChart3 className="h-5 w-5 text-emerald-600 mb-3 group-hover:text-emerald-700 transition-colors" />
                   <h3 className="text-sm font-semibold text-slate-900">Generate Reports</h3>
                   <p className="text-xs text-slate-500 mt-1">Export your impact data</p>
                 </button>
@@ -392,9 +392,12 @@ const MemberSection = () => {
         {submitSuccess && (
           <Card className="mb-8 border-0 border-l-4 border-green-500 bg-green-50">
             <CardContent className="pt-6">
-              <p className="text-green-800 font-medium">
-                ✓ Action submitted successfully! Thank you for contributing to our platform.
-              </p>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <p className="text-green-800 font-medium">
+                  Action submitted successfully! Thank you for contributing to our platform.
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
