@@ -38,6 +38,7 @@ const MemberSection = () => {
   });
 
   const [reportActionFilters, setReportActionFilters] = useState({
+    organization: "",
     category: "",
     startDate: "",
     endDate: "",
@@ -96,6 +97,9 @@ const MemberSection = () => {
   const getFilteredReportActions = () => {
     let filtered = memberActions;
 
+    if (reportActionFilters.organization) {
+      filtered = filtered.filter(a => a.company_name === reportActionFilters.organization);
+    }
     if (reportActionFilters.category) {
       filtered = filtered.filter(a => a.category === reportActionFilters.category);
     }
@@ -113,6 +117,10 @@ const MemberSection = () => {
 
   const getActionCategories = () => {
     return [...new Set(memberActions.map(a => a.category))].filter(Boolean).sort();
+  };
+
+  const getActionOrganizations = () => {
+    return [...new Set(memberActions.map(a => a.company_name))].filter(Boolean).sort();
   };
 
   const getMediaFiles = () => {
@@ -171,6 +179,12 @@ const MemberSection = () => {
   const handleGenerateReport = async () => {
     if (!includeReportData.actions && !includeReportData.media) {
       alert("Please select at least one data type to include in the report");
+      return;
+    }
+
+    // Check if date range is set for actions (required)
+    if (includeReportData.actions && (!reportActionFilters.startDate || !reportActionFilters.endDate)) {
+      alert("Please set a reporting date range for Actions (Start Date and End Date are required)");
       return;
     }
 
@@ -706,6 +720,20 @@ const MemberSection = () => {
                         <div className="p-4 space-y-4 bg-white">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">Organization</label>
+                              <select
+                                value={reportActionFilters.organization}
+                                onChange={(e) => setReportActionFilters({ ...reportActionFilters, organization: e.target.value })}
+                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                              >
+                                <option value="">All Organizations</option>
+                                {getActionOrganizations().map((org) => (
+                                  <option key={org} value={org}>{org}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
                               <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
                               <select
                                 value={reportActionFilters.category}
@@ -718,20 +746,23 @@ const MemberSection = () => {
                                 ))}
                               </select>
                             </div>
-                            <div></div>
+
                             <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">Start Date <span className="text-red-600">*</span></label>
                               <input
                                 type="date"
+                                required
                                 value={reportActionFilters.startDate}
                                 onChange={(e) => setReportActionFilters({ ...reportActionFilters, startDate: e.target.value })}
                                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                               />
                             </div>
+
                             <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-2">End Date</label>
+                              <label className="block text-sm font-medium text-slate-700 mb-2">End Date <span className="text-red-600">*</span></label>
                               <input
                                 type="date"
+                                required
                                 value={reportActionFilters.endDate}
                                 onChange={(e) => setReportActionFilters({ ...reportActionFilters, endDate: e.target.value })}
                                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -867,6 +898,17 @@ const MemberSection = () => {
                     <div>
                       <p className="text-sm font-medium text-yellow-800">No data selected</p>
                       <p className="text-xs text-yellow-700 mt-1">Select at least one data type above to generate a report</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Date Range Required Warning */}
+                {includeReportData.actions && (!reportActionFilters.startDate || !reportActionFilters.endDate) && (
+                  <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg flex items-start gap-3">
+                    <AlertCircle size={18} className="text-orange-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-orange-800">Date range required</p>
+                      <p className="text-xs text-orange-700 mt-1">Please set both Start Date and End Date to generate your report</p>
                     </div>
                   </div>
                 )}
