@@ -6,23 +6,25 @@ import { Users, Building2, ArrowRight } from "lucide-react";
 import PublicNavbar from "./PublicNavbar";
 
 interface MemberGateProps {
-  onAccess: (name: string, company: string) => void;
+  onAccess: (name: string, email: string) => void;
 }
 
 const MemberGate = ({ onAccess }: MemberGateProps) => {
   const [fullName, setFullName] = useState("");
-  const [company, setCompany] = useState("");
-  const [errors, setErrors] = useState<{ name?: string; company?: string }>({});
+  const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { name?: string; company?: string } = {};
+    const newErrors: { name?: string; email?: string } = {};
 
     if (!fullName.trim()) {
       newErrors.name = "Full name is required";
     }
-    if (!company.trim()) {
-      newErrors.company = "Company name is required";
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Please enter a valid email";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -35,10 +37,10 @@ const MemberGate = ({ onAccess }: MemberGateProps) => {
       "memberInfo",
       JSON.stringify({
         name: fullName.trim(),
-        company: company.trim(),
+        email: email.trim(),
       })
     );
-    onAccess(fullName.trim(), company.trim());
+    onAccess(fullName.trim(), email.trim());
   };
 
   return (
@@ -90,23 +92,23 @@ const MemberGate = ({ onAccess }: MemberGateProps) => {
                   )}
                 </div>
 
-                {/* Company */}
+                {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Company / Organization
+                    Email Address
                   </label>
                   <Input
-                    type="text"
-                    placeholder="Your Company Ltd."
-                    value={company}
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
                     onChange={(e) => {
-                      setCompany(e.target.value);
-                      if (errors.company) setErrors({ ...errors, company: undefined });
+                      setEmail(e.target.value);
+                      if (errors.email) setErrors({ ...errors, email: undefined });
                     }}
-                    className={errors.company ? "border-red-500" : ""}
+                    className={errors.email ? "border-red-500" : ""}
                   />
-                  {errors.company && (
-                    <p className="mt-1 text-sm text-red-500">{errors.company}</p>
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
                   )}
                 </div>
 
