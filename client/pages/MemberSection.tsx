@@ -20,9 +20,11 @@ import { createAchievement } from "@/services/achievementsService";
 const MemberSection = () => {
   const navigate = useNavigate();
   const [memberInfo, setMemberInfo] = useState<{ name: string; email: string } | null>(null);
-  const [currentView, setCurrentView] = useState<"dashboard" | "submit-action">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "submit-action" | "reports">("dashboard");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [memberActions, setMemberActions] = useState<any[]>([]);
+  const [reportFormat, setReportFormat] = useState<"csv" | "pdf">("csv");
 
   // Form state
   const [companyName, setCompanyName] = useState("");
@@ -45,6 +47,19 @@ const MemberSection = () => {
     }
   }, []);
 
+  // Load member's actions when entering reports view
+  useEffect(() => {
+    if (currentView === "reports") {
+      // Get all actions from localStorage (achievements stored by the app)
+      const storedActions = localStorage.getItem("memberActions");
+      if (storedActions) {
+        const actions = JSON.parse(storedActions);
+        // Filter by member's company (or could use email)
+        setMemberActions(actions);
+      }
+    }
+  }, [currentView]);
+
   const handleLogout = () => {
     localStorage.removeItem("memberInfo");
     setMemberInfo(null);
@@ -52,6 +67,110 @@ const MemberSection = () => {
 
   const handleMemberAccess = (name: string, email: string) => {
     setMemberInfo({ name, email });
+  };
+
+  const generateCSVReport = () => {
+    if (memberActions.length === 0) {
+      alert("No actions to report");
+      return;
+    }
+
+    // Create CSV header
+    const headers = [
+      "Company Name",
+      "Type of Action",
+      "Category",
+      "Location",
+      "Partner Organisation",
+      "People Impacted",
+      "Amount (MZN)",
+      "Description",
+      "Date Submitted",
+    ];
+
+    // Create CSV rows
+    const rows = memberActions.map((action) => [
+      action.company_name || "",
+      action.type_action || "",
+      action.category || "",
+      action.location || "",
+      action.partner_organisation || "",
+      action.people_impacted || "0",
+      action.amount || "0",
+      `"${(action.description || "").replace(/"/g, '""')}"`, // Escape quotes
+      action.created_at || new Date().toISOString(),
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `SACBM-Report-${memberInfo?.name?.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const generatePDFReport = () => {
+    if (memberActions.length === 0) {
+      alert("No actions to report");
+      return;
+    }
+
+    // Create a simple text-based PDF content (note: for production, use a library like jsPDF)
+    const reportText = [
+      "SOUTH AFRICAN CHAMBER OF BUSINESS IN MOZAMBIQUE",
+      "MEMBER IMPACT REPORT",
+      "=".repeat(60),
+      "",
+      `Member: ${memberInfo?.name}`,
+      `Email: ${memberInfo?.email}`,
+      `Generated: ${new Date().toLocaleDateString()}`,
+      "",
+      "=".repeat(60),
+      "SUBMITTED ACTIONS",
+      "=".repeat(60),
+      "",
+      ...memberActions.map(
+        (action, idx) => `
+Action ${idx + 1}: ${action.type_action}
+Company: ${action.company_name}
+Category: ${action.category}
+Location: ${action.location}
+Partner: ${action.partner_organisation || "N/A"}
+People Impacted: ${action.people_impacted || 0}
+Amount (MZN): ${action.amount || 0}
+Description: ${action.description}
+Date: ${action.created_at ? new Date(action.created_at).toLocaleDateString() : ""}
+${"-".repeat(60)}
+`
+      ),
+      "",
+      "=".repeat(60),
+      `Total Actions: ${memberActions.length}`,
+      `Total People Impacted: ${memberActions.reduce((sum, a) => sum + (a.people_impacted || 0), 0)}`,
+      `Total Contribution: MZN ${memberActions.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}`,
+      "=".repeat(60),
+    ].join("\n");
+
+    // Create blob and download as text file (can be printed to PDF)
+    const blob = new Blob([reportText], { type: "text/plain;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `SACBM-Report-${memberInfo?.name?.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.txt`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleSubmitAction = async (e: React.FormEvent) => {
@@ -78,6 +197,24 @@ const MemberSection = () => {
 
       if (result) {
         setSubmitSuccess(true);
+
+        // Store the action in localStorage for reports
+        const existingActions = JSON.parse(localStorage.getItem("memberActions") || "[]");
+        const newAction = {
+          company_name: companyName,
+          type_action: actionType,
+          category,
+          location: `${district}${province ? `, ${province}` : ""}`,
+          partner_organisation: partnerOrganisation,
+          people_impacted: peopleImpacted ? parseInt(peopleImpacted) : 0,
+          amount: amount ? parseInt(amount) : 0,
+          description,
+          created_at: new Date().toISOString(),
+          hide_amount: hideAmount,
+        };
+        existingActions.push(newAction);
+        localStorage.setItem("memberActions", JSON.stringify(existingActions));
+
         // Reset form
         setCompanyName("");
         setActionType("");
@@ -160,11 +297,14 @@ const MemberSection = () => {
                   <p className="text-xs text-slate-500 mt-1">Coming soon</p>
                 </div>
 
-                <div className="bg-white rounded-lg border border-slate-200 p-6 text-left opacity-50 cursor-not-allowed">
-                  <div className="text-2xl mb-3">📊</div>
-                  <h3 className="text-sm font-semibold text-slate-900">View Reports</h3>
-                  <p className="text-xs text-slate-500 mt-1">Coming soon</p>
-                </div>
+                <button
+                  onClick={() => setCurrentView("reports")}
+                  className="bg-white rounded-lg border border-slate-200 p-6 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-3 group-hover:scale-110 transition-transform">📊</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Generate Reports</h3>
+                  <p className="text-xs text-slate-500 mt-1">Export your impact data</p>
+                </button>
               </div>
             </div>
           </>
@@ -387,6 +527,139 @@ const MemberSection = () => {
                     {isSubmitting ? "Submitting..." : "Submit Action"}
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* Reports View */}
+        {currentView === "reports" && (
+          <>
+            <div className="mb-6">
+              <button
+                onClick={() => setCurrentView("dashboard")}
+                className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-colors"
+              >
+                ← Back to Dashboard
+              </button>
+            </div>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="bg-slate-50 border-b">
+                <CardTitle className="flex items-center gap-2">
+                  📊 Generate Reports
+                </CardTitle>
+                <CardDescription>
+                  Export your submitted actions and impact data
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {memberActions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-slate-600 mb-4">
+                      You haven't submitted any actions yet.
+                    </p>
+                    <Button
+                      onClick={() => setCurrentView("submit-action")}
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white"
+                    >
+                      Submit Your First Action
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Actions Summary */}
+                    <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <div className="text-2xl font-bold text-blue-700">{memberActions.length}</div>
+                        <p className="text-sm text-blue-600 mt-1">Total Actions Submitted</p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                        <div className="text-2xl font-bold text-green-700">
+                          {memberActions.reduce((sum, a) => sum + (a.people_impacted || 0), 0).toLocaleString()}
+                        </div>
+                        <p className="text-sm text-green-600 mt-1">Total People Impacted</p>
+                      </div>
+                      <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                        <div className="text-2xl font-bold text-emerald-700">
+                          MZN {memberActions.reduce((sum, a) => sum + (a.amount || 0), 0).toLocaleString()}
+                        </div>
+                        <p className="text-sm text-emerald-600 mt-1">Total Contribution</p>
+                      </div>
+                    </div>
+
+                    {/* Report Format Selection */}
+                    <div className="mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                      <Label className="text-sm font-medium mb-4 block">Export Format</Label>
+                      <div className="flex gap-4 flex-wrap">
+                        <button
+                          onClick={() => setReportFormat("csv")}
+                          className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                            reportFormat === "csv"
+                              ? "border-emerald-700 bg-emerald-50 text-emerald-700"
+                              : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
+                          }`}
+                        >
+                          📄 CSV (Spreadsheet)
+                        </button>
+                        <button
+                          onClick={() => setReportFormat("pdf")}
+                          className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                            reportFormat === "pdf"
+                              ? "border-emerald-700 bg-emerald-50 text-emerald-700"
+                              : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
+                          }`}
+                        >
+                          📋 PDF (Printable)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Recent Actions */}
+                    <div className="mb-8">
+                      <h3 className="text-sm font-semibold text-slate-900 mb-4">Recent Actions</h3>
+                      <div className="space-y-3">
+                        {memberActions.slice(0, 5).map((action, idx) => (
+                          <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-slate-900">{action.type_action}</h4>
+                                <p className="text-xs text-slate-600 mt-1">{action.company_name}</p>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                                    {action.category}
+                                  </span>
+                                  <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                                    {action.people_impacted || 0} people
+                                  </span>
+                                  <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
+                                    MZN {action.amount || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Export Buttons */}
+                    <div className="flex gap-4">
+                      <Button
+                        onClick={generateCSVReport}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        📥 Download as CSV
+                      </Button>
+                      <Button
+                        onClick={generatePDFReport}
+                        className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white"
+                      >
+                        📥 Download as PDF
+                      </Button>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </>
