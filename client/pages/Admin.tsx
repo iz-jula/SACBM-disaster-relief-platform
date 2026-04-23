@@ -1723,8 +1723,7 @@ export default function Admin() {
                       <label className="block text-sm font-medium text-slate-700 mb-2">
                         Sector
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={editingMember.sector}
                         onChange={(e) =>
                           setEditingMember({
@@ -1732,9 +1731,21 @@ export default function Admin() {
                             sector: e.target.value,
                           })
                         }
-                        placeholder="e.g., Energy, Mining, Agriculture, Financial Services"
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">Select a sector...</option>
+                        <option value="Mining">Mining</option>
+                        <option value="Oil & Gas">Oil & Gas</option>
+                        <option value="Financial Services">Financial Services</option>
+                        <option value="Logistics">Logistics</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Telecommunications">Telecommunications</option>
+                        <option value="Security">Security</option>
+                        <option value="Retail">Retail</option>
+                        <option value="Food & Beverage">Food & Beverage</option>
+                        <option value="Engineering & Consulting">Engineering & Consulting</option>
+                        <option value="Investment">Investment</option>
+                      </select>
                     </div>
 
                     {/* Description */}
