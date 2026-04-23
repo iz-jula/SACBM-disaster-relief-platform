@@ -11,6 +11,20 @@ import PublicFooter from "@/components/PublicFooter";
 import ImpactDetailModal from "@/components/ImpactDetailModal";
 import { getAchievements } from "@/services/achievementsService";
 
+// Placeholder images for missing impact photos
+const PLACEHOLDER_IMAGES = [
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F07abbe128c034110a41ea4e30c309f25?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F25973ad568f347639305716ee8338a8e?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fbf99fcd6af1f41fb93bb21a04341ac53?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F75345602b9e943b9983712eafd0894cd?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F1b76db134eb54ee9b4b112888f18b10c?format=webp&width=800&height=1200",
+];
+
+const getPlaceholderImageUrl = (achievementId?: number): string => {
+  const index = achievementId ? achievementId % PLACEHOLDER_IMAGES.length : Math.floor(Math.random() * PLACEHOLDER_IMAGES.length);
+  return PLACEHOLDER_IMAGES[index];
+};
+
 const PublicGallery = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [achievements, setAchievements] = useState<any[]>([]);
@@ -224,17 +238,34 @@ const PublicGallery = () => {
               {filteredAchievements.length} Impact{filteredAchievements.length !== 1 ? "s" : ""}
             </p>
             <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredAchievements.map((achievement) => (
+              {filteredAchievements.map((achievement) => {
+                // Parse media - handle both string and array formats
+                let mediaArray: string[] = [];
+                if (achievement.media) {
+                  if (Array.isArray(achievement.media)) {
+                    mediaArray = achievement.media;
+                  } else if (typeof achievement.media === "string") {
+                    try {
+                      const parsed = JSON.parse(achievement.media);
+                      mediaArray = Array.isArray(parsed) ? parsed : [achievement.media];
+                    } catch {
+                      mediaArray = [achievement.media];
+                    }
+                  }
+                }
+                const firstImage = mediaArray.length > 0 ? mediaArray[0] : null;
+
+                return (
                 <Card
                   key={achievement.id}
                   className="overflow-hidden border border-slate-200 shadow-none hover:shadow-md transition-all flex flex-col cursor-pointer"
                   onClick={() => setSelectedImpact(achievement)}
                 >
                   {/* Image Container */}
-                  {achievement.media && achievement.media.length > 0 ? (
+                  {firstImage ? (
                     <div className="relative h-56 w-full overflow-hidden bg-slate-200 group">
                       <img
-                        src={achievement.media[0]}
+                        src={firstImage}
                         alt={achievement.title}
                         className="h-full w-full object-cover transition-transform group-hover:scale-105 duration-300"
                       />
@@ -259,10 +290,26 @@ const PublicGallery = () => {
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="relative h-56 w-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                      <div className="text-center">
-                        <p className="text-xs font-medium text-slate-600">No Image</p>
+                  ) : (() => {
+                    const placeholderUrl = getPlaceholderImageUrl(achievement.id);
+                    return (
+                    <div className="relative h-56 w-full overflow-hidden bg-slate-200 group">
+                      <img
+                        src={placeholderUrl}
+                        alt={`${achievement.category || "Impact"} placeholder`}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105 duration-300 opacity-75"
+                      />
+                      <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                        <Button
+                          variant="secondary"
+                          className="bg-white hover:bg-slate-100 text-slate-900 font-medium text-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedImpact(achievement);
+                          }}
+                        >
+                          View More
+                        </Button>
                       </div>
                       {achievement.category && (
                         <div className="absolute top-4 right-4 bg-slate-900/80 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white rounded">
@@ -270,7 +317,8 @@ const PublicGallery = () => {
                         </div>
                       )}
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Card Content */}
                   <CardHeader className="pb-4 border-b border-slate-200">
@@ -344,7 +392,8 @@ const PublicGallery = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           </>
         ) : (

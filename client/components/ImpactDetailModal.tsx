@@ -7,6 +7,20 @@ interface ImpactDetailModalProps {
   onClose: () => void;
 }
 
+// Placeholder images for missing impact photos
+const PLACEHOLDER_IMAGES = [
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F07abbe128c034110a41ea4e30c309f25?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F25973ad568f347639305716ee8338a8e?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fbf99fcd6af1f41fb93bb21a04341ac53?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F75345602b9e943b9983712eafd0894cd?format=webp&width=800&height=1200",
+  "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F1b76db134eb54ee9b4b112888f18b10c?format=webp&width=800&height=1200",
+];
+
+const getPlaceholderImageUrl = (achievementId?: number): string => {
+  const index = achievementId ? achievementId % PLACEHOLDER_IMAGES.length : Math.floor(Math.random() * PLACEHOLDER_IMAGES.length);
+  return PLACEHOLDER_IMAGES[index];
+};
+
 const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -116,11 +130,21 @@ const ImpactDetailModal = ({ impact, onClose }: ImpactDetailModalProps) => {
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                <p className="text-slate-500 text-sm">No images available</p>
+            ) : (() => {
+              const placeholderUrl = getPlaceholderImageUrl(impact.id);
+              return (
+              <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
+                <img
+                  src={placeholderUrl}
+                  alt={`${impact.category || "Impact"} placeholder`}
+                  className="h-full w-full object-cover opacity-75"
+                />
+                <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                  <p className="text-white text-center font-medium">No images uploaded</p>
+                </div>
               </div>
-            )}
+              );
+            })()}
           </div>
 
           {/* Details Sidebar - Right Column */}
