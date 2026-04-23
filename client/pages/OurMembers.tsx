@@ -29,6 +29,11 @@ const OurMembers = () => {
       try {
         const achievements = await getAchievements();
 
+        // Load customizations from localStorage
+        const memberCustomizations = JSON.parse(
+          localStorage.getItem("memberCustomizations") || "{}"
+        );
+
         // Group achievements by company and aggregate metrics
         const memberMap = new Map<string, {
           count: number;
@@ -130,14 +135,16 @@ const OurMembers = () => {
         const membersList: Member[] = Array.from(memberMap.entries()).map(
           ([company, { count, image, totalPeopleImpacted, totalContribution }]) => {
             const companyConfig = sectorMap[company];
+            const customization = memberCustomizations[company];
+
             return {
               company,
               actionCount: count,
-              image: image || companyConfig?.image,
+              image: customization?.image || image || companyConfig?.image,
               totalPeopleImpacted,
               totalContribution,
-              sector: companyConfig?.sector || "Business & Commerce",
-              description: companyConfig?.description || "Leading organization committed to creating positive social impact across Mozambique.",
+              sector: customization?.sector || companyConfig?.sector || "Business & Commerce",
+              description: customization?.description || companyConfig?.description || "Leading organization committed to creating positive social impact across Mozambique.",
             };
           }
         );

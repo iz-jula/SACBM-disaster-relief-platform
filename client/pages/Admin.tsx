@@ -217,8 +217,21 @@ export default function Admin() {
 
     setIsSavingMember(true);
     try {
-      // In a real app, you would save this to a database
-      // For now, we'll just update the local state
+      // Save member customization to localStorage for now
+      // (In production, you'd save to a database)
+      const memberCustomizations = JSON.parse(
+        localStorage.getItem("memberCustomizations") || "{}"
+      );
+
+      memberCustomizations[editingMember.company] = {
+        sector: editingMember.sector,
+        description: editingMember.description,
+        image: editingMember.image,
+      };
+
+      localStorage.setItem("memberCustomizations", JSON.stringify(memberCustomizations));
+
+      // Update local state
       setMembers(members.map(m =>
         m.company === editingMember.company ? editingMember : m
       ));
