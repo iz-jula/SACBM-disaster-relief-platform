@@ -85,8 +85,8 @@ const Home = () => {
       <MembersActionsSummary />
 
       {/* Image Carousel Section (Placeholder for admin-uploaded images) */}
-      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
-        <div className="mb-16">
+      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-12 sm:py-16">
+        <div className="mb-12">
           <h2 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900">Moments of Impact</h2>
           <p className="mt-4 text-base text-slate-600 max-w-2xl">
             Visual stories from our community initiatives

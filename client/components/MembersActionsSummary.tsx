@@ -71,7 +71,7 @@ const MembersActionsSummary = () => {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
+    <section className="mx-auto max-w-7xl px-6 sm:px-8 py-12 sm:py-16">
       <div className="mb-12">
         <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Our Impact</h2>
         <p className="mt-4 text-base text-slate-600 max-w-2xl">
