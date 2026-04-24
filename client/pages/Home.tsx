@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
+import MembersActionsSummary from "@/components/MembersActionsSummary";
 import { getCarouselImages, CarouselImage } from "@/services/supabaseService";
 
 const Home = () => {
@@ -79,6 +80,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Members Actions Summary */}
+      <MembersActionsSummary />
 
       {/* Image Carousel Section (Placeholder for admin-uploaded images) */}
       <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
