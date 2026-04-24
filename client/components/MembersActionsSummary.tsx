@@ -93,6 +93,7 @@ const MembersActionsSummary = () => {
           </div>
         ))}
       </div>
+      <p className="text-xs text-slate-500 mt-6">Impact of Members since January 2026</p>
     </section>
   );
 };
