@@ -47,22 +47,18 @@ const MembersActionsSummary = () => {
     {
       label: "Members",
       value: memberCount,
-      icon: "👥",
     },
     {
       label: "Actions",
       value: metrics.totalAchievements,
-      icon: "⚡",
     },
     {
       label: "People Impacted",
       value: metrics.totalPeopleImpacted.toLocaleString(),
-      icon: "🤝",
     },
     {
       label: "Total Value (MZN)",
       value: metrics.totalContributed.toLocaleString(),
-      icon: "💰",
     },
   ];
 
@@ -76,20 +72,23 @@ const MembersActionsSummary = () => {
 
   return (
     <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
+      <div className="mb-12">
+        <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Our Impact</h2>
+        <p className="mt-4 text-base text-slate-600 max-w-2xl">
+          Members of SACBM working together to make a measurable difference across Mozambique
+        </p>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <div
             key={index}
-            className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow"
+            className="bg-slate-50 border border-slate-200 rounded-lg p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow"
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">{stat.label}</p>
-                <p className="text-3xl sm:text-4xl font-light text-slate-900 mt-2">
-                  {stat.value}
-                </p>
-              </div>
-              <span className="text-3xl">{stat.icon}</span>
+            <div>
+              <p className="text-sm font-medium text-slate-600">{stat.label}</p>
+              <p className="text-3xl sm:text-4xl font-light text-slate-900 mt-2">
+                {stat.value}
+              </p>
             </div>
           </div>
         ))}
