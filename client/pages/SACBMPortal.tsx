@@ -395,13 +395,13 @@ const DashboardSection = ({ member }: { member: Member }) => {
         <h3 className="text-lg font-medium text-slate-900 mb-4">Recent Notifications</h3>
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-6">
-            <div className="space-y-4">
+            <div className="space-y-3">
               {[
-                { title: "Event Reminder: Annual Gala", desc: "Happening in 3 days", color: "bg-blue-100 border-l-4 border-blue-500" },
-                { title: "New Member Joined", desc: "Welcome TechCore Solutions", color: "bg-emerald-100 border-l-4 border-emerald-500" },
-                { title: "Document Updated", desc: "2024 Strategic Plan approved", color: "bg-amber-100 border-l-4 border-amber-500" },
+                { title: "Event Reminder: Annual Gala", desc: "Happening in 3 days", color: "bg-slate-50 border-l-4 border-indigo-600" },
+                { title: "New Member Joined", desc: "Welcome TechCore Solutions", color: "bg-slate-50 border-l-4 border-emerald-600" },
+                { title: "Document Updated", desc: "2024 Strategic Plan approved", color: "bg-slate-50 border-l-4 border-slate-400" },
               ].map((notif, i) => (
-                <div key={i} className={`p-4 rounded-lg ${notif.color} transition-all hover:shadow-sm`}>
+                <div key={i} className={`p-4 rounded-lg ${notif.color} transition-all hover:shadow-md`}>
                   <p className="font-medium text-slate-900">{notif.title}</p>
                   <p className="text-sm text-slate-600 mt-1">{notif.desc}</p>
                 </div>
