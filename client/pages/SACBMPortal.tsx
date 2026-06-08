@@ -215,7 +215,7 @@ const SACBMPortal = () => {
         <div className="p-6 md:p-8">
           {currentSection === "dashboard" && <DashboardSection member={currentMember} />}
           {currentSection === "documents" && <DocumentsSection member={currentMember} />}
-          {currentSection === "events" && <EventsSection member={currentMember} />}
+          {currentSection === "events" && <EventsSection member={currentMember} onNavigate={setCurrentSection} />}
           {currentSection === "members" && <MembersSection member={currentMember} />}
         </div>
       </main>
@@ -512,8 +512,8 @@ const DocumentsSection = ({ member }: { member: Member }) => {
 };
 
 // Events Section Component
-const EventsSection = ({ member }: { member: Member }) => {
-  return <SACBMEvents member={member} />;
+const EventsSection = ({ member, onNavigate }: { member: Member; onNavigate: (section: "dashboard" | "documents" | "events" | "members") => void }) => {
+  return <SACBMEvents member={member} onNavigate={onNavigate} />;
 };
 
 // Members Section Component

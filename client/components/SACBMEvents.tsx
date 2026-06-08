@@ -104,9 +104,10 @@ const MOCK_RSVPS: EventRSVP[] = [
 
 interface SACBMEventsProps {
   member: Member;
+  onNavigate?: (section: "dashboard" | "documents" | "events" | "members") => void;
 }
 
-const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
+const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "past">("upcoming");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [detailedEvent, setDetailedEvent] = useState<Event | null>(null);
@@ -382,25 +383,37 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
             {sidebarOpen && (
               <div className="flex-1 space-y-2">
                 <button
-                  onClick={() => setDetailedEvent(null)}
+                  onClick={() => {
+                    setDetailedEvent(null);
+                    onNavigate?.("dashboard");
+                  }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <Home className="h-5 w-5" />
                   <span className="text-sm">Dashboard</span>
                 </button>
                 <button
-                  onClick={() => setDetailedEvent(null)}
+                  onClick={() => {
+                    setDetailedEvent(null);
+                    onNavigate?.("documents");
+                  }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <FileText className="h-5 w-5" />
                   <span className="text-sm">Documents</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 transition-colors">
+                <button
+                  onClick={() => setDetailedEvent(null)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 transition-colors"
+                >
                   <Calendar className="h-5 w-5" />
                   <span className="text-sm">Events</span>
                 </button>
                 <button
-                  onClick={() => setDetailedEvent(null)}
+                  onClick={() => {
+                    setDetailedEvent(null);
+                    onNavigate?.("members");
+                  }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <Users className="h-5 w-5" />
@@ -543,8 +556,17 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
                         {member.name.split(" ")[0]},
                       </p>
                       <p className="text-lg font-light text-emerald-800 mb-4">you're attending the event!</p>
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2">
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2 mb-2">
                         Add to Calendar
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
+                        }}
+                        variant="outline"
+                        className="w-full text-xs py-1"
+                      >
+                        Change Response
                       </Button>
                     </div>
                   </div>
