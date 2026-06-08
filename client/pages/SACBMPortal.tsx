@@ -249,7 +249,7 @@ const DashboardSection = ({ member }: { member: Member }) => {
   return (
     <div className="space-y-8">
       {/* Hero Banner Section */}
-      <div className="relative overflow-hidden rounded-xl h-64 md:h-72 bg-gradient-to-r from-slate-900 to-slate-800">
+      <div className="relative overflow-hidden rounded-xl h-48 md:h-72 bg-gradient-to-r from-slate-900 to-slate-800">
         {/* Background Image */}
         <img
           src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=1200&height=600"
@@ -260,22 +260,22 @@ const DashboardSection = ({ member }: { member: Member }) => {
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 via-slate-800/50 to-slate-900/60" />
 
         {/* Content */}
-        <div className="relative h-full flex flex-col justify-between p-8">
+        <div className="relative h-full flex flex-col justify-between p-4 md:p-8">
           <div>
-            <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white mb-3">
+            <h1 className="text-2xl md:text-5xl font-light tracking-tight text-white mb-2 md:mb-3">
               Welcome back, {member.name.split(" ")[0]}
             </h1>
-            <p className="text-lg text-slate-100 max-w-2xl">
+            <p className="text-sm md:text-lg text-slate-100 max-w-2xl">
               Manage your chamber activities and stay connected
             </p>
           </div>
 
           {/* Role & Tier Badges */}
-          <div className="flex items-center gap-3">
-            <span className={`text-xs font-semibold px-4 py-2 rounded-full border backdrop-blur-sm ${getTierColor(member.tier)}`}>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur-sm ${getTierColor(member.tier)}`}>
               {member.tier.toUpperCase()}
             </span>
-            <span className={`text-xs font-semibold px-4 py-2 rounded-full backdrop-blur-sm ${getRoleBadge(member.role).color}`}>
+            <span className={`text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm ${getRoleBadge(member.role).color}`}>
               {getRoleBadge(member.role).label}
             </span>
           </div>
@@ -283,37 +283,28 @@ const DashboardSection = ({ member }: { member: Member }) => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3">
         <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 font-medium">Upcoming Events</p>
-                <p className="text-3xl font-light text-slate-900 mt-2">12</p>
-              </div>
-              <Calendar className="h-8 w-8 text-emerald-600/20" />
+          <CardContent className="pt-4 pb-4">
+            <div className="flex flex-col items-start">
+              <p className="text-xs md:text-sm text-slate-600 font-medium">Events</p>
+              <p className="text-2xl md:text-3xl font-light text-slate-900 mt-1">12</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 font-medium">Active Members</p>
-                <p className="text-3xl font-light text-slate-900 mt-2">245</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-600/20" />
+          <CardContent className="pt-4 pb-4">
+            <div className="flex flex-col items-start">
+              <p className="text-xs md:text-sm text-slate-600 font-medium">Members</p>
+              <p className="text-2xl md:text-3xl font-light text-slate-900 mt-1">245</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600 font-medium">Notifications</p>
-                <p className="text-3xl font-light text-slate-900 mt-2">7</p>
-              </div>
-              <Bell className="h-8 w-8 text-purple-600/20" />
+          <CardContent className="pt-4 pb-4">
+            <div className="flex flex-col items-start">
+              <p className="text-xs md:text-sm text-slate-600 font-medium">Alerts</p>
+              <p className="text-2xl md:text-3xl font-light text-slate-900 mt-1">7</p>
             </div>
           </CardContent>
         </Card>
@@ -321,8 +312,8 @@ const DashboardSection = ({ member }: { member: Member }) => {
 
       {/* Grid: Calendar + Upcoming Events */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar */}
-        <div className="lg:col-span-1">
+        {/* Calendar - Hidden on mobile */}
+        <div className="hidden lg:block lg:col-span-1">
           <h3 className="text-lg font-medium text-slate-900 mb-4">Calendar</h3>
           <Card className="border-0 shadow-sm">
             <CardContent className="pt-6">
@@ -358,7 +349,7 @@ const DashboardSection = ({ member }: { member: Member }) => {
         </div>
 
         {/* Upcoming Events */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 order-first lg:order-last">
           <h3 className="text-lg font-medium text-slate-900 mb-4">Upcoming Events</h3>
           <div className="space-y-3">
             {upcomingEvents.map((event, idx) => (
