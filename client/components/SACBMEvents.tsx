@@ -613,13 +613,13 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                       </button>
                       <button
                         onClick={() => setShowMaybeForm(true)}
-                        className="text-sm font-medium text-slate-700 hover:text-slate-900 py-2 text-left transition-colors"
+                        className="text-sm font-medium text-amber-700 hover:text-amber-900 py-2 text-left transition-colors"
                       >
                         Maybe
                       </button>
                       <button
                         onClick={() => setShowDeclineForm(true)}
-                        className="text-sm font-medium text-slate-700 hover:text-slate-900 py-2 text-left transition-colors"
+                        className="text-sm font-medium text-red-700 hover:text-red-900 py-2 text-left transition-colors"
                       >
                         Decline
                       </button>
