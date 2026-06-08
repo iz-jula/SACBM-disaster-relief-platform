@@ -541,33 +541,32 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
             </div>
 
             {/* Sidebar - Right 1/3 with Image and RSVP */}
-            <div className="hidden md:flex md:w-1/3 flex-col bg-slate-100 border-l border-slate-200 sticky top-20 h-[calc(100vh-80px)]">
-              {/* Image - Full Height */}
-              <div className="flex-1 bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center overflow-hidden">
-                <Calendar className="h-20 w-20 text-slate-400" />
+            <div className="hidden md:flex md:w-1/3 flex-col bg-white border-l border-slate-200 h-[calc(100vh-80px)] overflow-hidden">
+              {/* Image - Longer to cover top */}
+              <div className="h-1/2 min-h-[300px] bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <Calendar className="h-24 w-24 text-slate-300" />
               </div>
 
               {/* RSVP Section - Sticky Bottom */}
-              <div className="p-6 bg-white border-t border-slate-200 space-y-4">
+              <div className="flex-1 overflow-auto p-6 bg-white space-y-4 border-t border-slate-200">
                 {rsvpResponse[detailedEvent.id]?.status === "accepted" ? (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg">
-                      <p className="text-xl font-light tracking-tight text-emerald-900 mb-1">
+                  <div className="space-y-3">
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <p className="text-2xl font-light tracking-tight text-emerald-900 mb-0.5">
                         {member.name.split(" ")[0]},
                       </p>
-                      <p className="text-lg font-light text-emerald-800 mb-4">you're attending the event!</p>
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2 mb-2">
+                      <p className="text-base font-light text-emerald-800 mb-4">you're attending!</p>
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 mb-3">
                         Add to Calendar
                       </Button>
-                      <Button
+                      <button
                         onClick={() => {
                           setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
                         }}
-                        variant="outline"
-                        className="w-full text-xs py-1"
+                        className="w-full text-xs text-emerald-700 hover:text-emerald-800 font-medium py-1 transition-colors"
                       >
-                        Change Response
-                      </Button>
+                        Change response
+                      </button>
                     </div>
                   </div>
                 ) : rsvpResponse[detailedEvent.id]?.status === "declined" ? (
@@ -575,16 +574,15 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                     <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
                       <p className="text-sm font-semibold text-slate-700 mb-2">You declined</p>
                       <p className="text-xs text-slate-600 mb-3">{rsvpResponse[detailedEvent.id].reason}</p>
-                      <Button
+                      <button
                         onClick={() => {
                           setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
                           setShowDeclineForm(false);
                         }}
-                        variant="outline"
-                        className="w-full text-xs py-1"
+                        className="w-full text-xs text-slate-700 hover:text-slate-900 font-medium py-1 transition-colors"
                       >
-                        Change Response
-                      </Button>
+                        Change response
+                      </button>
                     </div>
                   </div>
                 ) : rsvpResponse[detailedEvent.id]?.status === "maybe" ? (
@@ -592,40 +590,39 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                       <p className="text-sm font-semibold text-amber-800 mb-2">You'll decide by</p>
                       <p className="text-sm font-medium text-amber-900 mb-3">{rsvpResponse[detailedEvent.id].date}</p>
-                      <Button
+                      <button
                         onClick={() => {
                           setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
                           setShowMaybeForm(false);
                         }}
-                        variant="outline"
-                        className="w-full text-xs py-1"
+                        className="w-full text-xs text-amber-700 hover:text-amber-800 font-medium py-1 transition-colors"
                       >
-                        Change Response
-                      </Button>
+                        Change response
+                      </button>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-xs font-medium text-slate-600 mb-2">Will you attend?</p>
+                    <p className="text-xs font-medium text-slate-600 mb-3">Will you attend?</p>
                     <div className="flex flex-col gap-2">
-                      <Button
+                      <button
                         onClick={() => setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: { status: "accepted" } }))}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 rounded-lg transition-colors"
                       >
                         Accept
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => setShowMaybeForm(true)}
-                        className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2"
+                        className="w-full text-slate-700 hover:text-slate-900 text-sm font-medium py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                       >
                         Maybe
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => setShowDeclineForm(true)}
-                        className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2"
+                        className="w-full text-slate-700 hover:text-slate-900 text-sm font-medium py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                       >
                         Decline
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 )}
