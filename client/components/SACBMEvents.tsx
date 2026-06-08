@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Calendar,
   MapPin,
@@ -109,7 +110,13 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "past">("upcoming");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [detailedEvent, setDetailedEvent] = useState<Event | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [memberRsvps, setMemberRsvps] = useState<Record<string, EventRSVP["status"]>>({});
+  const [rsvpResponse, setRsvpResponse] = useState<Record<string, { status: string; reason?: string; date?: string }>>({});
+  const [showDeclineForm, setShowDeclineForm] = useState(false);
+  const [showMaybeForm, setShowMaybeForm] = useState(false);
+  const [declineReason, setDeclineReason] = useState("");
+  const [maybeDate, setMaybeDate] = useState("");
 
   // Initialize RSVPs for current member
   useMemo(() => {
@@ -361,33 +368,44 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
       {/* Event Detail Page */}
       {detailedEvent && (
         <div className="fixed inset-0 bg-white z-50 flex">
-          {/* Left Sidebar - Full Portal Sidebar */}
-          <div className="w-64 bg-white border-r border-slate-200 flex flex-col p-4 overflow-y-auto">
-            <button
-              onClick={() => setDetailedEvent(null)}
-              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors mb-6 font-medium"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back</span>
-            </button>
-            <div className="flex-1 space-y-2">
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
-                <Home className="h-5 w-5" />
-                <span className="text-sm">Dashboard</span>
+          {/* Left Sidebar - Collapsible */}
+          <div className={`${sidebarOpen ? "w-64" : "w-20"} bg-white border-r border-slate-200 flex flex-col p-4 overflow-y-auto transition-all duration-300`}>
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={() => setDetailedEvent(null)}
+                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors font-medium flex-1"
+              >
+                <ArrowLeft className="h-4 w-4 flex-shrink-0" />
+                {sidebarOpen && <span>Back</span>}
               </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
-                <FileText className="h-5 w-5" />
-                <span className="text-sm">Documents</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <Calendar className="h-5 w-5" />
-                <span className="text-sm">Events</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
-                <Users className="h-5 w-5" />
-                <span className="text-sm">Directory</span>
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600"
+                title={sidebarOpen ? "Collapse" : "Expand"}
+              >
+                {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronRight className="h-4 w-4 rotate-180" />}
               </button>
             </div>
+            {sidebarOpen && (
+              <div className="flex-1 space-y-2">
+                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                  <Home className="h-5 w-5" />
+                  <span className="text-sm">Dashboard</span>
+                </button>
+                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                  <FileText className="h-5 w-5" />
+                  <span className="text-sm">Documents</span>
+                </button>
+                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <Calendar className="h-5 w-5" />
+                  <span className="text-sm">Events</span>
+                </button>
+                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                  <Users className="h-5 w-5" />
+                  <span className="text-sm">Directory</span>
+                </button>
+              </div>
+            )}
             <div className="pt-4 border-t border-slate-200 space-y-2">
               <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-sm">
                 <Share2 className="h-5 w-5" />
@@ -516,20 +534,74 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
 
               {/* RSVP Section - Sticky Bottom */}
               <div className="p-6 bg-white border-t border-slate-200 space-y-4">
-                <div>
-                  <p className="text-xs font-medium text-slate-600 mb-2">Will you attend?</p>
-                  <div className="flex flex-col gap-2">
-                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2">
-                      Accept
-                    </Button>
-                    <Button className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2">
-                      Maybe
-                    </Button>
-                    <Button className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2">
-                      Decline
-                    </Button>
+                {rsvpResponse[detailedEvent.id]?.status === "accepted" ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm font-semibold text-green-800 mb-3">✓ You're attending!</p>
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2">
+                        Add to Calendar
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                ) : rsvpResponse[detailedEvent.id]?.status === "declined" ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                      <p className="text-sm font-semibold text-slate-700 mb-2">You declined</p>
+                      <p className="text-xs text-slate-600 mb-3">{rsvpResponse[detailedEvent.id].reason}</p>
+                      <Button
+                        onClick={() => {
+                          setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
+                          setShowDeclineForm(false);
+                        }}
+                        variant="outline"
+                        className="w-full text-xs py-1"
+                      >
+                        Change Response
+                      </Button>
+                    </div>
+                  </div>
+                ) : rsvpResponse[detailedEvent.id]?.status === "maybe" ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm font-semibold text-amber-800 mb-2">You'll decide by</p>
+                      <p className="text-sm font-medium text-amber-900 mb-3">{rsvpResponse[detailedEvent.id].date}</p>
+                      <Button
+                        onClick={() => {
+                          setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
+                          setShowMaybeForm(false);
+                        }}
+                        variant="outline"
+                        className="w-full text-xs py-1"
+                      >
+                        Change Response
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 mb-2">Will you attend?</p>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={() => setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: { status: "accepted" } }))}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2"
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        onClick={() => setShowMaybeForm(true)}
+                        className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2"
+                      >
+                        Maybe
+                      </Button>
+                      <Button
+                        onClick={() => setShowDeclineForm(true)}
+                        className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2"
+                      >
+                        Decline
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="pt-4 border-t border-slate-200">
                   <p className="text-xs text-slate-600">
                     RSVP by {new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}
@@ -539,6 +611,98 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
             </div>
 
           </div>
+
+          {/* Decline Reason Modal */}
+          {showDeclineForm && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <Card className="w-full max-w-md border-0">
+                <CardHeader>
+                  <CardTitle>Why can't you attend?</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    placeholder="Tell us why you can't make it (optional)"
+                    value={declineReason}
+                    onChange={(e) => setDeclineReason(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        setRsvpResponse(prev => ({
+                          ...prev,
+                          [detailedEvent.id]: { status: "declined", reason: declineReason || "Can't attend" }
+                        }));
+                        setShowDeclineForm(false);
+                        setDeclineReason("");
+                      }}
+                      className="flex-1 bg-slate-600 hover:bg-slate-700 text-white"
+                    >
+                      Confirm
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowDeclineForm(false);
+                        setDeclineReason("");
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Maybe Decision Date Modal */}
+          {showMaybeForm && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <Card className="w-full max-w-md border-0">
+                <CardHeader>
+                  <CardTitle>When will you know?</CardTitle>
+                  <CardDescription>Pick a date by when you'll make your decision</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <input
+                    type="date"
+                    value={maybeDate}
+                    onChange={(e) => setMaybeDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        if (maybeDate) {
+                          setRsvpResponse(prev => ({
+                            ...prev,
+                            [detailedEvent.id]: { status: "maybe", date: new Date(maybeDate).toLocaleDateString() }
+                          }));
+                          setShowMaybeForm(false);
+                          setMaybeDate("");
+                        }
+                      }}
+                      disabled={!maybeDate}
+                      className="flex-1 bg-amber-600 hover:bg-amber-700 text-white disabled:bg-slate-300"
+                    >
+                      Confirm
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowMaybeForm(false);
+                        setMaybeDate("");
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       )}
     </div>
