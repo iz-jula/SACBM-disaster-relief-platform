@@ -186,52 +186,45 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6 border-0 shadow-sm">
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">Search</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  placeholder="Search documents..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">Category</label>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="governance">Governance</SelectItem>
-                  <SelectItem value="policy">Policy</SelectItem>
-                  <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">Sort By</label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most Recent</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="alphabetical">Alphabetical</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <div className="relative">
+            <Search className="absolute left-0 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-6 border-0 border-b border-slate-200 rounded-none bg-transparent focus:border-slate-900 focus:ring-0 focus:bg-transparent"
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="governance">Governance</SelectItem>
+              <SelectItem value="policy">Policy</SelectItem>
+              <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Most Recent</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="alphabetical">Alphabetical</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       {/* Documents List */}
       {filteredDocuments.length === 0 ? (
