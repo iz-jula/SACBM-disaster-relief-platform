@@ -555,18 +555,20 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                       <p className="text-2xl font-light tracking-tight text-emerald-900 mb-0.5">
                         {member.name.split(" ")[0]},
                       </p>
-                      <p className="text-base font-light text-emerald-800 mb-4">you're attending!</p>
-                      <button className="text-sm font-medium text-emerald-700 hover:text-emerald-900 py-2 text-left transition-colors">
-                        Add to Calendar
-                      </button>
-                      <button
-                        onClick={() => {
-                          setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
-                        }}
-                        className="w-full text-xs text-emerald-700 hover:text-emerald-800 font-medium py-1 transition-colors"
-                      >
-                        Change response
-                      </button>
+                      <p className="text-base font-light text-emerald-800 mb-5">you're attending!</p>
+                      <div className="space-y-3">
+                        <button className="w-full text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 py-2 rounded transition-colors text-center">
+                          Add to Calendar
+                        </button>
+                        <button
+                          onClick={() => {
+                            setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
+                          }}
+                          className="w-full text-xs text-emerald-700 hover:text-emerald-800 font-medium py-1 transition-colors"
+                        >
+                          Change response
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : rsvpResponse[detailedEvent.id]?.status === "declined" ? (
