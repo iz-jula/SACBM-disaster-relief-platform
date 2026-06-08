@@ -255,6 +255,17 @@ const DashboardSection = ({ member }: { member: Member }) => {
     ? allEvents.filter(event => event.date === selectedDate)
     : allEvents;
 
+  const getNextEventDate = () => {
+    if (selectedDate) {
+      const sortedEvents = [...allEvents].sort((a, b) => a.date - b.date);
+      const nextEvent = sortedEvents.find(e => e.date > selectedDate);
+      return nextEvent ? nextEvent.date : sortedEvents[0].date;
+    }
+    return null;
+  };
+
+  const nextEventDate = getNextEventDate();
+
   return (
     <div className="space-y-8">
       {/* Hero Banner Section */}
@@ -408,11 +419,27 @@ const DashboardSection = ({ member }: { member: Member }) => {
               ))}
             </div>
           ) : (
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-50 to-slate-100">
               <CardContent className="pt-12 pb-12 text-center">
-                <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600 font-medium">No events on this date</p>
-                <p className="text-slate-500 text-sm mt-1">Select a different date or clear the filter</p>
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm mb-4">
+                  <Calendar className="h-7 w-7 text-slate-400" />
+                </div>
+                <p className="text-slate-900 font-semibold text-lg">No events scheduled</p>
+                <p className="text-slate-600 text-sm mt-3">
+                  {nextEventDate ? (
+                    <>
+                      The next event is on <span className="font-semibold text-emerald-600">Feb {nextEventDate}</span>
+                    </>
+                  ) : (
+                    "No upcoming events found"
+                  )}
+                </p>
+                <button
+                  onClick={() => setSelectedDate(null)}
+                  className="mt-4 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
+                >
+                  Clear filter
+                </button>
               </CardContent>
             </Card>
           )}
