@@ -17,6 +17,7 @@ import {
   Share2,
   Heart,
   Home,
+  FileText,
 } from "lucide-react";
 import { Member, Event, EventRSVP, MemberRole } from "@shared/api";
 
