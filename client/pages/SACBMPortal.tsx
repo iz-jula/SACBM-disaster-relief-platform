@@ -312,8 +312,8 @@ const DashboardSection = ({ member }: { member: Member }) => {
 
       {/* Grid: Calendar + Upcoming Events */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar - Hidden on mobile */}
-        <div className="hidden lg:block lg:col-span-1">
+        {/* Calendar */}
+        <div className="lg:col-span-1 order-last lg:order-first">
           <h3 className="text-lg font-medium text-slate-900 mb-4">Calendar</h3>
           <Card className="border-0 shadow-sm">
             <CardContent className="pt-6">
