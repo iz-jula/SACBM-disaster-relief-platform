@@ -37,6 +37,8 @@ const MOCK_EVENTS: Event[] = [
     createdDate: "2024-01-20",
     status: "upcoming",
     rsvpDeadline: "2024-03-08",
+    registrationInfo: "Click the RSVP button to confirm your attendance. You will receive a confirmation email with all event details.",
+    directionsInfo: "The venue is easily accessible by car or public transportation. Parking will be available on-site.",
   },
   {
     id: "2",
@@ -45,12 +47,15 @@ const MOCK_EVENTS: Event[] = [
     date: "2024-02-28",
     time: "07:30",
     endTime: "09:30",
-    location: "Hotel Avenida, Maputo",
+    location: "Zoom",
     capacity: 100,
+    zoomLink: "https://zoom.us/j/123456789",
     createdBy: "exco",
     createdDate: "2024-02-01",
     status: "upcoming",
     rsvpDeadline: "2024-02-24",
+    registrationInfo: "RSVP below to receive the Zoom link. Join 5 minutes early to test your audio and video.",
+    directionsInfo: "This is an online event. You can join from anywhere with an internet connection.",
   },
   {
     id: "3",
@@ -443,6 +448,16 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                   {detailedEvent.title}
                 </h1>
 
+                {/* Zoom Link - If Online */}
+                {detailedEvent.zoomLink && (
+                  <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm font-medium text-blue-900 mb-2">Join online via Zoom</p>
+                    <a href={detailedEvent.zoomLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-700 hover:text-blue-900 break-all">
+                      {detailedEvent.zoomLink}
+                    </a>
+                  </div>
+                )}
+
                 {/* Event Meta - Better Spacing */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 pb-8 border-b border-slate-200">
                   <div>
@@ -485,40 +500,10 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                 {/* How to Sign Up */}
                 <div className="mb-12">
                   <h2 className="text-2xl font-semibold text-slate-900 mb-4">How to register</h2>
-                  <div className="space-y-4">
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600 text-white">
-                          1
-                        </div>
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-900">Confirm your attendance</p>
-                        <p className="text-slate-600 mt-1">Click the RSVP button to let us know you're coming</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600 text-white">
-                          2
-                        </div>
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-900">You'll receive a confirmation</p>
-                        <p className="text-slate-600 mt-1">A confirmation email with all event details will be sent to you</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600 text-white">
-                          3
-                        </div>
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-900">Join us at the event</p>
-                        <p className="text-slate-600 mt-1">Arrive 15 minutes early for check-in</p>
-                      </div>
-                    </div>
+                  <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                    <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
+                      {detailedEvent.registrationInfo || "Click the RSVP button to confirm your attendance. You will receive a confirmation email with all event details."}
+                    </p>
                   </div>
                 </div>
 
@@ -529,12 +514,9 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                     <p className="text-slate-600 mb-4">
                       <strong className="text-slate-900">{detailedEvent.location}</strong>
                     </p>
-                    <p className="text-slate-600 mb-4">
-                      The venue is easily accessible by car or public transportation. Parking will be available on-site.
+                    <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
+                      {detailedEvent.directionsInfo || "The venue is easily accessible by car or public transportation. Parking will be available on-site."}
                     </p>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                      Get Directions
-                    </Button>
                   </div>
                 </div>
               </div>

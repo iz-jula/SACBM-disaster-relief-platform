@@ -68,6 +68,9 @@ export interface Event {
   createdDate: string;
   status: "upcoming" | "completed" | "cancelled";
   rsvpDeadline: string;
+  zoomLink?: string;
+  registrationInfo?: string;
+  directionsInfo?: string;
 }
 
 export interface EventRSVP {
