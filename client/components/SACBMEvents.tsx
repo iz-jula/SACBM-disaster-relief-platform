@@ -636,22 +636,22 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                 ) : (
                   <div>
                     <p className="text-xs font-medium text-slate-600 mb-4">Will you attend?</p>
-                    <div className="flex flex-col gap-3">
+                    <div className="flex gap-3">
                       <button
                         onClick={() => setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: { status: "accepted" } }))}
-                        className="text-sm font-medium text-emerald-700 hover:text-emerald-900 py-2 text-left transition-colors"
+                        className="flex-1 text-sm font-medium text-emerald-700 hover:text-emerald-900 py-2 text-center transition-colors"
                       >
                         Accept
                       </button>
                       <button
                         onClick={() => setShowMaybeForm(true)}
-                        className="text-sm font-medium text-amber-700 hover:text-amber-900 py-2 text-left transition-colors"
+                        className="flex-1 text-sm font-medium text-amber-700 hover:text-amber-900 py-2 text-center transition-colors"
                       >
                         Maybe
                       </button>
                       <button
                         onClick={() => setShowDeclineForm(true)}
-                        className="text-sm font-medium text-red-700 hover:text-red-900 py-2 text-left transition-colors"
+                        className="flex-1 text-sm font-medium text-red-700 hover:text-red-900 py-2 text-center transition-colors"
                       >
                         Decline
                       </button>
