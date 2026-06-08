@@ -199,7 +199,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       </div>
 
       {/* Filters */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-0 md:flex md:items-end md:space-x-6">
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <div className="relative">
             <Search className="absolute left-0 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -212,27 +212,29 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
           </div>
         </div>
         <div className="flex items-end gap-2">
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0 flex-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="governance">Governance</SelectItem>
-              <SelectItem value="policy">Policy</SelectItem>
-              <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-              {customCategories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex-1">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0 w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="governance">Governance</SelectItem>
+                <SelectItem value="policy">Policy</SelectItem>
+                <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+                {customCategories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           {member.role === MemberRole.ADMIN && (
             <button
               onClick={() => setShowNewCategoryForm(true)}
-              className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded transition-colors"
+              className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded transition-colors flex-shrink-0"
               title="Add new category"
             >
               <Plus className="h-4 w-4" />
@@ -241,7 +243,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
         </div>
         <div>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0">
+            <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0 w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
