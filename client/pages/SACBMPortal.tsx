@@ -226,6 +226,7 @@ const SACBMPortal = () => {
 // Dashboard Section Component
 const DashboardSection = ({ member }: { member: Member }) => {
   const [selectedDate, setSelectedDate] = useState<number | null>(15);
+  const [memberRsvps, setMemberRsvps] = useState<Record<string, "accepted" | "declined" | "maybe">>({});
 
   const allEvents = [
     {
@@ -266,6 +267,13 @@ const DashboardSection = ({ member }: { member: Member }) => {
   };
 
   const nextEvents = getNextEvents();
+
+  const handleRsvp = (eventTitle: string, status: "accepted" | "declined" | "maybe") => {
+    setMemberRsvps((prev) => ({
+      ...prev,
+      [eventTitle]: status,
+    }));
+  };
 
   return (
     <div className="space-y-8">
@@ -411,9 +419,18 @@ const DashboardSection = ({ member }: { member: Member }) => {
                           {event.dateStr} • Hosted by SACBM
                         </p>
                       </div>
-                      <button className="px-3 py-1 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex-shrink-0">
-                        RSVP
-                      </button>
+                      {memberRsvps[event.title] ? (
+                        <span className="px-3 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg">
+                          {memberRsvps[event.title]}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleRsvp(event.title, "accepted")}
+                          className="px-3 py-1 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex-shrink-0"
+                        >
+                          RSVP
+                        </button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -448,9 +465,18 @@ const DashboardSection = ({ member }: { member: Member }) => {
                           <p className="text-sm font-medium text-slate-900">{event.title}</p>
                           <p className="text-xs text-slate-600 mt-1">Feb {event.date}</p>
                         </div>
-                        <button className="px-2 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors flex-shrink-0">
-                          RSVP
-                        </button>
+                        {memberRsvps[event.title] ? (
+                          <span className="px-2 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 rounded">
+                            {memberRsvps[event.title]}
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleRsvp(event.title, "accepted")}
+                            className="px-2 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors flex-shrink-0"
+                          >
+                            RSVP
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
