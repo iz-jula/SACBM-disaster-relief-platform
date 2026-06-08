@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   Share2,
   Heart,
+  Home,
 } from "lucide-react";
 import { Member, Event, EventRSVP, MemberRole } from "@shared/api";
 
@@ -359,21 +360,43 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
       {/* Event Detail Page */}
       {detailedEvent && (
         <div className="fixed inset-0 bg-white z-50 flex">
-          {/* Left Sidebar - Collapsed */}
-          <div className="w-20 bg-white border-r border-slate-200 flex flex-col items-center py-4 space-y-2">
+          {/* Left Sidebar - Full Portal Sidebar */}
+          <div className="w-64 bg-white border-r border-slate-200 flex flex-col p-4 overflow-y-auto">
             <button
               onClick={() => setDetailedEvent(null)}
-              className="p-3 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900"
-              title="Back"
+              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors mb-6 font-medium"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back</span>
             </button>
-            <button className="p-3 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900">
-              <Share2 className="h-5 w-5" />
-            </button>
-            <button className="p-3 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900">
-              <Heart className="h-5 w-5" />
-            </button>
+            <div className="flex-1 space-y-2">
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                <Home className="h-5 w-5" />
+                <span className="text-sm">Dashboard</span>
+              </button>
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                <FileText className="h-5 w-5" />
+                <span className="text-sm">Documents</span>
+              </button>
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <Calendar className="h-5 w-5" />
+                <span className="text-sm">Events</span>
+              </button>
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                <Users className="h-5 w-5" />
+                <span className="text-sm">Directory</span>
+              </button>
+            </div>
+            <div className="pt-4 border-t border-slate-200 space-y-2">
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-sm">
+                <Share2 className="h-5 w-5" />
+                <span>Share</span>
+              </button>
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-sm">
+                <Heart className="h-5 w-5" />
+                <span>Save</span>
+              </button>
+            </div>
           </div>
 
           {/* Content with Sidebar Layout */}
@@ -386,11 +409,11 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
                   {detailedEvent.title}
                 </h1>
 
-                {/* Event Meta - Compact Inline */}
-                <div className="flex flex-wrap items-center gap-6 mb-8 pb-8 border-b border-slate-200">
+                {/* Event Meta - Better Spacing */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 pb-8 border-b border-slate-200">
                   <div>
-                    <p className="text-xs font-medium text-slate-600">Date</p>
-                    <p className="text-lg font-semibold text-slate-900 mt-1">
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Date</p>
+                    <p className="text-lg font-semibold text-slate-900">
                       {new Date(detailedEvent.date).toLocaleDateString("en-US", {
                         weekday: "short",
                         month: "short",
@@ -399,20 +422,20 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-slate-600">Time</p>
-                    <p className="text-lg font-semibold text-slate-900 mt-1">
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Time</p>
+                    <p className="text-lg font-semibold text-slate-900">
                       {detailedEvent.time}
                       {detailedEvent.endTime && ` - ${detailedEvent.endTime}`}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-600">Location</p>
-                    <p className="text-lg font-semibold text-slate-900 mt-1">{detailedEvent.location}</p>
+                  <div className={detailedEvent.capacity ? "lg:col-span-1" : "sm:col-span-2"}>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Location</p>
+                    <p className="text-lg font-semibold text-slate-900">{detailedEvent.location}</p>
                   </div>
                   {detailedEvent.capacity && (
                     <div>
-                      <p className="text-xs font-medium text-slate-600">Capacity</p>
-                      <p className="text-lg font-semibold text-slate-900 mt-1">{detailedEvent.capacity} people</p>
+                      <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Capacity</p>
+                      <p className="text-lg font-semibold text-slate-900">{detailedEvent.capacity} people</p>
                     </div>
                   )}
                 </div>
