@@ -641,19 +641,20 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
 
           {/* Decline Reason Modal */}
           {showDeclineForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <Card className="w-full max-w-md border-0">
-                <CardHeader>
-                  <CardTitle>Why can't you attend?</CardTitle>
+            <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <Card className="w-full max-w-md border-0 shadow-2xl">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                  <CardTitle className="text-xl font-light tracking-tight">Why can't you attend?</CardTitle>
+                  <CardDescription className="text-slate-600">Your feedback helps us improve future events</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 pt-6">
                   <Textarea
                     placeholder="Tell us why you can't make it (optional)"
                     value={declineReason}
                     onChange={(e) => setDeclineReason(e.target.value)}
-                    className="min-h-[100px]"
+                    className="min-h-[100px] border-slate-200 focus:border-slate-400 focus:ring-slate-300"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-3 pt-2">
                     <Button
                       onClick={() => {
                         setRsvpResponse(prev => ({
@@ -663,7 +664,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                         setShowDeclineForm(false);
                         setDeclineReason("");
                       }}
-                      className="flex-1 bg-slate-600 hover:bg-slate-700 text-white"
+                      className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium"
                     >
                       Confirm
                     </Button>
@@ -673,7 +674,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                         setDeclineReason("");
                       }}
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
                     >
                       Cancel
                     </Button>
@@ -684,52 +685,80 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
           )}
 
           {/* Maybe Decision Date Modal */}
-          {showMaybeForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <Card className="w-full max-w-md border-0">
-                <CardHeader>
-                  <CardTitle>When will you know?</CardTitle>
-                  <CardDescription>Pick a date by when you'll make your decision</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <input
-                    type="date"
-                    value={maybeDate}
-                    onChange={(e) => setMaybeDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => {
-                        if (maybeDate) {
-                          setRsvpResponse(prev => ({
-                            ...prev,
-                            [detailedEvent.id]: { status: "maybe", date: new Date(maybeDate).toLocaleDateString() }
-                          }));
+          {showMaybeForm && (() => {
+            const eventDate = new Date(detailedEvent.date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Max date is 24 hours before event
+            const maxDate = new Date(eventDate);
+            maxDate.setDate(maxDate.getDate() - 1);
+
+            // Format dates for input
+            const formatDateForInput = (date: Date) => {
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, "0");
+              const day = String(date.getDate()).padStart(2, "0");
+              return `${year}-${month}-${day}`;
+            };
+
+            const todayStr = formatDateForInput(today);
+            const maxDateStr = formatDateForInput(maxDate);
+            const isDateValid = maybeDate && maybeDate <= maxDateStr && maybeDate >= todayStr;
+
+            return (
+              <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <Card className="w-full max-w-md border-0 shadow-2xl">
+                  <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+                    <CardTitle className="text-xl font-light tracking-tight">When will you know?</CardTitle>
+                    <CardDescription className="text-slate-600">Decide by {new Date(maxDate).toLocaleDateString()}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 pt-6">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 mb-2 block">Decision date</label>
+                      <input
+                        type="date"
+                        value={maybeDate}
+                        onChange={(e) => setMaybeDate(e.target.value)}
+                        min={todayStr}
+                        max={maxDateStr}
+                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-slate-500 mt-2">Must decide by 24 hours before the event</p>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        onClick={() => {
+                          if (isDateValid) {
+                            setRsvpResponse(prev => ({
+                              ...prev,
+                              [detailedEvent.id]: { status: "maybe", date: new Date(maybeDate).toLocaleDateString() }
+                            }));
+                            setShowMaybeForm(false);
+                            setMaybeDate("");
+                          }
+                        }}
+                        disabled={!isDateValid}
+                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        onClick={() => {
                           setShowMaybeForm(false);
                           setMaybeDate("");
-                        }
-                      }}
-                      disabled={!maybeDate}
-                      className="flex-1 bg-amber-600 hover:bg-amber-700 text-white disabled:bg-slate-300"
-                    >
-                      Confirm
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setShowMaybeForm(false);
-                        setMaybeDate("");
-                      }}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+                        }}
+                        variant="outline"
+                        className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
