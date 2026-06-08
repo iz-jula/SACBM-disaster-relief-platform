@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Download, Search, Plus, Upload, Filter, Clock, CheckCircle2 } from "lucide-react";
+import { FileText, Download, Search, Upload } from "lucide-react";
 import { Member, Document, MemberRole } from "@shared/api";
 
 // Mock documents data
@@ -94,9 +94,12 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
 
-  // Filter documents based on member's access level
+  // Filter documents based on member's access level and approval status
   const accessibleDocuments = useMemo(() => {
     return MOCK_DOCUMENTS.filter((doc) => {
+      // Only show approved documents
+      if (!doc.isApproved) return false;
+
       // Admin and EXCO see all documents
       if (member.role === MemberRole.ADMIN || member.role === MemberRole.EXCO) {
         return true;
@@ -146,10 +149,10 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      "governance": "bg-purple-100 text-purple-800",
-      "policy": "bg-blue-100 text-blue-800",
-      "meeting-minutes": "bg-amber-100 text-amber-800",
-      "other": "bg-gray-100 text-gray-800",
+      "governance": "bg-slate-100 text-slate-700",
+      "policy": "bg-slate-100 text-slate-700",
+      "meeting-minutes": "bg-slate-100 text-slate-700",
+      "other": "bg-slate-100 text-slate-700",
     };
     return colors[category] || colors["other"];
   };
@@ -261,24 +264,13 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
 
                         {/* Badges */}
                         <div className="flex flex-wrap items-center gap-2 mt-3">
-                          <Badge className={`text-xs ${getCategoryColor(doc.category)}`}>
+                          <span className={`text-xs font-medium px-2 py-1 rounded ${getCategoryColor(doc.category)}`}>
                             {getCategoryLabel(doc.category)}
-                          </Badge>
-                          {doc.isApproved ? (
-                            <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded">
-                              <CheckCircle2 className="h-3 w-3" />
-                              Approved
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded">
-                              <Clock className="h-3 w-3" />
-                              Pending Review
-                            </div>
-                          )}
+                          </span>
                           {doc.visibility !== "all" && (
-                            <Badge variant="outline" className="text-xs">
-                              {doc.visibility.toUpperCase()}
-                            </Badge>
+                            <span className="text-xs font-medium text-slate-600 px-2 py-1">
+                              Only for {doc.visibility.toUpperCase()}
+                            </span>
                           )}
                         </div>
 
