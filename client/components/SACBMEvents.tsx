@@ -556,9 +556,9 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                         {member.name.split(" ")[0]},
                       </p>
                       <p className="text-base font-light text-emerald-800 mb-4">you're attending!</p>
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 mb-3">
+                      <button className="text-sm font-medium text-emerald-700 hover:text-emerald-900 py-2 text-left transition-colors">
                         Add to Calendar
-                      </Button>
+                      </button>
                       <button
                         onClick={() => {
                           setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
