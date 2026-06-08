@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Download, Search, Upload } from "lucide-react";
+import { FileText, Download, Search, Upload, Plus } from "lucide-react";
 import { Member, Document, MemberRole } from "@shared/api";
 
 // Mock documents data
@@ -93,6 +93,9 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [showNewCategoryForm, setShowNewCategoryForm] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   // Filter documents based on member's access level and approval status
   const accessibleDocuments = useMemo(() => {
@@ -167,6 +170,16 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
     return labels[category] || category;
   };
 
+  const allCategories = ["governance", "policy", "meeting-minutes", "other", ...customCategories];
+
+  const handleAddCategory = () => {
+    if (newCategoryName.trim() && !allCategories.includes(newCategoryName.toLowerCase())) {
+      setCustomCategories([...customCategories, newCategoryName.toLowerCase()]);
+      setNewCategoryName("");
+      setShowNewCategoryForm(false);
+    }
+  };
+
   return (
     <div>
       {/* Header with Upload Button */}
@@ -209,6 +222,23 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               <SelectItem value="policy">Policy</SelectItem>
               <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
               <SelectItem value="other">Other</SelectItem>
+              {customCategories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </SelectItem>
+              ))}
+              {member.role === MemberRole.ADMIN && (
+                <>
+                  <div className="border-t border-slate-200 my-1" />
+                  <button
+                    onClick={() => setShowNewCategoryForm(true)}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 rounded cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Category
+                  </button>
+                </>
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -225,6 +255,52 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
           </Select>
         </div>
       </div>
+
+      {/* New Category Modal */}
+      {showNewCategoryForm && member.role === MemberRole.ADMIN && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md border-0 shadow-2xl">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+              <CardTitle className="text-xl font-light tracking-tight">Create New Category</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-2">Category Name</label>
+                <Input
+                  placeholder="e.g., Training Materials"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleAddCategory();
+                    }
+                  }}
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={handleAddCategory}
+                  disabled={!newCategoryName.trim()}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
+                >
+                  Create
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowNewCategoryForm(false);
+                    setNewCategoryName("");
+                  }}
+                  variant="outline"
+                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-100"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Documents List */}
       {filteredDocuments.length === 0 ? (
