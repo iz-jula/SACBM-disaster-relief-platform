@@ -543,7 +543,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
             {/* Sidebar - Right 1/3 with Image and RSVP */}
             <div className="hidden md:flex md:w-1/3 flex-col bg-white border-l border-slate-200 h-[calc(100vh-80px)] overflow-hidden">
               {/* Image - Longer to cover top */}
-              <div className="h-1/2 min-h-[300px] bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="h-2/3 min-h-[450px] bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <Calendar className="h-24 w-24 text-slate-300" />
               </div>
 
@@ -603,23 +603,23 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                   </div>
                 ) : (
                   <div>
-                    <p className="text-xs font-medium text-slate-600 mb-3">Will you attend?</p>
-                    <div className="flex flex-col gap-2">
+                    <p className="text-xs font-medium text-slate-600 mb-4">Will you attend?</p>
+                    <div className="flex flex-col gap-3">
                       <button
                         onClick={() => setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: { status: "accepted" } }))}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+                        className="text-sm font-medium text-emerald-700 hover:text-emerald-900 py-2 text-left transition-colors"
                       >
                         Accept
                       </button>
                       <button
                         onClick={() => setShowMaybeForm(true)}
-                        className="w-full text-slate-700 hover:text-slate-900 text-sm font-medium py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="text-sm font-medium text-slate-700 hover:text-slate-900 py-2 text-left transition-colors"
                       >
                         Maybe
                       </button>
                       <button
                         onClick={() => setShowDeclineForm(true)}
-                        className="w-full text-slate-700 hover:text-slate-900 text-sm font-medium py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="text-sm font-medium text-slate-700 hover:text-slate-900 py-2 text-left transition-colors"
                       >
                         Decline
                       </button>
