@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogIn, AlertCircle, CheckCircle2 } from "lucide-react";
-import PublicNavbar from "@/components/PublicNavbar";
+import { LogIn, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Member, MemberTier, MemberRole } from "@shared/api";
 
 // Mock member database for demo
@@ -96,34 +95,41 @@ const SACBMLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <PublicNavbar />
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm font-medium">Back to Home</span>
+          </Link>
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
+            alt="SACBM Logo"
+            className="h-8 w-auto"
+          />
+          <div className="w-16"></div>
+        </div>
+      </div>
 
-      <div className="flex items-center justify-center min-h-[calc(100vh-64px)] p-4">
-        <Card className="w-full max-w-md border-0 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-blue-50 border-b">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-600 to-blue-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-              <div>
-                <CardTitle>SACBM Portal</CardTitle>
-                <CardDescription>Member Access</CardDescription>
-              </div>
-            </div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
+        <Card className="w-full max-w-md border-0 shadow-lg">
+          <CardHeader className="border-b border-slate-200 pb-6">
+            <CardTitle className="text-2xl font-light tracking-tight">Member Portal</CardTitle>
+            <CardDescription className="text-base mt-1">Sign in to your account</CardDescription>
           </CardHeader>
 
-          <CardContent className="pt-6">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="demo">Demo Accounts</TabsTrigger>
+          <CardContent className="pt-6 pb-6">
+            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="login" className="text-sm">Sign In</TabsTrigger>
+                <TabsTrigger value="demo" className="text-sm">Demo Accounts</TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}
               <TabsContent value="login" className="space-y-4">
-                <p className="text-sm text-slate-600 mb-4">
-                  Enter your credentials to access the SACBM member portal
+                <p className="text-sm text-slate-600 mb-6">
+                  Enter your email and password to access your account.
                 </p>
 
                 {error && (
@@ -173,28 +179,30 @@ const SACBMLogin = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
                   >
-                    <LogIn className="h-4 w-4 mr-2" />
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
 
-                <p className="text-xs text-slate-500 text-center mt-4">
-                  Don't have an account? Contact the chamber for membership details.
-                </p>
+                <div className="pt-4 border-t border-slate-200">
+                  <p className="text-xs text-slate-500 text-center">
+                    Don't have an account? <br />
+                    <span className="text-slate-600">Contact the chamber for membership.</span>
+                  </p>
+                </div>
               </TabsContent>
 
               {/* Demo Accounts Tab */}
               <TabsContent value="demo" className="space-y-4">
-                <Alert className="border-blue-200 bg-blue-50 mb-4">
-                  <CheckCircle2 className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-blue-800">
-                    All demo accounts use password: <strong>demo123</strong>
+                <Alert className="border-emerald-200 bg-emerald-50 mb-4">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <AlertDescription className="text-emerald-800 text-sm">
+                    All demo accounts: password is <strong>demo123</strong>
                   </AlertDescription>
                 </Alert>
 
-                <div className="space-y-3 max-h-64 overflow-y-auto">
+                <div className="space-y-2 max-h-64 overflow-y-auto">
                   {MOCK_MEMBERS.map((member) => (
                     <button
                       key={member.id}
@@ -203,16 +211,16 @@ const SACBMLogin = () => {
                         setPassword("demo123");
                         setSelectedTab("login");
                       }}
-                      className="w-full p-3 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-left transition-colors"
+                      className="w-full p-3 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-left transition-colors text-sm"
                     >
                       <div className="font-semibold text-slate-900">{member.name}</div>
-                      <div className="text-sm text-slate-600">{member.email}</div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-700 rounded">
+                      <div className="text-xs text-slate-600 mt-0.5">{member.email}</div>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-700 rounded">
                           {member.tier.toUpperCase()}
                         </span>
-                        <span className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-700 rounded">
-                          {member.role.toUpperCase()}
+                        <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-700 rounded">
+                          {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
                         </span>
                       </div>
                     </button>
