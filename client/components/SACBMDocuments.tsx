@@ -396,21 +396,23 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             </CardHeader>
 
             <CardContent className="flex-1 overflow-auto p-6 space-y-6">
-              {/* Document Preview */}
-              <div className="bg-slate-100 rounded-lg p-8 text-center min-h-[300px] flex flex-col items-center justify-center">
-                <div className="p-4 bg-blue-100 rounded-lg mb-4">
-                  <FileText className="h-12 w-12 text-blue-600" />
-                </div>
-                <p className="text-slate-700 font-medium mb-2">PDF Document</p>
-                <p className="text-sm text-slate-600 mb-4">{selectedDocument.fileSize} MB</p>
-                <Button
-                  onClick={() => window.open(selectedDocument.fileUrl, "_blank")}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download Document
-                </Button>
+              {/* Document Visualization */}
+              <div className="bg-slate-100 rounded-lg overflow-hidden">
+                <iframe
+                  src={`${selectedDocument.fileUrl}#toolbar=1&navpanes=0`}
+                  className="w-full h-96 border-0"
+                  title={selectedDocument.title}
+                />
               </div>
+
+              {/* Download Button */}
+              <Button
+                onClick={() => window.open(selectedDocument.fileUrl, "_blank")}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download Document
+              </Button>
 
               {/* Document Details */}
               <div className="grid grid-cols-2 gap-4">
