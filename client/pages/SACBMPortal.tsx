@@ -376,7 +376,7 @@ const DashboardSection = ({ member }: { member: Member }) => {
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-slate-900">{event.title}</h4>
                       <p className="text-sm text-slate-600 mt-1">
-                        📅 {event.date} • Hosted by SACBM
+                        {event.date} • Hosted by SACBM
                       </p>
                     </div>
                     <button className="px-3 py-1 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex-shrink-0">
@@ -397,18 +397,13 @@ const DashboardSection = ({ member }: { member: Member }) => {
           <CardContent className="pt-6">
             <div className="space-y-4">
               {[
-                { title: "Event Reminder: Annual Gala", desc: "Happening in 3 days", icon: "🔔", color: "bg-blue-50" },
-                { title: "New Member Joined", desc: "Welcome TechCore Solutions", icon: "👥", color: "bg-emerald-50" },
-                { title: "Document Updated", desc: "2024 Strategic Plan approved", icon: "📄", color: "bg-amber-50" },
+                { title: "Event Reminder: Annual Gala", desc: "Happening in 3 days", color: "bg-blue-100 border-l-4 border-blue-500" },
+                { title: "New Member Joined", desc: "Welcome TechCore Solutions", color: "bg-emerald-100 border-l-4 border-emerald-500" },
+                { title: "Document Updated", desc: "2024 Strategic Plan approved", color: "bg-amber-100 border-l-4 border-amber-500" },
               ].map((notif, i) => (
-                <div key={i} className="flex items-start gap-4 pb-4 border-b last:border-0 last:pb-0">
-                  <div className={`w-10 h-10 rounded-lg ${notif.color} flex items-center justify-center flex-shrink-0 text-lg`}>
-                    {notif.icon}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-900">{notif.title}</p>
-                    <p className="text-sm text-slate-600 mt-1">{notif.desc}</p>
-                  </div>
+                <div key={i} className={`p-4 rounded-lg ${notif.color} transition-all hover:shadow-sm`}>
+                  <p className="font-medium text-slate-900">{notif.title}</p>
+                  <p className="text-sm text-slate-600 mt-1">{notif.desc}</p>
                 </div>
               ))}
             </div>
