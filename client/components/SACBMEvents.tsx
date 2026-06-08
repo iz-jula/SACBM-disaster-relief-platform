@@ -673,7 +673,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                         setDeclineReason("");
                       }}
                       variant="outline"
-                      className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
+                      className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-100"
                     >
                       Cancel
                     </Button>
@@ -684,7 +684,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
           )}
 
           {/* Maybe Decision Date Modal */}
-          {showMaybeForm && (() => {
+          {showMaybeForm && detailedEvent && (() => {
             const eventDate = new Date(detailedEvent.date);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -748,7 +748,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                           setMaybeDate("");
                         }}
                         variant="outline"
-                        className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
+                        className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-100"
                       >
                         Cancel
                       </Button>
