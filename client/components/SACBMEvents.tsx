@@ -358,30 +358,26 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
 
       {/* Event Detail Page */}
       {detailedEvent && (
-        <div className="fixed inset-0 bg-white overflow-auto z-50">
-          {/* Header */}
-          <div className="sticky top-0 border-b border-slate-200 bg-white z-40">
-            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-              <button
-                onClick={() => setDetailedEvent(null)}
-                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5" />
-                <span className="font-medium">Back</span>
-              </button>
-              <div className="flex items-center gap-3">
-                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                  <Share2 className="h-5 w-5 text-slate-600" />
-                </button>
-                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                  <Heart className="h-5 w-5 text-slate-600" />
-                </button>
-              </div>
-            </div>
+        <div className="fixed inset-0 bg-white z-50 flex">
+          {/* Left Sidebar - Collapsed */}
+          <div className="w-20 bg-white border-r border-slate-200 flex flex-col items-center py-4 space-y-2">
+            <button
+              onClick={() => setDetailedEvent(null)}
+              className="p-3 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900"
+              title="Back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <button className="p-3 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900">
+              <Share2 className="h-5 w-5" />
+            </button>
+            <button className="p-3 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900">
+              <Heart className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Content with Sidebar Layout */}
-          <div className="flex h-[calc(100vh-80px)]">
+          <div className="flex flex-1 overflow-hidden">
             {/* Main Content - Left 2/3 */}
             <div className="flex-1 overflow-auto">
               <div className="max-w-3xl mx-auto px-8 py-12">
@@ -518,21 +514,6 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
               </div>
             </div>
 
-            {/* Mobile RSVP - Below content on mobile */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 space-y-3">
-              <p className="text-sm font-medium text-slate-900">Will you attend?</p>
-              <div className="flex gap-2">
-                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2">
-                  Accept
-                </Button>
-                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs py-2">
-                  Maybe
-                </Button>
-                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs py-2">
-                  Decline
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       )}
