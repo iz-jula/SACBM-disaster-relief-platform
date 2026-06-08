@@ -549,6 +549,13 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
 
               {/* RSVP Section - Sticky Bottom */}
               <div className="flex-1 overflow-auto p-6 bg-white space-y-4 border-t border-slate-200">
+                {/* RSVP Deadline - Visible at top */}
+                <div className="pb-3 border-b border-slate-200">
+                  <p className="text-xs text-slate-600 font-medium">
+                    RSVP by <span className="font-semibold text-slate-900">{new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}</span>
+                  </p>
+                </div>
+
                 {rsvpResponse[detailedEvent.id]?.status === "accepted" ? (
                   <div className="space-y-3">
                     <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
@@ -591,7 +598,30 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                   <div className="space-y-4">
                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                       <p className="text-sm font-semibold text-amber-800 mb-2">You'll decide by</p>
-                      <p className="text-sm font-medium text-amber-900 mb-3">{rsvpResponse[detailedEvent.id].date}</p>
+                      <p className="text-sm font-medium text-amber-900 mb-4">{rsvpResponse[detailedEvent.id].date}</p>
+
+                      {/* Reminder timestamps */}
+                      <div className="space-y-2 mb-4 pb-4 border-b border-amber-200">
+                        <p className="text-xs font-medium text-amber-800 mb-2">You'll get reminders:</p>
+                        {(() => {
+                          const eventDate = new Date(detailedEvent.date);
+                          const reminder4Days = new Date(eventDate);
+                          reminder4Days.setDate(reminder4Days.getDate() - 4);
+                          const reminder2Days = new Date(eventDate);
+                          reminder2Days.setDate(reminder2Days.getDate() - 2);
+                          const reminder12Hours = new Date(eventDate);
+                          reminder12Hours.setHours(reminder12Hours.getHours() - 12);
+
+                          return (
+                            <>
+                              <p className="text-xs text-amber-700">• {reminder4Days.toLocaleDateString()} (4 days before)</p>
+                              <p className="text-xs text-amber-700">• {reminder2Days.toLocaleDateString()} (2 days before)</p>
+                              <p className="text-xs text-amber-700">• {reminder12Hours.toLocaleDateString()} at {reminder12Hours.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (12 hours before)</p>
+                            </>
+                          );
+                        })()}
+                      </div>
+
                       <button
                         onClick={() => {
                           setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: undefined }));
@@ -628,11 +658,6 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                     </div>
                   </div>
                 )}
-                <div className="pt-4 border-t border-slate-200">
-                  <p className="text-xs text-slate-600">
-                    RSVP by {new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}
-                  </p>
-                </div>
               </div>
             </div>
 
