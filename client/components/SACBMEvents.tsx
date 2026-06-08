@@ -703,7 +703,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
 
             const todayStr = formatDateForInput(today);
             const maxDateStr = formatDateForInput(maxDate);
-            const isDateValid = maybeDate && maybeDate <= maxDateStr && maybeDate >= todayStr;
+            const isDateValid = !!maybeDate;
 
             return (
               <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
