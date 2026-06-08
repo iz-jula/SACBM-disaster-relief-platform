@@ -255,16 +255,17 @@ const DashboardSection = ({ member }: { member: Member }) => {
     ? allEvents.filter(event => event.date === selectedDate)
     : allEvents;
 
-  const getNextEventDate = () => {
-    if (selectedDate) {
+  const today = 15;
+
+  const getNextEvents = () => {
+    if (selectedDate && selectedDate !== today) {
       const sortedEvents = [...allEvents].sort((a, b) => a.date - b.date);
-      const nextEvent = sortedEvents.find(e => e.date > selectedDate);
-      return nextEvent ? nextEvent.date : sortedEvents[0].date;
+      return sortedEvents.filter(e => e.date >= today);
     }
-    return null;
+    return [];
   };
 
-  const nextEventDate = getNextEventDate();
+  const nextEvents = getNextEvents();
 
   return (
     <div className="space-y-8">
@@ -419,29 +420,43 @@ const DashboardSection = ({ member }: { member: Member }) => {
               ))}
             </div>
           ) : (
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-50 to-slate-100">
-              <CardContent className="pt-12 pb-12 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm mb-4">
-                  <Calendar className="h-7 w-7 text-slate-400" />
+            <div className="space-y-4">
+              {/* Empty State Banner */}
+              <Card className="border-0 shadow-sm bg-slate-50">
+                <CardContent className="pt-6 pb-6 text-center">
+                  <p className="text-slate-600 font-medium">No events on this date</p>
+                  <button
+                    onClick={() => setSelectedDate(today)}
+                    className="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium"
+                  >
+                    Go back to today
+                  </button>
+                </CardContent>
+              </Card>
+
+              {/* Next Events Banner */}
+              {nextEvents.length > 0 && (
+                <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-200 p-6">
+                  <p className="text-sm font-semibold text-slate-700 mb-4">Coming up</p>
+                  <div className="space-y-3">
+                    {nextEvents.slice(0, 3).map((event, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start justify-between gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:shadow-sm transition-shadow cursor-pointer"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-900">{event.title}</p>
+                          <p className="text-xs text-slate-600 mt-1">Feb {event.date}</p>
+                        </div>
+                        <button className="px-2 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors flex-shrink-0">
+                          RSVP
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-slate-900 font-semibold text-lg">No events scheduled</p>
-                <p className="text-slate-600 text-sm mt-3">
-                  {nextEventDate ? (
-                    <>
-                      The next event is on <span className="font-semibold text-emerald-600">Feb {nextEventDate}</span>
-                    </>
-                  ) : (
-                    "No upcoming events found"
-                  )}
-                </p>
-                <button
-                  onClick={() => setSelectedDate(null)}
-                  className="mt-4 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
-                >
-                  Clear filter
-                </button>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           )}
         </div>
       </div>
