@@ -42,10 +42,10 @@ const PublicNavbar = () => {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
-            <Link to="/members">
+            <Link to="/sacbm-login">
               <Button size="sm" className="hidden sm:inline-flex bg-emerald-700 hover:bg-emerald-800 text-white">
                 <LogIn className="h-4 w-4 mr-2" />
-                Member Section
+                Portal
               </Button>
             </Link>
 
@@ -78,11 +78,11 @@ const PublicNavbar = () => {
                 </Link>
               ))}
               <Link
-                to="/members"
+                to="/sacbm-login"
                 className="block rounded-lg px-3 py-2 text-base font-medium text-emerald-700 hover:bg-emerald-50"
                 onClick={() => setIsOpen(false)}
               >
-                Member Section
+                Member Portal
               </Link>
             </div>
           </div>

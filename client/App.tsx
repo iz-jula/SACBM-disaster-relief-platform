@@ -14,6 +14,8 @@ import OurMembers from "./pages/OurMembers";
 import MemberSection from "./pages/MemberSection";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import SACBMLogin from "./pages/SACBMLogin";
+import SACBMPortal from "./pages/SACBMPortal";
 
 // Member/Admin pages
 import Dashboard from "./pages/Dashboard";
@@ -50,6 +52,7 @@ const App = () => (
 
             {/* AUTHENTICATION */}
             <Route path="/login" element={<Login />} />
+            <Route path="/sacbm-login" element={<SACBMLogin />} />
 
             {/* MEMBER/ADMIN ROUTES */}
             <Route
@@ -132,6 +135,9 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
+            {/* SACBM PORTAL */}
+            <Route path="/sacbm-portal" element={<SACBMPortal />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
