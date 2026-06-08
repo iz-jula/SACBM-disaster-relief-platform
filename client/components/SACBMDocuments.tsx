@@ -97,10 +97,23 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [showNewCategoryForm, setShowNewCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [uploadedDocuments, setUploadedDocuments] = useState<Document[]>([]);
+
+  // Upload form state
+  const [uploadForm, setUploadForm] = useState({
+    title: "",
+    description: "",
+    category: "other",
+    visibility: "all" as "all" | "board" | "exco",
+    file: null as File | null,
+  });
+  const [uploadError, setUploadError] = useState("");
 
   // Filter documents based on member's access level and approval status
   const accessibleDocuments = useMemo(() => {
-    return MOCK_DOCUMENTS.filter((doc) => {
+    const allDocs = [...MOCK_DOCUMENTS, ...uploadedDocuments];
+    return allDocs.filter((doc) => {
       // Only show approved documents
       if (!doc.isApproved) return false;
 
@@ -115,7 +128,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       // Regular members see only "all" visibility
       return doc.visibility === "all";
     });
-  }, [member.role]);
+  }, [member.role, uploadedDocuments]);
 
   // Filter and search
   const filteredDocuments = useMemo(() => {
@@ -181,6 +194,65 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.includes("pdf") && !file.type.includes("document")) {
+        setUploadError("Please upload a PDF or document file");
+        return;
+      }
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError("File size must be less than 10MB");
+        return;
+      }
+      setUploadError("");
+      setUploadForm((prev) => ({ ...prev, file }));
+    }
+  };
+
+  const handleUpload = () => {
+    if (!uploadForm.title.trim()) {
+      setUploadError("Please enter a document title");
+      return;
+    }
+    if (!uploadForm.file) {
+      setUploadError("Please select a file");
+      return;
+    }
+
+    // Create a mock URL for the file
+    const fileUrl = URL.createObjectURL(uploadForm.file);
+    const fileSizeMB = (uploadForm.file.size / (1024 * 1024)).toFixed(1);
+
+    const newDoc: Document = {
+      id: `doc-${Date.now()}`,
+      title: uploadForm.title,
+      description: uploadForm.description,
+      category: uploadForm.category,
+      uploadedBy: member.name,
+      uploadedDate: new Date().toISOString().split("T")[0],
+      fileUrl,
+      fileSize: parseFloat(fileSizeMB),
+      isApproved: true, // Auto-approve admin uploads
+      approvedBy: member.name,
+      approvedDate: new Date().toISOString().split("T")[0],
+      visibility: uploadForm.visibility,
+    };
+
+    setUploadedDocuments([...uploadedDocuments, newDoc]);
+    setUploadForm({
+      title: "",
+      description: "",
+      category: "other",
+      visibility: "all",
+      file: null,
+    });
+    setUploadError("");
+    setShowUploadForm(false);
+  };
+
   return (
     <div>
       {/* Header with Upload Button */}
@@ -192,7 +264,10 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
           </p>
         </div>
         {member.role === MemberRole.ADMIN ? (
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 w-full md:w-auto">
+          <Button
+            onClick={() => setShowUploadForm(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 w-full md:w-auto"
+          >
             <Upload className="h-4 w-4" />
             Upload Document
           </Button>
@@ -255,6 +330,127 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
           </Select>
         </div>
       </div>
+
+      {/* Upload Document Modal */}
+      {showUploadForm && member.role === MemberRole.ADMIN && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md border-0 shadow-2xl">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+              <CardTitle className="text-xl font-light tracking-tight">Upload Document</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              {/* Title */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-2">Document Title</label>
+                <Input
+                  placeholder="e.g., Board Meeting Minutes"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm((prev) => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-2">Description (optional)</label>
+                <textarea
+                  placeholder="Add a brief description..."
+                  value={uploadForm.description}
+                  onChange={(e) => setUploadForm((prev) => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-2">Category</label>
+                <Select value={uploadForm.category} onValueChange={(value) => setUploadForm((prev) => ({ ...prev, category: value }))}>
+                  <SelectTrigger className="border-slate-200">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="governance">Governance</SelectItem>
+                    <SelectItem value="policy">Policy</SelectItem>
+                    <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                    {customCategories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Visibility */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-2">Visibility</label>
+                <Select value={uploadForm.visibility} onValueChange={(value) => setUploadForm((prev) => ({ ...prev, visibility: value as "all" | "board" | "exco" }))}>
+                  <SelectTrigger className="border-slate-200">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Members</SelectItem>
+                    <SelectItem value="board">Board Only</SelectItem>
+                    <SelectItem value="exco">EXCO Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* File Upload */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 block mb-2">Select File</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileSelect}
+                  className="w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+                />
+                {uploadForm.file && (
+                  <p className="text-xs text-slate-600 mt-2">
+                    Selected: {uploadForm.file.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {uploadError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{uploadError}</p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={handleUpload}
+                  disabled={!uploadForm.title.trim() || !uploadForm.file}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
+                >
+                  Upload
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowUploadForm(false);
+                    setUploadForm({
+                      title: "",
+                      description: "",
+                      category: "other",
+                      visibility: "all",
+                      file: null,
+                    });
+                    setUploadError("");
+                  }}
+                  variant="outline"
+                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-100"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* New Category Modal */}
       {showNewCategoryForm && member.role === MemberRole.ADMIN && (
