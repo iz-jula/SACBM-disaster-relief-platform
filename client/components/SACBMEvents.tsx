@@ -380,87 +380,157 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
             </div>
           </div>
 
-          {/* Content */}
-          <div className="max-w-6xl mx-auto px-6 py-8">
-            {/* Main Grid: Details Left, Image Right */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {/* Main Content - Left */}
-              <div className="md:col-span-2">
-                {/* Title & Description */}
-                <div className="mb-8">
-                  <h1 className="text-3xl md:text-4xl font-light tracking-tight text-slate-900 mb-3">
-                    {detailedEvent.title}
-                  </h1>
-                  <p className="text-base text-slate-600 leading-relaxed">
-                    {detailedEvent.description}
-                  </p>
-                </div>
+          {/* Content with Sidebar Layout */}
+          <div className="flex h-[calc(100vh-80px)]">
+            {/* Main Content - Left 2/3 */}
+            <div className="flex-1 overflow-auto">
+              <div className="max-w-3xl mx-auto px-8 py-12">
+                {/* Title */}
+                <h1 className="text-4xl md:text-5xl font-light tracking-tight text-slate-900 mb-6">
+                  {detailedEvent.title}
+                </h1>
 
-                {/* Quick Details - Compact Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                    <p className="text-xs font-medium text-slate-600 mb-2">Date</p>
-                    <p className="text-sm font-semibold text-slate-900">
+                {/* Event Meta - Compact Inline */}
+                <div className="flex flex-wrap items-center gap-6 mb-8 pb-8 border-b border-slate-200">
+                  <div>
+                    <p className="text-xs font-medium text-slate-600">Date</p>
+                    <p className="text-lg font-semibold text-slate-900 mt-1">
                       {new Date(detailedEvent.date).toLocaleDateString("en-US", {
+                        weekday: "short",
                         month: "short",
                         day: "numeric",
                       })}
                     </p>
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                    <p className="text-xs font-medium text-slate-600 mb-2">Time</p>
-                    <p className="text-sm font-semibold text-slate-900">{detailedEvent.time}</p>
-                  </div>
-                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                    <p className="text-xs font-medium text-slate-600 mb-2">Location</p>
-                    <p className="text-sm font-semibold text-slate-900 truncate">
-                      {detailedEvent.location.split(",")[0]}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600">Time</p>
+                    <p className="text-lg font-semibold text-slate-900 mt-1">
+                      {detailedEvent.time}
+                      {detailedEvent.endTime && ` - ${detailedEvent.endTime}`}
                     </p>
                   </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-600">Location</p>
+                    <p className="text-lg font-semibold text-slate-900 mt-1">{detailedEvent.location}</p>
+                  </div>
+                  {detailedEvent.capacity && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-600">Capacity</p>
+                      <p className="text-lg font-semibold text-slate-900 mt-1">{detailedEvent.capacity} people</p>
+                    </div>
+                  )}
                 </div>
 
-                {/* RSVP Section - Prominent */}
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-8">
-                  <h2 className="text-lg font-semibold text-slate-900 mb-4">Will you attend?</h2>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm gap-2">
-                      <CheckCircle2 className="h-4 w-4" />
-                      Accept
-                    </Button>
-                    <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm gap-2">
-                      <HelpCircle className="h-4 w-4" />
-                      Maybe
-                    </Button>
-                    <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm gap-2">
-                      <XCircle className="h-4 w-4" />
-                      Decline
-                    </Button>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-3">
-                    RSVP by {new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}
+                {/* Description */}
+                <div className="mb-12">
+                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">About this event</h2>
+                  <p className="text-lg text-slate-600 leading-relaxed mb-6">
+                    {detailedEvent.description}
                   </p>
                 </div>
 
-                {/* Additional Details */}
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <p className="text-xs font-medium text-slate-600">Organized by</p>
-                    <p className="text-slate-900 font-medium mt-1">SACBM</p>
+                {/* How to Sign Up */}
+                <div className="mb-12">
+                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">How to register</h2>
+                  <div className="space-y-4">
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600 text-white">
+                          1
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">Confirm your attendance</p>
+                        <p className="text-slate-600 mt-1">Click the RSVP button to let us know you're coming</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600 text-white">
+                          2
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">You'll receive a confirmation</p>
+                        <p className="text-slate-600 mt-1">A confirmation email with all event details will be sent to you</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-600 text-white">
+                          3
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900">Join us at the event</p>
+                        <p className="text-slate-600 mt-1">Arrive 15 minutes early for check-in</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-600">Capacity</p>
-                    <p className="text-slate-900 font-medium mt-1">
-                      {detailedEvent.capacity ? `${detailedEvent.capacity} people` : "TBD"}
+                </div>
+
+                {/* Directions */}
+                <div className="mb-12">
+                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">How to get there</h2>
+                  <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                    <p className="text-slate-600 mb-4">
+                      <strong className="text-slate-900">{detailedEvent.location}</strong>
                     </p>
+                    <p className="text-slate-600 mb-4">
+                      The venue is easily accessible by car or public transportation. Parking will be available on-site.
+                    </p>
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                      Get Directions
+                    </Button>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Image - Right */}
-              <div className="md:col-span-1">
-                <div className="rounded-xl overflow-hidden h-64 md:h-80 bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center sticky top-20">
-                  <Calendar className="h-16 w-16 text-slate-400" />
+            {/* Sidebar - Right 1/3 with Image and RSVP */}
+            <div className="hidden md:flex md:w-1/3 flex-col bg-slate-100 border-l border-slate-200 sticky top-20 h-[calc(100vh-80px)]">
+              {/* Image - Full Height */}
+              <div className="flex-1 bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center overflow-hidden">
+                <Calendar className="h-20 w-20 text-slate-400" />
+              </div>
+
+              {/* RSVP Section - Sticky Bottom */}
+              <div className="p-6 bg-white border-t border-slate-200 space-y-4">
+                <div>
+                  <p className="text-xs font-medium text-slate-600 mb-2">Will you attend?</p>
+                  <div className="flex flex-col gap-2">
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2">
+                      Accept
+                    </Button>
+                    <Button className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2">
+                      Maybe
+                    </Button>
+                    <Button className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm py-2">
+                      Decline
+                    </Button>
+                  </div>
                 </div>
+                <div className="pt-4 border-t border-slate-200">
+                  <p className="text-xs text-slate-600">
+                    RSVP by {new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile RSVP - Below content on mobile */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 space-y-3">
+              <p className="text-sm font-medium text-slate-900">Will you attend?</p>
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2">
+                  Accept
+                </Button>
+                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs py-2">
+                  Maybe
+                </Button>
+                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs py-2">
+                  Decline
+                </Button>
               </div>
             </div>
           </div>
