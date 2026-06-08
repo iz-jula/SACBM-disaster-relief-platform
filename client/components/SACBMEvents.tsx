@@ -164,7 +164,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
             Discover chamber events, RSVP, and view event galleries
           </p>
         </div>
-        {member.role === MemberRole.ADMIN || member.role === MemberRole.BOARD ? (
+        {member.role === MemberRole.ADMIN ? (
           <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 w-full md:w-auto">
             <Plus className="h-4 w-4" />
             Create Event
