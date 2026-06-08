@@ -13,6 +13,9 @@ import {
   HelpCircle,
   Image as ImageIcon,
   ChevronRight,
+  ArrowLeft,
+  Share2,
+  Heart,
 } from "lucide-react";
 import { Member, Event, EventRSVP, MemberRole } from "@shared/api";
 
@@ -103,6 +106,7 @@ interface SACBMEventsProps {
 const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "past">("upcoming");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [detailedEvent, setDetailedEvent] = useState<Event | null>(null);
   const [memberRsvps, setMemberRsvps] = useState<Record<string, EventRSVP["status"]>>({});
 
   // Initialize RSVPs for current member
@@ -202,7 +206,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
               <Card
                 key={event.id}
                 className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
-                onClick={() => setSelectedEvent(event)}
+                onClick={() => setDetailedEvent(event)}
               >
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row">
@@ -352,60 +356,127 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
         </div>
       )}
 
-      {/* Event Detail Modal */}
-      {selectedEvent && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedEvent(null)}
-        >
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-auto border-0">
-            <CardHeader className="bg-gradient-to-r from-emerald-50 to-blue-50 border-b">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-2xl">{selectedEvent.title}</CardTitle>
-                  <CardDescription className="mt-2">{selectedEvent.description}</CardDescription>
-                </div>
-                <button
-                  onClick={() => setSelectedEvent(null)}
-                  className="text-slate-500 hover:text-slate-700"
-                >
-                  ✕
+      {/* Event Detail Page */}
+      {detailedEvent && (
+        <div className="fixed inset-0 bg-white overflow-auto z-50">
+          {/* Header */}
+          <div className="sticky top-0 border-b border-slate-200 bg-white z-40">
+            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+              <button
+                onClick={() => setDetailedEvent(null)}
+                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span className="font-medium">Back</span>
+              </button>
+              <div className="flex items-center gap-3">
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                  <Share2 className="h-5 w-5 text-slate-600" />
+                </button>
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                  <Heart className="h-5 w-5 text-slate-600" />
                 </button>
               </div>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-slate-600 font-medium">Date</p>
-                  <p className="font-semibold text-slate-900 mt-1">
-                    {new Date(selectedEvent.date).toLocaleDateString()}
-                  </p>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="max-w-4xl mx-auto px-6 py-12">
+            {/* Image */}
+            <div className="mb-8 rounded-xl overflow-hidden h-96 bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center">
+              <Calendar className="h-20 w-20 text-slate-400" />
+            </div>
+
+            {/* Title & Description */}
+            <div className="mb-8">
+              <h1 className="text-4xl md:text-5xl font-light tracking-tight text-slate-900 mb-4">
+                {detailedEvent.title}
+              </h1>
+              <p className="text-lg text-slate-600 leading-relaxed">
+                {detailedEvent.description}
+              </p>
+            </div>
+
+            {/* Event Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <Calendar className="h-5 w-5 text-emerald-600" />
+                  <p className="text-sm font-medium text-slate-600">Date & Time</p>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-600 font-medium">Time</p>
-                  <p className="font-semibold text-slate-900 mt-1">
-                    {selectedEvent.time} {selectedEvent.endTime && `- ${selectedEvent.endTime}`}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm text-slate-600 font-medium">Location</p>
-                  <p className="font-semibold text-slate-900 mt-1">{selectedEvent.location}</p>
-                </div>
-                {selectedEvent.capacity && (
-                  <div>
-                    <p className="text-sm text-slate-600 font-medium">Capacity</p>
-                    <p className="font-semibold text-slate-900 mt-1">{selectedEvent.capacity} people</p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm text-slate-600 font-medium">RSVP Deadline</p>
-                  <p className="font-semibold text-slate-900 mt-1">
-                    {new Date(selectedEvent.rsvpDeadline).toLocaleDateString()}
-                  </p>
-                </div>
+                <p className="text-lg font-semibold text-slate-900">
+                  {new Date(detailedEvent.date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+                <p className="text-sm text-slate-600 mt-2">
+                  {detailedEvent.time}
+                  {detailedEvent.endTime && ` - ${detailedEvent.endTime}`}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+
+              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <MapPin className="h-5 w-5 text-emerald-600" />
+                  <p className="text-sm font-medium text-slate-600">Location</p>
+                </div>
+                <p className="text-lg font-semibold text-slate-900">{detailedEvent.location}</p>
+              </div>
+
+              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <Users className="h-5 w-5 text-emerald-600" />
+                  <p className="text-sm font-medium text-slate-600">
+                    {detailedEvent.capacity ? "Capacity" : "Attendees"}
+                  </p>
+                </div>
+                <p className="text-lg font-semibold text-slate-900">
+                  {detailedEvent.capacity ? `${detailedEvent.capacity} people` : "TBD"}
+                </p>
+              </div>
+            </div>
+
+            {/* RSVP Section */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-8 mb-12">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">Will you be attending?</h2>
+              <p className="text-slate-600 mb-6">
+                RSVP deadline: {new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Accept
+                </Button>
+                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 gap-2">
+                  <HelpCircle className="h-4 w-4" />
+                  Maybe
+                </Button>
+                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 gap-2">
+                  <XCircle className="h-4 w-4" />
+                  Decline
+                </Button>
+              </div>
+            </div>
+
+            {/* Additional Info */}
+            <div className="border-t border-slate-200 pt-12">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-6">Event Details</h2>
+              <div className="space-y-4 text-slate-600">
+                <p>
+                  <span className="font-medium text-slate-900">Organized by:</span> SACBM
+                </p>
+                <p>
+                  <span className="font-medium text-slate-900">Event Type:</span> Chamber Event
+                </p>
+                <p className="line-clamp-3">
+                  <span className="font-medium text-slate-900">About:</span> {detailedEvent.description}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
