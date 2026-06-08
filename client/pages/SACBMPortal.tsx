@@ -226,9 +226,24 @@ const SACBMPortal = () => {
 // Dashboard Section Component
 const DashboardSection = ({ member }: { member: Member }) => {
   const upcomingEvents = [
-    { title: "Annual SACBM Gala", date: "15 Mar", icon: "🎉" },
-    { title: "Business Breakfast", date: "28 Feb", icon: "☕" },
-    { title: "Board Meeting", date: "15 Feb", icon: "📋" },
+    {
+      title: "Annual SACBM Gala",
+      date: "15 Mar",
+      image: "https://images.unsplash.com/photo-1519671482677-504be0271101?w=400&h=300&fit=crop",
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      title: "Business Breakfast",
+      date: "28 Feb",
+      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop",
+      color: "from-amber-500 to-orange-500",
+    },
+    {
+      title: "Board Meeting",
+      date: "15 Feb",
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+      color: "from-blue-500 to-cyan-500",
+    },
   ];
 
   return (
@@ -347,11 +362,16 @@ const DashboardSection = ({ member }: { member: Member }) => {
           <h3 className="text-lg font-medium text-slate-900 mb-4">Upcoming Events</h3>
           <div className="space-y-3">
             {upcomingEvents.map((event, idx) => (
-              <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center text-2xl flex-shrink-0">
-                      {event.icon}
+              <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex items-center gap-4 p-4">
+                    <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className={`absolute inset-0 bg-gradient-to-br ${event.color} opacity-0 hover:opacity-10 transition-opacity`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-slate-900">{event.title}</h4>
