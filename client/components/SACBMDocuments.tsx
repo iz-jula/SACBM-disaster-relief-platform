@@ -96,6 +96,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [customCategories, setCustomCategories] = useState<string[]>([]);
   const [showNewCategoryForm, setShowNewCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
 
   // Filter documents based on member's access level and approval status
   const accessibleDocuments = useMemo(() => {
@@ -313,7 +314,11 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       ) : (
         <div className="space-y-4">
           {filteredDocuments.map((doc) => (
-            <Card key={doc.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+            <Card
+              key={doc.id}
+              className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => setSelectedDocument(doc)}
+            >
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   {/* Icon */}
@@ -365,6 +370,84 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Document Detail Modal */}
+      {selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl border-0 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex-shrink-0">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-xl font-light tracking-tight mb-2">{selectedDocument.title}</CardTitle>
+                  {selectedDocument.description && (
+                    <CardDescription className="text-slate-600">{selectedDocument.description}</CardDescription>
+                  )}
+                </div>
+                <button
+                  onClick={() => setSelectedDocument(null)}
+                  className="p-2 hover:bg-slate-200 rounded transition-colors flex-shrink-0"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="flex-1 overflow-auto p-6 space-y-6">
+              {/* Document Preview */}
+              <div className="bg-slate-100 rounded-lg p-8 text-center min-h-[300px] flex flex-col items-center justify-center">
+                <div className="p-4 bg-blue-100 rounded-lg mb-4">
+                  <FileText className="h-12 w-12 text-blue-600" />
+                </div>
+                <p className="text-slate-700 font-medium mb-2">PDF Document</p>
+                <p className="text-sm text-slate-600 mb-4">{selectedDocument.fileSize} MB</p>
+                <Button
+                  onClick={() => window.open(selectedDocument.fileUrl, "_blank")}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Document
+                </Button>
+              </div>
+
+              {/* Document Details */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Category</p>
+                  <p className={`text-sm font-medium ${getCategoryColor(selectedDocument.category)}`}>
+                    {getCategoryLabel(selectedDocument.category)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Uploaded</p>
+                  <p className="text-sm text-slate-900">{new Date(selectedDocument.uploadedDate).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Uploaded By</p>
+                  <p className="text-sm text-slate-900">{selectedDocument.uploadedBy}</p>
+                </div>
+                {selectedDocument.visibility !== "all" && (
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">Visibility</p>
+                    <p className="text-sm text-slate-900">Only for {selectedDocument.visibility.toUpperCase()}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+
+            {/* Close Button */}
+            <div className="border-t border-slate-200 p-4 bg-slate-50 flex-shrink-0">
+              <Button
+                onClick={() => setSelectedDocument(null)}
+                variant="outline"
+                className="w-full border-slate-300 text-slate-700 hover:bg-slate-100"
+              >
+                Close
+              </Button>
+            </div>
+          </Card>
         </div>
       )}
     </div>
