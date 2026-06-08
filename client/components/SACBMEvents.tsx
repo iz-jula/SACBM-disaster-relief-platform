@@ -378,42 +378,44 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
                 <ArrowLeft className="h-4 w-4 flex-shrink-0" />
                 {sidebarOpen && <span>Back</span>}
               </button>
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600"
-                title={sidebarOpen ? "Collapse" : "Expand"}
-              >
-                {sidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronRight className="h-4 w-4 rotate-180" />}
-              </button>
             </div>
             {sidebarOpen && (
               <div className="flex-1 space-y-2">
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                <button
+                  onClick={() => setDetailedEvent(null)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+                >
                   <Home className="h-5 w-5" />
                   <span className="text-sm">Dashboard</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                <button
+                  onClick={() => setDetailedEvent(null)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+                >
                   <FileText className="h-5 w-5" />
                   <span className="text-sm">Documents</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 transition-colors">
                   <Calendar className="h-5 w-5" />
                   <span className="text-sm">Events</span>
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50">
+                <button
+                  onClick={() => setDetailedEvent(null)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+                >
                   <Users className="h-5 w-5" />
                   <span className="text-sm">Directory</span>
                 </button>
               </div>
             )}
-            <div className="pt-4 border-t border-slate-200 space-y-2">
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-sm">
-                <Share2 className="h-5 w-5" />
-                <span>Share</span>
-              </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 text-sm">
-                <Heart className="h-5 w-5" />
-                <span>Save</span>
+            <div className="mt-auto pt-4 border-t border-slate-200 space-y-2">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors text-sm"
+                title={sidebarOpen ? "Collapse" : "Expand"}
+              >
+                <ChevronRight className={`h-5 w-5 transition-transform ${sidebarOpen ? "rotate-180" : ""}`} />
+                {sidebarOpen && <span>Collapse</span>}
               </button>
             </div>
           </div>
@@ -536,8 +538,11 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
               <div className="p-6 bg-white border-t border-slate-200 space-y-4">
                 {rsvpResponse[detailedEvent.id]?.status === "accepted" ? (
                   <div className="space-y-4">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm font-semibold text-green-800 mb-3">✓ You're attending!</p>
+                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg">
+                      <p className="text-xl font-light tracking-tight text-emerald-900 mb-1">
+                        {member.name.split(" ")[0]},
+                      </p>
+                      <p className="text-lg font-light text-emerald-800 mb-4">you're attending the event!</p>
                       <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm py-2">
                         Add to Calendar
                       </Button>
