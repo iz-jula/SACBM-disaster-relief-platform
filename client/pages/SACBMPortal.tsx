@@ -225,26 +225,35 @@ const SACBMPortal = () => {
 
 // Dashboard Section Component
 const DashboardSection = ({ member }: { member: Member }) => {
-  const upcomingEvents = [
+  const [selectedDate, setSelectedDate] = useState<number | null>(15);
+
+  const allEvents = [
     {
       title: "Annual SACBM Gala",
-      date: "15 Mar",
+      date: 15,
+      dateStr: "15 Mar",
       image: "https://images.unsplash.com/photo-1519671482677-504be0271101?w=400&h=300&fit=crop",
       color: "from-purple-500 to-pink-500",
     },
     {
       title: "Business Breakfast",
-      date: "28 Feb",
+      date: 28,
+      dateStr: "28 Feb",
       image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop",
       color: "from-amber-500 to-orange-500",
     },
     {
       title: "Board Meeting",
-      date: "15 Feb",
+      date: 15,
+      dateStr: "15 Feb",
       image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
       color: "from-blue-500 to-cyan-500",
     },
   ];
+
+  const upcomingEvents = selectedDate
+    ? allEvents.filter(event => event.date === selectedDate)
+    : allEvents;
 
   return (
     <div className="space-y-8">
@@ -318,7 +327,7 @@ const DashboardSection = ({ member }: { member: Member }) => {
           <Card className="border-0 shadow-sm">
             <CardContent className="pt-6">
               <div className="space-y-4">
-                {/* Simple Calendar View */}
+                {/* Interactive Calendar View */}
                 <div className="text-center">
                   <h4 className="text-sm font-semibold text-slate-900 mb-4">February 2024</h4>
                   <div className="grid grid-cols-7 gap-2 mb-4">
@@ -329,18 +338,27 @@ const DashboardSection = ({ member }: { member: Member }) => {
                     ))}
                   </div>
                   <div className="grid grid-cols-7 gap-2">
-                    {Array.from({ length: 29 }).map((_, i) => (
-                      <button
-                        key={i}
-                        className={`py-2 text-xs rounded-lg transition-colors ${
-                          i === 14
-                            ? "bg-emerald-600 text-white font-semibold"
-                            : "text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
+                    {Array.from({ length: 29 }).map((_, i) => {
+                      const dayNum = i + 1;
+                      const isSelected = dayNum === selectedDate;
+                      const hasEvents = allEvents.some(e => e.date === dayNum);
+
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedDate(isSelected ? null : dayNum)}
+                          className={`py-2 text-xs rounded-lg transition-all font-medium ${
+                            isSelected
+                              ? "bg-emerald-600 text-white shadow-md scale-105"
+                              : hasEvents
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          {dayNum}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -350,34 +368,54 @@ const DashboardSection = ({ member }: { member: Member }) => {
 
         {/* Upcoming Events */}
         <div className="lg:col-span-2 order-first lg:order-last">
-          <h3 className="text-lg font-medium text-slate-900 mb-4">Upcoming Events</h3>
-          <div className="space-y-3">
-            {upcomingEvents.map((event, idx) => (
-              <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
-                <CardContent className="p-0">
-                  <div className="flex items-center gap-4 p-4">
-                    <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className={`absolute inset-0 bg-gradient-to-br ${event.color} opacity-0 hover:opacity-10 transition-opacity`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-slate-900">{event.title}</h4>
-                      <p className="text-sm text-slate-600 mt-1">
-                        {event.date} • Hosted by SACBM
-                      </p>
-                    </div>
-                    <button className="px-3 py-1 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex-shrink-0">
-                      RSVP
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-slate-900">Upcoming Events</h3>
+            {selectedDate && (
+              <button
+                onClick={() => setSelectedDate(null)}
+                className="text-xs font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 transition-colors"
+              >
+                Feb {selectedDate} ✕
+              </button>
+            )}
           </div>
+          {upcomingEvents.length > 0 ? (
+            <div className="space-y-3">
+              {upcomingEvents.map((event, idx) => (
+                <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="flex items-center gap-4 p-4">
+                      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className={`absolute inset-0 bg-gradient-to-br ${event.color} opacity-0 hover:opacity-10 transition-opacity`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-slate-900">{event.title}</h4>
+                        <p className="text-sm text-slate-600 mt-1">
+                          {event.dateStr} • Hosted by SACBM
+                        </p>
+                      </div>
+                      <button className="px-3 py-1 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex-shrink-0">
+                        RSVP
+                      </button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-0 shadow-sm">
+              <CardContent className="pt-12 pb-12 text-center">
+                <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-600 font-medium">No events on this date</p>
+                <p className="text-slate-500 text-sm mt-1">Select a different date or clear the filter</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
