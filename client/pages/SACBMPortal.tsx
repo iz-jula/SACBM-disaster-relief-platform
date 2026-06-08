@@ -12,17 +12,19 @@ import {
   X,
   Bell,
   ChevronRight,
+  BarChart3,
 } from "lucide-react";
 import SACBMDocuments from "@/components/SACBMDocuments";
 import SACBMEvents from "@/components/SACBMEvents";
 import SACBMMembers from "@/components/SACBMMembers";
+import SACBMBoardExco from "@/components/SACBMBoardExco";
 import { Member, MemberTier, MemberRole } from "@shared/api";
 
 const SACBMPortal = () => {
   const navigate = useNavigate();
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentSection, setCurrentSection] = useState<"dashboard" | "documents" | "events" | "members">("dashboard");
+  const [currentSection, setCurrentSection] = useState<"dashboard" | "documents" | "events" | "members" | "board-exco">("dashboard");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -78,6 +80,9 @@ const SACBMPortal = () => {
     { id: "documents", label: "Documents", icon: FileText },
     { id: "events", label: "Events", icon: Calendar },
     { id: "members", label: "Directory", icon: Users },
+    ...(currentMember && [MemberRole.ADMIN, MemberRole.EXCO, MemberRole.BOARD].includes(currentMember.role)
+      ? [{ id: "board-exco", label: "Board & EXCO", icon: BarChart3 }]
+      : []),
   ];
 
   return (
@@ -188,6 +193,7 @@ const SACBMPortal = () => {
                   {currentSection === "documents" && "Documents"}
                   {currentSection === "events" && "Events"}
                   {currentSection === "members" && "Directory"}
+                  {currentSection === "board-exco" && "Board & EXCO"}
                 </h1>
               </div>
             </div>
@@ -217,6 +223,7 @@ const SACBMPortal = () => {
           {currentSection === "documents" && <DocumentsSection member={currentMember} />}
           {currentSection === "events" && <EventsSection member={currentMember} onNavigate={setCurrentSection} />}
           {currentSection === "members" && <MembersSection member={currentMember} />}
+          {currentSection === "board-exco" && <BoardExcoSection member={currentMember} />}
         </div>
       </main>
     </div>
@@ -545,6 +552,11 @@ const EventsSection = ({ member, onNavigate }: { member: Member; onNavigate: (se
 // Members Section Component
 const MembersSection = ({ member }: { member: Member }) => {
   return <SACBMMembers currentMember={member} />;
+};
+
+// Board & EXCO Section Component
+const BoardExcoSection = ({ member }: { member: Member }) => {
+  return <SACBMBoardExco member={member} />;
 };
 
 export default SACBMPortal;
