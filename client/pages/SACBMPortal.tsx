@@ -113,26 +113,6 @@ const SACBMPortal = () => {
           )}
         </div>
 
-        {/* User Card */}
-        <div className="px-3 py-3">
-          {sidebarOpen ? (
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {currentMember.name.split(" ").map(n => n[0]).join("")}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-900 truncate">{currentMember.name}</p>
-                <p className="text-xs text-slate-500 truncate">{currentMember.company}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-xs font-bold">
-                {currentMember.name.split(" ").map(n => n[0]).join("")}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Menu Items */}
         <nav className="flex-1 p-3 space-y-1">
@@ -211,20 +191,22 @@ const SACBMPortal = () => {
                 </h1>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-2">
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${getTierColor(currentMember.tier)}`}>
-                  {currentMember.tier.toUpperCase()}
-                </span>
-                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${roleBadge.color}`}>
-                  {roleBadge.label}
-                </span>
-              </div>
+            <div className="flex items-center gap-4">
               {!isMobile && (
                 <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                   <Bell className="h-5 w-5 text-slate-600" />
                 </button>
               )}
+              {/* Profile Section */}
+              <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-slate-900">{currentMember.name}</p>
+                  <p className="text-xs text-slate-600">{currentMember.company}</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                  {currentMember.name.split(" ").map(n => n[0]).join("")}
+                </div>
+              </div>
             </div>
           </div>
         </div>
