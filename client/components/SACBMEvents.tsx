@@ -381,99 +381,86 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member }) => {
           </div>
 
           {/* Content */}
-          <div className="max-w-4xl mx-auto px-6 py-12">
-            {/* Image */}
-            <div className="mb-8 rounded-xl overflow-hidden h-96 bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center">
-              <Calendar className="h-20 w-20 text-slate-400" />
-            </div>
-
-            {/* Title & Description */}
-            <div className="mb-8">
-              <h1 className="text-4xl md:text-5xl font-light tracking-tight text-slate-900 mb-4">
-                {detailedEvent.title}
-              </h1>
-              <p className="text-lg text-slate-600 leading-relaxed">
-                {detailedEvent.description}
-              </p>
-            </div>
-
-            {/* Event Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <Calendar className="h-5 w-5 text-emerald-600" />
-                  <p className="text-sm font-medium text-slate-600">Date & Time</p>
-                </div>
-                <p className="text-lg font-semibold text-slate-900">
-                  {new Date(detailedEvent.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-                <p className="text-sm text-slate-600 mt-2">
-                  {detailedEvent.time}
-                  {detailedEvent.endTime && ` - ${detailedEvent.endTime}`}
-                </p>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <MapPin className="h-5 w-5 text-emerald-600" />
-                  <p className="text-sm font-medium text-slate-600">Location</p>
-                </div>
-                <p className="text-lg font-semibold text-slate-900">{detailedEvent.location}</p>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <Users className="h-5 w-5 text-emerald-600" />
-                  <p className="text-sm font-medium text-slate-600">
-                    {detailedEvent.capacity ? "Capacity" : "Attendees"}
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            {/* Main Grid: Details Left, Image Right */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {/* Main Content - Left */}
+              <div className="md:col-span-2">
+                {/* Title & Description */}
+                <div className="mb-8">
+                  <h1 className="text-3xl md:text-4xl font-light tracking-tight text-slate-900 mb-3">
+                    {detailedEvent.title}
+                  </h1>
+                  <p className="text-base text-slate-600 leading-relaxed">
+                    {detailedEvent.description}
                   </p>
                 </div>
-                <p className="text-lg font-semibold text-slate-900">
-                  {detailedEvent.capacity ? `${detailedEvent.capacity} people` : "TBD"}
-                </p>
-              </div>
-            </div>
 
-            {/* RSVP Section */}
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-8 mb-12">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-4">Will you be attending?</h2>
-              <p className="text-slate-600 mb-6">
-                RSVP deadline: {new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Accept
-                </Button>
-                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 gap-2">
-                  <HelpCircle className="h-4 w-4" />
-                  Maybe
-                </Button>
-                <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 gap-2">
-                  <XCircle className="h-4 w-4" />
-                  Decline
-                </Button>
-              </div>
-            </div>
+                {/* Quick Details - Compact Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <p className="text-xs font-medium text-slate-600 mb-2">Date</p>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {new Date(detailedEvent.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <p className="text-xs font-medium text-slate-600 mb-2">Time</p>
+                    <p className="text-sm font-semibold text-slate-900">{detailedEvent.time}</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <p className="text-xs font-medium text-slate-600 mb-2">Location</p>
+                    <p className="text-sm font-semibold text-slate-900 truncate">
+                      {detailedEvent.location.split(",")[0]}
+                    </p>
+                  </div>
+                </div>
 
-            {/* Additional Info */}
-            <div className="border-t border-slate-200 pt-12">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-6">Event Details</h2>
-              <div className="space-y-4 text-slate-600">
-                <p>
-                  <span className="font-medium text-slate-900">Organized by:</span> SACBM
-                </p>
-                <p>
-                  <span className="font-medium text-slate-900">Event Type:</span> Chamber Event
-                </p>
-                <p className="line-clamp-3">
-                  <span className="font-medium text-slate-900">About:</span> {detailedEvent.description}
-                </p>
+                {/* RSVP Section - Prominent */}
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-8">
+                  <h2 className="text-lg font-semibold text-slate-900 mb-4">Will you attend?</h2>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm gap-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Accept
+                    </Button>
+                    <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm gap-2">
+                      <HelpCircle className="h-4 w-4" />
+                      Maybe
+                    </Button>
+                    <Button className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm gap-2">
+                      <XCircle className="h-4 w-4" />
+                      Decline
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-3">
+                    RSVP by {new Date(detailedEvent.rsvpDeadline).toLocaleDateString()}
+                  </p>
+                </div>
+
+                {/* Additional Details */}
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="text-xs font-medium text-slate-600">Organized by</p>
+                    <p className="text-slate-900 font-medium mt-1">SACBM</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-600">Capacity</p>
+                    <p className="text-slate-900 font-medium mt-1">
+                      {detailedEvent.capacity ? `${detailedEvent.capacity} people` : "TBD"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image - Right */}
+              <div className="md:col-span-1">
+                <div className="rounded-xl overflow-hidden h-64 md:h-80 bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center sticky top-20">
+                  <Calendar className="h-16 w-16 text-slate-400" />
+                </div>
               </div>
             </div>
           </div>
