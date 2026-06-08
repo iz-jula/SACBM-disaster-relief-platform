@@ -149,10 +149,10 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      "governance": "bg-slate-100 text-slate-700",
-      "policy": "bg-slate-100 text-slate-700",
-      "meeting-minutes": "bg-slate-100 text-slate-700",
-      "other": "bg-slate-100 text-slate-700",
+      "governance": "text-purple-700",
+      "policy": "text-blue-700",
+      "meeting-minutes": "text-amber-700",
+      "other": "text-slate-700",
     };
     return colors[category] || colors["other"];
   };
@@ -177,7 +177,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             Access chamber documents, policies, and meeting minutes
           </p>
         </div>
-        {member.role === MemberRole.ADMIN || member.role === MemberRole.BOARD ? (
+        {member.role === MemberRole.ADMIN ? (
           <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 w-full md:w-auto">
             <Upload className="h-4 w-4" />
             Upload Document
@@ -263,12 +263,12 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                         )}
 
                         {/* Badges */}
-                        <div className="flex flex-wrap items-center gap-2 mt-3">
-                          <span className={`text-xs font-medium px-2 py-1 rounded ${getCategoryColor(doc.category)}`}>
+                        <div className="flex flex-wrap items-center gap-3 mt-3">
+                          <span className={`text-xs font-medium ${getCategoryColor(doc.category)}`}>
                             {getCategoryLabel(doc.category)}
                           </span>
                           {doc.visibility !== "all" && (
-                            <span className="text-xs font-medium text-slate-600 px-2 py-1">
+                            <span className="text-xs font-medium text-slate-600">
                               Only for {doc.visibility.toUpperCase()}
                             </span>
                           )}
