@@ -199,7 +199,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       </div>
 
       {/* Filters */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-0 md:flex md:items-end md:space-x-6">
         <div>
           <div className="relative">
             <Search className="absolute left-0 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -211,9 +211,9 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             />
           </div>
         </div>
-        <div>
+        <div className="flex items-end gap-2">
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0">
+            <SelectTrigger className="border-0 border-b border-slate-200 rounded-none bg-transparent focus:ring-0 flex-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -227,20 +227,17 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </SelectItem>
               ))}
-              {member.role === MemberRole.ADMIN && (
-                <>
-                  <div className="border-t border-slate-200 my-1" />
-                  <button
-                    onClick={() => setShowNewCategoryForm(true)}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 rounded cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Category
-                  </button>
-                </>
-              )}
             </SelectContent>
           </Select>
+          {member.role === MemberRole.ADMIN && (
+            <button
+              onClick={() => setShowNewCategoryForm(true)}
+              className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-50 rounded transition-colors"
+              title="Add new category"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          )}
         </div>
         <div>
           <Select value={sortBy} onValueChange={setSortBy}>
