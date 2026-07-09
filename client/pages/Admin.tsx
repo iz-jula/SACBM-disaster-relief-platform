@@ -112,9 +112,12 @@ export default function Admin() {
   // Carousel management state
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [isLoadingCarousel, setIsLoadingCarousel] = useState(false);
-  const [newCarouselUrl, setNewCarouselUrl] = useState("");
+  const [carouselImageFile, setCarouselImageFile] = useState<File | null>(null);
+  const [carouselImagePreview, setCarouselImagePreview] = useState<string>("");
   const [newCarouselTitle, setNewCarouselTitle] = useState("");
   const [newCarouselDescription, setNewCarouselDescription] = useState("");
+  const [carouselLocation, setCarouselLocation] = useState<string>("moments_of_impact");
+  const [isUploadingCarouselImage, setIsUploadingCarouselImage] = useState(false);
 
   // Member access management state
   const [approvedMembers, setApprovedMembers] = useState<ApprovedMember[]>([]);
@@ -351,32 +354,63 @@ export default function Admin() {
     }
   };
 
+  const handleCarouselImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+      setCarouselImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCarouselImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("Please select a JPG or PNG image");
+    }
+  };
+
   const handleAddCarouselImage = async () => {
-    if (!newCarouselUrl || !newCarouselTitle) {
-      alert("Please fill in image URL and title");
+    if (!carouselImageFile || !newCarouselTitle) {
+      alert("Please select an image and enter a title");
       return;
     }
 
+    setIsUploadingCarouselImage(true);
     try {
-      const newImage = await createCarouselImage({
-        url: newCarouselUrl,
-        title: newCarouselTitle,
-        description: newCarouselDescription,
-        display_order: carouselImages.length,
-      });
+      // Import the carousel service function
+      const { uploadCarouselImageFile } = await import("@/services/carouselService");
 
-      if (newImage) {
-        setCarouselImages([...carouselImages, newImage]);
-        setNewCarouselUrl("");
-        setNewCarouselTitle("");
-        setNewCarouselDescription("");
-        alert("Image added successfully!");
+      const imageUrl = await uploadCarouselImageFile(
+        carouselImageFile,
+        newCarouselTitle,
+        carouselLocation
+      );
+
+      if (imageUrl) {
+        const newImage = await createCarouselImage({
+          url: imageUrl,
+          title: newCarouselTitle,
+          description: newCarouselDescription,
+          display_order: carouselImages.length,
+          location: carouselLocation,
+        });
+
+        if (newImage) {
+          setCarouselImages([...carouselImages, newImage]);
+          setCarouselImageFile(null);
+          setCarouselImagePreview("");
+          setNewCarouselTitle("");
+          setNewCarouselDescription("");
+          setCarouselLocation("moments_of_impact");
+          alert("Image uploaded successfully!");
+        }
       } else {
-        alert("Failed to add image");
+        alert("Failed to upload image");
       }
     } catch (error) {
       console.error("Error adding carousel image:", error);
       alert("Error adding image");
+    } finally {
+      setIsUploadingCarouselImage(false);
     }
   };
 
@@ -1941,43 +1975,110 @@ export default function Admin() {
               {/* Add New Image Section */}
               <div className="border border-slate-200 rounded-lg p-6 mb-8 bg-slate-50">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Add New Image</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Image URL</label>
-                    <input
-                      type="url"
-                      value={newCarouselUrl}
-                      onChange={(e) => setNewCarouselUrl(e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Form Section */}
+                  <div className="space-y-4">
+                    {/* Image Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Upload Image (JPG/PNG)</label>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        onChange={handleCarouselImageSelect}
+                        disabled={isUploadingCarouselImage}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">Max 5MB, JPG or PNG</p>
+                    </div>
+
+                    {/* Location Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Display Location</label>
+                      <select
+                        value={carouselLocation}
+                        onChange={(e) => setCarouselLocation(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="moments_of_impact">Moments of Impact (Home Carousel)</option>
+                        <option value="hero_background">Hero Background (Behind Stats)</option>
+                        <option value="gallery">Gallery Spotlight</option>
+                      </select>
+                      <p className="text-xs text-slate-500 mt-1">Choose where this image will appear</p>
+                    </div>
+
+                    {/* Title */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
+                      <input
+                        type="text"
+                        value={newCarouselTitle}
+                        onChange={(e) => setNewCarouselTitle(e.target.value)}
+                        placeholder="e.g., Community Relief Efforts"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                      <textarea
+                        value={newCarouselDescription}
+                        onChange={(e) => setNewCarouselDescription(e.target.value)}
+                        placeholder="Describe the image..."
+                        rows={3}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    {/* Upload Button */}
+                    <button
+                      onClick={handleAddCarouselImage}
+                      disabled={isUploadingCarouselImage || !carouselImageFile}
+                      className={`w-full px-6 py-2 rounded-lg font-medium transition-colors ${
+                        isUploadingCarouselImage || !carouselImageFile
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
+                    >
+                      {isUploadingCarouselImage ? "Uploading..." : "Upload Image"}
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
-                    <input
-                      type="text"
-                      value={newCarouselTitle}
-                      onChange={(e) => setNewCarouselTitle(e.target.value)}
-                      placeholder="e.g., Community Relief Efforts"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+
+                  {/* Preview Section */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Preview</label>
+                      {carouselImagePreview ? (
+                        <div className="rounded-lg overflow-hidden border border-slate-300">
+                          <img
+                            src={carouselImagePreview}
+                            alt="Preview"
+                            className="w-full h-48 object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-48 bg-slate-200 rounded-lg flex items-center justify-center">
+                          <p className="text-slate-500">No image selected</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Location Preview Info */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="text-sm font-semibold text-blue-900 mb-2">📍 Where This Will Appear:</p>
+                      <p className="text-sm text-blue-800">
+                        {carouselLocation === "moments_of_impact" && (
+                          "This image will appear in the 'Moments of Impact' carousel section on the home page."
+                        )}
+                        {carouselLocation === "hero_background" && (
+                          "This image will display behind the statistics cards at the top of the home page."
+                        )}
+                        {carouselLocation === "gallery" && (
+                          "This image will appear in the gallery spotlight section."
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
-                    <textarea
-                      value={newCarouselDescription}
-                      onChange={(e) => setNewCarouselDescription(e.target.value)}
-                      placeholder="Describe the image..."
-                      rows={3}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <button
-                    onClick={handleAddCarouselImage}
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-                  >
-                    Add Image
-                  </button>
                 </div>
               </div>
 
