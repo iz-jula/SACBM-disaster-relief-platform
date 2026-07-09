@@ -2381,20 +2381,16 @@ export default function Admin() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Category
+                        Category *
                       </label>
-                      <select
+                      <input
+                        type="text"
                         value={eventFormData.category}
                         onChange={(e) => setEventFormData({ ...eventFormData, category: e.target.value })}
+                        placeholder="e.g., Health & Wellness, Training, Environment"
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      >
-                        <option value="Health & Wellness">Health & Wellness</option>
-                        <option value="Training">Training</option>
-                        <option value="Environment">Environment</option>
-                        <option value="Leadership">Leadership</option>
-                        <option value="Education">Education</option>
-                        <option value="Empowerment">Empowerment</option>
-                      </select>
+                      />
+                      <p className="text-xs text-slate-500 mt-1">Create your own category or use existing ones</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
