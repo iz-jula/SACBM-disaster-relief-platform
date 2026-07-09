@@ -191,11 +191,11 @@ const OurMembers = () => {
       {/* Header */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-20">
-          <h1 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900">
-            Our Members
+          <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">
+            Social Impact per Member
           </h1>
           <p className="mt-4 text-base text-slate-600 max-w-2xl">
-            Meet the companies and organizations making a difference across Mozambique
+            View the social impact activities and contributions of each SACBM member organization
           </p>
         </div>
       </div>
