@@ -22,6 +22,7 @@ import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateI
 import { getAchievements } from "@/services/achievementsService";
 import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
+import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, type Event, type HelpNeed } from "@/services/eventsService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -122,6 +123,35 @@ export default function Admin() {
   const [newMemberName, setNewMemberName] = useState("");
   const [newMemberCompany, setNewMemberCompany] = useState("");
 
+  // Events management state
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [eventFormData, setEventFormData] = useState<Omit<Event, "id">>({
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    description: "",
+    category: "Health & Wellness",
+    attendees: 0,
+    featured: false,
+    helpNeeds: [],
+    contactMessage: "",
+    image: "",
+    gallery: [],
+  });
+  const [eventCategories, setEventCategories] = useState<string[]>([]);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [newHelpNeed, setNewHelpNeed] = useState<HelpNeed>({
+    name: "",
+    quantity: 0,
+    unit: "",
+  });
+  const [deleteConfirmEventId, setDeleteConfirmEventId] = useState<string | null>(null);
+
   // Load INGD active state from database
   useEffect(() => {
     const loadIngdSetting = async () => {
@@ -201,6 +231,13 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === "member-access") {
       loadApprovedMembers();
+    }
+  }, [activeTab]);
+
+  // Load events when events tab is activated
+  useEffect(() => {
+    if (activeTab === "events") {
+      loadEvents();
     }
   }, [activeTab]);
 
@@ -412,6 +449,174 @@ export default function Admin() {
         alert("Error removing member");
       }
     }
+  };
+
+  // ===== EVENTS MANAGEMENT FUNCTIONS =====
+  const loadEvents = () => {
+    setIsLoadingEvents(true);
+    try {
+      const allEvents = getAllEvents();
+      const categories = getCategories();
+      setEvents(allEvents);
+      setEventCategories(categories);
+      setIsLoadingEvents(false);
+    } catch (error) {
+      console.error("Error loading events:", error);
+      setErrorMessage("Failed to load events");
+      setIsLoadingEvents(false);
+    }
+  };
+
+  const resetEventForm = () => {
+    setEventFormData({
+      title: "",
+      date: "",
+      time: "",
+      location: "",
+      description: "",
+      category: "Health & Wellness",
+      attendees: 0,
+      featured: false,
+      helpNeeds: [],
+      contactMessage: "",
+      image: "",
+      gallery: [],
+    });
+    setNewHelpNeed({ name: "", quantity: 0, unit: "" });
+    setEditingEventId(null);
+  };
+
+  const handleAddEvent = () => {
+    setShowEventForm(true);
+    resetEventForm();
+  };
+
+  const handleEditEvent = (event: Event) => {
+    setEditingEventId(event.id);
+    setEventFormData({
+      title: event.title,
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      description: event.description,
+      category: event.category,
+      attendees: event.attendees || 0,
+      featured: event.featured || false,
+      helpNeeds: event.helpNeeds || [],
+      contactMessage: event.contactMessage || "",
+      image: event.image || "",
+      gallery: event.gallery || [],
+    });
+    setShowEventForm(true);
+  };
+
+  const handleSaveEvent = () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    // Validation
+    if (!eventFormData.title || !eventFormData.date || !eventFormData.time || !eventFormData.location) {
+      setErrorMessage("Please fill in all required fields (Title, Date, Time, Location)");
+      return;
+    }
+
+    try {
+      if (editingEventId) {
+        // Update existing event
+        const updatedEvent = updateEvent(editingEventId, eventFormData);
+        if (updatedEvent) {
+          setEvents(events.map((e) => (e.id === editingEventId ? updatedEvent : e)));
+          setSuccessMessage("Event updated successfully!");
+          setShowEventForm(false);
+          resetEventForm();
+        } else {
+          setErrorMessage("Failed to update event");
+        }
+      } else {
+        // Create new event
+        const newEvent = createEvent(eventFormData);
+        setEvents([...events, newEvent]);
+        setSuccessMessage("Event created successfully!");
+        setShowEventForm(false);
+        resetEventForm();
+      }
+
+      // Clear messages after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+        setErrorMessage("");
+      }, 3000);
+    } catch (error) {
+      console.error("Error saving event:", error);
+      setErrorMessage("Failed to save event");
+    }
+  };
+
+  const handleDeleteEvent = (eventId: string) => {
+    if (confirm("Are you sure you want to delete this event?")) {
+      try {
+        const success = deleteEvent(eventId);
+        if (success) {
+          setEvents(events.filter((e) => e.id !== eventId));
+          setSuccessMessage("Event deleted successfully!");
+          setDeleteConfirmEventId(null);
+          setTimeout(() => setSuccessMessage(""), 3000);
+        } else {
+          setErrorMessage("Failed to delete event");
+        }
+      } catch (error) {
+        console.error("Error deleting event:", error);
+        setErrorMessage("Failed to delete event");
+      }
+    }
+  };
+
+  const handleAddHelpNeed = () => {
+    if (!newHelpNeed.name) {
+      setErrorMessage("Please enter a help need name");
+      return;
+    }
+
+    const updatedHelpNeeds = [...(eventFormData.helpNeeds || []), newHelpNeed];
+    setEventFormData({
+      ...eventFormData,
+      helpNeeds: updatedHelpNeeds,
+    });
+    setNewHelpNeed({ name: "", quantity: 0, unit: "" });
+    setErrorMessage("");
+  };
+
+  const handleRemoveHelpNeed = (index: number) => {
+    const updatedHelpNeeds = eventFormData.helpNeeds?.filter((_, i) => i !== index) || [];
+    setEventFormData({
+      ...eventFormData,
+      helpNeeds: updatedHelpNeeds,
+    });
+  };
+
+  const handleAddGalleryImage = () => {
+    const url = prompt("Enter image URL:");
+    if (url && url.trim()) {
+      const updatedGallery = [...(eventFormData.gallery || []), url.trim()];
+      setEventFormData({
+        ...eventFormData,
+        gallery: updatedGallery,
+      });
+    }
+  };
+
+  const handleRemoveGalleryImage = (index: number) => {
+    const updatedGallery = eventFormData.gallery?.filter((_, i) => i !== index) || [];
+    setEventFormData({
+      ...eventFormData,
+      gallery: updatedGallery,
+    });
+  };
+
+  const handleCancelEventForm = () => {
+    setShowEventForm(false);
+    resetEventForm();
+    setErrorMessage("");
   };
 
   const loadAllRequests = async () => {
@@ -1828,43 +2033,426 @@ export default function Admin() {
         {/* Events Tab */}
         {activeTab === "events" && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">Events Management</h2>
-              <p className="text-slate-600 mb-6">Create, edit, and manage social events. Set event details, required help items, quantities, and contact information.</p>
-
-              <div className="border-t border-slate-200 pt-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Event Features</h3>
-                <ul className="space-y-3 text-slate-700">
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span><strong>Event Details:</strong> Title, date, time, location, description, category</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span><strong>Help Needs:</strong> Define what members can donate with quantities and units (e.g., "Hospital beds - 5 units")</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span><strong>Contact Information:</strong> Custom contact message with point of contact details</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span><strong>Event Images:</strong> Upload main image and gallery photos</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span><strong>Featured Events:</strong> Mark events as featured to highlight them on the dashboard</span>
-                  </li>
-                </ul>
+            {/* Messages */}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 flex items-center gap-3">
+                <span className="font-bold">✓</span>
+                <span>{successMessage}</span>
+                <button
+                  onClick={() => setSuccessMessage("")}
+                  className="ml-auto text-green-600 hover:text-green-800"
+                >
+                  <X size={16} />
+                </button>
               </div>
+            )}
+            {errorMessage && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 flex items-center gap-3">
+                <span className="font-bold">!</span>
+                <span>{errorMessage}</span>
+                <button
+                  onClick={() => setErrorMessage("")}
+                  className="ml-auto text-red-600 hover:text-red-800"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
 
-              <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-blue-900">
-                  <strong>Note:</strong> Events are currently managed through the database. A full admin interface for creating and editing events will be available soon.
-                  For now, events are displayed from the mock data. Contact the development team to add custom events to your dashboard.
-                </p>
+            {/* Header */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 mb-2">Events Management</h2>
+                  <p className="text-slate-600">Create, edit, and manage social events with help needs and contact information</p>
+                </div>
+                {!showEventForm && (
+                  <button
+                    onClick={handleAddEvent}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    <Plus size={18} />
+                    New Event
+                  </button>
+                )}
               </div>
             </div>
+
+            {/* Event Form or List */}
+            {showEventForm ? (
+              // EVENT FORM
+              <div className="bg-white rounded-xl shadow p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-slate-900">
+                    {editingEventId ? "Edit Event" : "Create New Event"}
+                  </h3>
+                  <button
+                    onClick={handleCancelEventForm}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="border-t border-slate-200 pt-6 space-y-6">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Event Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={eventFormData.title}
+                      onChange={(e) => setEventFormData({ ...eventFormData, title: e.target.value })}
+                      placeholder="e.g., Community Health Drive"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Date and Time Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Date *
+                      </label>
+                      <input
+                        type="text"
+                        value={eventFormData.date}
+                        onChange={(e) => setEventFormData({ ...eventFormData, date: e.target.value })}
+                        placeholder="e.g., March 15, 2024"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Time *
+                      </label>
+                      <input
+                        type="text"
+                        value={eventFormData.time}
+                        onChange={(e) => setEventFormData({ ...eventFormData, time: e.target.value })}
+                        placeholder="e.g., 8:00 AM - 2:00 PM"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      value={eventFormData.location}
+                      onChange={(e) => setEventFormData({ ...eventFormData, location: e.target.value })}
+                      placeholder="e.g., Central Health Center, Maputo"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Description *
+                    </label>
+                    <textarea
+                      value={eventFormData.description}
+                      onChange={(e) => setEventFormData({ ...eventFormData, description: e.target.value })}
+                      placeholder="Describe the event in detail..."
+                      rows={4}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Category and Attendees Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Category
+                      </label>
+                      <select
+                        value={eventFormData.category}
+                        onChange={(e) => setEventFormData({ ...eventFormData, category: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      >
+                        <option value="Health & Wellness">Health & Wellness</option>
+                        <option value="Training">Training</option>
+                        <option value="Environment">Environment</option>
+                        <option value="Leadership">Leadership</option>
+                        <option value="Education">Education</option>
+                        <option value="Empowerment">Empowerment</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Expected Attendees
+                      </label>
+                      <input
+                        type="number"
+                        value={eventFormData.attendees || 0}
+                        onChange={(e) => setEventFormData({ ...eventFormData, attendees: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Featured Checkbox */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      checked={eventFormData.featured}
+                      onChange={(e) => setEventFormData({ ...eventFormData, featured: e.target.checked })}
+                      className="w-4 h-4 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <label htmlFor="featured" className="text-sm font-medium text-slate-700">
+                      Featured Event (highlight on dashboard)
+                    </label>
+                  </div>
+
+                  {/* Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Main Image URL
+                    </label>
+                    <input
+                      type="text"
+                      value={eventFormData.image || ""}
+                      onChange={(e) => setEventFormData({ ...eventFormData, image: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                    {eventFormData.image && (
+                      <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
+                        <img src={eventFormData.image} alt="Preview" className="w-full h-full object-cover" onError={() => {}} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Gallery Images */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-medium text-slate-700">Gallery Images</label>
+                      <button
+                        onClick={handleAddGalleryImage}
+                        className="px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                      >
+                        <Plus size={14} className="inline mr-1" />
+                        Add Image
+                      </button>
+                    </div>
+                    {eventFormData.gallery && eventFormData.gallery.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {eventFormData.gallery.map((url, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={url}
+                              alt={`Gallery ${idx + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                              onError={() => {}}
+                            />
+                            <button
+                              onClick={() => handleRemoveGalleryImage(idx)}
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Contact Message */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Contact Message
+                    </label>
+                    <textarea
+                      value={eventFormData.contactMessage || ""}
+                      onChange={(e) => setEventFormData({ ...eventFormData, contactMessage: e.target.value })}
+                      placeholder="e.g., To contribute, please contact Dr. Maria Silva at maria.silva@example.com or call +258 84 123 4567"
+                      rows={3}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Help Needs Section */}
+                  <div className="border-t border-slate-200 pt-6">
+                    <h4 className="text-lg font-semibold text-slate-900 mb-4">Help Needs</h4>
+
+                    {/* Existing Help Needs */}
+                    {eventFormData.helpNeeds && eventFormData.helpNeeds.length > 0 && (
+                      <div className="mb-6 space-y-2">
+                        {eventFormData.helpNeeds.map((need, idx) => (
+                          <div key={idx} className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-medium text-slate-900">{need.name}</p>
+                              {need.quantity && (
+                                <p className="text-sm text-slate-600">Needed: {need.quantity} {need.unit || "items"}</p>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleRemoveHelpNeed(idx)}
+                              className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add New Help Need */}
+                    <div className="space-y-3 bg-slate-50 p-4 rounded-lg">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input
+                          type="text"
+                          value={newHelpNeed.name}
+                          onChange={(e) => setNewHelpNeed({ ...newHelpNeed, name: e.target.value })}
+                          placeholder="Help need name (e.g., Hospital beds)"
+                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        />
+                        <input
+                          type="number"
+                          value={newHelpNeed.quantity || 0}
+                          onChange={(e) => setNewHelpNeed({ ...newHelpNeed, quantity: parseInt(e.target.value) || 0 })}
+                          placeholder="Quantity"
+                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        />
+                        <input
+                          type="text"
+                          value={newHelpNeed.unit || ""}
+                          onChange={(e) => setNewHelpNeed({ ...newHelpNeed, unit: e.target.value })}
+                          placeholder="Unit (e.g., units, sets, boxes)"
+                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        />
+                      </div>
+                      <button
+                        onClick={handleAddHelpNeed}
+                        className="w-full px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium rounded-lg transition-colors"
+                      >
+                        <Plus size={16} className="inline mr-2" />
+                        Add Help Need
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Form Actions */}
+                  <div className="border-t border-slate-200 pt-6 flex gap-3 justify-end">
+                    <button
+                      onClick={handleCancelEventForm}
+                      className="px-6 py-2 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveEvent}
+                      className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
+                    >
+                      {editingEventId ? "Update Event" : "Create Event"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // EVENTS LIST
+              <div className="space-y-4">
+                {isLoadingEvents ? (
+                  <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                    Loading events...
+                  </div>
+                ) : events.length === 0 ? (
+                  <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                    <p className="text-lg">No events yet. Create your first event to get started.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {events.map((event) => (
+                      <div key={event.id} className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+                        <div className="flex gap-4 items-start">
+                          {/* Event Image */}
+                          {event.image && (
+                            <div className="w-24 h-24 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                              <img
+                                src={event.image}
+                                alt={event.title}
+                                className="w-full h-full object-cover"
+                                onError={() => {}}
+                              />
+                            </div>
+                          )}
+
+                          {/* Event Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="text-lg font-semibold text-slate-900">{event.title}</h3>
+                                  {event.featured && (
+                                    <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">Featured</span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-slate-600 mb-3">{event.description}</p>
+
+                                {/* Event Details */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-slate-600">
+                                  <div>
+                                    <p className="font-medium text-slate-700">Date</p>
+                                    <p>{event.date}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-slate-700">Time</p>
+                                    <p>{event.time}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-slate-700">Location</p>
+                                    <p className="truncate">{event.location}</p>
+                                  </div>
+                                  {event.attendees && (
+                                    <div>
+                                      <p className="font-medium text-slate-700">Expected</p>
+                                      <p>~{event.attendees} attendees</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Help Needs Count */}
+                                {event.helpNeeds && event.helpNeeds.length > 0 && (
+                                  <p className="text-xs text-emerald-600 font-medium mt-2">
+                                    {event.helpNeeds.length} help need{event.helpNeeds.length !== 1 ? "s" : ""}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleEditEvent(event)}
+                                  className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                                  title="Edit event"
+                                >
+                                  <Edit2 size={18} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteEvent(event.id)}
+                                  className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                                  title="Delete event"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

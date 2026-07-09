@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,53 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { getCarouselImages, CarouselImage, getActionsMetrics } from "@/services/supabaseService";
-
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  category: string;
-  attendees?: number;
-  featured?: boolean;
-}
-
-const MOCK_EVENTS: Event[] = [
-  {
-    id: "1",
-    title: "Community Health Drive",
-    date: "March 15, 2024",
-    time: "8:00 AM - 2:00 PM",
-    location: "Central Health Center, Maputo",
-    description: "Free medical checkups and health awareness program in partnership with local clinics.",
-    category: "Health & Wellness",
-    attendees: 250,
-    featured: true,
-  },
-  {
-    id: "2",
-    title: "Disaster Relief Training",
-    date: "March 22, 2024",
-    time: "9:00 AM - 5:00 PM",
-    location: "Chamber Building, Maputo",
-    description: "Comprehensive training for rapid response teams in emergency situations.",
-    category: "Training",
-    attendees: 100,
-    featured: true,
-  },
-  {
-    id: "3",
-    title: "Environmental Cleanup Initiative",
-    date: "April 5, 2024",
-    time: "7:00 AM - 12:00 PM",
-    location: "Coastal Areas, Gaza Province",
-    description: "Join member organizations in community environmental conservation and cleanup projects.",
-    category: "Environment",
-    attendees: 180,
-  },
-];
+import { getAllEvents, type Event } from "@/services/eventsService";
 
 interface Stats {
   totalActions: number;
@@ -108,6 +62,8 @@ const Home = () => {
       prev === carouselImages.length - 1 ? 0 : prev + 1
     );
   };
+
+  const allEvents = useMemo(() => getAllEvents(), []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -168,14 +124,14 @@ const Home = () => {
             </p>
           </div>
 
-        {MOCK_EVENTS.length > 0 ? (
+        {allEvents.length > 0 ? (
           <>
             {/* Featured Events */}
-            {MOCK_EVENTS.filter(e => e.featured).length > 0 && (
+            {allEvents.filter(e => e.featured).length > 0 && (
               <div className="mb-8">
                 <h3 className="text-xl font-light text-slate-900 mb-4">Featured Events</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  {MOCK_EVENTS.filter(e => e.featured).map((event) => (
+                  {allEvents.filter(e => e.featured).map((event) => (
                     <div key={event.id} className="rounded-lg border border-slate-200 bg-white p-5 hover:shadow-md transition-shadow">
                       <div className="mb-3 inline-block rounded-full bg-emerald-100 px-3 py-1">
                         <span className="text-xs font-medium text-emerald-700">{event.category}</span>
@@ -203,11 +159,11 @@ const Home = () => {
             )}
 
             {/* Other Upcoming Events */}
-            {MOCK_EVENTS.filter(e => !e.featured).length > 0 && (
+            {allEvents.filter(e => !e.featured).length > 0 && (
               <div>
                 <h3 className="text-2xl font-light text-slate-900 mb-6">Other Upcoming Events</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {MOCK_EVENTS.filter(e => !e.featured).map((event) => (
+                  {allEvents.filter(e => !e.featured).map((event) => (
                     <div key={event.id} className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
                       <div className="mb-4 inline-block rounded-full bg-slate-100 px-3 py-1">
                         <span className="text-xs font-medium text-slate-700">{event.category}</span>

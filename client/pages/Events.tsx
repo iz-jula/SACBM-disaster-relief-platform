@@ -1,94 +1,25 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, MapPin, Users } from "lucide-react";
-
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  description: string;
-  category: string;
-  attendees?: number;
-  featured?: boolean;
-}
-
-const MOCK_EVENTS: Event[] = [
-  {
-    id: "1",
-    title: "Community Health Drive",
-    date: "March 15, 2024",
-    time: "8:00 AM - 2:00 PM",
-    location: "Central Health Center, Maputo",
-    description: "Free medical checkups and health awareness program in partnership with local clinics. All community members welcome.",
-    category: "Health & Wellness",
-    attendees: 250,
-    featured: true,
-  },
-  {
-    id: "2",
-    title: "Disaster Relief Training",
-    date: "March 22, 2024",
-    time: "9:00 AM - 5:00 PM",
-    location: "Chamber Building, Maputo",
-    description: "Comprehensive training for rapid response teams in emergency situations. Professional certification provided.",
-    category: "Training",
-    attendees: 100,
-    featured: true,
-  },
-  {
-    id: "3",
-    title: "Environmental Cleanup Initiative",
-    date: "April 5, 2024",
-    time: "7:00 AM - 12:00 PM",
-    location: "Coastal Areas, Gaza Province",
-    description: "Join member organizations in community environmental conservation and cleanup projects.",
-    category: "Environment",
-    attendees: 180,
-  },
-  {
-    id: "4",
-    title: "CSR Leadership Summit",
-    date: "April 12, 2024",
-    time: "2:00 PM - 6:00 PM",
-    location: "Polana Hotel, Maputo",
-    description: "Strategic dialogue on corporate social responsibility initiatives and impact measurement.",
-    category: "Leadership",
-    attendees: 75,
-  },
-  {
-    id: "5",
-    title: "School Supplies Distribution",
-    date: "April 20, 2024",
-    time: "10:00 AM - 3:00 PM",
-    location: "Multiple Schools, Sofala Province",
-    description: "Distribution of educational materials and supplies to underprivileged schools.",
-    category: "Education",
-    attendees: 200,
-  },
-  {
-    id: "6",
-    title: "Women Empowerment Workshop",
-    date: "May 1, 2024",
-    time: "9:00 AM - 4:00 PM",
-    location: "Chamber Building, Maputo",
-    description: "Skills development and business training for women entrepreneurs and community leaders.",
-    category: "Empowerment",
-    attendees: 120,
-  },
-];
+import { getAllEvents, type Event } from "@/services/eventsService";
 
 const Events = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const allEvents = useMemo(() => getAllEvents(), []);
 
-  const categories = ["All", ...new Set(MOCK_EVENTS.map((e) => e.category))];
-  const filteredEvents = selectedCategory === "All" 
-    ? MOCK_EVENTS 
-    : MOCK_EVENTS.filter((e) => e.category === selectedCategory);
+  const categories = useMemo(
+    () => ["All", ...new Set(allEvents.map((e) => e.category))],
+    [allEvents]
+  );
+  const filteredEvents = useMemo(
+    () => selectedCategory === "All"
+      ? allEvents
+      : allEvents.filter((e) => e.category === selectedCategory),
+    [selectedCategory, allEvents]
+  );
 
   const featuredEvents = filteredEvents.filter((e) => e.featured);
   const upcomingEvents = filteredEvents.filter((e) => !e.featured);
