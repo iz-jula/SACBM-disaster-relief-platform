@@ -2090,24 +2090,43 @@ export default function Admin() {
                 <p className="text-slate-600">No images yet. Add one above!</p>
               ) : (
                 <div className="space-y-4">
-                  {carouselImages.map((img) => (
-                    <div key={img.id} className="border border-slate-200 rounded-lg p-4 flex gap-4">
-                      <div className="flex-shrink-0 h-24 w-24 rounded-lg overflow-hidden bg-slate-100">
-                        <img src={img.url} alt={img.title} className="h-full w-full object-cover" />
+                  {carouselImages.map((img) => {
+                    const locationLabel = {
+                      "moments_of_impact": "🎯 Moments of Impact",
+                      "hero_background": "🎨 Hero Background (Top)",
+                      "gallery": "🖼️ Gallery Spotlight"
+                    }[img.location || "moments_of_impact"] || img.location;
+
+                    const locationBgColor = {
+                      "moments_of_impact": "bg-blue-50 border-blue-200 text-blue-700",
+                      "hero_background": "bg-amber-50 border-amber-200 text-amber-700",
+                      "gallery": "bg-purple-50 border-purple-200 text-purple-700"
+                    }[img.location || "moments_of_impact"] || "bg-slate-50 border-slate-200 text-slate-700";
+
+                    return (
+                      <div key={img.id} className="border border-slate-200 rounded-lg p-4 flex gap-4">
+                        <div className="flex-shrink-0 h-24 w-24 rounded-lg overflow-hidden bg-slate-100">
+                          <img src={img.url} alt={img.title} className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-slate-900">{img.title}</h4>
+                          <p className="text-sm text-slate-600 mt-1">{img.description}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${locationBgColor}`}>
+                              {locationLabel}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-2 truncate">{img.url}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteCarouselImage(img.id)}
+                          className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors flex-shrink-0"
+                        >
+                          Delete
+                        </button>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-slate-900">{img.title}</h4>
-                        <p className="text-sm text-slate-600 mt-1">{img.description}</p>
-                        <p className="text-xs text-slate-500 mt-2 truncate">{img.url}</p>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteCarouselImage(img.id)}
-                        className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors flex-shrink-0"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

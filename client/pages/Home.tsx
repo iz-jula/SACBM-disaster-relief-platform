@@ -7,6 +7,7 @@ import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { getCarouselImages, CarouselImage, getActionsMetrics } from "@/services/supabaseService";
 import { getAllEvents, type Event } from "@/services/eventsService";
+import { getCarouselImagesByLocation } from "@/services/carouselService";
 
 interface Stats {
   totalActions: number;
@@ -15,7 +16,9 @@ interface Stats {
 }
 
 const Home = () => {
-  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [allCarouselImages, setAllCarouselImages] = useState<CarouselImage[]>([]);
+  const [momentOfImpactImages, setMomentOfImpactImages] = useState<CarouselImage[]>([]);
+  const [heroBackgroundImages, setHeroBackgroundImages] = useState<CarouselImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [stats, setStats] = useState<Stats>({
     totalActions: 0,
@@ -24,11 +27,15 @@ const Home = () => {
   });
 
   useEffect(() => {
-    // Load carousel images from Supabase
+    // Load carousel images by location from Supabase
     const loadImages = async () => {
       try {
-        const images = await getCarouselImages();
-        setCarouselImages(images);
+        const momentImages = await getCarouselImagesByLocation("moments_of_impact");
+        const heroImages = await getCarouselImagesByLocation("hero_background");
+
+        setAllCarouselImages([...momentImages, ...heroImages]);
+        setMomentOfImpactImages(momentImages);
+        setHeroBackgroundImages(heroImages);
       } catch (error) {
         console.error("Error loading carousel images:", error);
       }
@@ -53,13 +60,13 @@ const Home = () => {
 
   const goToPreviousImage = () => {
     setCurrentImageIndex((prev) =>
-      prev === 0 ? carouselImages.length - 1 : prev - 1
+      prev === 0 ? momentOfImpactImages.length - 1 : prev - 1
     );
   };
 
   const goToNextImage = () => {
     setCurrentImageIndex((prev) =>
-      prev === carouselImages.length - 1 ? 0 : prev + 1
+      prev === momentOfImpactImages.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -81,12 +88,25 @@ const Home = () => {
       <section className="relative overflow-hidden px-6 sm:px-8 py-16 sm:py-28">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=1200&height=600"
-            alt="Community impact background"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/90 to-white/85" />
+          {heroBackgroundImages.length > 0 ? (
+            <>
+              <img
+                src={heroBackgroundImages[0].url}
+                alt={heroBackgroundImages[0].title}
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/90 to-white/85" />
+            </>
+          ) : (
+            <>
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=1200&height=600"
+                alt="Community impact background"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/90 to-white/85" />
+            </>
+          )}
         </div>
 
         {/* Content */}
@@ -223,12 +243,12 @@ const Home = () => {
           </div>
 
         {/* Carousel */}
-        {carouselImages.length > 0 ? (
+        {momentOfImpactImages.length > 0 ? (
           <div className="relative rounded-lg overflow-hidden h-96 sm:h-[28rem]">
             {/* Current Image */}
             <img
-              src={carouselImages[currentImageIndex].url}
-              alt={carouselImages[currentImageIndex].title}
+              src={momentOfImpactImages[currentImageIndex].url}
+              alt={momentOfImpactImages[currentImageIndex].title}
               className="w-full h-full object-cover"
             />
 
@@ -238,15 +258,15 @@ const Home = () => {
             {/* Image Info */}
             <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white">
               <h3 className="text-2xl sm:text-3xl font-light mb-2">
-                {carouselImages[currentImageIndex].title}
+                {momentOfImpactImages[currentImageIndex].title}
               </h3>
               <p className="text-sm sm:text-base text-slate-100">
-                {carouselImages[currentImageIndex].description}
+                {momentOfImpactImages[currentImageIndex].description}
               </p>
             </div>
 
             {/* Navigation Buttons */}
-            {carouselImages.length > 1 && (
+            {momentOfImpactImages.length > 1 && (
               <>
                 <button
                   onClick={goToPreviousImage}
@@ -265,7 +285,7 @@ const Home = () => {
 
                 {/* Dot Indicators */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                  {carouselImages.map((_, idx) => (
+                  {momentOfImpactImages.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
