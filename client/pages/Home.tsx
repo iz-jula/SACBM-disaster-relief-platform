@@ -80,6 +80,24 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
+          <div className="text-center">
+            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">2,500+</div>
+            <p className="text-lg text-slate-700 font-medium">Total Actions</p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">50,000+</div>
+            <p className="text-lg text-slate-700 font-medium">People Impact</p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">$5M+</div>
+            <p className="text-lg text-slate-700 font-medium">Total Contribution</p>
+          </div>
+        </div>
+      </section>
+
       {/* Image Carousel Section (Placeholder for admin-uploaded images) */}
       <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
         <div className="mb-16">
