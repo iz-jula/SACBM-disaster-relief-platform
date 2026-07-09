@@ -9,7 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // Public pages
 import Home from "./pages/Home";
 import PublicGallery from "./pages/PublicGallery";
-import About from "./pages/About";
+import Events from "./pages/Events";
 import OurMembers from "./pages/OurMembers";
 import MemberSection from "./pages/MemberSection";
 import Login from "./pages/Login";
@@ -45,7 +45,7 @@ const App = () => (
             <Route path="/impact" element={<Home />} />
             <Route path="/gallery" element={<PublicGallery />} />
             <Route path="/our-members" element={<OurMembers />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/events" element={<Events />} />
             <Route path="/members" element={<MemberSection />} />
 
             {/* AUTHENTICATION */}

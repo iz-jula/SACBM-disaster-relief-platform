@@ -10,7 +10,7 @@ const PublicNavbar = () => {
 
   const navLinks = [
     { label: "Dashboard", href: "/" },
-    { label: "About", href: "/about" },
+    { label: "Events", href: "/events" },
   ];
 
   return (
