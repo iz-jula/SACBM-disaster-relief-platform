@@ -188,9 +188,9 @@ const EventDetail = () => {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-6 sm:px-8 py-8 sm:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Event Details Card (2/3 width) */}
-          <div className="lg:col-span-2">
+        <div className={`grid grid-cols-1 gap-8 ${event.image ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
+          {/* Left Column - Event Details Card */}
+          <div className={event.image ? 'lg:col-span-2' : 'lg:col-span-1'}>
             <div className="rounded-lg border border-slate-200 bg-white p-10 sm:p-14 shadow-sm">
               {/* Category Badge */}
               <div className="mb-6 inline-block rounded-full bg-emerald-100 px-4 py-2">
@@ -304,11 +304,11 @@ const EventDetail = () => {
             </div>
           </div>
 
-          {/* Right Column - Picture Gallery (1/3 width) */}
-          <div className="lg:col-span-1">
-            <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-              {/* Main Image */}
-              {event.image ? (
+          {/* Right Column - Picture Gallery (only show if image exists) */}
+          {event.image && (
+            <div className="lg:col-span-1">
+              <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                {/* Main Image */}
                 <div className="mb-6">
                   <img
                     src={event.image}
@@ -316,38 +316,34 @@ const EventDetail = () => {
                     className="w-full h-64 md:h-80 object-cover rounded-lg"
                   />
                 </div>
-              ) : (
-                <div className="mb-6 w-full h-64 md:h-80 bg-slate-100 rounded-lg flex items-center justify-center">
-                  <span className="text-slate-400 text-center text-sm">No image available</span>
-                </div>
-              )}
 
-              {/* Gallery Heading */}
-              <h3 className="text-lg font-light text-slate-900 mb-4">Event Gallery</h3>
+                {/* Gallery Heading */}
+                <h3 className="text-lg font-light text-slate-900 mb-4">Event Gallery</h3>
 
-              {/* Thumbnails Grid */}
-              {event.gallery && event.gallery.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3">
-                  {event.gallery.map((galleryImage, idx) => (
-                    <button
-                      key={idx}
-                      className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 hover:border-emerald-300 transition-colors group"
-                    >
-                      <img
-                        src={galleryImage}
-                        alt={`Gallery ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="w-full p-8 bg-slate-50 rounded-lg border border-slate-200 text-center">
-                  <p className="text-slate-400 text-sm">No additional gallery images</p>
-                </div>
-              )}
+                {/* Thumbnails Grid */}
+                {event.gallery && event.gallery.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {event.gallery.map((galleryImage, idx) => (
+                      <button
+                        key={idx}
+                        className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 hover:border-emerald-300 transition-colors group"
+                      >
+                        <img
+                          src={galleryImage}
+                          alt={`Gallery ${idx + 1}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="w-full p-8 bg-slate-50 rounded-lg border border-slate-200 text-center">
+                    <p className="text-slate-400 text-sm">No additional gallery images</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Related Events Section */}
