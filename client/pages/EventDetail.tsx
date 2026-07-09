@@ -5,6 +5,12 @@ import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Users, Clock } from "lucide-react";
 
+interface HelpNeed {
+  name: string;
+  quantity?: number;
+  unit?: string;
+}
+
 interface Event {
   id: string;
   title: string;
@@ -15,7 +21,8 @@ interface Event {
   category: string;
   attendees?: number;
   featured?: boolean;
-  helpNeeds?: string[];
+  helpNeeds?: HelpNeed[];
+  contactMessage?: string;
 }
 
 const MOCK_EVENTS: Event[] = [
@@ -29,7 +36,13 @@ const MOCK_EVENTS: Event[] = [
     category: "Health & Wellness",
     attendees: 250,
     featured: true,
-    helpNeeds: ["Medical supplies", "Hospital beds", "Medications", "First aid kits"],
+    helpNeeds: [
+      { name: "Hospital beds", quantity: 5, unit: "units" },
+      { name: "Medical supplies", quantity: 100, unit: "kits" },
+      { name: "Medications", quantity: 50, unit: "boxes" },
+      { name: "First aid kits", quantity: 20, unit: "kits" },
+    ],
+    contactMessage: "To contribute, please contact Dr. Maria Silva at maria.silva@chs.org.mz or call +258 84 123 4567",
   },
   {
     id: "2",
@@ -41,7 +54,13 @@ const MOCK_EVENTS: Event[] = [
     category: "Training",
     attendees: 100,
     featured: true,
-    helpNeeds: ["Emergency shelter materials", "Food supplies", "Water containers", "First responder equipment"],
+    helpNeeds: [
+      { name: "Emergency shelter materials", quantity: 30, unit: "tents" },
+      { name: "Food supplies", quantity: 200, unit: "meals" },
+      { name: "Water containers", quantity: 50, unit: "units" },
+      { name: "First responder equipment", quantity: 15, unit: "sets" },
+    ],
+    contactMessage: "For donations, contact João Mascarenhas at j.mascarenhas@sacbm.org.mz or +258 82 765 4321",
   },
   {
     id: "3",
@@ -52,7 +71,13 @@ const MOCK_EVENTS: Event[] = [
     description: "Join member organizations in community environmental conservation and cleanup projects.",
     category: "Environment",
     attendees: 180,
-    helpNeeds: ["Cleaning supplies", "Waste disposal equipment", "Protective gear", "Transportation"],
+    helpNeeds: [
+      { name: "Cleaning supplies", quantity: 500, unit: "liters" },
+      { name: "Waste disposal equipment", quantity: 10, unit: "units" },
+      { name: "Protective gear", quantity: 200, unit: "sets" },
+      { name: "Transportation", quantity: 5, unit: "vehicles" },
+    ],
+    contactMessage: "Please reach out to the SACBM environmental team at environment@sacbm.org.mz",
   },
   {
     id: "4",
@@ -63,7 +88,13 @@ const MOCK_EVENTS: Event[] = [
     description: "Strategic dialogue on corporate social responsibility initiatives and impact measurement.",
     category: "Leadership",
     attendees: 75,
-    helpNeeds: ["Refreshments", "Conference materials", "Technology support", "Venue resources"],
+    helpNeeds: [
+      { name: "Refreshments", quantity: 75, unit: "portions" },
+      { name: "Conference materials", quantity: 75, unit: "sets" },
+      { name: "Technology support", quantity: 3, unit: "teams" },
+      { name: "Venue resources", quantity: 1, unit: "complete" },
+    ],
+    contactMessage: "To support this summit, contact events@sacbm.org.mz or call +258 84 999 8888",
   },
   {
     id: "5",
@@ -74,7 +105,13 @@ const MOCK_EVENTS: Event[] = [
     description: "Distribution of educational materials and supplies to underprivileged schools.",
     category: "Education",
     attendees: 200,
-    helpNeeds: ["School supplies", "Textbooks", "Learning materials", "Stationery"],
+    helpNeeds: [
+      { name: "School supplies", quantity: 500, unit: "sets" },
+      { name: "Textbooks", quantity: 300, unit: "units" },
+      { name: "Learning materials", quantity: 1000, unit: "items" },
+      { name: "Stationery", quantity: 50, unit: "boxes" },
+    ],
+    contactMessage: "For educational donations, contact education@sacbm.org.mz",
   },
   {
     id: "6",
@@ -85,7 +122,13 @@ const MOCK_EVENTS: Event[] = [
     description: "Skills development and business training for women entrepreneurs and community leaders.",
     category: "Empowerment",
     attendees: 120,
-    helpNeeds: ["Training materials", "Refreshments", "Business resources", "Mentorship support"],
+    helpNeeds: [
+      { name: "Training materials", quantity: 120, unit: "sets" },
+      { name: "Refreshments", quantity: 120, unit: "meals" },
+      { name: "Business resources", quantity: 80, unit: "guides" },
+      { name: "Mentorship support", quantity: 30, unit: "mentors" },
+    ],
+    contactMessage: "To participate as a mentor or sponsor, reach out to women@sacbm.org.mz",
   },
 ];
 
@@ -220,14 +263,21 @@ const EventDetail = () => {
                       <div className="mt-1 h-6 w-6 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
                         <span className="text-white text-sm font-medium">✓</span>
                       </div>
-                      <p className="text-slate-900 font-medium">{need}</p>
+                      <div>
+                        <p className="text-slate-900 font-medium">{need.name}</p>
+                        {need.quantity && (
+                          <p className="text-sm text-emerald-700 font-semibold mt-1">
+                            Needed: {need.quantity} {need.unit || "items"}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="mt-8 p-6 rounded-lg bg-emerald-50 border border-emerald-200">
                 <p className="text-slate-700">
-                  If you'd like to contribute to this event, please <strong>contact the SACBM office</strong> to coordinate your support.
+                  {event.contactMessage || "If you'd like to contribute to this event, please contact the SACBM office to coordinate your support."}
                 </p>
               </div>
             </div>
