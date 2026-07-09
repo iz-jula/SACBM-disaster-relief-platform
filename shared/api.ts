@@ -10,3 +10,9 @@
 export interface DemoResponse {
   message: string;
 }
+
+export interface StatsResponse {
+  totalActions: number;
+  peopleImpacted: number;
+  totalContribution: number;
+}

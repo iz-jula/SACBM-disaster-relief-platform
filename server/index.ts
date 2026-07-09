@@ -22,6 +22,7 @@ import {
   handleRemoveUser,
 } from "./routes/users";
 import { handleGetDashboardData } from "./routes/dashboard";
+import { handleGetStats } from "./routes/stats";
 
 export function createServer() {
   const app = express();
@@ -44,6 +45,9 @@ export function createServer() {
 
   // Dashboard consolidated data endpoint
   app.get("/api/dashboard-data", handleGetDashboardData);
+
+  // Stats endpoint
+  app.get("/api/stats", handleGetStats);
 
   // Requests endpoints
   app.get("/api/requests", handleGetRequests);

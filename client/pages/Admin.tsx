@@ -22,6 +22,7 @@ import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateI
 import { getAchievements } from "@/services/achievementsService";
 import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
+import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, uploadEventImage, uploadGalleryImage, deleteEventImage, deleteGalleryImage, type Event, type HelpNeed } from "@/services/eventsService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -47,7 +48,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "menu" | "ingd" | "carousel" | "documents" | "member-access" | "users" | "connectivity" | "requests"
+    "menu" | "ingd" | "carousel" | "documents" | "member-access" | "users" | "connectivity" | "requests" | "events"
   >("menu");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -111,9 +112,12 @@ export default function Admin() {
   // Carousel management state
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [isLoadingCarousel, setIsLoadingCarousel] = useState(false);
-  const [newCarouselUrl, setNewCarouselUrl] = useState("");
+  const [carouselImageFile, setCarouselImageFile] = useState<File | null>(null);
+  const [carouselImagePreview, setCarouselImagePreview] = useState<string>("");
   const [newCarouselTitle, setNewCarouselTitle] = useState("");
   const [newCarouselDescription, setNewCarouselDescription] = useState("");
+  const [carouselLocation, setCarouselLocation] = useState<string>("moments_of_impact");
+  const [isUploadingCarouselImage, setIsUploadingCarouselImage] = useState(false);
 
   // Member access management state
   const [approvedMembers, setApprovedMembers] = useState<ApprovedMember[]>([]);
@@ -121,6 +125,40 @@ export default function Admin() {
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [newMemberName, setNewMemberName] = useState("");
   const [newMemberCompany, setNewMemberCompany] = useState("");
+
+  // Events management state
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [eventFormData, setEventFormData] = useState<Omit<Event, "id">>({
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    description: "",
+    category: "Health & Wellness",
+    attendees: 0,
+    featured: false,
+    helpNeeds: [],
+    contactMessage: "",
+    image: "",
+    gallery: [],
+  });
+  const [eventCategories, setEventCategories] = useState<string[]>([]);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [newHelpNeed, setNewHelpNeed] = useState<HelpNeed>({
+    name: "",
+    quantity: 0,
+    unit: "",
+  });
+  const [deleteConfirmEventId, setDeleteConfirmEventId] = useState<string | null>(null);
+  const [eventImageFile, setEventImageFile] = useState<File | null>(null);
+  const [eventImagePreview, setEventImagePreview] = useState<string>("");
+  const [isUploadingEventImage, setIsUploadingEventImage] = useState(false);
+  const [galleryImageFiles, setGalleryImageFiles] = useState<File[]>([]);
+  const [isUploadingGalleryImages, setIsUploadingGalleryImages] = useState(false);
 
   // Load INGD active state from database
   useEffect(() => {
@@ -201,6 +239,13 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === "member-access") {
       loadApprovedMembers();
+    }
+  }, [activeTab]);
+
+  // Load events when events tab is activated
+  useEffect(() => {
+    if (activeTab === "events") {
+      loadEvents();
     }
   }, [activeTab]);
 
@@ -309,32 +354,63 @@ export default function Admin() {
     }
   };
 
+  const handleCarouselImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+      setCarouselImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCarouselImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("Please select a JPG or PNG image");
+    }
+  };
+
   const handleAddCarouselImage = async () => {
-    if (!newCarouselUrl || !newCarouselTitle) {
-      alert("Please fill in image URL and title");
+    if (!carouselImageFile || !newCarouselTitle) {
+      alert("Please select an image and enter a title");
       return;
     }
 
+    setIsUploadingCarouselImage(true);
     try {
-      const newImage = await createCarouselImage({
-        url: newCarouselUrl,
-        title: newCarouselTitle,
-        description: newCarouselDescription,
-        display_order: carouselImages.length,
-      });
+      // Import the carousel service function
+      const { uploadCarouselImageFile } = await import("@/services/carouselService");
 
-      if (newImage) {
-        setCarouselImages([...carouselImages, newImage]);
-        setNewCarouselUrl("");
-        setNewCarouselTitle("");
-        setNewCarouselDescription("");
-        alert("Image added successfully!");
+      const imageUrl = await uploadCarouselImageFile(
+        carouselImageFile,
+        newCarouselTitle,
+        carouselLocation
+      );
+
+      if (imageUrl) {
+        const newImage = await createCarouselImage({
+          url: imageUrl,
+          title: newCarouselTitle,
+          description: newCarouselDescription,
+          display_order: carouselImages.length,
+          location: carouselLocation,
+        });
+
+        if (newImage) {
+          setCarouselImages([...carouselImages, newImage]);
+          setCarouselImageFile(null);
+          setCarouselImagePreview("");
+          setNewCarouselTitle("");
+          setNewCarouselDescription("");
+          setCarouselLocation("moments_of_impact");
+          alert("Image uploaded successfully!");
+        }
       } else {
-        alert("Failed to add image");
+        alert("Failed to upload image");
       }
     } catch (error) {
       console.error("Error adding carousel image:", error);
       alert("Error adding image");
+    } finally {
+      setIsUploadingCarouselImage(false);
     }
   };
 
@@ -412,6 +488,242 @@ export default function Admin() {
         alert("Error removing member");
       }
     }
+  };
+
+  // ===== EVENTS MANAGEMENT FUNCTIONS =====
+  const loadEvents = async () => {
+    setIsLoadingEvents(true);
+    try {
+      const allEvents = await getAllEvents();
+      const categories = await getCategories();
+      setEvents(allEvents);
+      setEventCategories(categories);
+      setIsLoadingEvents(false);
+    } catch (error) {
+      console.error("Error loading events:", error);
+      setErrorMessage("Failed to load events");
+      setIsLoadingEvents(false);
+    }
+  };
+
+  const resetEventForm = () => {
+    setEventFormData({
+      title: "",
+      date: "",
+      time: "",
+      location: "",
+      description: "",
+      category: "Health & Wellness",
+      attendees: 0,
+      featured: false,
+      helpNeeds: [],
+      contactMessage: "",
+      image_url: "",
+      gallery: [],
+    });
+    setNewHelpNeed({ name: "", quantity: 0, unit: "" });
+    setEditingEventId(null);
+    setEventImageFile(null);
+    setEventImagePreview("");
+    setGalleryImageFiles([]);
+  };
+
+  const handleAddEvent = () => {
+    setShowEventForm(true);
+    resetEventForm();
+  };
+
+  const handleEditEvent = (event: Event) => {
+    setEditingEventId(event.id);
+    setEventFormData({
+      title: event.title,
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      description: event.description,
+      category: event.category,
+      attendees: event.attendees || 0,
+      featured: event.featured || false,
+      helpNeeds: event.helpNeeds || [],
+      contactMessage: event.contactMessage || "",
+      image_url: event.image_url || "",
+      gallery: event.gallery || [],
+    });
+    setEventImagePreview(event.image_url || "");
+    setEventImageFile(null);
+    setGalleryImageFiles([]);
+    setShowEventForm(true);
+  };
+
+  const handleSaveEvent = async () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    // Validation
+    if (!eventFormData.title || !eventFormData.date || !eventFormData.time || !eventFormData.location) {
+      setErrorMessage("Please fill in all required fields (Title, Date, Time, Location)");
+      return;
+    }
+
+    try {
+      let imageUrl = eventFormData.image_url;
+
+      // Upload main image if a new file is selected
+      if (eventImageFile) {
+        setIsUploadingEventImage(true);
+        imageUrl = await uploadEventImage(eventImageFile, editingEventId || "new");
+        if (!imageUrl) {
+          setErrorMessage("Failed to upload main image");
+          setIsUploadingEventImage(false);
+          return;
+        }
+        setIsUploadingEventImage(false);
+      }
+
+      // Prepare gallery URLs
+      let galleryUrls = eventFormData.gallery || [];
+
+      // Upload new gallery images
+      if (galleryImageFiles.length > 0) {
+        setIsUploadingGalleryImages(true);
+        const uploadedUrls = await Promise.all(
+          galleryImageFiles.map((file) =>
+            uploadGalleryImage(file, editingEventId || "new")
+          )
+        );
+        galleryUrls = [...galleryUrls, ...uploadedUrls.filter((url) => url !== null) as string[]];
+        setIsUploadingGalleryImages(false);
+      }
+
+      const eventDataToSave = {
+        ...eventFormData,
+        image_url: imageUrl,
+        gallery: galleryUrls,
+      };
+
+      if (editingEventId) {
+        // Update existing event
+        const updatedEvent = await updateEvent(editingEventId, eventDataToSave);
+        if (updatedEvent) {
+          setEvents(events.map((e) => (e.id === editingEventId ? updatedEvent : e)));
+          setSuccessMessage("Event updated successfully!");
+          setShowEventForm(false);
+          resetEventForm();
+        } else {
+          setErrorMessage("Failed to update event");
+        }
+      } else {
+        // Create new event
+        const newEvent = await createEvent(eventDataToSave);
+        if (newEvent) {
+          setEvents([...events, newEvent]);
+          setSuccessMessage("Event created successfully!");
+          setShowEventForm(false);
+          resetEventForm();
+        } else {
+          setErrorMessage("Failed to create event");
+        }
+      }
+
+      // Clear messages after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+        setErrorMessage("");
+      }, 3000);
+    } catch (error) {
+      console.error("Error saving event:", error);
+      setErrorMessage("Failed to save event");
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (confirm("Are you sure you want to delete this event?")) {
+      try {
+        const success = await deleteEvent(eventId);
+        if (success) {
+          setEvents(events.filter((e) => e.id !== eventId));
+          setSuccessMessage("Event deleted successfully!");
+          setDeleteConfirmEventId(null);
+          setTimeout(() => setSuccessMessage(""), 3000);
+        } else {
+          setErrorMessage("Failed to delete event");
+        }
+      } catch (error) {
+        console.error("Error deleting event:", error);
+        setErrorMessage("Failed to delete event");
+      }
+    }
+  };
+
+  const handleAddHelpNeed = () => {
+    if (!newHelpNeed.name) {
+      setErrorMessage("Please enter a help need name");
+      return;
+    }
+
+    const updatedHelpNeeds = [...(eventFormData.helpNeeds || []), newHelpNeed];
+    setEventFormData({
+      ...eventFormData,
+      helpNeeds: updatedHelpNeeds,
+    });
+    setNewHelpNeed({ name: "", quantity: 0, unit: "" });
+    setErrorMessage("");
+  };
+
+  const handleRemoveHelpNeed = (index: number) => {
+    const updatedHelpNeeds = eventFormData.helpNeeds?.filter((_, i) => i !== index) || [];
+    setEventFormData({
+      ...eventFormData,
+      helpNeeds: updatedHelpNeeds,
+    });
+  };
+
+  const handleEventImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEventImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setEventImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGalleryImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setGalleryImageFiles(Array.from(files));
+    }
+  };
+
+  const handleAddGalleryImage = () => {
+    const url = prompt("Enter image URL:");
+    if (url && url.trim()) {
+      const updatedGallery = [...(eventFormData.gallery || []), url.trim()];
+      setEventFormData({
+        ...eventFormData,
+        gallery: updatedGallery,
+      });
+    }
+  };
+
+  const handleRemoveGalleryImage = (index: number) => {
+    const updatedGallery = eventFormData.gallery?.filter((_, i) => i !== index) || [];
+    setEventFormData({
+      ...eventFormData,
+      gallery: updatedGallery,
+    });
+  };
+
+  const handleRemoveGalleryImageFile = (index: number) => {
+    setGalleryImageFiles(galleryImageFiles.filter((_, i) => i !== index));
+  };
+
+  const handleCancelEventForm = () => {
+    setShowEventForm(false);
+    resetEventForm();
+    setErrorMessage("");
   };
 
   const loadAllRequests = async () => {
@@ -730,8 +1042,8 @@ export default function Admin() {
     <Layout>
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
             {activeTab !== "menu" && (
               <button
                 onClick={() => setActiveTab("menu")}
@@ -740,39 +1052,20 @@ export default function Admin() {
                 ← Back to Dashboard
               </button>
             )}
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">
               {activeTab === "menu" ? "Admin Dashboard" : "Manage Settings"}
             </h1>
             {activeTab === "menu" && (
-              <p className="text-slate-600 mt-1">
-                Organize and manage your website
-              </p>
-            )}
-            {user && activeTab === "menu" && (
-              <p className="text-xs text-slate-500 mt-2">
-                Logged in as: {user.name}
+              <p className="text-slate-600 text-base mt-3 max-w-2xl">
+                Organize and manage your website, members, and content
               </p>
             )}
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
-            <LogOut size={16} />
-            Logout
-          </button>
         </div>
-
-        {/* Navigation removed for minimalist design - use sidebar buttons to navigate */}
 
         {/* Menu/Home Tab */}
         {activeTab === "menu" && (
           <div className="space-y-12">
-            <div>
-              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900 mb-3">Admin Dashboard</h1>
-              <p className="text-base text-slate-600 max-w-2xl">Organize and manage your website, members, and content</p>
-            </div>
-
             {/* Edit Website Section */}
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Edit Website</h2>
@@ -811,6 +1104,15 @@ export default function Admin() {
                   <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📄</div>
                   <h3 className="text-sm font-semibold text-slate-900">Documents</h3>
                   <p className="text-xs text-slate-500 mt-1">Files & docs</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("events")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📅</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Events</h3>
+                  <p className="text-xs text-slate-500 mt-1">Create & manage</p>
                 </button>
               </div>
             </div>
@@ -1654,43 +1956,110 @@ export default function Admin() {
               {/* Add New Image Section */}
               <div className="border border-slate-200 rounded-lg p-6 mb-8 bg-slate-50">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Add New Image</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Image URL</label>
-                    <input
-                      type="url"
-                      value={newCarouselUrl}
-                      onChange={(e) => setNewCarouselUrl(e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Form Section */}
+                  <div className="space-y-4">
+                    {/* Image Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Upload Image (JPG/PNG)</label>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        onChange={handleCarouselImageSelect}
+                        disabled={isUploadingCarouselImage}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">Max 5MB, JPG or PNG</p>
+                    </div>
+
+                    {/* Location Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Display Location</label>
+                      <select
+                        value={carouselLocation}
+                        onChange={(e) => setCarouselLocation(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="moments_of_impact">Moments of Impact (Home Carousel)</option>
+                        <option value="hero_background">Hero Background (Behind Stats)</option>
+                        <option value="gallery">Gallery Spotlight</option>
+                      </select>
+                      <p className="text-xs text-slate-500 mt-1">Choose where this image will appear</p>
+                    </div>
+
+                    {/* Title */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
+                      <input
+                        type="text"
+                        value={newCarouselTitle}
+                        onChange={(e) => setNewCarouselTitle(e.target.value)}
+                        placeholder="e.g., Community Relief Efforts"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                      <textarea
+                        value={newCarouselDescription}
+                        onChange={(e) => setNewCarouselDescription(e.target.value)}
+                        placeholder="Describe the image..."
+                        rows={3}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    {/* Upload Button */}
+                    <button
+                      onClick={handleAddCarouselImage}
+                      disabled={isUploadingCarouselImage || !carouselImageFile}
+                      className={`w-full px-6 py-2 rounded-lg font-medium transition-colors ${
+                        isUploadingCarouselImage || !carouselImageFile
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
+                    >
+                      {isUploadingCarouselImage ? "Uploading..." : "Upload Image"}
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
-                    <input
-                      type="text"
-                      value={newCarouselTitle}
-                      onChange={(e) => setNewCarouselTitle(e.target.value)}
-                      placeholder="e.g., Community Relief Efforts"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+
+                  {/* Preview Section */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Preview</label>
+                      {carouselImagePreview ? (
+                        <div className="rounded-lg overflow-hidden border border-slate-300">
+                          <img
+                            src={carouselImagePreview}
+                            alt="Preview"
+                            className="w-full h-48 object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-48 bg-slate-200 rounded-lg flex items-center justify-center">
+                          <p className="text-slate-500">No image selected</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Location Preview Info */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="text-sm font-semibold text-blue-900 mb-2">📍 Where This Will Appear:</p>
+                      <p className="text-sm text-blue-800">
+                        {carouselLocation === "moments_of_impact" && (
+                          "This image will appear in the 'Moments of Impact' carousel section on the home page."
+                        )}
+                        {carouselLocation === "hero_background" && (
+                          "This image will display behind the statistics cards at the top of the home page."
+                        )}
+                        {carouselLocation === "gallery" && (
+                          "This image will appear in the gallery spotlight section."
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
-                    <textarea
-                      value={newCarouselDescription}
-                      onChange={(e) => setNewCarouselDescription(e.target.value)}
-                      placeholder="Describe the image..."
-                      rows={3}
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <button
-                    onClick={handleAddCarouselImage}
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-                  >
-                    Add Image
-                  </button>
                 </div>
               </div>
 
@@ -1702,24 +2071,43 @@ export default function Admin() {
                 <p className="text-slate-600">No images yet. Add one above!</p>
               ) : (
                 <div className="space-y-4">
-                  {carouselImages.map((img) => (
-                    <div key={img.id} className="border border-slate-200 rounded-lg p-4 flex gap-4">
-                      <div className="flex-shrink-0 h-24 w-24 rounded-lg overflow-hidden bg-slate-100">
-                        <img src={img.url} alt={img.title} className="h-full w-full object-cover" />
+                  {carouselImages.map((img) => {
+                    const locationLabel = {
+                      "moments_of_impact": "🎯 Moments of Impact",
+                      "hero_background": "🎨 Hero Background (Top)",
+                      "gallery": "🖼️ Gallery Spotlight"
+                    }[img.location || "moments_of_impact"] || img.location;
+
+                    const locationBgColor = {
+                      "moments_of_impact": "bg-blue-50 border-blue-200 text-blue-700",
+                      "hero_background": "bg-amber-50 border-amber-200 text-amber-700",
+                      "gallery": "bg-purple-50 border-purple-200 text-purple-700"
+                    }[img.location || "moments_of_impact"] || "bg-slate-50 border-slate-200 text-slate-700";
+
+                    return (
+                      <div key={img.id} className="border border-slate-200 rounded-lg p-4 flex gap-4">
+                        <div className="flex-shrink-0 h-24 w-24 rounded-lg overflow-hidden bg-slate-100">
+                          <img src={img.url} alt={img.title} className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-slate-900">{img.title}</h4>
+                          <p className="text-sm text-slate-600 mt-1">{img.description}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${locationBgColor}`}>
+                              {locationLabel}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-2 truncate">{img.url}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteCarouselImage(img.id)}
+                          className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors flex-shrink-0"
+                        >
+                          Delete
+                        </button>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-slate-900">{img.title}</h4>
-                        <p className="text-sm text-slate-600 mt-1">{img.description}</p>
-                        <p className="text-xs text-slate-500 mt-2 truncate">{img.url}</p>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteCarouselImage(img.id)}
-                        className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg transition-colors flex-shrink-0"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1813,6 +2201,498 @@ export default function Admin() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Events Tab */}
+        {activeTab === "events" && (
+          <div className="space-y-6">
+            {/* Messages */}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 flex items-center gap-3">
+                <span className="font-bold">✓</span>
+                <span>{successMessage}</span>
+                <button
+                  onClick={() => setSuccessMessage("")}
+                  className="ml-auto text-green-600 hover:text-green-800"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+            {errorMessage && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 flex items-center gap-3">
+                <span className="font-bold">!</span>
+                <span>{errorMessage}</span>
+                <button
+                  onClick={() => setErrorMessage("")}
+                  className="ml-auto text-red-600 hover:text-red-800"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
+            {/* Header */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 mb-2">Events Management</h2>
+                  <p className="text-slate-600">Create, edit, and manage social events with help needs and contact information</p>
+                </div>
+                {!showEventForm && (
+                  <button
+                    onClick={handleAddEvent}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    <Plus size={18} />
+                    New Event
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Event Form or List */}
+            {showEventForm ? (
+              // EVENT FORM
+              <div className="bg-white rounded-xl shadow p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-slate-900">
+                    {editingEventId ? "Edit Event" : "Create New Event"}
+                  </h3>
+                  <button
+                    onClick={handleCancelEventForm}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="border-t border-slate-200 pt-6 space-y-6">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Event Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={eventFormData.title}
+                      onChange={(e) => setEventFormData({ ...eventFormData, title: e.target.value })}
+                      placeholder="e.g., Community Health Drive"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Date and Time Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Date *
+                      </label>
+                      <input
+                        type="text"
+                        value={eventFormData.date}
+                        onChange={(e) => setEventFormData({ ...eventFormData, date: e.target.value })}
+                        placeholder="e.g., March 15, 2024"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Time *
+                      </label>
+                      <input
+                        type="text"
+                        value={eventFormData.time}
+                        onChange={(e) => setEventFormData({ ...eventFormData, time: e.target.value })}
+                        placeholder="e.g., 8:00 AM - 2:00 PM"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      value={eventFormData.location}
+                      onChange={(e) => setEventFormData({ ...eventFormData, location: e.target.value })}
+                      placeholder="e.g., Central Health Center, Maputo"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Description *
+                    </label>
+                    <textarea
+                      value={eventFormData.description}
+                      onChange={(e) => setEventFormData({ ...eventFormData, description: e.target.value })}
+                      placeholder="Describe the event in detail..."
+                      rows={4}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Category and Attendees Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Category
+                      </label>
+                      <select
+                        value={eventFormData.category}
+                        onChange={(e) => setEventFormData({ ...eventFormData, category: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      >
+                        <option value="Health & Wellness">Health & Wellness</option>
+                        <option value="Training">Training</option>
+                        <option value="Environment">Environment</option>
+                        <option value="Leadership">Leadership</option>
+                        <option value="Education">Education</option>
+                        <option value="Empowerment">Empowerment</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Expected Attendees
+                      </label>
+                      <input
+                        type="number"
+                        value={eventFormData.attendees || 0}
+                        onChange={(e) => setEventFormData({ ...eventFormData, attendees: parseInt(e.target.value) || 0 })}
+                        placeholder="0"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Featured Checkbox */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      checked={eventFormData.featured}
+                      onChange={(e) => setEventFormData({ ...eventFormData, featured: e.target.checked })}
+                      className="w-4 h-4 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <label htmlFor="featured" className="text-sm font-medium text-slate-700">
+                      Featured Event (highlight on dashboard)
+                    </label>
+                  </div>
+
+                  {/* Main Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Main Image
+                    </label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-2">
+                          Upload New Image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleEventImageSelect}
+                          disabled={isUploadingEventImage}
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:opacity-50"
+                        />
+                        {isUploadingEventImage && (
+                          <p className="text-xs text-emerald-600 mt-1">Uploading image...</p>
+                        )}
+                      </div>
+
+                      {/* Image Preview */}
+                      {eventImagePreview && (
+                        <div className="mt-2">
+                          <p className="text-xs font-medium text-slate-600 mb-2">Preview</p>
+                          <div className="w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
+                            <img src={eventImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Gallery Images */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-3 block">Gallery Images</label>
+                    <div className="space-y-4">
+                      {/* Upload new gallery images */}
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-2">
+                          Upload Gallery Images (Multiple)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleGalleryImageSelect}
+                          disabled={isUploadingGalleryImages}
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:opacity-50"
+                        />
+                        {isUploadingGalleryImages && (
+                          <p className="text-xs text-emerald-600 mt-1">Uploading images...</p>
+                        )}
+                      </div>
+
+                      {/* Preview selected files */}
+                      {galleryImageFiles.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-slate-600 mb-2">Files to Upload ({galleryImageFiles.length})</p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {galleryImageFiles.map((file, idx) => (
+                              <div key={idx} className="relative group">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Upload ${idx + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                                />
+                                <button
+                                  onClick={() => handleRemoveGalleryImageFile(idx)}
+                                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Or add by URL */}
+                      <div className="border-t border-slate-200 pt-4">
+                        <p className="text-xs font-medium text-slate-600 mb-2">Or Add by URL</p>
+                        <button
+                          onClick={handleAddGalleryImage}
+                          className="px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                        >
+                          <Plus size={14} className="inline mr-1" />
+                          Add URL
+                        </button>
+                      </div>
+
+                      {/* Existing gallery images */}
+                      {eventFormData.gallery && eventFormData.gallery.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-slate-600 mb-2">Uploaded Images</p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {eventFormData.gallery.map((url, idx) => (
+                              <div key={idx} className="relative group">
+                                <img
+                                  src={url}
+                                  alt={`Gallery ${idx + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                                  onError={() => {}}
+                                />
+                                <button
+                                  onClick={() => handleRemoveGalleryImage(idx)}
+                                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Contact Message */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Contact Message
+                    </label>
+                    <textarea
+                      value={eventFormData.contactMessage || ""}
+                      onChange={(e) => setEventFormData({ ...eventFormData, contactMessage: e.target.value })}
+                      placeholder="e.g., To contribute, please contact Dr. Maria Silva at maria.silva@example.com or call +258 84 123 4567"
+                      rows={3}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Help Needs Section */}
+                  <div className="border-t border-slate-200 pt-6">
+                    <h4 className="text-lg font-semibold text-slate-900 mb-4">Help Needs</h4>
+
+                    {/* Existing Help Needs */}
+                    {eventFormData.helpNeeds && eventFormData.helpNeeds.length > 0 && (
+                      <div className="mb-6 space-y-2">
+                        {eventFormData.helpNeeds.map((need, idx) => (
+                          <div key={idx} className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-medium text-slate-900">{need.name}</p>
+                              {need.quantity && (
+                                <p className="text-sm text-slate-600">Needed: {need.quantity} {need.unit || "items"}</p>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleRemoveHelpNeed(idx)}
+                              className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add New Help Need */}
+                    <div className="space-y-3 bg-slate-50 p-4 rounded-lg">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input
+                          type="text"
+                          value={newHelpNeed.name}
+                          onChange={(e) => setNewHelpNeed({ ...newHelpNeed, name: e.target.value })}
+                          placeholder="Help need name (e.g., Hospital beds)"
+                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        />
+                        <input
+                          type="number"
+                          value={newHelpNeed.quantity || 0}
+                          onChange={(e) => setNewHelpNeed({ ...newHelpNeed, quantity: parseInt(e.target.value) || 0 })}
+                          placeholder="Quantity"
+                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        />
+                        <input
+                          type="text"
+                          value={newHelpNeed.unit || ""}
+                          onChange={(e) => setNewHelpNeed({ ...newHelpNeed, unit: e.target.value })}
+                          placeholder="Unit (e.g., units, sets, boxes)"
+                          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        />
+                      </div>
+                      <button
+                        onClick={handleAddHelpNeed}
+                        className="w-full px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-medium rounded-lg transition-colors"
+                      >
+                        <Plus size={16} className="inline mr-2" />
+                        Add Help Need
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Form Actions */}
+                  <div className="border-t border-slate-200 pt-6 flex gap-3 justify-end">
+                    <button
+                      onClick={handleCancelEventForm}
+                      className="px-6 py-2 border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveEvent}
+                      className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
+                    >
+                      {editingEventId ? "Update Event" : "Create Event"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // EVENTS LIST
+              <div className="space-y-4">
+                {isLoadingEvents ? (
+                  <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                    Loading events...
+                  </div>
+                ) : events.length === 0 ? (
+                  <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
+                    <p className="text-lg">No events yet. Create your first event to get started.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {events.map((event) => (
+                      <div key={event.id} className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+                        <div className="flex gap-4 items-start">
+                          {/* Event Image */}
+                          {event.image_url && (
+                            <div className="w-24 h-24 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                              <img
+                                src={event.image_url}
+                                alt={event.title}
+                                className="w-full h-full object-cover"
+                                onError={() => {}}
+                              />
+                            </div>
+                          )}
+
+                          {/* Event Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="text-lg font-semibold text-slate-900">{event.title}</h3>
+                                  {event.featured && (
+                                    <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">Featured</span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-slate-600 mb-3">{event.description}</p>
+
+                                {/* Event Details */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-slate-600">
+                                  <div>
+                                    <p className="font-medium text-slate-700">Date</p>
+                                    <p>{event.date}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-slate-700">Time</p>
+                                    <p>{event.time}</p>
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-slate-700">Location</p>
+                                    <p className="truncate">{event.location}</p>
+                                  </div>
+                                  {event.attendees && (
+                                    <div>
+                                      <p className="font-medium text-slate-700">Expected</p>
+                                      <p>~{event.attendees} attendees</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Help Needs Count */}
+                                {event.helpNeeds && event.helpNeeds.length > 0 && (
+                                  <p className="text-xs text-emerald-600 font-medium mt-2">
+                                    {event.helpNeeds.length} help need{event.helpNeeds.length !== 1 ? "s" : ""}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleEditEvent(event)}
+                                  className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors"
+                                  title="Edit event"
+                                >
+                                  <Edit2 size={18} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteEvent(event.id)}
+                                  className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                                  title="Delete event"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
