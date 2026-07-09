@@ -188,116 +188,166 @@ const EventDetail = () => {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-6 sm:px-8 py-8 sm:py-12">
-        <div className="rounded-lg border border-slate-200 bg-white p-10 sm:p-14 shadow-sm">
-          {/* Category Badge */}
-          <div className="mb-6 inline-block rounded-full bg-emerald-100 px-4 py-2">
-            <span className="text-sm font-medium text-emerald-700">{event.category}</span>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900 mb-6">
-            {event.title}
-          </h1>
-
-          {/* Description */}
-          <p className="text-lg text-slate-600 leading-relaxed mb-12 max-w-2xl">
-            {event.description}
-          </p>
-
-          {/* Event Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12 border-t border-b border-slate-200">
-            {/* Date */}
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <Calendar className="h-6 w-6 text-emerald-700" />
-                <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Date</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Event Details Card (2/3 width) */}
+          <div className="lg:col-span-2">
+            <div className="rounded-lg border border-slate-200 bg-white p-10 sm:p-14 shadow-sm">
+              {/* Category Badge */}
+              <div className="mb-6 inline-block rounded-full bg-emerald-100 px-4 py-2">
+                <span className="text-sm font-medium text-emerald-700">{event.category}</span>
               </div>
-              <p className="text-xl text-slate-900 font-light">{event.date}</p>
-            </div>
 
-            {/* Time */}
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <Clock className="h-6 w-6 text-emerald-700" />
-                <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Time</span>
-              </div>
-              <p className="text-xl text-slate-900 font-light">{event.time}</p>
-            </div>
+              {/* Title */}
+              <h1 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900 mb-6">
+                {event.title}
+              </h1>
 
-            {/* Location */}
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <MapPin className="h-6 w-6 text-emerald-700" />
-                <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Location</span>
-              </div>
-              <p className="text-xl text-slate-900 font-light">{event.location}</p>
-            </div>
+              {/* Description */}
+              <p className="text-lg text-slate-600 leading-relaxed mb-12 max-w-2xl">
+                {event.description}
+              </p>
 
-            {/* Expected Attendees */}
-            {event.attendees && (
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <Users className="h-6 w-6 text-emerald-700" />
-                  <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Expected Attendees</span>
-                </div>
-                <p className="text-xl text-slate-900 font-light">~{event.attendees}</p>
-              </div>
-            )}
-          </div>
-
-          {/* CTA Section */}
-          <div className="mt-12 flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium">
-              Register for Event
-            </Button>
-            <Button size="lg" variant="outline" className="font-medium">
-              Share Event
-            </Button>
-          </div>
-
-          {/* About This Event */}
-          <div className="mt-12 pt-12 border-t border-slate-200">
-            <h2 className="text-2xl font-light text-slate-900 mb-4">About This Event</h2>
-            <p className="text-slate-600 leading-relaxed">
-              This is part of SACBM's ongoing commitment to social responsibility and community impact.
-              All members are encouraged to participate and contribute to our collective mission of making
-              a positive difference across Mozambique.
-            </p>
-          </div>
-
-          {/* Ways Members Can Help */}
-          {event.helpNeeds && event.helpNeeds.length > 0 && (
-            <div className="mt-12 pt-12 border-t border-slate-200">
-              <h2 className="text-2xl font-light text-slate-900 mb-8">Ways Members Can Help</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {event.helpNeeds.map((need, idx) => (
-                  <div
-                    key={idx}
-                    className="rounded-lg border border-slate-200 bg-slate-50 p-6 hover:border-emerald-300 hover:bg-emerald-50 transition-all"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1 h-6 w-6 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
-                        <span className="text-white text-sm font-medium">✓</span>
-                      </div>
-                      <div>
-                        <p className="text-slate-900 font-medium">{need.name}</p>
-                        {need.quantity && (
-                          <p className="text-sm text-emerald-700 font-semibold mt-1">
-                            Needed: {need.quantity} {need.unit || "items"}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+              {/* Event Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12 border-t border-b border-slate-200">
+                {/* Date */}
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <Calendar className="h-6 w-6 text-emerald-700" />
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Date</span>
                   </div>
-                ))}
+                  <p className="text-xl text-slate-900 font-light">{event.date}</p>
+                </div>
+
+                {/* Time */}
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <Clock className="h-6 w-6 text-emerald-700" />
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Time</span>
+                  </div>
+                  <p className="text-xl text-slate-900 font-light">{event.time}</p>
+                </div>
+
+                {/* Location */}
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <MapPin className="h-6 w-6 text-emerald-700" />
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Location</span>
+                  </div>
+                  <p className="text-xl text-slate-900 font-light">{event.location}</p>
+                </div>
+
+                {/* Expected Attendees */}
+                {event.attendees && (
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <Users className="h-6 w-6 text-emerald-700" />
+                      <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Expected Attendees</span>
+                    </div>
+                    <p className="text-xl text-slate-900 font-light">~{event.attendees}</p>
+                  </div>
+                )}
               </div>
-              <div className="mt-8 p-6 rounded-lg bg-emerald-50 border border-emerald-200">
-                <p className="text-slate-700">
-                  {event.contactMessage || "If you'd like to contribute to this event, please contact the SACBM office to coordinate your support."}
+
+              {/* CTA Section */}
+              <div className="mt-12 flex flex-col sm:flex-row gap-4">
+                <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium">
+                  Register for Event
+                </Button>
+                <Button size="lg" variant="outline" className="font-medium">
+                  Share Event
+                </Button>
+              </div>
+
+              {/* About This Event */}
+              <div className="mt-12 pt-12 border-t border-slate-200">
+                <h2 className="text-2xl font-light text-slate-900 mb-4">About This Event</h2>
+                <p className="text-slate-600 leading-relaxed">
+                  This is part of SACBM's ongoing commitment to social responsibility and community impact.
+                  All members are encouraged to participate and contribute to our collective mission of making
+                  a positive difference across Mozambique.
                 </p>
               </div>
+
+              {/* Ways Members Can Help */}
+              {event.helpNeeds && event.helpNeeds.length > 0 && (
+                <div className="mt-12 pt-12 border-t border-slate-200">
+                  <h2 className="text-2xl font-light text-slate-900 mb-8">Ways Members Can Help</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {event.helpNeeds.map((need, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-lg border border-slate-200 bg-slate-50 p-6 hover:border-emerald-300 hover:bg-emerald-50 transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-1 h-6 w-6 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-sm font-medium">✓</span>
+                          </div>
+                          <div>
+                            <p className="text-slate-900 font-medium">{need.name}</p>
+                            {need.quantity && (
+                              <p className="text-sm text-emerald-700 font-semibold mt-1">
+                                Needed: {need.quantity} {need.unit || "items"}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-8 p-6 rounded-lg bg-emerald-50 border border-emerald-200">
+                    <p className="text-slate-700">
+                      {event.contactMessage || "If you'd like to contribute to this event, please contact the SACBM office to coordinate your support."}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Right Column - Picture Gallery (1/3 width) */}
+          <div className="lg:col-span-1">
+            <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+              {/* Main Image */}
+              {event.image ? (
+                <div className="mb-6">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-64 md:h-80 object-cover rounded-lg"
+                  />
+                </div>
+              ) : (
+                <div className="mb-6 w-full h-64 md:h-80 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <span className="text-slate-400 text-center text-sm">No image available</span>
+                </div>
+              )}
+
+              {/* Gallery Heading */}
+              <h3 className="text-lg font-light text-slate-900 mb-4">Event Gallery</h3>
+
+              {/* Thumbnails Grid */}
+              {event.gallery && event.gallery.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {event.gallery.map((galleryImage, idx) => (
+                    <button
+                      key={idx}
+                      className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 hover:border-emerald-300 transition-colors group"
+                    >
+                      <img
+                        src={galleryImage}
+                        alt={`Gallery ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full p-8 bg-slate-50 rounded-lg border border-slate-200 text-center">
+                  <p className="text-slate-400 text-sm">No additional gallery images</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Related Events Section */}
