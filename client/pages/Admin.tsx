@@ -1052,38 +1052,15 @@ export default function Admin() {
                 ← Back to Dashboard
               </button>
             )}
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">
               {activeTab === "menu" ? "Admin Dashboard" : "Manage Settings"}
             </h1>
             {activeTab === "menu" && (
-              <p className="text-slate-600 text-sm mt-2">
+              <p className="text-slate-600 text-base mt-3 max-w-2xl">
                 Organize and manage your website, members, and content
               </p>
             )}
           </div>
-          {user && activeTab === "menu" && (
-            <div className="flex-shrink-0 text-right">
-              <p className="text-xs text-slate-500 mb-3">
-                Logged in as: <span className="font-medium text-slate-700">{user.name}</span>
-              </p>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm"
-              >
-                <LogOut size={16} />
-                Logout
-              </button>
-            </div>
-          )}
-          {user && activeTab !== "menu" && (
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm flex-shrink-0"
-            >
-              <LogOut size={16} />
-              Logout
-            </button>
-          )}
         </div>
 
         {/* Menu/Home Tab */}
