@@ -81,7 +81,7 @@ const Home = () => {
         {/* Content */}
         <div className="relative z-10 mx-auto max-w-7xl">
           <div className="mb-12">
-            <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Chamber Dashboard</h1>
+            <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">SACBM's CSR Dashboard</h1>
             <p className="mt-4 text-base text-slate-600">Overview of SACBM's social impact and community initiatives</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -113,7 +113,7 @@ const Home = () => {
       {/* Upcoming CSR Events Section */}
       <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28 border-t border-slate-200">
         <div className="mb-16">
-          <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Upcoming CSR Events</h2>
+          <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Upcoming Social Events</h2>
           <p className="mt-4 text-base text-slate-600">
             Join us for upcoming community and corporate social responsibility initiatives
           </p>
