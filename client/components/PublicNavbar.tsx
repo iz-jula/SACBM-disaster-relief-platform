@@ -28,15 +28,13 @@ const PublicNavbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {/* Dashboard Link */}
+            <Link
+              to="/"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Dashboard
+            </Link>
 
             {/* Our Impact Dropdown */}
             <div className="relative group">
@@ -59,6 +57,14 @@ const PublicNavbar = () => {
                 </Link>
               </div>
             </div>
+
+            {/* Events Link */}
+            <Link
+              to="/events"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Events
+            </Link>
           </div>
 
           {/* Right Actions */}
@@ -88,16 +94,14 @@ const PublicNavbar = () => {
         {isOpen && (
           <div className="border-t bg-white md:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {/* Dashboard Link */}
+              <Link
+                to="/"
+                className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                onClick={() => setIsOpen(false)}
+              >
+                Dashboard
+              </Link>
 
               {/* Mobile Our Impact Dropdown */}
               <div>
@@ -133,6 +137,15 @@ const PublicNavbar = () => {
                   </div>
                 )}
               </div>
+
+              {/* Events Link */}
+              <Link
+                to="/events"
+                className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                onClick={() => setIsOpen(false)}
+              >
+                Events
+              </Link>
 
               <Link
                 to="/members"
