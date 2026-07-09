@@ -23,6 +23,8 @@ interface Event {
   featured?: boolean;
   helpNeeds?: HelpNeed[];
   contactMessage?: string;
+  image?: string;
+  gallery?: string[];
 }
 
 const MOCK_EVENTS: Event[] = [
@@ -36,6 +38,10 @@ const MOCK_EVENTS: Event[] = [
     category: "Health & Wellness",
     attendees: 250,
     featured: true,
+    image: "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=400&height=400",
+    gallery: [
+      "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=400&height=400",
+    ],
     helpNeeds: [
       { name: "Hospital beds", quantity: 5, unit: "units" },
       { name: "Medical supplies", quantity: 100, unit: "kits" },

@@ -159,11 +159,11 @@ const Home = () => {
 
       {/* Requirements Requested Section */}
       {/* Upcoming Social Events Section */}
-      <section className="max-w-full px-6 sm:px-8 py-20 sm:py-28 border-t border-slate-200">
+      <section className="max-w-full px-6 sm:px-8 py-12 sm:py-16 border-t border-slate-200">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-16">
-            <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Upcoming Social Events</h2>
-            <p className="mt-4 text-base text-slate-600">
+          <div className="mb-10">
+            <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-slate-900">Upcoming Social Events</h2>
+            <p className="mt-3 text-base text-slate-600">
               Join us for upcoming community and corporate social responsibility initiatives
             </p>
           </div>
@@ -172,28 +172,28 @@ const Home = () => {
           <>
             {/* Featured Events */}
             {MOCK_EVENTS.filter(e => e.featured).length > 0 && (
-              <div className="mb-12">
-                <h3 className="text-2xl font-light text-slate-900 mb-6">Featured Events</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              <div className="mb-8">
+                <h3 className="text-xl font-light text-slate-900 mb-4">Featured Events</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                   {MOCK_EVENTS.filter(e => e.featured).map((event) => (
-                    <div key={event.id} className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
-                      <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
-                        <span className="text-sm font-medium text-emerald-700">{event.category}</span>
+                    <div key={event.id} className="rounded-lg border border-slate-200 bg-white p-5 hover:shadow-md transition-shadow">
+                      <div className="mb-3 inline-block rounded-full bg-emerald-100 px-3 py-1">
+                        <span className="text-xs font-medium text-emerald-700">{event.category}</span>
                       </div>
-                      <h3 className="text-xl font-medium text-slate-900 mb-2">{event.title}</h3>
-                      <p className="text-slate-600 text-sm mb-4">{event.description}</p>
-                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-                        <Calendar className="h-4 w-4 text-emerald-700" />
+                      <h3 className="text-lg font-medium text-slate-900 mb-2">{event.title}</h3>
+                      <p className="text-slate-600 text-sm mb-3">{event.description}</p>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                        <Calendar className="h-3 w-3 text-emerald-700" />
                         <span>{event.date}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                        <MapPin className="h-4 w-4 text-emerald-700" />
+                      <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                        <MapPin className="h-3 w-3 text-emerald-700" />
                         <span>{event.location}</span>
                       </div>
                       <Link to={`/event/${event.id}`} className="w-full">
-                        <Button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white">
+                        <Button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm py-2">
                           Learn More
-                          <ArrowRight className="ml-2 h-4 w-4" />
+                          <ArrowRight className="ml-2 h-3 w-3" />
                         </Button>
                       </Link>
                     </div>
