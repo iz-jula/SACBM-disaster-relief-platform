@@ -181,7 +181,7 @@ const EventDetail = () => {
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-4xl px-6 sm:px-8 py-16 sm:py-24">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 py-8 sm:py-12">
         <div className="rounded-lg border border-slate-200 bg-white p-10 sm:p-14 shadow-sm">
           {/* Category Badge */}
           <div className="mb-6 inline-block rounded-full bg-emerald-100 px-4 py-2">
@@ -199,7 +199,7 @@ const EventDetail = () => {
           </p>
 
           {/* Event Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-12 border-t border-b border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12 border-t border-b border-slate-200">
             {/* Date */}
             <div>
               <div className="flex items-center gap-3 mb-3">
