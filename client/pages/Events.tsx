@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
@@ -172,10 +173,12 @@ const Events = () => {
                   )}
                 </div>
 
-                <Button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <Link to={`/event/${event.id}`} className="w-full">
+                  <Button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white">
+                    Learn More
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             ))}
           </div>
@@ -194,14 +197,15 @@ const Events = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcomingEvents.map((event) => (
-              <div
+              <Link
                 key={event.id}
-                className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow flex flex-col"
+                to={`/event/${event.id}`}
+                className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow flex flex-col group"
               >
-                <div className="mb-3 inline-block rounded-full bg-slate-100 px-3 py-1 w-fit">
-                  <span className="text-xs font-medium text-slate-700">{event.category}</span>
+                <div className="mb-3 inline-block rounded-full bg-slate-100 px-3 py-1 w-fit group-hover:bg-emerald-100 transition-colors">
+                  <span className="text-xs font-medium text-slate-700 group-hover:text-emerald-700 transition-colors">{event.category}</span>
                 </div>
-                <h3 className="text-lg font-light text-slate-900 mb-3">{event.title}</h3>
+                <h3 className="text-lg font-light text-slate-900 mb-3 group-hover:text-emerald-700 transition-colors">{event.title}</h3>
                 <p className="text-sm text-slate-600 mb-4 flex-grow">{event.description}</p>
 
                 <div className="space-y-2 mb-6 text-sm text-slate-600">
@@ -218,7 +222,7 @@ const Events = () => {
                 <Button variant="outline" className="w-full">
                   Learn More
                 </Button>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

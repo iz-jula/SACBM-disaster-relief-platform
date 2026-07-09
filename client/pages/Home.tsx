@@ -188,7 +188,7 @@ const Home = () => {
                         <MapPin className="h-4 w-4 text-emerald-700" />
                         <span>{event.location}</span>
                       </div>
-                      <Link to="/events" className="w-full">
+                      <Link to={`/event/${event.id}`} className="w-full">
                         <Button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white">
                           Learn More
                           <ArrowRight className="ml-2 h-4 w-4" />
@@ -220,7 +220,7 @@ const Home = () => {
                         <MapPin className="h-4 w-4 text-emerald-700" />
                         <span>{event.location}</span>
                       </div>
-                      <Link to="/events" className="w-full">
+                      <Link to={`/event/${event.id}`} className="w-full">
                         <Button variant="outline" size="sm" className="w-full">
                           Learn More
                         </Button>
