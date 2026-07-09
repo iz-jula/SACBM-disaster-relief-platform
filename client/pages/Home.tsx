@@ -7,9 +7,20 @@ import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { getCarouselImages, CarouselImage } from "@/services/supabaseService";
 
+interface Stats {
+  totalActions: number;
+  peopleImpacted: number;
+  totalContribution: number;
+}
+
 const Home = () => {
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [stats, setStats] = useState<Stats>({
+    totalActions: 0,
+    peopleImpacted: 0,
+    totalContribution: 0,
+  });
 
   useEffect(() => {
     // Load carousel images from Supabase
@@ -22,6 +33,18 @@ const Home = () => {
       }
     };
     loadImages();
+
+    // Load stats from API
+    const loadStats = async () => {
+      try {
+        const response = await fetch("/api/stats");
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error("Error loading stats:", error);
+      }
+    };
+    loadStats();
   }, []);
 
   const goToPreviousImage = () => {
@@ -84,15 +107,21 @@ const Home = () => {
       <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
           <div className="text-center">
-            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">2,500+</div>
+            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">
+              {stats.totalActions.toLocaleString()}
+            </div>
             <p className="text-lg text-slate-700 font-medium">Total Actions</p>
           </div>
           <div className="text-center">
-            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">50,000+</div>
+            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">
+              {stats.peopleImpacted.toLocaleString()}
+            </div>
             <p className="text-lg text-slate-700 font-medium">People Impact</p>
           </div>
           <div className="text-center">
-            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">$5M+</div>
+            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">
+              {Math.round(stats.totalContribution / 1000000).toLocaleString()}M MZN
+            </div>
             <p className="text-lg text-slate-700 font-medium">Total Contribution</p>
           </div>
         </div>
