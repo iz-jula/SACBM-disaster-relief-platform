@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.events (
   contact_message TEXT,
   image TEXT,
   gallery JSONB DEFAULT '[]'::jsonb,
+  attachments JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

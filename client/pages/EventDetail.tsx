@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, MapPin, Users, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users, Clock, Download, FileText } from "lucide-react";
 import { getAllEvents, type Event } from "@/services/eventsService";
 
 const EventDetail = () => {
@@ -173,6 +173,31 @@ const EventDetail = () => {
                     <p className="text-slate-700">
                       {event.contactMessage || "If you'd like to contribute to this event, please contact the SACBM office to coordinate your support."}
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Attachments Section */}
+              {event.attachments && event.attachments.length > 0 && (
+                <div className="mt-12 pt-12 border-t border-slate-200">
+                  <h2 className="text-2xl font-light text-slate-900 mb-6">Event Documents</h2>
+                  <div className="space-y-2">
+                    {event.attachments.map((attachment, idx) => (
+                      <a
+                        key={idx}
+                        href={attachment.url}
+                        download={attachment.name}
+                        className="flex items-center gap-3 p-4 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-emerald-300 transition-all group"
+                      >
+                        <FileText className="h-5 w-5 text-slate-500 group-hover:text-emerald-700 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-900 truncate group-hover:text-emerald-700 transition-colors">
+                            {attachment.name}
+                          </p>
+                        </div>
+                        <Download className="h-4 w-4 text-slate-400 group-hover:text-emerald-700 flex-shrink-0 transition-colors" />
+                      </a>
+                    ))}
                   </div>
                 </div>
               )}

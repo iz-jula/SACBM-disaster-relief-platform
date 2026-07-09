@@ -6,6 +6,12 @@ export interface HelpNeed {
   unit?: string;
 }
 
+export interface Attachment {
+  name: string;
+  url: string;
+  size?: number;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -20,6 +26,7 @@ export interface Event {
   contactMessage?: string;
   image_url?: string;
   gallery?: string[];
+  attachments?: Attachment[];
 }
 
 /**
@@ -51,6 +58,7 @@ export async function getAllEvents(): Promise<Event[]> {
       contactMessage: row.contact_message,
       image_url: row.image_url,
       gallery: row.gallery || [],
+      attachments: row.attachments || [],
     }));
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -90,6 +98,7 @@ export async function getEventById(id: string): Promise<Event | null> {
       contactMessage: data.contact_message,
       image_url: data.image_url,
       gallery: data.gallery || [],
+      attachments: data.attachments || [],
     };
   } catch (error) {
     console.error("Error fetching event:", error);
@@ -120,6 +129,7 @@ export async function createEvent(
           contact_message: event.contactMessage || "",
           image_url: event.image_url || "",
           gallery: event.gallery || [],
+          attachments: event.attachments || [],
         },
       ])
       .select()
@@ -179,6 +189,8 @@ export async function updateEvent(
     if (updates.image_url !== undefined)
       updateData.image_url = updates.image_url;
     if (updates.gallery !== undefined) updateData.gallery = updates.gallery;
+    if (updates.attachments !== undefined)
+      updateData.attachments = updates.attachments;
 
     const { data, error } = await supabase
       .from("events")
@@ -208,6 +220,7 @@ export async function updateEvent(
       contactMessage: data.contact_message,
       image_url: data.image_url,
       gallery: data.gallery || [],
+      attachments: data.attachments || [],
     };
   } catch (error) {
     console.error("Error updating event:", error);
@@ -382,6 +395,7 @@ export async function getFeaturedEvents(): Promise<Event[]> {
       contactMessage: row.contact_message,
       image_url: row.image_url,
       gallery: row.gallery || [],
+      attachments: row.attachments || [],
     }));
   } catch (error) {
     console.error("Error fetching featured events:", error);
@@ -419,6 +433,7 @@ export async function getEventsByCategory(category: string): Promise<Event[]> {
       contactMessage: row.contact_message,
       image_url: row.image_url,
       gallery: row.gallery || [],
+      attachments: row.attachments || [],
     }));
   } catch (error) {
     console.error("Error fetching events by category:", error);
@@ -446,5 +461,66 @@ export async function getCategories(): Promise<string[]> {
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
+  }
+}
+
+/**
+ * Upload attachment (PDF or document) to Supabase Storage
+ */
+export async function uploadAttachment(
+  file: File,
+  eventId: string
+): Promise<{ name: string; url: string } | null> {
+  try {
+    const fileName = `${eventId}-${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("events-images")
+      .upload(`attachments/${fileName}`, file);
+
+    if (error) {
+      console.error("Error uploading attachment:", error);
+      return null;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage
+      .from("events-images")
+      .getPublicUrl(`attachments/${fileName}`);
+
+    return {
+      name: file.name,
+      url: publicUrl,
+    };
+  } catch (error) {
+    console.error("Error uploading attachment:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete attachment from Supabase Storage
+ */
+export async function deleteAttachment(attachmentUrl: string): Promise<boolean> {
+  try {
+    if (!attachmentUrl) return false;
+
+    const path = attachmentUrl.includes("events-images/")
+      ? attachmentUrl.split("events-images/")[1]
+      : attachmentUrl;
+
+    const { error } = await supabase.storage
+      .from("events-images")
+      .remove([path]);
+
+    if (error) {
+      console.error("Error deleting attachment:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting attachment:", error);
+    return false;
   }
 }
