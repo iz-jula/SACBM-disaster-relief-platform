@@ -15,6 +15,7 @@ interface Event {
   category: string;
   attendees?: number;
   featured?: boolean;
+  helpNeeds?: string[];
 }
 
 const MOCK_EVENTS: Event[] = [
@@ -28,6 +29,7 @@ const MOCK_EVENTS: Event[] = [
     category: "Health & Wellness",
     attendees: 250,
     featured: true,
+    helpNeeds: ["Medical supplies", "Hospital beds", "Medications", "First aid kits"],
   },
   {
     id: "2",
@@ -39,6 +41,7 @@ const MOCK_EVENTS: Event[] = [
     category: "Training",
     attendees: 100,
     featured: true,
+    helpNeeds: ["Emergency shelter materials", "Food supplies", "Water containers", "First responder equipment"],
   },
   {
     id: "3",
@@ -49,6 +52,7 @@ const MOCK_EVENTS: Event[] = [
     description: "Join member organizations in community environmental conservation and cleanup projects.",
     category: "Environment",
     attendees: 180,
+    helpNeeds: ["Cleaning supplies", "Waste disposal equipment", "Protective gear", "Transportation"],
   },
   {
     id: "4",
@@ -59,6 +63,7 @@ const MOCK_EVENTS: Event[] = [
     description: "Strategic dialogue on corporate social responsibility initiatives and impact measurement.",
     category: "Leadership",
     attendees: 75,
+    helpNeeds: ["Refreshments", "Conference materials", "Technology support", "Venue resources"],
   },
   {
     id: "5",
@@ -69,6 +74,7 @@ const MOCK_EVENTS: Event[] = [
     description: "Distribution of educational materials and supplies to underprivileged schools.",
     category: "Education",
     attendees: 200,
+    helpNeeds: ["School supplies", "Textbooks", "Learning materials", "Stationery"],
   },
   {
     id: "6",
@@ -79,6 +85,7 @@ const MOCK_EVENTS: Event[] = [
     description: "Skills development and business training for women entrepreneurs and community leaders.",
     category: "Empowerment",
     attendees: 120,
+    helpNeeds: ["Training materials", "Refreshments", "Business resources", "Mentorship support"],
   },
 ];
 
@@ -199,12 +206,39 @@ const EventDetail = () => {
             </Button>
           </div>
 
+          {/* Ways Members Can Help */}
+          {event.helpNeeds && event.helpNeeds.length > 0 && (
+            <div className="mt-12 pt-12 border-t border-slate-200">
+              <h2 className="text-2xl font-light text-slate-900 mb-8">Ways Members Can Help</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {event.helpNeeds.map((need, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-6 hover:border-emerald-300 hover:bg-emerald-50 transition-all"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 h-6 w-6 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-sm font-medium">✓</span>
+                      </div>
+                      <p className="text-slate-900 font-medium">{need}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 p-6 rounded-lg bg-emerald-50 border border-emerald-200">
+                <p className="text-slate-700">
+                  If you'd like to contribute to this event, please <strong>contact the SACBM office</strong> to coordinate your support.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Additional Info */}
           <div className="mt-12 pt-12 border-t border-slate-200">
             <h2 className="text-2xl font-light text-slate-900 mb-4">About This Event</h2>
             <p className="text-slate-600 leading-relaxed">
-              This is part of SACBM's ongoing commitment to social responsibility and community impact. 
-              All members are encouraged to participate and contribute to our collective mission of making 
+              This is part of SACBM's ongoing commitment to social responsibility and community impact.
+              All members are encouraged to participate and contribute to our collective mission of making
               a positive difference across Mozambique.
             </p>
           </div>
