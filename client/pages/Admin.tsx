@@ -47,7 +47,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "menu" | "ingd" | "carousel" | "documents" | "member-access" | "users" | "connectivity" | "requests"
+    "menu" | "ingd" | "carousel" | "documents" | "member-access" | "users" | "connectivity" | "requests" | "events"
   >("menu");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -811,6 +811,15 @@ export default function Admin() {
                   <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📄</div>
                   <h3 className="text-sm font-semibold text-slate-900">Documents</h3>
                   <p className="text-xs text-slate-500 mt-1">Files & docs</p>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("events")}
+                  className="bg-white rounded-lg border border-slate-200 p-5 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                >
+                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📅</div>
+                  <h3 className="text-sm font-semibold text-slate-900">Events</h3>
+                  <p className="text-xs text-slate-500 mt-1">Create & manage</p>
                 </button>
               </div>
             </div>
@@ -1812,6 +1821,49 @@ export default function Admin() {
                   </table>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Events Tab */}
+        {activeTab === "events" && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">Events Management</h2>
+              <p className="text-slate-600 mb-6">Create, edit, and manage social events. Set event details, required help items, quantities, and contact information.</p>
+
+              <div className="border-t border-slate-200 pt-6">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Event Features</h3>
+                <ul className="space-y-3 text-slate-700">
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span><strong>Event Details:</strong> Title, date, time, location, description, category</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span><strong>Help Needs:</strong> Define what members can donate with quantities and units (e.g., "Hospital beds - 5 units")</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span><strong>Contact Information:</strong> Custom contact message with point of contact details</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span><strong>Event Images:</strong> Upload main image and gallery photos</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span><strong>Featured Events:</strong> Mark events as featured to highlight them on the dashboard</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-900">
+                  <strong>Note:</strong> Events are currently managed through the database. A full admin interface for creating and editing events will be available soon.
+                  For now, events are displayed from the mock data. Contact the development team to add custom events to your dashboard.
+                </p>
+              </div>
             </div>
           </div>
         )}
