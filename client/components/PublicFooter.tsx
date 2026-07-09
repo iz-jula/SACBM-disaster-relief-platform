@@ -57,7 +57,7 @@ const PublicFooter = () => {
               </li>
               <li>
                 <Link to="/our-members" className="text-sm text-slate-300 hover:text-white">
-                  Our Members
+                  Per Member
                 </Link>
               </li>
               <li>

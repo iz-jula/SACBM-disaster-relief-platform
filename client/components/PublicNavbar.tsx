@@ -55,7 +55,7 @@ const PublicNavbar = () => {
                   to="/our-members"
                   className="block px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-slate-50 hover:text-foreground rounded-b-lg last:rounded-b-lg"
                 >
-                  Our Members
+                  Per Member
                 </Link>
               </div>
             </div>
@@ -128,7 +128,7 @@ const PublicNavbar = () => {
                         setIsImpactDropdownOpen(false);
                       }}
                     >
-                      Our Members
+                      Per Member
                     </Link>
                   </div>
                 )}
