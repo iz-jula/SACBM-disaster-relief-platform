@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,18 @@ import { getAllEvents, type Event } from "@/services/eventsService";
 const EventDetail = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [event, setEvent] = useState<Event | undefined>(undefined);
 
-  const allEvents = useMemo(() => getAllEvents(), []);
-  const event = useMemo(
-    () => allEvents.find((e) => e.id === eventId),
-    [eventId, allEvents]
-  );
+  useEffect(() => {
+    const loadEvents = async () => {
+      const events = await getAllEvents();
+      setAllEvents(events);
+      const foundEvent = events.find((e) => e.id === eventId);
+      setEvent(foundEvent);
+    };
+    loadEvents();
+  }, [eventId]);
 
   if (!event) {
     return (
@@ -57,7 +63,7 @@ const EventDetail = () => {
 
       {/* Main Content */}
       <div className="mx-auto max-w-7xl px-6 sm:px-8 py-8 sm:py-12">
-        <div className={`grid grid-cols-1 gap-8 ${event.image ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
+        <div className={`grid grid-cols-1 gap-8 ${event?.image_url ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
           {/* Left Column - Event Details Card */}
           <div className={event.image ? 'lg:col-span-2' : 'lg:col-span-1'}>
             <div className="rounded-lg border border-slate-200 bg-white p-10 sm:p-14 shadow-sm">
@@ -174,13 +180,13 @@ const EventDetail = () => {
           </div>
 
           {/* Right Column - Picture Gallery (only show if image exists) */}
-          {event.image && (
+          {event?.image_url && (
             <div className="lg:col-span-1">
               <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
                 {/* Main Image */}
                 <div className="mb-6">
                   <img
-                    src={event.image}
+                    src={event.image_url}
                     alt={event.title}
                     className="w-full h-64 md:h-80 object-cover rounded-lg"
                   />

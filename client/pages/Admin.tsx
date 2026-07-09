@@ -22,7 +22,7 @@ import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateI
 import { getAchievements } from "@/services/achievementsService";
 import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
-import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, type Event, type HelpNeed } from "@/services/eventsService";
+import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, uploadEventImage, uploadGalleryImage, deleteEventImage, deleteGalleryImage, type Event, type HelpNeed } from "@/services/eventsService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -151,6 +151,11 @@ export default function Admin() {
     unit: "",
   });
   const [deleteConfirmEventId, setDeleteConfirmEventId] = useState<string | null>(null);
+  const [eventImageFile, setEventImageFile] = useState<File | null>(null);
+  const [eventImagePreview, setEventImagePreview] = useState<string>("");
+  const [isUploadingEventImage, setIsUploadingEventImage] = useState(false);
+  const [galleryImageFiles, setGalleryImageFiles] = useState<File[]>([]);
+  const [isUploadingGalleryImages, setIsUploadingGalleryImages] = useState(false);
 
   // Load INGD active state from database
   useEffect(() => {
@@ -452,11 +457,11 @@ export default function Admin() {
   };
 
   // ===== EVENTS MANAGEMENT FUNCTIONS =====
-  const loadEvents = () => {
+  const loadEvents = async () => {
     setIsLoadingEvents(true);
     try {
-      const allEvents = getAllEvents();
-      const categories = getCategories();
+      const allEvents = await getAllEvents();
+      const categories = await getCategories();
       setEvents(allEvents);
       setEventCategories(categories);
       setIsLoadingEvents(false);
@@ -479,11 +484,14 @@ export default function Admin() {
       featured: false,
       helpNeeds: [],
       contactMessage: "",
-      image: "",
+      image_url: "",
       gallery: [],
     });
     setNewHelpNeed({ name: "", quantity: 0, unit: "" });
     setEditingEventId(null);
+    setEventImageFile(null);
+    setEventImagePreview("");
+    setGalleryImageFiles([]);
   };
 
   const handleAddEvent = () => {
@@ -504,13 +512,16 @@ export default function Admin() {
       featured: event.featured || false,
       helpNeeds: event.helpNeeds || [],
       contactMessage: event.contactMessage || "",
-      image: event.image || "",
+      image_url: event.image_url || "",
       gallery: event.gallery || [],
     });
+    setEventImagePreview(event.image_url || "");
+    setEventImageFile(null);
+    setGalleryImageFiles([]);
     setShowEventForm(true);
   };
 
-  const handleSaveEvent = () => {
+  const handleSaveEvent = async () => {
     setErrorMessage("");
     setSuccessMessage("");
 
@@ -521,9 +532,44 @@ export default function Admin() {
     }
 
     try {
+      let imageUrl = eventFormData.image_url;
+
+      // Upload main image if a new file is selected
+      if (eventImageFile) {
+        setIsUploadingEventImage(true);
+        imageUrl = await uploadEventImage(eventImageFile, editingEventId || "new");
+        if (!imageUrl) {
+          setErrorMessage("Failed to upload main image");
+          setIsUploadingEventImage(false);
+          return;
+        }
+        setIsUploadingEventImage(false);
+      }
+
+      // Prepare gallery URLs
+      let galleryUrls = eventFormData.gallery || [];
+
+      // Upload new gallery images
+      if (galleryImageFiles.length > 0) {
+        setIsUploadingGalleryImages(true);
+        const uploadedUrls = await Promise.all(
+          galleryImageFiles.map((file) =>
+            uploadGalleryImage(file, editingEventId || "new")
+          )
+        );
+        galleryUrls = [...galleryUrls, ...uploadedUrls.filter((url) => url !== null) as string[]];
+        setIsUploadingGalleryImages(false);
+      }
+
+      const eventDataToSave = {
+        ...eventFormData,
+        image_url: imageUrl,
+        gallery: galleryUrls,
+      };
+
       if (editingEventId) {
         // Update existing event
-        const updatedEvent = updateEvent(editingEventId, eventFormData);
+        const updatedEvent = await updateEvent(editingEventId, eventDataToSave);
         if (updatedEvent) {
           setEvents(events.map((e) => (e.id === editingEventId ? updatedEvent : e)));
           setSuccessMessage("Event updated successfully!");
@@ -534,11 +580,15 @@ export default function Admin() {
         }
       } else {
         // Create new event
-        const newEvent = createEvent(eventFormData);
-        setEvents([...events, newEvent]);
-        setSuccessMessage("Event created successfully!");
-        setShowEventForm(false);
-        resetEventForm();
+        const newEvent = await createEvent(eventDataToSave);
+        if (newEvent) {
+          setEvents([...events, newEvent]);
+          setSuccessMessage("Event created successfully!");
+          setShowEventForm(false);
+          resetEventForm();
+        } else {
+          setErrorMessage("Failed to create event");
+        }
       }
 
       // Clear messages after 3 seconds
@@ -552,10 +602,10 @@ export default function Admin() {
     }
   };
 
-  const handleDeleteEvent = (eventId: string) => {
+  const handleDeleteEvent = async (eventId: string) => {
     if (confirm("Are you sure you want to delete this event?")) {
       try {
-        const success = deleteEvent(eventId);
+        const success = await deleteEvent(eventId);
         if (success) {
           setEvents(events.filter((e) => e.id !== eventId));
           setSuccessMessage("Event deleted successfully!");
@@ -594,6 +644,25 @@ export default function Admin() {
     });
   };
 
+  const handleEventImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEventImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setEventImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleGalleryImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setGalleryImageFiles(Array.from(files));
+    }
+  };
+
   const handleAddGalleryImage = () => {
     const url = prompt("Enter image URL:");
     if (url && url.trim()) {
@@ -611,6 +680,10 @@ export default function Admin() {
       ...eventFormData,
       gallery: updatedGallery,
     });
+  };
+
+  const handleRemoveGalleryImageFile = (index: number) => {
+    setGalleryImageFiles(galleryImageFiles.filter((_, i) => i !== index));
   };
 
   const handleCancelEventForm = () => {
@@ -2212,57 +2285,123 @@ export default function Admin() {
                     </label>
                   </div>
 
-                  {/* Image */}
+                  {/* Main Image */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Main Image URL
+                      Main Image
                     </label>
-                    <input
-                      type="text"
-                      value={eventFormData.image || ""}
-                      onChange={(e) => setEventFormData({ ...eventFormData, image: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                    />
-                    {eventFormData.image && (
-                      <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
-                        <img src={eventFormData.image} alt="Preview" className="w-full h-full object-cover" onError={() => {}} />
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-2">
+                          Upload New Image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleEventImageSelect}
+                          disabled={isUploadingEventImage}
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:opacity-50"
+                        />
+                        {isUploadingEventImage && (
+                          <p className="text-xs text-emerald-600 mt-1">Uploading image...</p>
+                        )}
                       </div>
-                    )}
+
+                      {/* Image Preview */}
+                      {eventImagePreview && (
+                        <div className="mt-2">
+                          <p className="text-xs font-medium text-slate-600 mb-2">Preview</p>
+                          <div className="w-32 h-32 rounded-lg overflow-hidden border border-slate-200">
+                            <img src={eventImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Gallery Images */}
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="text-sm font-medium text-slate-700">Gallery Images</label>
-                      <button
-                        onClick={handleAddGalleryImage}
-                        className="px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
-                      >
-                        <Plus size={14} className="inline mr-1" />
-                        Add Image
-                      </button>
-                    </div>
-                    {eventFormData.gallery && eventFormData.gallery.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {eventFormData.gallery.map((url, idx) => (
-                          <div key={idx} className="relative group">
-                            <img
-                              src={url}
-                              alt={`Gallery ${idx + 1}`}
-                              className="w-full h-24 object-cover rounded-lg border border-slate-200"
-                              onError={() => {}}
-                            />
-                            <button
-                              onClick={() => handleRemoveGalleryImage(idx)}
-                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ))}
+                    <label className="text-sm font-medium text-slate-700 mb-3 block">Gallery Images</label>
+                    <div className="space-y-4">
+                      {/* Upload new gallery images */}
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-2">
+                          Upload Gallery Images (Multiple)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleGalleryImageSelect}
+                          disabled={isUploadingGalleryImages}
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:opacity-50"
+                        />
+                        {isUploadingGalleryImages && (
+                          <p className="text-xs text-emerald-600 mt-1">Uploading images...</p>
+                        )}
                       </div>
-                    )}
+
+                      {/* Preview selected files */}
+                      {galleryImageFiles.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-slate-600 mb-2">Files to Upload ({galleryImageFiles.length})</p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {galleryImageFiles.map((file, idx) => (
+                              <div key={idx} className="relative group">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Upload ${idx + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                                />
+                                <button
+                                  onClick={() => handleRemoveGalleryImageFile(idx)}
+                                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Or add by URL */}
+                      <div className="border-t border-slate-200 pt-4">
+                        <p className="text-xs font-medium text-slate-600 mb-2">Or Add by URL</p>
+                        <button
+                          onClick={handleAddGalleryImage}
+                          className="px-3 py-1 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                        >
+                          <Plus size={14} className="inline mr-1" />
+                          Add URL
+                        </button>
+                      </div>
+
+                      {/* Existing gallery images */}
+                      {eventFormData.gallery && eventFormData.gallery.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-slate-600 mb-2">Uploaded Images</p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {eventFormData.gallery.map((url, idx) => (
+                              <div key={idx} className="relative group">
+                                <img
+                                  src={url}
+                                  alt={`Gallery ${idx + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg border border-slate-200"
+                                  onError={() => {}}
+                                />
+                                <button
+                                  onClick={() => handleRemoveGalleryImage(idx)}
+                                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Contact Message */}
@@ -2374,10 +2513,10 @@ export default function Admin() {
                       <div key={event.id} className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
                         <div className="flex gap-4 items-start">
                           {/* Event Image */}
-                          {event.image && (
+                          {event.image_url && (
                             <div className="w-24 h-24 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
                               <img
-                                src={event.image}
+                                src={event.image_url}
                                 alt={event.title}
                                 className="w-full h-full object-cover"
                                 onError={() => {}}

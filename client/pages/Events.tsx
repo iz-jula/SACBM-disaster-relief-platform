@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
@@ -8,7 +8,15 @@ import { getAllEvents, type Event } from "@/services/eventsService";
 
 const Events = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const allEvents = useMemo(() => getAllEvents(), []);
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      const events = await getAllEvents();
+      setAllEvents(events);
+    };
+    loadEvents();
+  }, []);
 
   const categories = useMemo(
     () => ["All", ...new Set(allEvents.map((e) => e.category))],

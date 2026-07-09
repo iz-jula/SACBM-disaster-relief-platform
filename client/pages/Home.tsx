@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,15 @@ const Home = () => {
     );
   };
 
-  const allEvents = useMemo(() => getAllEvents(), []);
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      const events = await getAllEvents();
+      setAllEvents(events);
+    };
+    loadEvents();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">

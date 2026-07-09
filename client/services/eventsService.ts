@@ -1,5 +1,4 @@
-// Events service for managing events with localStorage persistence
-// This service handles CRUD operations for events and help needs
+import { supabase } from "./supabaseService";
 
 export interface HelpNeed {
   name: string;
@@ -19,277 +18,433 @@ export interface Event {
   featured?: boolean;
   helpNeeds?: HelpNeed[];
   contactMessage?: string;
-  image?: string;
+  image_url?: string;
   gallery?: string[];
 }
 
-const EVENTS_STORAGE_KEY = "sacbm_events";
-
-// Mock data to initialize with if localStorage is empty
-const MOCK_EVENTS: Event[] = [
-  {
-    id: "1",
-    title: "Community Health Drive",
-    date: "March 15, 2024",
-    time: "8:00 AM - 2:00 PM",
-    location: "Central Health Center, Maputo",
-    description: "Free medical checkups and health awareness program in partnership with local clinics. All community members welcome.",
-    category: "Health & Wellness",
-    attendees: 250,
-    featured: true,
-    image: "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=400&height=400",
-    gallery: [
-      "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=400&height=400",
-    ],
-    helpNeeds: [
-      { name: "Hospital beds", quantity: 5, unit: "units" },
-      { name: "Medical supplies", quantity: 100, unit: "kits" },
-      { name: "Medications", quantity: 50, unit: "boxes" },
-      { name: "First aid kits", quantity: 20, unit: "kits" },
-    ],
-    contactMessage: "To contribute, please contact Dr. Maria Silva at maria.silva@chs.org.mz or call +258 84 123 4567",
-  },
-  {
-    id: "2",
-    title: "Disaster Relief Training",
-    date: "March 22, 2024",
-    time: "9:00 AM - 5:00 PM",
-    location: "Chamber Building, Maputo",
-    description: "Comprehensive training for rapid response teams in emergency situations. Professional certification provided.",
-    category: "Training",
-    attendees: 100,
-    featured: true,
-    helpNeeds: [
-      { name: "Emergency shelter materials", quantity: 30, unit: "tents" },
-      { name: "Food supplies", quantity: 200, unit: "meals" },
-      { name: "Water containers", quantity: 50, unit: "units" },
-      { name: "First responder equipment", quantity: 15, unit: "sets" },
-    ],
-    contactMessage: "For donations, contact João Mascarenhas at j.mascarenhas@sacbm.org.mz or +258 82 765 4321",
-  },
-  {
-    id: "3",
-    title: "Environmental Cleanup Initiative",
-    date: "April 5, 2024",
-    time: "7:00 AM - 12:00 PM",
-    location: "Coastal Areas, Gaza Province",
-    description: "Join member organizations in community environmental conservation and cleanup projects.",
-    category: "Environment",
-    attendees: 180,
-    helpNeeds: [
-      { name: "Cleaning supplies", quantity: 500, unit: "liters" },
-      { name: "Waste disposal equipment", quantity: 10, unit: "units" },
-      { name: "Protective gear", quantity: 200, unit: "sets" },
-      { name: "Transportation", quantity: 5, unit: "vehicles" },
-    ],
-    contactMessage: "Please reach out to the SACBM environmental team at environment@sacbm.org.mz",
-  },
-  {
-    id: "4",
-    title: "CSR Leadership Summit",
-    date: "April 12, 2024",
-    time: "2:00 PM - 6:00 PM",
-    location: "Polana Hotel, Maputo",
-    description: "Strategic dialogue on corporate social responsibility initiatives and impact measurement.",
-    category: "Leadership",
-    attendees: 75,
-    helpNeeds: [
-      { name: "Refreshments", quantity: 75, unit: "portions" },
-      { name: "Conference materials", quantity: 75, unit: "sets" },
-      { name: "Technology support", quantity: 3, unit: "teams" },
-      { name: "Venue resources", quantity: 1, unit: "complete" },
-    ],
-    contactMessage: "To support this summit, contact events@sacbm.org.mz or call +258 84 999 8888",
-  },
-  {
-    id: "5",
-    title: "School Supplies Distribution",
-    date: "April 20, 2024",
-    time: "10:00 AM - 3:00 PM",
-    location: "Multiple Schools, Sofala Province",
-    description: "Distribution of educational materials and supplies to underprivileged schools.",
-    category: "Education",
-    attendees: 200,
-    helpNeeds: [
-      { name: "School supplies", quantity: 500, unit: "sets" },
-      { name: "Textbooks", quantity: 300, unit: "units" },
-      { name: "Learning materials", quantity: 1000, unit: "items" },
-      { name: "Stationery", quantity: 50, unit: "boxes" },
-    ],
-    contactMessage: "For educational donations, contact education@sacbm.org.mz",
-  },
-  {
-    id: "6",
-    title: "Women Empowerment Workshop",
-    date: "May 1, 2024",
-    time: "9:00 AM - 4:00 PM",
-    location: "Chamber Building, Maputo",
-    description: "Skills development and business training for women entrepreneurs and community leaders.",
-    category: "Empowerment",
-    attendees: 120,
-    helpNeeds: [
-      { name: "Training materials", quantity: 120, unit: "sets" },
-      { name: "Refreshments", quantity: 120, unit: "meals" },
-      { name: "Business resources", quantity: 80, unit: "guides" },
-      { name: "Mentorship support", quantity: 30, unit: "mentors" },
-    ],
-    contactMessage: "To participate as a mentor or sponsor, reach out to women@sacbm.org.mz",
-  },
-];
-
 /**
- * Initialize localStorage with mock data if empty
+ * Get all events from Supabase
  */
-function initializeStorage(): void {
-  if (!localStorage.getItem(EVENTS_STORAGE_KEY)) {
-    localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(MOCK_EVENTS));
+export async function getAllEvents(): Promise<Event[]> {
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching events:", error);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      date: row.date,
+      time: row.time,
+      location: row.location,
+      description: row.description,
+      category: row.category,
+      attendees: row.attendees,
+      featured: row.featured,
+      helpNeeds: row.help_needs || [],
+      contactMessage: row.contact_message,
+      image_url: row.image_url,
+      gallery: row.gallery || [],
+    }));
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return [];
   }
 }
 
 /**
- * Get all events
+ * Get event by ID from Supabase
  */
-export function getAllEvents(): Event[] {
-  initializeStorage();
-  const data = localStorage.getItem(EVENTS_STORAGE_KEY);
-  return data ? JSON.parse(data) : MOCK_EVENTS;
-}
+export async function getEventById(id: string): Promise<Event | null> {
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-/**
- * Get event by ID
- */
-export function getEventById(id: string): Event | null {
-  const events = getAllEvents();
-  return events.find((e) => e.id === id) || null;
-}
+    if (error) {
+      console.error("Error fetching event:", error);
+      return null;
+    }
 
-/**
- * Create new event
- */
-export function createEvent(event: Omit<Event, "id">): Event {
-  const events = getAllEvents();
-  const newEvent: Event = {
-    ...event,
-    id: Date.now().toString(),
-  };
-  events.push(newEvent);
-  localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  return newEvent;
-}
+    if (!data) return null;
 
-/**
- * Update event
- */
-export function updateEvent(id: string, updates: Partial<Event>): Event | null {
-  const events = getAllEvents();
-  const index = events.findIndex((e) => e.id === id);
-  
-  if (index === -1) {
+    return {
+      id: data.id,
+      title: data.title,
+      date: data.date,
+      time: data.time,
+      location: data.location,
+      description: data.description,
+      category: data.category,
+      attendees: data.attendees,
+      featured: data.featured,
+      helpNeeds: data.help_needs || [],
+      contactMessage: data.contact_message,
+      image_url: data.image_url,
+      gallery: data.gallery || [],
+    };
+  } catch (error) {
+    console.error("Error fetching event:", error);
     return null;
   }
-
-  events[index] = {
-    ...events[index],
-    ...updates,
-    id: events[index].id, // Ensure ID doesn't change
-  };
-
-  localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  return events[index];
 }
 
 /**
- * Delete event
+ * Create new event in Supabase
  */
-export function deleteEvent(id: string): boolean {
-  const events = getAllEvents();
-  const filteredEvents = events.filter((e) => e.id !== id);
-  
-  if (filteredEvents.length === events.length) {
-    return false; // Event not found
-  }
+export async function createEvent(
+  event: Omit<Event, "id">
+): Promise<Event | null> {
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .insert([
+        {
+          title: event.title,
+          date: event.date,
+          time: event.time,
+          location: event.location,
+          description: event.description,
+          category: event.category,
+          attendees: event.attendees || 0,
+          featured: event.featured || false,
+          help_needs: event.helpNeeds || [],
+          contact_message: event.contactMessage || "",
+          image_url: event.image_url || "",
+          gallery: event.gallery || [],
+        },
+      ])
+      .select()
+      .single();
 
-  localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(filteredEvents));
-  return true;
-}
+    if (error) {
+      console.error("Error creating event:", error);
+      return null;
+    }
 
-/**
- * Add help need to event
- */
-export function addHelpNeedToEvent(eventId: string, helpNeed: HelpNeed): Event | null {
-  const events = getAllEvents();
-  const event = events.find((e) => e.id === eventId);
+    if (!data) return null;
 
-  if (!event) {
+    return {
+      id: data.id,
+      title: data.title,
+      date: data.date,
+      time: data.time,
+      location: data.location,
+      description: data.description,
+      category: data.category,
+      attendees: data.attendees,
+      featured: data.featured,
+      helpNeeds: data.help_needs || [],
+      contactMessage: data.contact_message,
+      image_url: data.image_url,
+      gallery: data.gallery || [],
+    };
+  } catch (error) {
+    console.error("Error creating event:", error);
     return null;
   }
-
-  if (!event.helpNeeds) {
-    event.helpNeeds = [];
-  }
-
-  event.helpNeeds.push(helpNeed);
-  localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  return event;
 }
 
 /**
- * Update help need in event
+ * Update event in Supabase
  */
-export function updateHelpNeedInEvent(
-  eventId: string,
-  helpNeedIndex: number,
-  helpNeed: HelpNeed,
-): Event | null {
-  const events = getAllEvents();
-  const event = events.find((e) => e.id === eventId);
+export async function updateEvent(
+  id: string,
+  updates: Partial<Event>
+): Promise<Event | null> {
+  try {
+    const updateData: any = {};
 
-  if (!event || !event.helpNeeds || helpNeedIndex < 0 || helpNeedIndex >= event.helpNeeds.length) {
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.date !== undefined) updateData.date = updates.date;
+    if (updates.time !== undefined) updateData.time = updates.time;
+    if (updates.location !== undefined) updateData.location = updates.location;
+    if (updates.description !== undefined)
+      updateData.description = updates.description;
+    if (updates.category !== undefined) updateData.category = updates.category;
+    if (updates.attendees !== undefined) updateData.attendees = updates.attendees;
+    if (updates.featured !== undefined) updateData.featured = updates.featured;
+    if (updates.helpNeeds !== undefined)
+      updateData.help_needs = updates.helpNeeds;
+    if (updates.contactMessage !== undefined)
+      updateData.contact_message = updates.contactMessage;
+    if (updates.image_url !== undefined)
+      updateData.image_url = updates.image_url;
+    if (updates.gallery !== undefined) updateData.gallery = updates.gallery;
+
+    const { data, error } = await supabase
+      .from("events")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating event:", error);
+      return null;
+    }
+
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      title: data.title,
+      date: data.date,
+      time: data.time,
+      location: data.location,
+      description: data.description,
+      category: data.category,
+      attendees: data.attendees,
+      featured: data.featured,
+      helpNeeds: data.help_needs || [],
+      contactMessage: data.contact_message,
+      image_url: data.image_url,
+      gallery: data.gallery || [],
+    };
+  } catch (error) {
+    console.error("Error updating event:", error);
     return null;
   }
-
-  event.helpNeeds[helpNeedIndex] = helpNeed;
-  localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  return event;
 }
 
 /**
- * Delete help need from event
+ * Delete event from Supabase
  */
-export function deleteHelpNeedFromEvent(eventId: string, helpNeedIndex: number): Event | null {
-  const events = getAllEvents();
-  const event = events.find((e) => e.id === eventId);
+export async function deleteEvent(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from("events").delete().eq("id", id);
 
-  if (!event || !event.helpNeeds || helpNeedIndex < 0 || helpNeedIndex >= event.helpNeeds.length) {
+    if (error) {
+      console.error("Error deleting event:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    return false;
+  }
+}
+
+/**
+ * Upload main event image to Supabase Storage
+ */
+export async function uploadEventImage(
+  file: File,
+  eventId: string
+): Promise<string | null> {
+  try {
+    const fileName = `${eventId}-${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("events-images")
+      .upload(`main/${fileName}`, file);
+
+    if (error) {
+      console.error("Error uploading event image:", error);
+      return null;
+    }
+
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("events-images").getPublicUrl(`main/${fileName}`);
+
+    return publicUrl;
+  } catch (error) {
+    console.error("Error uploading event image:", error);
     return null;
   }
+}
 
-  event.helpNeeds.splice(helpNeedIndex, 1);
-  localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  return event;
+/**
+ * Delete event image from Supabase Storage
+ */
+export async function deleteEventImage(imagePath: string): Promise<boolean> {
+  try {
+    if (!imagePath) return false;
+
+    // Extract the path from the full URL if needed
+    const path = imagePath.includes("events-images/")
+      ? imagePath.split("events-images/")[1]
+      : imagePath;
+
+    const { error } = await supabase.storage
+      .from("events-images")
+      .remove([path]);
+
+    if (error) {
+      console.error("Error deleting event image:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting event image:", error);
+    return false;
+  }
+}
+
+/**
+ * Upload gallery image to Supabase Storage
+ */
+export async function uploadGalleryImage(
+  file: File,
+  eventId: string
+): Promise<string | null> {
+  try {
+    const fileName = `${eventId}-gallery-${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+      .from("events-images")
+      .upload(`gallery/${fileName}`, file);
+
+    if (error) {
+      console.error("Error uploading gallery image:", error);
+      return null;
+    }
+
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage
+      .from("events-images")
+      .getPublicUrl(`gallery/${fileName}`);
+
+    return publicUrl;
+  } catch (error) {
+    console.error("Error uploading gallery image:", error);
+    return null;
+  }
+}
+
+/**
+ * Delete gallery image from Supabase Storage
+ */
+export async function deleteGalleryImage(imagePath: string): Promise<boolean> {
+  try {
+    if (!imagePath) return false;
+
+    // Extract the path from the full URL if needed
+    const path = imagePath.includes("events-images/")
+      ? imagePath.split("events-images/")[1]
+      : imagePath;
+
+    const { error } = await supabase.storage
+      .from("events-images")
+      .remove([path]);
+
+    if (error) {
+      console.error("Error deleting gallery image:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting gallery image:", error);
+    return false;
+  }
 }
 
 /**
  * Get featured events only
  */
-export function getFeaturedEvents(): Event[] {
-  const events = getAllEvents();
-  return events.filter((e) => e.featured);
+export async function getFeaturedEvents(): Promise<Event[]> {
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("featured", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching featured events:", error);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      date: row.date,
+      time: row.time,
+      location: row.location,
+      description: row.description,
+      category: row.category,
+      attendees: row.attendees,
+      featured: row.featured,
+      helpNeeds: row.help_needs || [],
+      contactMessage: row.contact_message,
+      image_url: row.image_url,
+      gallery: row.gallery || [],
+    }));
+  } catch (error) {
+    console.error("Error fetching featured events:", error);
+    return [];
+  }
 }
 
 /**
  * Get events by category
  */
-export function getEventsByCategory(category: string): Event[] {
-  const events = getAllEvents();
-  return events.filter((e) => e.category === category);
+export async function getEventsByCategory(category: string): Promise<Event[]> {
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("category", category)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching events by category:", error);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      date: row.date,
+      time: row.time,
+      location: row.location,
+      description: row.description,
+      category: row.category,
+      attendees: row.attendees,
+      featured: row.featured,
+      helpNeeds: row.help_needs || [],
+      contactMessage: row.contact_message,
+      image_url: row.image_url,
+      gallery: row.gallery || [],
+    }));
+  } catch (error) {
+    console.error("Error fetching events by category:", error);
+    return [];
+  }
 }
 
 /**
  * Get list of all categories
  */
-export function getCategories(): string[] {
-  const events = getAllEvents();
-  const categories = new Set(events.map((e) => e.category));
-  return Array.from(categories).sort();
+export async function getCategories(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("category")
+      .order("category", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching categories:", error);
+      return [];
+    }
+
+    const categories = new Set((data || []).map((row: any) => row.category));
+    return Array.from(categories).filter((cat) => cat) as string[];
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
 }
