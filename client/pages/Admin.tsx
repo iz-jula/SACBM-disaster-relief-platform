@@ -2287,27 +2287,27 @@ export default function Admin() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Date *
+                        Date * (YYYY-MM-DD)
                       </label>
                       <input
-                        type="text"
+                        type="date"
                         value={eventFormData.date}
                         onChange={(e) => setEventFormData({ ...eventFormData, date: e.target.value })}
-                        placeholder="e.g., March 15, 2024"
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       />
+                      <p className="text-xs text-slate-500 mt-1">This determines if the event is upcoming or past</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Time *
+                        Start Time * (HH:MM)
                       </label>
                       <input
-                        type="text"
+                        type="time"
                         value={eventFormData.time}
                         onChange={(e) => setEventFormData({ ...eventFormData, time: e.target.value })}
-                        placeholder="e.g., 8:00 AM - 2:00 PM"
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       />
+                      <p className="text-xs text-slate-500 mt-1">Event start time</p>
                     </div>
                   </div>
 
