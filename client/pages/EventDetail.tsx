@@ -249,6 +249,16 @@ const EventDetail = () => {
             </Button>
           </div>
 
+          {/* About This Event */}
+          <div className="mt-12 pt-12 border-t border-slate-200">
+            <h2 className="text-2xl font-light text-slate-900 mb-4">About This Event</h2>
+            <p className="text-slate-600 leading-relaxed">
+              This is part of SACBM's ongoing commitment to social responsibility and community impact.
+              All members are encouraged to participate and contribute to our collective mission of making
+              a positive difference across Mozambique.
+            </p>
+          </div>
+
           {/* Ways Members Can Help */}
           {event.helpNeeds && event.helpNeeds.length > 0 && (
             <div className="mt-12 pt-12 border-t border-slate-200">
@@ -282,16 +292,6 @@ const EventDetail = () => {
               </div>
             </div>
           )}
-
-          {/* Additional Info */}
-          <div className="mt-12 pt-12 border-t border-slate-200">
-            <h2 className="text-2xl font-light text-slate-900 mb-4">About This Event</h2>
-            <p className="text-slate-600 leading-relaxed">
-              This is part of SACBM's ongoing commitment to social responsibility and community impact.
-              All members are encouraged to participate and contribute to our collective mission of making
-              a positive difference across Mozambique.
-            </p>
-          </div>
         </div>
 
         {/* Related Events Section */}
