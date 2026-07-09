@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
-import { getCarouselImages, CarouselImage } from "@/services/supabaseService";
+import { getCarouselImages, CarouselImage, getActionsMetrics } from "@/services/supabaseService";
 
 interface Stats {
   totalActions: number;
@@ -34,12 +34,15 @@ const Home = () => {
     };
     loadImages();
 
-    // Load stats from API
+    // Load stats from Supabase
     const loadStats = async () => {
       try {
-        const response = await fetch("/api/stats");
-        const data = await response.json();
-        setStats(data);
+        const metrics = await getActionsMetrics();
+        setStats({
+          totalActions: metrics.totalAchievements,
+          peopleImpacted: metrics.totalPeopleImpacted,
+          totalContribution: metrics.totalContributed,
+        });
       } catch (error) {
         console.error("Error loading stats:", error);
       }
@@ -60,77 +63,107 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
       <PublicNavbar />
 
-      {/* Hero Section with Background Image */}
-      <section className="relative overflow-hidden px-4 py-20 sm:px-6 sm:py-32 lg:px-8">
-        {/* Background image overlay */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F3a1a4e655da0467388df0f18259e3a68?format=webp&width=800&height=1200"
-            alt="Community volunteers in action"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/50 via-slate-800/45 to-slate-900/50" />
+      {/* Dashboard Stats Section - Main Overview */}
+      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-28">
+        <div className="mb-12">
+          <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Chamber Dashboard</h1>
+          <p className="mt-4 text-base text-slate-600">Overview of SACBM's social impact and community initiatives</p>
         </div>
-
-        {/* Content */}
-        <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-light tracking-tight text-white">
-            Making a Difference<br />
-            <span className="text-yellow-300">
-              Together
-            </span>
-          </h1>
-          <p className="mt-6 text-base sm:text-lg text-slate-100 max-w-2xl mx-auto leading-relaxed">
-            This platform is dedicated to showcase how the South African Chamber of Business in Mozambique (SACBM), through its members, are creating meaningful social impact across Mozambique through disaster relief, humanitarian aid, and community support.
-          </p>
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row justify-center sm:gap-6">
-            <Link to="/gallery">
-              <Button size="lg" className="w-full sm:w-auto bg-white hover:bg-slate-100 text-slate-900 font-medium">
-                Explore Our Impact
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/about">
-              <Button size="lg" className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-medium">
-                Learn More
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="rounded-lg border border-slate-200 bg-white p-8 sm:p-10 text-center hover:shadow-md transition-shadow">
+            <div className="text-5xl sm:text-6xl font-light text-emerald-700 mb-4">
+              {stats.totalActions.toLocaleString()}
+            </div>
+            <p className="text-base text-slate-600 font-medium">Total Actions</p>
+            <p className="text-xs text-slate-500 mt-2">Community initiatives and interventions</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-8 sm:p-10 text-center hover:shadow-md transition-shadow">
+            <div className="text-5xl sm:text-6xl font-light text-emerald-700 mb-4">
+              {stats.peopleImpacted.toLocaleString()}
+            </div>
+            <p className="text-base text-slate-600 font-medium">People Impact</p>
+            <p className="text-xs text-slate-500 mt-2">Lives positively affected</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-8 sm:p-10 text-center hover:shadow-md transition-shadow">
+            <div className="text-5xl sm:text-6xl font-light text-emerald-700 mb-4">
+              {Math.round(stats.totalContribution / 1000000).toLocaleString()}M
+            </div>
+            <p className="text-base text-slate-600 font-medium">Total Contribution</p>
+            <p className="text-xs text-slate-500 mt-2">MZN committed and deployed</p>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
-          <div className="text-center">
-            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">
-              {stats.totalActions.toLocaleString()}
+      {/* Upcoming CSR Events Section */}
+      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28 border-t border-slate-200">
+        <div className="mb-16">
+          <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Upcoming CSR Events</h2>
+          <p className="mt-4 text-base text-slate-600">
+            Join us for upcoming community and corporate social responsibility initiatives
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Event Card 1 */}
+          <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+            <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
+              <span className="text-sm font-medium text-emerald-700">Upcoming</span>
             </div>
-            <p className="text-lg text-slate-700 font-medium">Total Actions</p>
+            <h3 className="text-xl font-medium text-slate-900 mb-2">Community Health Drive</h3>
+            <p className="text-slate-600 text-sm mb-4">Free medical checkups and health awareness in partnership with local clinics.</p>
+            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
+              <span>📅 Coming Soon</span>
+            </div>
+            <Link to="/about">
+              <Button variant="outline" size="sm" className="w-full">
+                Learn More
+              </Button>
+            </Link>
           </div>
-          <div className="text-center">
-            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">
-              {stats.peopleImpacted.toLocaleString()}
+
+          {/* Event Card 2 */}
+          <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+            <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
+              <span className="text-sm font-medium text-emerald-700">Upcoming</span>
             </div>
-            <p className="text-lg text-slate-700 font-medium">People Impact</p>
+            <h3 className="text-xl font-medium text-slate-900 mb-2">Disaster Relief Training</h3>
+            <p className="text-slate-600 text-sm mb-4">Training program for rapid response teams in emergency situations.</p>
+            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
+              <span>📅 Coming Soon</span>
+            </div>
+            <Link to="/about">
+              <Button variant="outline" size="sm" className="w-full">
+                Learn More
+              </Button>
+            </Link>
           </div>
-          <div className="text-center">
-            <div className="text-4xl sm:text-5xl font-light text-emerald-700 mb-4">
-              {Math.round(stats.totalContribution / 1000000).toLocaleString()}M MZN
+
+          {/* Event Card 3 */}
+          <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+            <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
+              <span className="text-sm font-medium text-emerald-700">Upcoming</span>
             </div>
-            <p className="text-lg text-slate-700 font-medium">Total Contribution</p>
+            <h3 className="text-xl font-medium text-slate-900 mb-2">Environmental Cleanup</h3>
+            <p className="text-slate-600 text-sm mb-4">Join members in community environmental conservation projects.</p>
+            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
+              <span>📅 Coming Soon</span>
+            </div>
+            <Link to="/about">
+              <Button variant="outline" size="sm" className="w-full">
+                Learn More
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Image Carousel Section (Placeholder for admin-uploaded images) */}
-      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28">
+      <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28 border-t border-slate-200">
         <div className="mb-16">
-          <h2 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900">Moments of Impact</h2>
+          <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Moments of Impact</h2>
           <p className="mt-4 text-base text-slate-600 max-w-2xl">
             Visual stories from our community initiatives
           </p>
@@ -204,7 +237,7 @@ const Home = () => {
       </section>
 
       {/* Contact CTA Section */}
-      <section className="mx-auto max-w-4xl px-6 sm:px-8 py-20 sm:py-28">
+      <section className="mx-auto max-w-4xl px-6 sm:px-8 py-20 sm:py-28 border-t border-slate-200">
         <div className="border border-slate-300 rounded-lg p-12 sm:p-16 bg-white">
           <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Want to Partner with the Chamber?</h2>
           <p className="mt-6 text-base text-slate-600 max-w-2xl">

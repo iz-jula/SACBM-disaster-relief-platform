@@ -8,7 +8,7 @@ const PublicNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { label: "Home", href: "/" },
+    { label: "Dashboard", href: "/" },
     { label: "Our Members", href: "/our-members" },
     { label: "Our Impact", href: "/gallery" },
     { label: "About", href: "/about" },
