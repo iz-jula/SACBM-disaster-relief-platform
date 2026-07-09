@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
-import { getCarouselImages, CarouselImage, getActionsMetrics } from "@/services/supabaseService";
+import { getActionsMetrics } from "@/services/supabaseService";
 import { getAllEvents, type Event } from "@/services/eventsService";
-import { getCarouselImagesByLocation } from "@/services/carouselService";
+import { getCarouselImagesByLocation, type CarouselImage } from "@/services/carouselService";
 
 interface Stats {
   totalActions: number;
@@ -16,7 +16,6 @@ interface Stats {
 }
 
 const Home = () => {
-  const [allCarouselImages, setAllCarouselImages] = useState<CarouselImage[]>([]);
   const [momentOfImpactImages, setMomentOfImpactImages] = useState<CarouselImage[]>([]);
   const [heroBackgroundImages, setHeroBackgroundImages] = useState<CarouselImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -33,7 +32,6 @@ const Home = () => {
         const momentImages = await getCarouselImagesByLocation("moments_of_impact");
         const heroImages = await getCarouselImagesByLocation("hero_background");
 
-        setAllCarouselImages([...momentImages, ...heroImages]);
         setMomentOfImpactImages(momentImages);
         setHeroBackgroundImages(heroImages);
       } catch (error) {

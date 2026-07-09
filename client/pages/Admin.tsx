@@ -1042,8 +1042,8 @@ export default function Admin() {
     <Layout>
       <div className="space-y-8">
         {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
             {activeTab !== "menu" && (
               <button
                 onClick={() => setActiveTab("menu")}
@@ -1056,35 +1056,39 @@ export default function Admin() {
               {activeTab === "menu" ? "Admin Dashboard" : "Manage Settings"}
             </h1>
             {activeTab === "menu" && (
-              <p className="text-slate-600 mt-1">
-                Organize and manage your website
-              </p>
-            )}
-            {user && activeTab === "menu" && (
-              <p className="text-xs text-slate-500 mt-2">
-                Logged in as: {user.name}
+              <p className="text-slate-600 text-sm mt-2">
+                Organize and manage your website, members, and content
               </p>
             )}
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
-            <LogOut size={16} />
-            Logout
-          </button>
+          {user && activeTab === "menu" && (
+            <div className="flex-shrink-0 text-right">
+              <p className="text-xs text-slate-500 mb-3">
+                Logged in as: <span className="font-medium text-slate-700">{user.name}</span>
+              </p>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          )}
+          {user && activeTab !== "menu" && (
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm flex-shrink-0"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          )}
         </div>
-
-        {/* Navigation removed for minimalist design - use sidebar buttons to navigate */}
 
         {/* Menu/Home Tab */}
         {activeTab === "menu" && (
           <div className="space-y-12">
-            <div>
-              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900 mb-3">Admin Dashboard</h1>
-              <p className="text-base text-slate-600 max-w-2xl">Organize and manage your website, members, and content</p>
-            </div>
-
             {/* Edit Website Section */}
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Edit Website</h2>
