@@ -1,11 +1,58 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { getCarouselImages, CarouselImage, getActionsMetrics } from "@/services/supabaseService";
+
+interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  category: string;
+  attendees?: number;
+  featured?: boolean;
+}
+
+const MOCK_EVENTS: Event[] = [
+  {
+    id: "1",
+    title: "Community Health Drive",
+    date: "March 15, 2024",
+    time: "8:00 AM - 2:00 PM",
+    location: "Central Health Center, Maputo",
+    description: "Free medical checkups and health awareness program in partnership with local clinics.",
+    category: "Health & Wellness",
+    attendees: 250,
+    featured: true,
+  },
+  {
+    id: "2",
+    title: "Disaster Relief Training",
+    date: "March 22, 2024",
+    time: "9:00 AM - 5:00 PM",
+    location: "Chamber Building, Maputo",
+    description: "Comprehensive training for rapid response teams in emergency situations.",
+    category: "Training",
+    attendees: 100,
+    featured: true,
+  },
+  {
+    id: "3",
+    title: "Environmental Cleanup Initiative",
+    date: "April 5, 2024",
+    time: "7:00 AM - 12:00 PM",
+    location: "Coastal Areas, Gaza Province",
+    description: "Join member organizations in community environmental conservation and cleanup projects.",
+    category: "Environment",
+    attendees: 180,
+  },
+];
 
 interface Stats {
   totalActions: number;
@@ -110,7 +157,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Upcoming CSR Events Section */}
+      {/* Upcoming Social Events Section */}
       <section className="mx-auto max-w-7xl px-6 sm:px-8 py-20 sm:py-28 border-t border-slate-200">
         <div className="mb-16">
           <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Upcoming Social Events</h2>
@@ -119,58 +166,83 @@ const Home = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Event Card 1 */}
-          <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
-            <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
-              <span className="text-sm font-medium text-emerald-700">Upcoming</span>
-            </div>
-            <h3 className="text-xl font-medium text-slate-900 mb-2">Community Health Drive</h3>
-            <p className="text-slate-600 text-sm mb-4">Free medical checkups and health awareness in partnership with local clinics.</p>
-            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-              <span>📅 Coming Soon</span>
-            </div>
-            <Link to="/about">
-              <Button variant="outline" size="sm" className="w-full">
-                Learn More
-              </Button>
-            </Link>
-          </div>
+        {MOCK_EVENTS.length > 0 ? (
+          <>
+            {/* Featured Events */}
+            {MOCK_EVENTS.filter(e => e.featured).length > 0 && (
+              <div className="mb-12">
+                <h3 className="text-2xl font-light text-slate-900 mb-6">Featured Events</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                  {MOCK_EVENTS.filter(e => e.featured).map((event) => (
+                    <div key={event.id} className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+                      <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
+                        <span className="text-sm font-medium text-emerald-700">{event.category}</span>
+                      </div>
+                      <h3 className="text-xl font-medium text-slate-900 mb-2">{event.title}</h3>
+                      <p className="text-slate-600 text-sm mb-4">{event.description}</p>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
+                        <Calendar className="h-4 w-4 text-emerald-700" />
+                        <span>{event.date}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                        <MapPin className="h-4 w-4 text-emerald-700" />
+                        <span>{event.location}</span>
+                      </div>
+                      <Link to="/events" className="w-full">
+                        <Button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white">
+                          Learn More
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* Event Card 2 */}
-          <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
-            <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
-              <span className="text-sm font-medium text-emerald-700">Upcoming</span>
-            </div>
-            <h3 className="text-xl font-medium text-slate-900 mb-2">Disaster Relief Training</h3>
-            <p className="text-slate-600 text-sm mb-4">Training program for rapid response teams in emergency situations.</p>
-            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-              <span>📅 Coming Soon</span>
-            </div>
-            <Link to="/about">
-              <Button variant="outline" size="sm" className="w-full">
-                Learn More
+            {/* Other Upcoming Events */}
+            {MOCK_EVENTS.filter(e => !e.featured).length > 0 && (
+              <div>
+                <h3 className="text-2xl font-light text-slate-900 mb-6">Other Upcoming Events</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {MOCK_EVENTS.filter(e => !e.featured).map((event) => (
+                    <div key={event.id} className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
+                      <div className="mb-4 inline-block rounded-full bg-slate-100 px-3 py-1">
+                        <span className="text-xs font-medium text-slate-700">{event.category}</span>
+                      </div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-2">{event.title}</h3>
+                      <p className="text-slate-600 text-sm mb-4">{event.description}</p>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
+                        <Calendar className="h-4 w-4 text-emerald-700" />
+                        <span>{event.date}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                        <MapPin className="h-4 w-4 text-emerald-700" />
+                        <span>{event.location}</span>
+                      </div>
+                      <Link to="/events" className="w-full">
+                        <Button variant="outline" size="sm" className="w-full">
+                          Learn More
+                        </Button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-12 text-center">
+            <p className="text-lg text-slate-700 mb-4">Dear Members,</p>
+            <p className="text-slate-600 mb-6">there are no upcoming events for the time being. We'll be announcing new initiatives soon.</p>
+            <Link to="/events">
+              <Button className="bg-emerald-700 hover:bg-emerald-800 text-white">
+                View All Events
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
-
-          {/* Event Card 3 */}
-          <div className="rounded-lg border border-slate-200 bg-white p-6 hover:shadow-md transition-shadow">
-            <div className="mb-4 inline-block rounded-full bg-emerald-100 px-3 py-1">
-              <span className="text-sm font-medium text-emerald-700">Upcoming</span>
-            </div>
-            <h3 className="text-xl font-medium text-slate-900 mb-2">Environmental Cleanup</h3>
-            <p className="text-slate-600 text-sm mb-4">Join members in community environmental conservation projects.</p>
-            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-              <span>📅 Coming Soon</span>
-            </div>
-            <Link to="/about">
-              <Button variant="outline" size="sm" className="w-full">
-                Learn More
-              </Button>
-            </Link>
-          </div>
-        </div>
+        )}
       </section>
 
       {/* Image Carousel Section (Placeholder for admin-uploaded images) */}
