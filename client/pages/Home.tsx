@@ -86,8 +86,8 @@ const Home = () => {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Special event</p>
-            <h2 className="mt-1 text-xl font-medium text-slate-900">Mandela Day · 18 July</h2>
-            <p className="mt-1 text-sm text-slate-600">Join SACBM members for 67 minutes of community impact.</p>
+            <h2 className="mt-1 text-xl font-medium text-slate-900">Mandela Day · Mavalane Hospital · 18 July</h2>
+            <p className="mt-1 text-sm text-slate-600">Join SACBM for a morning of care, solidarity, and practical support in Paediatrics.</p>
           </div>
           <Link to="/mandela-day" className="flex-shrink-0">
             <Button className="bg-emerald-700 text-white hover:bg-emerald-800">
