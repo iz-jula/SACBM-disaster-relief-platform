@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, LogIn, ChevronDown } from "lucide-react";
+import { Menu, X, LogIn, ChevronDown, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +64,14 @@ const PublicNavbar = () => {
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Events
+            </Link>
+
+            <Link
+              to="/mandela-day"
+              className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-yellow-300"
+            >
+              <HeartHandshake className="h-4 w-4" />
+              Mandela Day
             </Link>
           </div>
 
@@ -145,6 +153,15 @@ const PublicNavbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Events
+              </Link>
+
+              <Link
+                to="/mandela-day"
+                className="flex items-center gap-2 rounded-lg bg-yellow-100 px-3 py-2 text-base font-semibold text-slate-900 hover:bg-yellow-200"
+                onClick={() => setIsOpen(false)}
+              >
+                <HeartHandshake className="h-4 w-4 text-emerald-700" />
+                Mandela Day
               </Link>
 
               <Link

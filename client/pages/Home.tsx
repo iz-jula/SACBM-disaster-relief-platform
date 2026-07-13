@@ -82,6 +82,22 @@ const Home = () => {
     <div className="min-h-screen bg-white">
       <PublicNavbar />
 
+      <section className="border-b border-yellow-200 bg-yellow-50">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Special event</p>
+            <h2 className="mt-1 text-xl font-medium text-slate-900">Mandela Day · 18 July</h2>
+            <p className="mt-1 text-sm text-slate-600">Join SACBM members for 67 minutes of community impact.</p>
+          </div>
+          <Link to="/mandela-day" className="flex-shrink-0">
+            <Button className="bg-emerald-700 text-white hover:bg-emerald-800">
+              Explore the event
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* Dashboard Stats Section - Main Overview with Background */}
       <section className="relative overflow-hidden px-6 sm:px-8 py-16 sm:py-28">
         {/* Background Image with Overlay */}
