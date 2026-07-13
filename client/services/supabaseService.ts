@@ -5,6 +5,50 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
+export interface MemberCustomization {
+  company: string;
+  sector: string;
+  description: string;
+  image_url?: string | null;
+  updated_at?: string;
+}
+
+export async function getMemberCustomizations(): Promise<MemberCustomization[]> {
+  const { data, error } = await supabase
+    .from("member_customizations")
+    .select("company, sector, description, image_url, updated_at");
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function uploadMemberImage(file: File, company: string): Promise<string> {
+  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const safeCompany = company.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const filePath = `${safeCompany}-${crypto.randomUUID()}.${extension}`;
+  const { error } = await supabase.storage
+    .from("member-images")
+    .upload(filePath, file, { contentType: file.type, upsert: false });
+
+  if (error) throw error;
+
+  const { data } = supabase.storage.from("member-images").getPublicUrl(filePath);
+  return data.publicUrl;
+}
+
+export async function saveMemberCustomization(
+  customization: Omit<MemberCustomization, "updated_at">,
+): Promise<MemberCustomization> {
+  const { data, error } = await supabase
+    .from("member_customizations")
+    .upsert({ ...customization, updated_at: new Date().toISOString() })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export interface RelieRequest {
   id?: number;
   originator: string;

@@ -20,7 +20,7 @@ import DocumentUploadForm from "@/components/DocumentUploadForm";
 import { useAuth } from "@/context/AuthContext";
 import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateIngdRequest, deleteIngdRequest } from "@/services/requestsService";
 import { getAchievements } from "@/services/achievementsService";
-import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember } from "@/services/supabaseService";
+import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember, getMemberCustomizations, saveMemberCustomization, uploadMemberImage } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
 import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, uploadEventImage, uploadGalleryImage, deleteEventImage, deleteGalleryImage, uploadAttachment, deleteAttachment, type Event, type HelpNeed, type Attachment } from "@/services/eventsService";
 
@@ -48,7 +48,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<
-    "menu" | "ingd" | "carousel" | "documents" | "member-access" | "users" | "connectivity" | "requests" | "events"
+    "menu" | "ingd" | "carousel" | "documents" | "members" | "member-access" | "users" | "connectivity" | "requests" | "events"
   >("menu");
   const [metrics, setMetrics] = useState({
     totalRequests: 0,
@@ -254,7 +254,11 @@ export default function Admin() {
   const loadMembers = async () => {
     setIsLoadingMembers(true);
     try {
-      const achievements = await getAchievements();
+      const [achievements, customizations] = await Promise.all([
+        getAchievements(),
+        getMemberCustomizations(),
+      ]);
+      const customizationMap = new Map(customizations.map((customization) => [customization.company, customization]));
 
       // Group by company and get unique members with their aggregated data
       const memberMap = new Map<string, MemberData>();
@@ -263,11 +267,12 @@ export default function Admin() {
         const company = achievement.company_name || "Unknown Company";
 
         if (!memberMap.has(company)) {
+          const customization = customizationMap.get(company);
           memberMap.set(company, {
             company,
-            sector: "",
-            description: "",
-            image: achievement.media && achievement.media.length > 0 ? (Array.isArray(achievement.media) ? achievement.media[0] : achievement.media) : undefined,
+            sector: customization?.sector || "",
+            description: customization?.description || "",
+            image: customization?.image_url || (achievement.media && achievement.media.length > 0 ? (Array.isArray(achievement.media) ? achievement.media[0] : achievement.media) : undefined),
           });
         }
       });
@@ -292,23 +297,23 @@ export default function Admin() {
 
     setIsSavingMember(true);
     try {
-      // Save member customization to localStorage for now
-      // (In production, you'd save to a database)
-      const memberCustomizations = JSON.parse(
-        localStorage.getItem("memberCustomizations") || "{}"
-      );
-
-      memberCustomizations[editingMember.company] = {
+      const imageUrl = memberImageFile
+        ? await uploadMemberImage(memberImageFile, editingMember.company)
+        : editingMember.image;
+      const savedMember = await saveMemberCustomization({
+        company: editingMember.company,
         sector: editingMember.sector,
         description: editingMember.description,
-        image: editingMember.image,
+        image_url: imageUrl,
+      });
+      const updatedMember = {
+        ...editingMember,
+        image: savedMember.image_url || undefined,
       };
-
-      localStorage.setItem("memberCustomizations", JSON.stringify(memberCustomizations));
 
       // Update local state
       setMembers(members.map(m =>
-        m.company === editingMember.company ? editingMember : m
+        m.company === editingMember.company ? updatedMember : m
       ));
 
       setEditingMember(null);
