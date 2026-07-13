@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   CalendarDays,
@@ -12,6 +12,7 @@ import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { mandelaDayHelpNeeds } from "@/services/eventsService";
+import { getAchievements } from "@/services/achievementsService";
 
 const posterUrl = "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F2a0976bdc1fd4a44bcf9e5da4fd5fcda?format=webp&width=800&height=1200";
 
@@ -46,8 +47,8 @@ const MandelaDay = () => {
       <main>
         <section className="relative overflow-hidden bg-[#211510] text-white">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(224,93,38,0.42),_transparent_42%),radial-gradient(circle_at_bottom_left,_rgba(243,177,82,0.22),_transparent_38%)]" />
-          <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 sm:px-8 sm:py-28 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-            <div>
+          <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+            <div className="lg:-translate-y-4">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-300/40 bg-orange-400/10 px-4 py-2 text-sm font-medium text-orange-200">
                 <HeartHandshake className="h-4 w-4" />
                 SACBM community event
@@ -194,6 +195,7 @@ const MandelaDay = () => {
 };
 
 const DonationInterestForm = () => {
+  const [memberCompanies, setMemberCompanies] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     donorName: "",
     email: "",
@@ -204,6 +206,13 @@ const DonationInterestForm = () => {
     quantity: "",
     notes: "",
   });
+
+  useEffect(() => {
+    getAchievements().then((achievements) => {
+      const companies = [...new Set(achievements.map((achievement) => achievement.company_name).filter(Boolean))].sort();
+      setMemberCompanies(companies);
+    });
+  }, []);
 
   const selectedNeed = mandelaDayHelpNeeds.find((need) => need.name === formData.requirement);
   const isMember = formData.membership === "member";
@@ -251,19 +260,28 @@ const DonationInterestForm = () => {
                 <option value="non-member">No, I am not a member</option>
               </select>
             </label>
-            {isMember && <FormField label="Company represented" name="company" value={formData.company} onChange={(value) => updateField("company", value)} required />}
+            {isMember && (
+              <label className="block text-sm font-medium text-slate-700">
+                Company represented
+                <select required value={formData.company} onChange={(event) => updateField("company", event.target.value)} className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal text-slate-900 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-200">
+                  <option value="">Select your company</option>
+                  {memberCompanies.map((company) => <option key={company} value={company}>{company}</option>)}
+                </select>
+              </label>
+            )}
             <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
               Requirement to claim
               <select required value={formData.requirement} onChange={(event) => updateField("requirement", event.target.value)} className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal text-slate-900 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-200">
                 <option value="">Select a requirement</option>
                 {requirementCategories.map(({ title, needs }) => (
                   <optgroup key={title} label={title}>
-                    {needs.map((need) => <option key={need.name} value={need.name}>{need.name}</option>)}
+                    {needs.map((need) => <option key={need.name} value={need.name}>{need.name} — {need.quantity} {need.unit} left</option>)}
                   </optgroup>
                 ))}
               </select>
+              {selectedNeed && <p className="mt-2 text-xs text-orange-700">{selectedNeed.quantity} {selectedNeed.unit} still needed</p>}
             </label>
-            <FormField label="Quantity you will provide" name="quantity" type="number" min="1" value={formData.quantity} onChange={(value) => updateField("quantity", value)} required />
+            <FormField label="Quantity you will provide" name="quantity" type="number" min="1" max={selectedNeed?.quantity} value={formData.quantity} onChange={(value) => updateField("quantity", value)} required />
             <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
               Additional notes
               <textarea value={formData.notes} onChange={(event) => updateField("notes", event.target.value)} rows={4} placeholder="Add delivery timing, specifications, or questions" className="mt-2 block w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-600 focus:ring-2 focus:ring-orange-200" />
@@ -279,10 +297,10 @@ const DonationInterestForm = () => {
   );
 };
 
-const FormField = ({ label, name, value, onChange, type = "text", min, required = false }: { label: string; name: string; value: string; onChange: (value: string) => void; type?: string; min?: string; required?: boolean }) => (
+const FormField = ({ label, name, value, onChange, type = "text", min, max, required = false }: { label: string; name: string; value: string; onChange: (value: string) => void; type?: string; min?: string; max?: number; required?: boolean }) => (
   <label className="block text-sm font-medium text-slate-700">
     {label}
-    <input name={name} type={type} min={min} value={value} onChange={(event) => onChange(event.target.value)} required={required} className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-600 focus:ring-2 focus:ring-orange-200" />
+    <input name={name} type={type} min={min} max={max} value={value} onChange={(event) => onChange(event.target.value)} required={required} className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-600 focus:ring-2 focus:ring-orange-200" />
   </label>
 );
 
