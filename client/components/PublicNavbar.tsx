@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, LogIn, ChevronDown, HeartHandshake } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, X, ChevronDown, HeartHandshake } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PublicNavbar = () => {
@@ -77,13 +76,6 @@ const PublicNavbar = () => {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
-            <Link to="/members">
-              <Button size="sm" className="hidden sm:inline-flex bg-emerald-700 hover:bg-emerald-800 text-white">
-                <LogIn className="h-4 w-4 mr-2" />
-                Member Section
-              </Button>
-            </Link>
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -164,13 +156,6 @@ const PublicNavbar = () => {
                 Mandela Day
               </Link>
 
-              <Link
-                to="/members"
-                className="block rounded-lg px-3 py-2 text-base font-medium text-emerald-700 hover:bg-emerald-50"
-                onClick={() => setIsOpen(false)}
-              >
-                Member Section
-              </Link>
             </div>
           </div>
         )}

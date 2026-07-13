@@ -14,6 +14,7 @@ import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { mandelaDayHelpNeeds } from "@/services/eventsService";
 import { getAchievements } from "@/services/achievementsService";
+import { createDonationClaim } from "@/services/donationClaimsService";
 
 const posterUrl = "https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2F2a0976bdc1fd4a44bcf9e5da4fd5fcda?format=webp&width=800&height=1200";
 
@@ -250,9 +251,23 @@ const DonationInterestForm = () => {
     updateField("quantity", String(Math.min(Number(value), selectedNeed.quantity)));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const quantity = selectedNeed ? Math.min(Number(formData.quantity), selectedNeed.quantity) : Number(formData.quantity);
+
+    await createDonationClaim({
+      eventId: "mandela-day-mavalane",
+      donorName: formData.donorName,
+      email: formData.email,
+      phone: formData.phone,
+      membershipStatus: isMember ? "member" : "non-member",
+      company: isMember ? formData.company : undefined,
+      requirement: selectedNeed?.name || formData.requirement,
+      quantity,
+      unit: selectedNeed?.unit || "items",
+      notes: formData.notes,
+    });
+
     const body = [
       "Mandela Day donation claim",
       `Donor: ${formData.donorName}`,
@@ -265,7 +280,7 @@ const DonationInterestForm = () => {
       `Notes: ${formData.notes || "None"}`,
     ].join("\n");
 
-    window.location.href = `mailto:support@sacbm.co.mz?subject=${encodeURIComponent("Mandela Day donation claim")}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:joao.v@southafricanchamber.co.mz?cc=${encodeURIComponent("mariza.f@southafricanchamber.co.mz")}&subject=${encodeURIComponent("Mandela Day donation claim")}&body=${encodeURIComponent(body)}`;
   };
 
   return (
