@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.events (
   featured BOOLEAN DEFAULT false,
   help_needs JSONB DEFAULT '[]'::jsonb,
   contact_message TEXT,
-  image TEXT,
+  image_url TEXT,
   gallery JSONB DEFAULT '[]'::jsonb,
   attachments JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -69,17 +69,18 @@ CREATE POLICY "Allow public read access" ON public.events
 
 -- Events: Allow authenticated users to insert
 CREATE POLICY "Allow authenticated insert" ON public.events
-  FOR INSERT
+  FOR INSERT TO authenticated
   WITH CHECK (auth.role() = 'authenticated');
 
 -- Events: Allow authenticated users to update their own events
 CREATE POLICY "Allow authenticated update" ON public.events
-  FOR UPDATE
-  USING (auth.role() = 'authenticated');
+  FOR UPDATE TO authenticated
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
 
 -- Events: Allow authenticated users to delete
 CREATE POLICY "Allow authenticated delete" ON public.events
-  FOR DELETE
+  FOR DELETE TO authenticated
   USING (auth.role() = 'authenticated');
 
 -- Carousel Images: Allow anyone to read
@@ -89,17 +90,18 @@ CREATE POLICY "Allow public read access" ON public.carousel_images
 
 -- Carousel Images: Allow authenticated users to insert
 CREATE POLICY "Allow authenticated insert" ON public.carousel_images
-  FOR INSERT
+  FOR INSERT TO authenticated
   WITH CHECK (auth.role() = 'authenticated');
 
 -- Carousel Images: Allow authenticated users to update
 CREATE POLICY "Allow authenticated update" ON public.carousel_images
-  FOR UPDATE
-  USING (auth.role() = 'authenticated');
+  FOR UPDATE TO authenticated
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
 
 -- Carousel Images: Allow authenticated users to delete
 CREATE POLICY "Allow authenticated delete" ON public.carousel_images
-  FOR DELETE
+  FOR DELETE TO authenticated
   USING (auth.role() = 'authenticated');
 
 -- ============================================
