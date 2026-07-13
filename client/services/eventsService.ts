@@ -29,6 +29,76 @@ export interface Event {
   attachments?: Attachment[];
 }
 
+export const mandelaDayHelpNeeds: HelpNeed[] = [
+  { name: "Toys", quantity: 100, unit: "units" },
+  { name: "Snacks and sandwiches", quantity: 100, unit: "units" },
+  { name: "Cool drinks", quantity: 20, unit: "packs" },
+  { name: "Water", quantity: 20, unit: "packs" },
+  { name: "Small juices", quantity: 20, unit: "packs" },
+  { name: "Biscuits", quantity: 5, unit: "boxes" },
+  { name: "NAN 1 Milk", quantity: 20, unit: "units" },
+  { name: "NAN Pre Milk", quantity: 10, unit: "units" },
+  { name: "Milk Lactogen", quantity: 10, unit: "units" },
+  { name: "Surgical gloves", quantity: 10, unit: "boxes" },
+  { name: "Procedure gloves", quantity: 10, unit: "boxes" },
+  { name: "Feeding tubes (20 per pack)", quantity: 20, unit: "packs" },
+  { name: "Suction probes (20 per pack)", quantity: 20, unit: "packs" },
+  { name: "Paracetamol 10mg/ml, 100ml ampoules", quantity: 50, unit: "ampoules" },
+  { name: "Diclofenac 25mg/ml, 3ml ampoules", quantity: 50, unit: "ampoules" },
+  { name: "Adrenaline 1mg/ml, 1ml ampoules", quantity: 90, unit: "ampoules" },
+  { name: "Hydrocortisone 100mg ampoules", quantity: 90, unit: "ampoules" },
+  { name: "MAQ Cleansing Cream", quantity: 5, unit: "units" },
+  { name: "Window cleaner", quantity: 5, unit: "units" },
+  { name: "MAQ Liquid Soap", quantity: 10, unit: "units" },
+  { name: "Handy Andy", quantity: 10, unit: "units" },
+  { name: "Adult disposable diapers, size M", quantity: 80, unit: "packs" },
+  { name: "Adult disposable diapers, size L", quantity: 81, unit: "packs" },
+  { name: "Adult disposable diapers, size XL", quantity: 82, unit: "packs" },
+  { name: "Baby diapers", quantity: 1600, unit: "units" },
+  { name: "Wet wipes", quantity: 100, unit: "units" },
+  { name: "Blankets", quantity: 300, unit: "units" },
+  { name: "Pillows", quantity: 60, unit: "units" },
+  { name: "Pillowcases", quantity: 60, unit: "units" },
+  { name: "Patient hospital clothing", quantity: 50, unit: "units" },
+  { name: "White sheets", quantity: 300, unit: "units" },
+  { name: "Bottle brushes", quantity: 5, unit: "units" },
+  { name: "Baby bodysuits, short sleeve", quantity: 50, unit: "units" },
+  { name: "Baby bodysuits, long sleeve", quantity: 50, unit: "units" },
+  { name: "Bibs", quantity: 80, unit: "units" },
+  { name: "Socks", quantity: 80, unit: "pairs" },
+  { name: "Mattresses", quantity: 10, unit: "units" },
+  { name: "Beds", quantity: 10, unit: "units" },
+  { name: "Breastfeeding chairs", quantity: 60, unit: "units" },
+  { name: "Stretchers", quantity: 5, unit: "units" },
+  { name: "Wheelchairs", quantity: 5, unit: "units" },
+  { name: "Incubators, MAS-BI300 (MASmed)", quantity: 10, unit: "units" },
+  { name: "Infuser pumps, ZNB (KellyMed)", quantity: 10, unit: "units" },
+  { name: "Phototherapy equipment, XHZ-90", quantity: 15, unit: "units" },
+  { name: "Phototherapy lamps, YZ20BT132", quantity: 60, unit: "units" },
+  { name: "LED lamps, 24W E27 spiral thread", quantity: 100, unit: "units" },
+  { name: "LED lamps, T8 120cm", quantity: 25, unit: "units" },
+  { name: "Polyethylene balls for lamps", quantity: 10, unit: "units" },
+  { name: "Single-phase Legrand electrical sockets", quantity: 10, unit: "units" },
+  { name: "Solar geysers, electric/hybrid 100L", quantity: 2, unit: "units" },
+  { name: "20L electric kettles", quantity: 2, unit: "units" },
+  { name: "Metal hooks with dowels for mosquito nets", quantity: 30, unit: "units" },
+  { name: "Nursery and Paediatrics interior wall painting", quantity: 1, unit: "wall painting" },
+];
+
+const mandelaDayEvent: Event = {
+  id: "mandela-day-mavalane",
+  title: "Nelson Mandela Day at Mavalane Hospital",
+  date: "18 July 2025",
+  time: "10:00–11:00 (guests arrive from 09:30)",
+  location: "Paediatrics Department, Mavalane Hospital, Maputo",
+  description: "Vamos-nos envolver. Join SACBM for a morning of care, solidarity, hospital visits, and practical support for children at Mavalane Hospital.",
+  category: "Community Impact",
+  attendees: 107,
+  featured: true,
+  helpNeeds: mandelaDayHelpNeeds,
+  contactMessage: "To coordinate a donation, contact SACBM. Medicines, medical consumables, and technical equipment must be confirmed with the hospital before purchase or delivery.",
+};
+
 /**
  * Get all events from Supabase
  */
@@ -41,10 +111,10 @@ export async function getAllEvents(): Promise<Event[]> {
 
     if (error) {
       console.error("Error fetching events:", error);
-      return [];
+      return [mandelaDayEvent];
     }
 
-    return (data || []).map((row: any) => ({
+    const events = (data || []).map((row: any) => ({
       id: row.id,
       title: row.title,
       date: row.date,
@@ -60,6 +130,10 @@ export async function getAllEvents(): Promise<Event[]> {
       gallery: row.gallery || [],
       attachments: row.attachments || [],
     }));
+
+    return events.some((event) => event.id === mandelaDayEvent.id)
+      ? events
+      : [mandelaDayEvent, ...events];
   } catch (error) {
     console.error("Error fetching events:", error);
     return [];

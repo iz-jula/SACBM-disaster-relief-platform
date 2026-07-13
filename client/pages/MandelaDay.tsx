@@ -10,6 +10,7 @@ import {
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
+import { mandelaDayHelpNeeds } from "@/services/eventsService";
 
 const programme = [
   ["09:30–10:00", "Arrival of guests and welcome by hospital staff"],
@@ -23,31 +24,15 @@ const programme = [
   ["10:55–11:00", "Family photo and closing address by the hospital director"],
 ] as const;
 
-const donationNeeds = [
-  {
-    title: "Food and essentials",
-    items: "100 toys, 100 snack packs, 20 packs each of cool drinks, water, and small juices, 5 boxes of biscuits, and infant milk.",
-  },
-  {
-    title: "Hygiene and comfort",
-    items: "Baby diapers, adult diapers in sizes M–XL, 100 wet wipes, 300 blankets, 60 pillows, 60 pillowcases, hospital clothing, sheets, and bottle brushes.",
-  },
-  {
-    title: "Clothing for children",
-    items: "50 short-sleeve bodysuits, 50 long-sleeve bodysuits, 80 bibs, and 80 pairs of socks.",
-  },
-  {
-    title: "Furniture and mobility",
-    items: "10 mattresses, 10 beds, 60 breastfeeding chairs, 5 stretchers, and 5 wheelchairs.",
-  },
-  {
-    title: "Medical supplies and equipment",
-    items: "Gloves, feeding tubes, suction probes, medicines, incubators, infusion pumps, phototherapy equipment, and phototherapy lamps.",
-  },
-  {
-    title: "Facilities and maintenance",
-    items: "Cleaning products, liquid soap, LED lamps, electrical sockets, a hybrid 100L solar geyser, electric kettles, mosquito-net hooks, and interior painting for Paediatrics.",
-  },
+const requirementCategories = [
+  { title: "Event requirements", needs: mandelaDayHelpNeeds.slice(0, 9) },
+  { title: "Medicines and medical consumables", needs: mandelaDayHelpNeeds.slice(9, 17) },
+  { title: "Cleaning and disinfecting materials", needs: mandelaDayHelpNeeds.slice(17, 21) },
+  { title: "Hygiene products", needs: mandelaDayHelpNeeds.slice(21, 32) },
+  { title: "Clothing", needs: mandelaDayHelpNeeds.slice(32, 36) },
+  { title: "Beds, chairs, and stretchers", needs: mandelaDayHelpNeeds.slice(36, 41) },
+  { title: "Medical and other equipment", needs: mandelaDayHelpNeeds.slice(41, 51) },
+  { title: "Maintenance material", needs: mandelaDayHelpNeeds.slice(51) },
 ] as const;
 
 const MandelaDay = () => {
@@ -147,11 +132,29 @@ const MandelaDay = () => {
               <p className="mt-5 text-lg leading-relaxed text-slate-600">The hospital has identified the needs below for the Mandela Day initiative. Businesses and members can support one category or coordinate a specific donation with SACBM.</p>
             </div>
 
-            <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {donationNeeds.map(({ title, items }) => (
-                <div key={title} className="rounded-2xl border border-amber-200 bg-white p-7 shadow-sm">
-                  <h3 className="text-xl font-medium text-slate-900">{title}</h3>
-                  <p className="mt-3 leading-relaxed text-slate-600">{items}</p>
+            <div className="mt-14 space-y-10">
+              {requirementCategories.map(({ title, needs }) => (
+                <div key={title}>
+                  <h3 className="mb-4 text-2xl font-light tracking-tight text-slate-900">{title}</h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {needs.map((need) => (
+                      <div key={need.name} className="rounded-lg border border-amber-200 bg-white p-6 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-50">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-emerald-700">
+                            <span className="text-sm font-medium text-white">✓</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-900">{need.name}</p>
+                            {need.quantity && (
+                              <p className="mt-1 text-sm font-semibold text-emerald-700">
+                                Needed: {need.quantity} {need.unit || "items"}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
