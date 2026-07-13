@@ -6,6 +6,7 @@ import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { ArrowRight, Search, X } from "lucide-react";
 import { getAchievements } from "@/services/achievementsService";
+import { getMemberCustomizations } from "@/services/supabaseService";
 
 interface Member {
   company: string;
@@ -27,11 +28,12 @@ const OurMembers = () => {
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const achievements = await getAchievements();
-
-        // Load customizations from localStorage
-        const memberCustomizations = JSON.parse(
-          localStorage.getItem("memberCustomizations") || "{}"
+        const [achievements, customizations] = await Promise.all([
+          getAchievements(),
+          getMemberCustomizations(),
+        ]);
+        const memberCustomizations = new Map(
+          customizations.map((customization) => [customization.company, customization]),
         );
 
         // Group achievements by company and aggregate metrics
@@ -135,12 +137,12 @@ const OurMembers = () => {
         const membersList: Member[] = Array.from(memberMap.entries()).map(
           ([company, { count, image, totalPeopleImpacted, totalContribution }]) => {
             const companyConfig = sectorMap[company];
-            const customization = memberCustomizations[company];
+            const customization = memberCustomizations.get(company);
 
             return {
               company,
               actionCount: count,
-              image: customization?.image || image || companyConfig?.image,
+              image: customization?.image_url || image || companyConfig?.image,
               totalPeopleImpacted,
               totalContribution,
               sector: customization?.sector || companyConfig?.sector || "Business & Commerce",
