@@ -13,6 +13,7 @@ import {
   Edit2,
   X,
   Upload,
+  PackageCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -23,6 +24,7 @@ import { getAchievements } from "@/services/achievementsService";
 import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember, getMemberCustomizations, saveMemberCustomization, uploadMemberImage } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
 import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, uploadEventImage, uploadGalleryImage, deleteEventImage, deleteGalleryImage, uploadAttachment, deleteAttachment, type Event, type HelpNeed, type Attachment } from "@/services/eventsService";
+import { getDonationClaims, updateDonationClaimStatus, type DonationClaim, type DonationClaimStatus } from "@/services/donationClaimsService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -159,6 +161,8 @@ export default function Admin() {
   const [isUploadingEventImage, setIsUploadingEventImage] = useState(false);
   const [galleryImageFiles, setGalleryImageFiles] = useState<File[]>([]);
   const [isUploadingGalleryImages, setIsUploadingGalleryImages] = useState(false);
+  const [donationClaims, setDonationClaims] = useState<DonationClaim[]>([]);
+  const [updatingDonationClaimId, setUpdatingDonationClaimId] = useState<string | null>(null);
   const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
   const [isUploadingAttachments, setIsUploadingAttachments] = useState(false);
 
@@ -501,10 +505,14 @@ export default function Admin() {
   const loadEvents = async () => {
     setIsLoadingEvents(true);
     try {
-      const allEvents = await getAllEvents();
-      const categories = await getCategories();
+      const [allEvents, categories, claims] = await Promise.all([
+        getAllEvents(),
+        getCategories(),
+        getDonationClaims(),
+      ]);
       setEvents(allEvents);
       setEventCategories(categories);
+      setDonationClaims(claims);
       setIsLoadingEvents(false);
     } catch (error) {
       console.error("Error loading events:", error);
@@ -658,6 +666,19 @@ export default function Admin() {
       console.error("Error saving event:", error);
       setErrorMessage("Failed to save event");
     }
+  };
+
+  const handleDonationStatusChange = async (claimId: string, status: DonationClaimStatus) => {
+    setUpdatingDonationClaimId(claimId);
+    const updatedClaim = await updateDonationClaimStatus(claimId, status);
+    if (updatedClaim) {
+      setDonationClaims((claims) =>
+        claims.map((claim) => (claim.id === claimId ? updatedClaim : claim)),
+      );
+    } else {
+      setErrorMessage("Failed to update donation status");
+    }
+    setUpdatingDonationClaimId(null);
   };
 
   const handleDeleteEvent = async (eventId: string) => {
@@ -2769,6 +2790,58 @@ export default function Admin() {
                                     {event.helpNeeds.length} help need{event.helpNeeds.length !== 1 ? "s" : ""}
                                   </p>
                                 )}
+
+                                {(() => {
+                                  const eventClaims = donationClaims.filter((claim) => claim.eventId === event.id);
+                                  const pendingCount = eventClaims.filter((claim) => claim.status === "pending").length;
+                                  return (
+                                    <div className="mt-4 rounded-lg border border-orange-200 bg-orange-50/60 p-3">
+                                      <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2">
+                                          <PackageCheck size={16} className="text-orange-700" />
+                                          <span className="text-sm font-semibold text-slate-900">Donation follow-up</span>
+                                          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-600">
+                                            {eventClaims.length} claim{eventClaims.length !== 1 ? "s" : ""}
+                                          </span>
+                                        </div>
+                                        {pendingCount > 0 && (
+                                          <span className="text-xs font-semibold text-orange-700">{pendingCount} pending</span>
+                                        )}
+                                      </div>
+
+                                      {eventClaims.length === 0 ? (
+                                        <p className="mt-2 text-xs text-slate-500">No donation claims yet.</p>
+                                      ) : (
+                                        <div className="mt-3 space-y-2">
+                                          {eventClaims.map((claim) => (
+                                            <div key={claim.id} className="flex flex-col gap-2 rounded-md border border-orange-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+                                              <div className="min-w-0">
+                                                <p className="truncate text-sm font-medium text-slate-900">{claim.donorName}</p>
+                                                <p className="truncate text-xs text-slate-500">
+                                                  {claim.requirement} · {claim.quantity} {claim.unit}
+                                                  {claim.company ? ` · ${claim.company}` : ""}
+                                                </p>
+                                                <p className="truncate text-xs text-slate-500">{claim.email}</p>
+                                              </div>
+                                              <select
+                                                value={claim.status}
+                                                disabled={updatingDonationClaimId === claim.id}
+                                                onChange={(e) => handleDonationStatusChange(claim.id, e.target.value as DonationClaimStatus)}
+                                                className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs font-medium text-slate-700 disabled:opacity-50"
+                                                aria-label={`Update donation status for ${claim.donorName}`}
+                                              >
+                                                <option value="pending">Pending</option>
+                                                <option value="confirmed">Confirmed</option>
+                                                <option value="fulfilled">Fulfilled</option>
+                                                <option value="declined">Declined</option>
+                                              </select>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </div>
 
                               {/* Actions */}
