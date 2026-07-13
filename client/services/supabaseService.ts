@@ -39,14 +39,25 @@ export async function uploadMemberImage(file: File, company: string): Promise<st
 export async function saveMemberCustomization(
   customization: Omit<MemberCustomization, "updated_at">,
 ): Promise<MemberCustomization> {
-  const { data, error } = await supabase
+  const values = { ...customization, updated_at: new Date().toISOString() };
+  const { data: updated, error: updateError } = await supabase
     .from("member_customizations")
-    .upsert({ ...customization, updated_at: new Date().toISOString() })
+    .update(values)
+    .eq("company", customization.company)
+    .select()
+    .maybeSingle();
+
+  if (updateError) throw updateError;
+  if (updated) return updated;
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("member_customizations")
+    .insert(values)
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  if (insertError) throw insertError;
+  return inserted;
 }
 
 export interface RelieRequest {
