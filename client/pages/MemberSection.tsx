@@ -472,6 +472,7 @@ const MemberSection = () => {
                           <SelectItem value="Shelter">Shelter</SelectItem>
                           <SelectItem value="Water">Water & Sanitation</SelectItem>
                           <SelectItem value="Disaster Relief">Disaster Relief</SelectItem>
+                          <SelectItem value="Hospitality">Hospitality</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>

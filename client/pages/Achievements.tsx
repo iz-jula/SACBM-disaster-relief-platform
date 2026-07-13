@@ -34,6 +34,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   Water: "bg-cyan-100 text-cyan-800",
   Evacuation: "bg-yellow-100 text-yellow-800",
   Multiple: "bg-pink-100 text-pink-800",
+  Hospitality: "bg-amber-100 text-amber-800",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -834,6 +835,7 @@ export default function Achievements() {
                     <option>Water</option>
                     <option>Evacuation</option>
                     <option>Multiple</option>
+                    <option>Hospitality</option>
                   </select>
                 </div>
 
@@ -1775,7 +1777,8 @@ export default function Achievements() {
                       <option>Water</option>
                       <option>Evacuation</option>
                       <option>Multiple</option>
-                    </select>
+                    <option>Hospitality</option>
+                  </select>
                   </div>
 
                   <div>
