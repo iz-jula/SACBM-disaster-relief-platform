@@ -22,7 +22,7 @@ import { getMetrics, getAllRequests, getIngdRequests, createIngdRequest, updateI
 import { getAchievements } from "@/services/achievementsService";
 import { getIngdDocuments, createIngdDocument, deleteIngdDocument, updateIngdDocument, uploadDocumentToStorage, getIngdActiveSetting, setIngdActiveSetting, getCarouselImages, createCarouselImage, deleteCarouselImage, getApprovedMembers, createApprovedMember, deleteApprovedMember } from "@/services/supabaseService";
 import type { RelieRequest, IngdRequest, IngdDocument, CarouselImage, ApprovedMember } from "@/services/supabaseService";
-import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, uploadEventImage, uploadGalleryImage, deleteEventImage, deleteGalleryImage, type Event, type HelpNeed } from "@/services/eventsService";
+import { getAllEvents, createEvent, updateEvent, deleteEvent, getCategories, uploadEventImage, uploadGalleryImage, deleteEventImage, deleteGalleryImage, uploadAttachment, deleteAttachment, type Event, type HelpNeed, type Attachment } from "@/services/eventsService";
 
 // Format numbers with . for thousands and , for decimals (European format)
 const formatNumber = (value: number, decimals: number = 0): string => {
@@ -159,6 +159,8 @@ export default function Admin() {
   const [isUploadingEventImage, setIsUploadingEventImage] = useState(false);
   const [galleryImageFiles, setGalleryImageFiles] = useState<File[]>([]);
   const [isUploadingGalleryImages, setIsUploadingGalleryImages] = useState(false);
+  const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
+  const [isUploadingAttachments, setIsUploadingAttachments] = useState(false);
 
   // Load INGD active state from database
   useEffect(() => {
@@ -595,10 +597,27 @@ export default function Admin() {
         setIsUploadingGalleryImages(false);
       }
 
+      // Prepare attachments
+      let attachments = eventFormData.attachments || [];
+
+      // Upload new attachment files
+      if (attachmentFiles.length > 0) {
+        setIsUploadingAttachments(true);
+        const uploadedAttachments = await Promise.all(
+          attachmentFiles.map((file) =>
+            uploadAttachment(file, editingEventId || "new")
+          )
+        );
+        attachments = [...attachments, ...uploadedAttachments.filter((att) => att !== null) as Attachment[]];
+        setIsUploadingAttachments(false);
+        setAttachmentFiles([]);
+      }
+
       const eventDataToSave = {
         ...eventFormData,
         image_url: imageUrl,
         gallery: galleryUrls,
+        attachments: attachments,
       };
 
       if (editingEventId) {
@@ -718,6 +737,25 @@ export default function Admin() {
 
   const handleRemoveGalleryImageFile = (index: number) => {
     setGalleryImageFiles(galleryImageFiles.filter((_, i) => i !== index));
+  };
+
+  const handleAttachmentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setAttachmentFiles(Array.from(files));
+    }
+  };
+
+  const handleRemoveAttachmentFile = (index: number) => {
+    setAttachmentFiles(attachmentFiles.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveAttachment = (index: number) => {
+    const updatedAttachments = eventFormData.attachments?.filter((_, i) => i !== index) || [];
+    setEventFormData({
+      ...eventFormData,
+      attachments: updatedAttachments,
+    });
   };
 
   const handleCancelEventForm = () => {
@@ -2287,27 +2325,27 @@ export default function Admin() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Date *
+                        Date * (YYYY-MM-DD)
                       </label>
                       <input
-                        type="text"
+                        type="date"
                         value={eventFormData.date}
                         onChange={(e) => setEventFormData({ ...eventFormData, date: e.target.value })}
-                        placeholder="e.g., March 15, 2024"
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       />
+                      <p className="text-xs text-slate-500 mt-1">This determines if the event is upcoming or past</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Time *
+                        Start Time * (HH:MM)
                       </label>
                       <input
-                        type="text"
+                        type="time"
                         value={eventFormData.time}
                         onChange={(e) => setEventFormData({ ...eventFormData, time: e.target.value })}
-                        placeholder="e.g., 8:00 AM - 2:00 PM"
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       />
+                      <p className="text-xs text-slate-500 mt-1">Event start time</p>
                     </div>
                   </div>
 
@@ -2343,20 +2381,16 @@ export default function Admin() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Category
+                        Category *
                       </label>
-                      <select
+                      <input
+                        type="text"
                         value={eventFormData.category}
                         onChange={(e) => setEventFormData({ ...eventFormData, category: e.target.value })}
+                        placeholder="e.g., Health & Wellness, Training, Environment"
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                      >
-                        <option value="Health & Wellness">Health & Wellness</option>
-                        <option value="Training">Training</option>
-                        <option value="Environment">Environment</option>
-                        <option value="Leadership">Leadership</option>
-                        <option value="Education">Education</option>
-                        <option value="Empowerment">Empowerment</option>
-                      </select>
+                      />
+                      <p className="text-xs text-slate-500 mt-1">Create your own category or use existing ones</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -2496,6 +2530,71 @@ export default function Admin() {
                                   className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Attachments Section */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-3 block">Event Documents (PDFs, etc.)</label>
+                    <div className="space-y-4">
+                      {/* Upload attachments */}
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-2">
+                          Upload Documents
+                        </label>
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.xlsx,.xls"
+                          multiple
+                          onChange={handleAttachmentSelect}
+                          disabled={isUploadingAttachments}
+                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:opacity-50"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">PDF, Word, Excel files</p>
+                        {isUploadingAttachments && (
+                          <p className="text-xs text-emerald-600 mt-1">Uploading documents...</p>
+                        )}
+                      </div>
+
+                      {/* Files to upload */}
+                      {attachmentFiles.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-slate-600 mb-2">Files to Upload ({attachmentFiles.length})</p>
+                          <div className="space-y-2">
+                            {attachmentFiles.map((file, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                <span className="text-sm text-slate-700 truncate">{file.name}</span>
+                                <button
+                                  onClick={() => handleRemoveAttachmentFile(idx)}
+                                  className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors flex-shrink-0"
+                                >
+                                  <X size={16} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Existing attachments */}
+                      {eventFormData.attachments && eventFormData.attachments.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-slate-600 mb-2">Uploaded Documents</p>
+                          <div className="space-y-2">
+                            {eventFormData.attachments.map((attachment, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                                <span className="text-sm text-slate-700 truncate">{attachment.name}</span>
+                                <button
+                                  onClick={() => handleRemoveAttachment(idx)}
+                                  className="p-1 hover:bg-red-100 text-red-600 rounded transition-colors flex-shrink-0"
+                                >
+                                  <X size={16} />
                                 </button>
                               </div>
                             ))}
