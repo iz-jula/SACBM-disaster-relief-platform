@@ -10,7 +10,6 @@ import {
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 
 const programme = [
   ["09:30–10:00", "Arrival of guests and welcome by hospital staff"],
