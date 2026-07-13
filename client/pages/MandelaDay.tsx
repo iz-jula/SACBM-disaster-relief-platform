@@ -23,6 +23,32 @@ const programme = [
   ["10:55–11:00", "Family photo and closing address by the hospital director"],
 ] as const;
 
+const donationNeeds = [
+  {
+    title: "Food and essentials",
+    items: "100 toys, 100 snack packs, 20 packs each of cool drinks, water, and small juices, 5 boxes of biscuits, and infant milk.",
+  },
+  {
+    title: "Hygiene and comfort",
+    items: "Baby diapers, adult diapers in sizes M–XL, 100 wet wipes, 300 blankets, 60 pillows, 60 pillowcases, hospital clothing, sheets, and bottle brushes.",
+  },
+  {
+    title: "Clothing for children",
+    items: "50 short-sleeve bodysuits, 50 long-sleeve bodysuits, 80 bibs, and 80 pairs of socks.",
+  },
+  {
+    title: "Furniture and mobility",
+    items: "10 mattresses, 10 beds, 60 breastfeeding chairs, 5 stretchers, and 5 wheelchairs.",
+  },
+  {
+    title: "Medical supplies and equipment",
+    items: "Gloves, feeding tubes, suction probes, medicines, incubators, infusion pumps, phototherapy equipment, and phototherapy lamps.",
+  },
+  {
+    title: "Facilities and maintenance",
+    items: "Cleaning products, liquid soap, LED lamps, electrical sockets, a hybrid 100L solar geyser, electric kettles, mosquito-net hooks, and interior painting for Paediatrics.",
+  },
+] as const;
 
 const MandelaDay = () => {
   return (
@@ -69,6 +95,7 @@ const MandelaDay = () => {
                 <EventMeta icon={CalendarDays} label="Date" value="18 July 2025" />
                 <EventMeta icon={MapPin} label="Location" value="Paediatrics, Mavalane Hospital, Maputo" />
                 <EventMeta icon={Users} label="Time" value="10:00–11:00" />
+                <EventMeta icon={HeartHandshake} label="Beneficiaries" value="107 newborns and children" />
               </div>
               <p className="mt-8 rounded-xl bg-white/10 p-4 text-sm leading-relaxed text-slate-300">
                 Guests arrive from 09:30. The morning includes hospital visits, messages of solidarity, and the delivery of toys, snacks, and other donations.
@@ -108,6 +135,29 @@ const MandelaDay = () => {
                   <p className="leading-relaxed text-slate-700">{item}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-slate-200 bg-amber-50/60">
+          <div className="mx-auto max-w-7xl px-6 py-20 sm:px-8 sm:py-28">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">Contribua · Support the hospital</p>
+              <h2 className="mt-4 text-4xl font-light tracking-tight text-slate-900 sm:text-5xl">Help us bring practical support to Mavalane Paediatrics.</h2>
+              <p className="mt-5 text-lg leading-relaxed text-slate-600">The hospital has identified the needs below for the Mandela Day initiative. Businesses and members can support one category or coordinate a specific donation with SACBM.</p>
+            </div>
+
+            <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {donationNeeds.map(({ title, items }) => (
+                <div key={title} className="rounded-2xl border border-amber-200 bg-white p-7 shadow-sm">
+                  <h3 className="text-xl font-medium text-slate-900">{title}</h3>
+                  <p className="mt-3 leading-relaxed text-slate-600">{items}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 rounded-2xl border border-amber-200 bg-white p-6 text-sm leading-relaxed text-slate-600 sm:p-7">
+              <span className="font-semibold text-slate-900">Important:</span> medicines, medical consumables, and technical equipment must be confirmed with the hospital before purchase or delivery. Contact SACBM to coordinate donations and receive the latest specifications.
             </div>
           </div>
         </section>
