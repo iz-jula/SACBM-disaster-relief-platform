@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, LogIn, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, X, ChevronDown, HeartHandshake } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PublicNavbar = () => {
@@ -65,17 +64,18 @@ const PublicNavbar = () => {
             >
               Events
             </Link>
+
+            <Link
+              to="/mandela-day"
+              className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-yellow-300"
+            >
+              <HeartHandshake className="h-4 w-4" />
+              Mandela Day
+            </Link>
           </div>
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
-            <Link to="/members">
-              <Button size="sm" className="hidden sm:inline-flex bg-emerald-700 hover:bg-emerald-800 text-white">
-                <LogIn className="h-4 w-4 mr-2" />
-                Member Section
-              </Button>
-            </Link>
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -148,12 +148,14 @@ const PublicNavbar = () => {
               </Link>
 
               <Link
-                to="/members"
-                className="block rounded-lg px-3 py-2 text-base font-medium text-emerald-700 hover:bg-emerald-50"
+                to="/mandela-day"
+                className="flex items-center gap-2 rounded-lg bg-yellow-100 px-3 py-2 text-base font-semibold text-slate-900 hover:bg-yellow-200"
                 onClick={() => setIsOpen(false)}
               >
-                Member Section
+                <HeartHandshake className="h-4 w-4 text-emerald-700" />
+                Mandela Day
               </Link>
+
             </div>
           </div>
         )}

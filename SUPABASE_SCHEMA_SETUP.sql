@@ -33,7 +33,30 @@ CREATE INDEX IF NOT EXISTS events_date_idx ON public.events(date DESC);
 CREATE INDEX IF NOT EXISTS events_category_idx ON public.events(category);
 
 -- ============================================
--- 2. CAROUSEL_IMAGES TABLE
+-- 2. DONATION CLAIMS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS public.donation_claims (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id TEXT NOT NULL,
+  donor_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  membership_status TEXT NOT NULL CHECK (membership_status IN ('member', 'non-member')),
+  company TEXT,
+  requirement TEXT NOT NULL,
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  unit TEXT NOT NULL,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'fulfilled', 'declined')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS donation_claims_event_idx ON public.donation_claims(event_id);
+CREATE INDEX IF NOT EXISTS donation_claims_status_idx ON public.donation_claims(status);
+
+-- ============================================
+-- 3. CAROUSEL_IMAGES TABLE
 -- ============================================
 CREATE TABLE IF NOT EXISTS public.carousel_images (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -56,7 +79,11 @@ CREATE INDEX IF NOT EXISTS carousel_images_order_idx ON public.carousel_images(d
 -- 3. ENABLE ROW LEVEL SECURITY (RLS)
 -- ============================================
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.donation_claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.carousel_images ENABLE ROW LEVEL SECURITY;
+
+GRANT INSERT ON public.donation_claims TO anon;
+GRANT SELECT, UPDATE ON public.donation_claims TO authenticated;
 
 -- ============================================
 -- 4. CREATE RLS POLICIES (Allow public read, authenticated write)
@@ -82,6 +109,20 @@ CREATE POLICY "Allow authenticated update" ON public.events
 CREATE POLICY "Allow authenticated delete" ON public.events
   FOR DELETE TO authenticated
   USING (auth.role() = 'authenticated');
+
+-- Donation claims: public visitors may submit, authenticated admins may review and update
+CREATE POLICY "Allow public donation claim insert" ON public.donation_claims
+  FOR INSERT TO anon, authenticated
+  WITH CHECK (quantity > 0 AND membership_status IN ('member', 'non-member'));
+
+CREATE POLICY "Allow authenticated donation claim review" ON public.donation_claims
+  FOR SELECT TO authenticated
+  USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Allow authenticated donation claim updates" ON public.donation_claims
+  FOR UPDATE TO authenticated
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
 
 -- Carousel Images: Allow anyone to read
 CREATE POLICY "Allow public read access" ON public.carousel_images
