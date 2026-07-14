@@ -153,7 +153,7 @@ const MandelaDay = () => {
                   <h3 className="mb-4 text-2xl font-light tracking-tight text-slate-900">{title}</h3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {needs.map((need) => (
-                      <div key={need.name} className="rounded-lg border border-orange-200 bg-[#fffdf9] p-6 shadow-sm transition-all hover:border-orange-300 hover:bg-orange-50">
+                      <a key={need.name} href={`/mandela-day?requirement=${encodeURIComponent(need.name)}#donate`} className="block rounded-lg border border-orange-200 bg-[#fffdf9] p-6 shadow-sm transition-all hover:border-orange-300 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2">
                         <div className="flex items-start gap-3">
                           <div className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-emerald-700">
                             <span className="text-sm font-medium text-white">✓</span>
@@ -167,7 +167,7 @@ const MandelaDay = () => {
                             )}
                           </div>
                         </div>
-                      </div>
+                      </a>
                     ))}
                   </div>
                 </div>
@@ -219,8 +219,8 @@ const DonationInterestForm = () => {
     phone: "",
     membership: "",
     company: "",
-    requirement: "",
-    quantity: "",
+    selectedRequirements: [] as string[],
+    quantities: {} as Record<string, string>,
     notes: "",
   });
 
@@ -231,42 +231,60 @@ const DonationInterestForm = () => {
     });
   }, []);
 
-  const selectedNeed = mandelaDayHelpNeeds.find((need) => need.name === formData.requirement);
   const isMember = formData.membership === "member";
 
-  const updateField = (field: keyof typeof formData, value: string) => {
+  useEffect(() => {
+    const requirement = new URLSearchParams(window.location.search).get("requirement");
+    if (requirement && mandelaDayHelpNeeds.some((need) => need.name === requirement)) {
+      setFormData((current) => ({
+        ...current,
+        selectedRequirements: [requirement],
+        quantities: { ...current.quantities, [requirement]: "" },
+      }));
+    }
+  }, []);
+
+  const updateField = (field: "donorName" | "email" | "phone" | "membership" | "company" | "notes", value: string) => {
     setFormData((current) => ({ ...current, [field]: value }));
   };
 
-  const handleRequirementChange = (value: string) => {
-    setFormData((current) => ({ ...current, requirement: value, quantity: "" }));
+  const handleRequirementChange = (name: string, checked: boolean) => {
+    setFormData((current) => ({
+      ...current,
+      selectedRequirements: checked
+        ? [...current.selectedRequirements, name]
+        : current.selectedRequirements.filter((requirement) => requirement !== name),
+      quantities: checked ? { ...current.quantities, [name]: current.quantities[name] || "" } : current.quantities,
+    }));
   };
 
-  const handleQuantityChange = (value: string) => {
-    if (!value || !selectedNeed) {
-      updateField("quantity", value);
-      return;
-    }
-
-    updateField("quantity", String(Math.min(Number(value), selectedNeed.quantity)));
+  const handleQuantityChange = (name: string, value: string) => {
+    const need = mandelaDayHelpNeeds.find((item) => item.name === name);
+    const quantity = !value || !need ? value : String(Math.min(Number(value), need.quantity));
+    setFormData((current) => ({ ...current, quantities: { ...current.quantities, [name]: quantity } }));
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const quantity = selectedNeed ? Math.min(Number(formData.quantity), selectedNeed.quantity) : Number(formData.quantity);
+    const selectedNeeds = formData.selectedRequirements
+      .map((name) => mandelaDayHelpNeeds.find((need) => need.name === name))
+      .filter((need): need is (typeof mandelaDayHelpNeeds)[number] => Boolean(need));
 
-    await createDonationClaim({
-      eventId: "mandela-day-mavalane",
-      donorName: formData.donorName,
-      email: formData.email,
-      phone: formData.phone,
-      membershipStatus: isMember ? "member" : "non-member",
-      company: isMember ? formData.company : undefined,
-      requirement: selectedNeed?.name || formData.requirement,
-      quantity,
-      unit: selectedNeed?.unit || "items",
-      notes: formData.notes,
-    });
+    await Promise.all(selectedNeeds.map((need) => {
+      const quantity = Math.min(Number(formData.quantities[need.name]), need.quantity);
+      return createDonationClaim({
+        eventId: "mandela-day-mavalane",
+        donorName: formData.donorName,
+        email: formData.email,
+        phone: formData.phone,
+        membershipStatus: isMember ? "member" : "non-member",
+        company: isMember ? formData.company : undefined,
+        requirement: need.name,
+        quantity,
+        unit: need.unit || "items",
+        notes: formData.notes,
+      });
+    }));
 
     const body = [
       "Mandela Day donation claim",
@@ -275,8 +293,8 @@ const DonationInterestForm = () => {
       `Phone: ${formData.phone || "Not provided"}`,
       `SACBM member: ${isMember ? "Yes" : "No"}`,
       ...(isMember ? [`Company represented: ${formData.company}`] : []),
-      `Requirement: ${selectedNeed?.name || formData.requirement}`,
-      `Quantity offered: ${quantity} ${selectedNeed?.unit || "items"}`,
+      "Donations:",
+      ...selectedNeeds.map((need) => `- ${need.name}: ${formData.quantities[need.name]} ${need.unit || "items"}`),
       `Notes: ${formData.notes || "None"}`,
     ].join("\n");
 
@@ -314,19 +332,33 @@ const DonationInterestForm = () => {
                 </select>
               </label>
             )}
-            <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
-              Requirement to claim
-              <select required value={formData.requirement} onChange={(event) => handleRequirementChange(event.target.value)} className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal text-slate-900 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-200">
-                <option value="">Select a requirement</option>
-                {requirementCategories.map(({ title, needs }) => (
-                  <optgroup key={title} label={title}>
-                    {needs.map((need) => <option key={need.name} value={need.name}>{need.name} — {need.quantity} {need.unit} left</option>)}
-                  </optgroup>
+            <fieldset className="sm:col-span-2">
+              <legend className="text-sm font-medium text-slate-700">Requirements to claim</legend>
+              <p className="mt-1 text-xs text-slate-500">Select one or more items, then enter the quantity for each.</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {requirementCategories.flatMap(({ needs }) => needs).map((need) => (
+                  <label key={need.name} className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3 text-sm transition hover:border-orange-300 has-[:checked]:border-orange-600 has-[:checked]:bg-orange-50">
+                    <input
+                      type="checkbox"
+                      checked={formData.selectedRequirements.includes(need.name)}
+                      onChange={(event) => handleRequirementChange(need.name, event.target.checked)}
+                      required={formData.selectedRequirements.length === 0}
+                      className="mt-1 h-4 w-4 accent-orange-700"
+                    />
+                    <span>
+                      <span className="block font-medium text-slate-900">{need.name}</span>
+                      <span className="text-xs text-slate-500">{need.quantity} {need.unit} still needed</span>
+                    </span>
+                  </label>
                 ))}
-              </select>
-              {selectedNeed && <p className="mt-2 text-xs text-orange-700">{selectedNeed.quantity} {selectedNeed.unit} still needed</p>}
-            </label>
-            <FormField label="Quantity you will provide" name="quantity" type="number" min="1" max={selectedNeed?.quantity} value={formData.quantity} onChange={handleQuantityChange} required />
+              </div>
+            </fieldset>
+            {formData.selectedRequirements.map((name) => {
+              const need = mandelaDayHelpNeeds.find((item) => item.name === name);
+              return need ? (
+                <FormField key={name} label={`Quantity for ${need.name}`} name={`quantity-${name}`} type="number" min="1" max={need.quantity} value={formData.quantities[name] || ""} onChange={(value) => handleQuantityChange(name, value)} required />
+              ) : null;
+            })}
             <label className="block text-sm font-medium text-slate-700 sm:col-span-2">
               Additional notes
               <textarea value={formData.notes} onChange={(event) => updateField("notes", event.target.value)} rows={4} placeholder="Add delivery timing, specifications, or questions" className="mt-2 block w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-600 focus:ring-2 focus:ring-orange-200" />
