@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown, HeartHandshake } from "lucide-react";
+import { Menu, X, ChevronDown, HeartHandshake, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PublicNavbar = () => {
@@ -63,6 +63,14 @@ const PublicNavbar = () => {
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Events
+            </Link>
+
+            <Link
+              to="/members"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
+            >
+              <Users className="h-3.5 w-3.5" />
+              Member Section
             </Link>
 
             <Link
@@ -145,6 +153,15 @@ const PublicNavbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Events
+              </Link>
+
+              <Link
+                to="/members"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-base font-semibold text-emerald-800 hover:bg-emerald-50"
+                onClick={() => setIsOpen(false)}
+              >
+                <Users className="h-4 w-4" />
+                Member Section
               </Link>
 
               <Link
