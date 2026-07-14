@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown, HeartHandshake } from "lucide-react";
+import { Menu, X, ChevronDown, HeartHandshake, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const PublicNavbar = () => {
@@ -72,10 +72,20 @@ const PublicNavbar = () => {
               <HeartHandshake className="h-4 w-4" />
               Mandela Day
             </Link>
+
           </div>
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
+            <Link
+              to="/members"
+              aria-label="Open Member Section"
+              title="Member Section"
+              className="hidden h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800 md:inline-flex"
+            >
+              <Users className="h-4 w-4" />
+            </Link>
+
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -145,6 +155,15 @@ const PublicNavbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Events
+              </Link>
+
+              <Link
+                to="/members"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-base font-semibold text-emerald-800 hover:bg-emerald-50"
+                onClick={() => setIsOpen(false)}
+              >
+                <Users className="h-4 w-4" />
+                Member Section
               </Link>
 
               <Link
