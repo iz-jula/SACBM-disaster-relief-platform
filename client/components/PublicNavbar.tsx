@@ -66,19 +66,20 @@ const PublicNavbar = () => {
             </Link>
 
             <Link
-              to="/members"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
-            >
-              <Users className="h-3.5 w-3.5" />
-              Member Section
-            </Link>
-
-            <Link
               to="/mandela-day"
               className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-yellow-300"
             >
               <HeartHandshake className="h-4 w-4" />
               Mandela Day
+            </Link>
+
+            <Link
+              to="/members"
+              aria-label="Open Member Section"
+              title="Member Section"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800"
+            >
+              <Users className="h-4 w-4" />
             </Link>
           </div>
 
