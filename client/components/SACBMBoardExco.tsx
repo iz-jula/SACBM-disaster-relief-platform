@@ -201,10 +201,41 @@ const FinancialRecordRow = ({
   </div>
 );
 
-type TabType = "overview" | "renewals" | "authorizations" | "finance" | "invoices" | "receipts" | "contracts";
+type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts";
+
+type FinanceView = "summary" | "invoices" | "receipts";
+
+const FinanceSubnav = ({
+  activeView,
+  onChange,
+}: {
+  activeView: FinanceView;
+  onChange: (view: FinanceView) => void;
+}) => (
+  <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+    {([
+      ["summary", "Financial Activity"],
+      ["invoices", "Invoices"],
+      ["receipts", "Receipts"],
+    ] as [FinanceView, string][]).map(([view, label]) => (
+      <button
+        key={view}
+        onClick={() => onChange(view)}
+        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+          activeView === view
+            ? "bg-emerald-600 text-white"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        }`}
+      >
+        {label}
+      </button>
+    ))}
+  </div>
+);
 
 const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [financeView, setFinanceView] = useState<FinanceView>("summary");
   const [selectedFile, setSelectedFile] = useState<FinancialRecord | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadType, setUploadType] = useState<"receipt" | "invoice" | "contract">("receipt");
@@ -240,6 +271,13 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       approved: approved.length,
       pending: pending.length,
       totalAmount: totalApproved,
+      spendToDate: approved
+        .filter((record) => record.type === "receipt" || record.type === "invoice")
+        .reduce((sum, record) => sum + (record.amount || 0), 0),
+      renewalIncome: MOCK_MEMBER_RENEWALS.reduce((sum, renewal) => {
+        const annualFee = { bronze: 500, gold: 1200, platinum: 2500 }[renewal.tier];
+        return sum + annualFee;
+      }, 0),
     };
   }, [financialRecords]);
 
@@ -349,10 +387,13 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       {/* Tab Navigation */}
       <div className="border-b border-slate-200">
         <div className="flex gap-8">
-          {(["overview", "renewals", "authorizations", "finance", "invoices", "receipts", "contracts"] as TabType[]).map((tab) => (
+          {(["overview", "renewals", "authorizations", "finance", "contracts"] as TabType[]).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab);
+                if (tab === "finance") setFinanceView("summary");
+              }}
               className={`py-4 px-1 font-medium text-sm transition-colors border-b-2 ${
                 activeTab === tab
                   ? "border-emerald-600 text-emerald-600"
@@ -363,8 +404,6 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               {tab === "renewals" && "Member Renewals"}
               {tab === "authorizations" && "Authorizations"}
               {tab === "finance" && "Finance"}
-              {tab === "invoices" && "Invoices"}
-              {tab === "receipts" && "Receipts"}
               {tab === "contracts" && "Contracts"}
             </button>
           ))}
@@ -592,8 +631,25 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       )}
 
       {/* Finance Overview Tab */}
-      {activeTab === "finance" && (
+      {activeTab === "finance" && financeView === "summary" && (
         <div className="space-y-6">
+          <FinanceSubnav activeView={financeView} onChange={setFinanceView} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="border-0 shadow-sm">
+              <CardContent className="pt-5">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Spend to date</p>
+                <p className="text-3xl font-light text-slate-900 mt-2">${financialStats.spendToDate.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-2">Approved invoices and receipts</p>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-sm">
+              <CardContent className="pt-5">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Member renewal income</p>
+                <p className="text-3xl font-light text-emerald-700 mt-2">${financialStats.renewalIncome.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-2">Current renewal cycle</p>
+              </CardContent>
+            </Card>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="border-0 shadow-sm lg:col-span-2">
               <CardHeader>
@@ -639,8 +695,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       )}
 
       {/* Invoices Tab */}
-      {activeTab === "invoices" && (
+      {activeTab === "finance" && financeView === "invoices" && (
         <div className="space-y-6">
+          <FinanceSubnav activeView={financeView} onChange={setFinanceView} />
           {isAdmin && (
             <Button
               onClick={() => {
@@ -668,8 +725,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       )}
 
       {/* Receipts Tab */}
-      {activeTab === "receipts" && (
+      {activeTab === "finance" && financeView === "receipts" && (
         <div className="space-y-6">
+          <FinanceSubnav activeView={financeView} onChange={setFinanceView} />
           {isAdmin && (
             <Button
               onClick={() => {
