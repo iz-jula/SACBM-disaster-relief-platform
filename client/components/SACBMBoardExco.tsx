@@ -60,6 +60,12 @@ interface PendingAuthorization {
   requestDate: string;
   status: "pending" | "approved" | "rejected";
   priority: "high" | "medium" | "low";
+  requiredApprovals: number;
+  approvedBy: string[];
+  pendingApprovers: string[];
+  deadline: string;
+  attachmentUrl?: string;
+  rejectionNote?: string;
 }
 
 const MONTHS = [
@@ -156,6 +162,11 @@ const MOCK_PENDING_AUTHORIZATIONS: PendingAuthorization[] = [
     requestDate: "2024-02-10",
     status: "pending",
     priority: "high",
+    requiredApprovals: 3,
+    approvedBy: ["Thandi Mokoena"],
+    pendingApprovers: ["Ian Smith", "Amina Patel"],
+    deadline: "2024-02-18",
+    attachmentUrl: "/docs/q1-marketing-budget.pdf",
   },
   {
     id: "2",
@@ -165,6 +176,11 @@ const MOCK_PENDING_AUTHORIZATIONS: PendingAuthorization[] = [
     requestDate: "2024-02-09",
     status: "pending",
     priority: "medium",
+    requiredApprovals: 2,
+    approvedBy: [],
+    pendingApprovers: ["Thandi Mokoena", "Amina Patel"],
+    deadline: "2024-02-20",
+    attachmentUrl: "/docs/new-member-application.pdf",
   },
   {
     id: "3",
@@ -175,6 +191,11 @@ const MOCK_PENDING_AUTHORIZATIONS: PendingAuthorization[] = [
     requestDate: "2024-02-08",
     status: "approved",
     priority: "high",
+    requiredApprovals: 2,
+    approvedBy: ["Thandi Mokoena", "Amina Patel"],
+    pendingApprovers: [],
+    deadline: "2024-02-15",
+    attachmentUrl: "/docs/sponsorship-agreement.pdf",
   },
 ];
 
@@ -267,6 +288,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadCategory, setUploadCategory] = useState("");
   const [financialRecords, setFinancialRecords] = useState<FinancialRecord[]>(MOCK_FINANCIAL_RECORDS);
+  const [authorizationRequests, setAuthorizationRequests] = useState<PendingAuthorization[]>(MOCK_PENDING_AUTHORIZATIONS);
+  const [selectedAuthorization, setSelectedAuthorization] = useState<PendingAuthorization | null>(null);
+  const [authorizationNotes, setAuthorizationNotes] = useState("");
 
   const isAdmin = member.role === MemberRole.ADMIN;
   const hasAccess = [MemberRole.ADMIN, MemberRole.EXCO, MemberRole.BOARD].includes(member.role);
@@ -395,12 +419,38 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   }, []);
 
   const authStats = useMemo(() => {
-    const pending = MOCK_PENDING_AUTHORIZATIONS.filter((a) => a.status === "pending").length;
-    const approved = MOCK_PENDING_AUTHORIZATIONS.filter((a) => a.status === "approved").length;
-    const highPriority = MOCK_PENDING_AUTHORIZATIONS.filter((a) => a.priority === "high" && a.status === "pending").length;
+    const pending = authorizationRequests.filter((a) => a.status === "pending").length;
+    const approved = authorizationRequests.filter((a) => a.status === "approved").length;
+    const highPriority = authorizationRequests.filter((a) => a.priority === "high" && a.status === "pending").length;
 
     return { pending, approved, highPriority };
-  }, []);
+  }, [authorizationRequests]);
+
+  const handleAuthorization = (decision: "approved" | "rejected") => {
+    if (!selectedAuthorization) return;
+    if (decision === "rejected" && !authorizationNotes.trim()) return;
+
+    setAuthorizationRequests((requests) =>
+      requests.map((request) => {
+        if (request.id !== selectedAuthorization.id) return request;
+        if (decision === "rejected") {
+          return { ...request, status: "rejected", rejectionNote: authorizationNotes.trim() };
+        }
+        const approvedBy = request.approvedBy.includes(member.name)
+          ? request.approvedBy
+          : [...request.approvedBy, member.name];
+        const pendingApprovers = request.pendingApprovers.filter((approver) => approver !== member.name);
+        return {
+          ...request,
+          approvedBy,
+          pendingApprovers,
+          status: approvedBy.length >= request.requiredApprovals ? "approved" : "pending",
+        };
+      })
+    );
+    setSelectedAuthorization(null);
+    setAuthorizationNotes("");
+  };
 
   const handleUploadFile = () => {
     if (uploadTitle.trim() && uploadCategory.trim()) {
@@ -695,10 +745,11 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {MOCK_PENDING_AUTHORIZATIONS.map((auth) => (
-                  <div
+                {authorizationRequests.map((auth) => (
+                  <button
                     key={auth.id}
-                    className={`flex items-start justify-between p-4 border-l-4 rounded-lg ${
+                    onClick={() => setSelectedAuthorization(auth)}
+                    className={`w-full text-left p-4 border-l-4 rounded-lg transition-shadow hover:shadow-sm ${
                       auth.priority === "high"
                         ? "border-l-red-600 bg-red-50"
                         : auth.priority === "medium"
@@ -706,31 +757,157 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                         : "border-l-slate-400 bg-slate-50"
                     }`}
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-900">{auth.title}</p>
-                      <p className="text-sm text-slate-600 mt-1">Requested by {auth.requester}</p>
-                      <p className="text-xs text-slate-500 mt-1">On {auth.requestDate}</p>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-slate-900">{auth.title}</p>
+                        <p className="text-sm text-slate-600 mt-1">Requested by {auth.requester} · Due {auth.deadline}</p>
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                          <span className="font-medium text-slate-900">{auth.approvedBy.length}/{auth.requiredApprovals} approvals</span>
+                          <span>{auth.pendingApprovers.length} EXCO {auth.pendingApprovers.length === 1 ? "member" : "members"} missing</span>
+                          {auth.attachmentUrl && <span className="text-emerald-700">Attachment available</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 flex-shrink-0">
+                        {auth.amount !== undefined && <p className="text-lg font-semibold text-slate-900">${auth.amount.toLocaleString()}</p>}
+                        <span
+                          className={`text-xs font-medium px-3 py-1.5 rounded-full whitespace-nowrap ${
+                            auth.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : auth.status === "approved"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {auth.status}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4 flex-shrink-0">
-                      {auth.amount && <p className="text-lg font-semibold text-slate-900">${auth.amount.toLocaleString()}</p>}
-                      <span
-                        className={`text-xs font-medium px-3 py-1.5 rounded-full whitespace-nowrap ${
-                          auth.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : auth.status === "approved"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {auth.status === "pending" && "Pending"}
-                        {auth.status === "approved" && "Approved"}
-                        {auth.status === "rejected" && "Rejected"}
-                      </span>
-                    </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Authorization Review Modal */}
+      {selectedAuthorization && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <Card className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden border-0 shadow-2xl">
+            <CardHeader className="flex-shrink-0 border-b border-slate-200 bg-slate-50">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-xl font-light tracking-tight">{selectedAuthorization.title}</CardTitle>
+                  <CardDescription className="mt-1">
+                    Requested by {selectedAuthorization.requester} on {selectedAuthorization.requestDate}
+                  </CardDescription>
+                </div>
+                <button
+                  onClick={() => setSelectedAuthorization(null)}
+                  className="rounded-md px-2 py-1 text-xl text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+                  aria-label="Close authorization review"
+                >
+                  ×
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 space-y-6 overflow-y-auto p-6">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Status</p>
+                  <p className="mt-1 text-sm font-medium capitalize text-slate-900">{selectedAuthorization.status}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Deadline</p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">{selectedAuthorization.deadline}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Required</p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">{selectedAuthorization.requiredApprovals} EXCO</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Amount</p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">
+                    {selectedAuthorization.amount !== undefined ? `$${selectedAuthorization.amount.toLocaleString()}` : "—"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-900">Approval progress</p>
+                  <p className="text-sm text-slate-600">{selectedAuthorization.approvedBy.length} of {selectedAuthorization.requiredApprovals}</p>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-emerald-600 transition-all"
+                    style={{ width: `${Math.min((selectedAuthorization.approvedBy.length / selectedAuthorization.requiredApprovals) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-lg bg-emerald-50 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">Approved by</p>
+                    <p className="mt-1 text-sm text-emerald-900">{selectedAuthorization.approvedBy.length ? selectedAuthorization.approvedBy.join(", ") : "No approvals yet"}</p>
+                  </div>
+                  <div className="rounded-lg bg-amber-50 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-amber-700">Still needed</p>
+                    <p className="mt-1 text-sm text-amber-900">{selectedAuthorization.pendingApprovers.length ? selectedAuthorization.pendingApprovers.join(", ") : "Quorum reached"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {selectedAuthorization.attachmentUrl && (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-slate-900">Attachment</p>
+                  <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                    <iframe
+                      src={`${selectedAuthorization.attachmentUrl}#toolbar=1&navpanes=0`}
+                      className="h-64 w-full border-0"
+                      title={`${selectedAuthorization.title} attachment`}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {selectedAuthorization.rejectionNote && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-red-700">Rejection notes</p>
+                  <p className="mt-1 text-sm text-red-900">{selectedAuthorization.rejectionNote}</p>
+                </div>
+              )}
+
+              {selectedAuthorization.status === "pending" && (
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Review notes</label>
+                  <textarea
+                    value={authorizationNotes}
+                    onChange={(event) => setAuthorizationNotes(event.target.value)}
+                    placeholder="Required when rejecting this request"
+                    rows={3}
+                    className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+              )}
+            </CardContent>
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end">
+              <Button variant="outline" onClick={() => setSelectedAuthorization(null)} className="border-slate-300 text-slate-700 hover:bg-white">
+                Close
+              </Button>
+              {selectedAuthorization.status === "pending" && (
+                <>
+                  <Button
+                    onClick={() => handleAuthorization("rejected")}
+                    disabled={!authorizationNotes.trim()}
+                    className="bg-red-600 text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    Reject with notes
+                  </Button>
+                  <Button onClick={() => handleAuthorization("approved")} className="bg-emerald-600 text-white hover:bg-emerald-700">
+                    Approve request
+                  </Button>
+                </>
+              )}
+            </div>
           </Card>
         </div>
       )}
