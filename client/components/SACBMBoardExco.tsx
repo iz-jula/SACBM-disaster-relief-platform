@@ -214,7 +214,7 @@ const FinanceSubnav = ({
   activeView: FinanceView;
   onChange: (view: FinanceView) => void;
 }) => (
-  <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+  <div className="flex min-w-max items-center gap-2 overflow-x-auto border-b border-slate-200 pb-3">
     {([
       ["summary", "Financial Activity"],
       ["invoices", "Invoices"],
@@ -325,14 +325,17 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       });
     }
 
-    const [year, month] = activityDate.split("-").map(Number);
-    return Array.from({ length: new Date(year, month, 0).getDate() }, (_, index) => {
-      const day = String(index + 1).padStart(2, "0");
-      const date = `${activityDate}-${day}`;
+    return Array.from({ length: 5 }, (_, index) => {
+      const startDay = index * 7 + 1;
+      const endDay = startDay + 6;
       const amount = activityEntries
-        .filter((entry) => entry.date === date)
+        .filter((entry) => {
+          if (!entry.date.startsWith(`${activityDate}-`)) return false;
+          const day = Number(entry.date.slice(-2));
+          return day >= startDay && day <= endDay;
+        })
         .reduce((sum, entry) => sum + entry.amount, 0);
-      return { label: day, amount };
+      return { label: `Week ${index + 1}`, amount };
     });
   }, [activityCategory, activityDate, activityFilter, financialRecords]);
 
@@ -454,8 +457,8 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       )}
 
       {/* Tab Navigation */}
-      <div className="border-b border-slate-200">
-        <div className="flex gap-8">
+      <div className="border-b border-slate-200 overflow-x-auto">
+        <div className="flex min-w-max gap-6 px-1">
           {(["overview", "renewals", "authorizations", "finance", "contracts"] as TabType[]).map((tab) => (
             <button
               key={tab}
@@ -722,50 +725,54 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="border-0 shadow-sm lg:col-span-2">
               <CardHeader>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <CardTitle>Financial activity</CardTitle>
-                    <CardDescription>{activityCategoryLabel} for the selected period</CardDescription>
-                  </div>
+                <div>
+                  <CardTitle>Financial activity</CardTitle>
+                  <CardDescription>{activityCategoryLabel} for the selected period</CardDescription>
+                </div>
+                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-[auto_1fr] sm:items-center">
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">View by</span>
                   <div className="flex flex-wrap items-center gap-2">
-                    {(["day", "month", "year"] as ActivityFilter[]).map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => {
-                          setActivityFilter(filter);
-                          if (filter === "year") setActivityDate(activityDate.slice(0, 4));
-                          if (filter === "month") setActivityDate(activityDate.length === 4 ? `${activityDate}-01` : activityDate.slice(0, 7));
-                          if (filter === "day") {
-                            setActivityDate(
-                              activityDate.length === 4
-                                ? `${activityDate}-01-01`
-                                : activityDate.length === 7
-                                ? `${activityDate}-01`
-                                : activityDate
-                            );
-                          }
-                        }}
-                        className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
-                          activityFilter === filter
-                            ? "bg-emerald-600 text-white"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
-                        {filter}
-                      </button>
-                    ))}
+                    <div className="flex rounded-md bg-slate-100 p-1">
+                      {(["day", "month", "year"] as ActivityFilter[]).map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => {
+                            setActivityFilter(filter);
+                            if (filter === "year") setActivityDate(activityDate.slice(0, 4));
+                            if (filter === "month") setActivityDate(activityDate.length === 4 ? `${activityDate}-01` : activityDate.slice(0, 7));
+                            if (filter === "day") {
+                              setActivityDate(
+                                activityDate.length === 4
+                                  ? `${activityDate}-01-01`
+                                  : activityDate.length === 7
+                                  ? `${activityDate}-01`
+                                  : activityDate
+                              );
+                            }
+                          }}
+                          className={`rounded px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+                            activityFilter === filter
+                              ? "bg-white text-emerald-700 shadow-sm"
+                              : "text-slate-500 hover:text-slate-900"
+                          }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                    </div>
                     <input
                       type={activityFilter === "year" ? "number" : activityFilter === "month" ? "month" : "date"}
                       value={activityDate}
                       min={activityFilter === "year" ? "2000" : undefined}
                       max={activityFilter === "year" ? "2100" : undefined}
                       onChange={(event) => setActivityDate(event.target.value)}
-                      className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                       aria-label={`Select ${activityFilter}`}
                     />
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="mt-5 border-t border-slate-100 pt-4">
+                  <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-medium text-slate-500 mr-1">Filter:</span>
                   {(["all", "invoices", "receipts", "member-renewals"] as ActivityCategory[]).map((category) => (
                     <button
@@ -780,6 +787,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                       {category === "all" ? "All activity" : category === "member-renewals" ? "Member renewals" : category}
                     </button>
                   ))}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
