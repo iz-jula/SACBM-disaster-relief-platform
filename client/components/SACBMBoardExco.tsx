@@ -23,6 +23,8 @@ import {
   Search,
   Filter,
   Eye,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Member, MemberRole } from "@shared/api";
 
@@ -59,6 +61,21 @@ interface PendingAuthorization {
   status: "pending" | "approved" | "rejected";
   priority: "high" | "medium" | "low";
 }
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 const MOCK_FINANCIAL_RECORDS: FinancialRecord[] = [
   {
@@ -242,6 +259,8 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [activityCategory, setActivityCategory] = useState<ActivityCategory>("all");
   const [activityDate, setActivityDate] = useState("2024-02");
   const [activityEndDate, setActivityEndDate] = useState("2024-02-29");
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [monthPickerYear, setMonthPickerYear] = useState(2024);
   const [selectedFile, setSelectedFile] = useState<FinancialRecord | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadType, setUploadType] = useState<"receipt" | "invoice" | "contract">("receipt");
@@ -779,15 +798,62 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                       ))}
                     </div>
                     {activityFilter === "month" && (
-                      <div className="flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700">
-                        <input
-                          type="month"
-                          value={activityDate.slice(0, 7)}
-                          onChange={(event) => setActivityDate(event.target.value)}
-                          className="w-8 border-0 bg-transparent p-0 outline-none"
-                          aria-label="Select month"
-                        />
-                        <span>{selectedMonthLabel}</span>
+                      <div className="relative">
+                        <button
+                          onClick={() => {
+                            setMonthPickerYear(Number(activityDate.slice(0, 4)));
+                            setMonthPickerOpen((open) => !open);
+                          }}
+                          className="flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 hover:border-emerald-400 hover:text-emerald-700"
+                          aria-expanded={monthPickerOpen}
+                          aria-haspopup="dialog"
+                        >
+                          {selectedMonthLabel}
+                        </button>
+                        {monthPickerOpen && (
+                          <div className="absolute right-0 top-11 z-20 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
+                            <div className="mb-4 flex items-center justify-between">
+                              <button
+                                onClick={() => setMonthPickerYear((year) => year - 1)}
+                                className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                                aria-label="Previous year"
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </button>
+                              <span className="text-sm font-semibold text-slate-900">{monthPickerYear}</span>
+                              <button
+                                onClick={() => setMonthPickerYear((year) => year + 1)}
+                                className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                                aria-label="Next year"
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              {MONTHS.map((month, index) => {
+                                const isSelected =
+                                  Number(activityDate.slice(0, 4)) === monthPickerYear &&
+                                  Number(activityDate.slice(5, 7)) === index + 1;
+                                return (
+                                  <button
+                                    key={month}
+                                    onClick={() => {
+                                      setActivityDate(`${monthPickerYear}-${String(index + 1).padStart(2, "0")}`);
+                                      setMonthPickerOpen(false);
+                                    }}
+                                    className={`rounded-md px-2 py-2 text-xs font-medium transition-colors ${
+                                      isSelected
+                                        ? "bg-emerald-600 text-white"
+                                        : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                                    }`}
+                                  >
+                                    {month.slice(0, 3)}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     {activityFilter === "year" && (
