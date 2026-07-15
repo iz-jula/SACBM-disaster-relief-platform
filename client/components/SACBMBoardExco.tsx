@@ -204,7 +204,7 @@ const FinancialRecordRow = ({
 type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts";
 
 type FinanceView = "summary" | "invoices" | "receipts";
-type ActivityFilter = "day" | "month" | "year";
+type ActivityFilter = "day" | "month" | "year" | "range";
 type ActivityCategory = "all" | "invoices" | "receipts" | "member-renewals";
 
 const FinanceSubnav = ({
@@ -241,6 +241,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("month");
   const [activityCategory, setActivityCategory] = useState<ActivityCategory>("all");
   const [activityDate, setActivityDate] = useState("2024-02");
+  const [activityEndDate, setActivityEndDate] = useState("2024-02-29");
   const [selectedFile, setSelectedFile] = useState<FinancialRecord | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadType, setUploadType] = useState<"receipt" | "invoice" | "contract">("receipt");
@@ -311,6 +312,13 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       return [{ label: activityDate, amount }];
     }
 
+    if (activityFilter === "range") {
+      const amount = activityEntries
+        .filter((entry) => entry.date >= activityDate && entry.date <= activityEndDate)
+        .reduce((sum, entry) => sum + entry.amount, 0);
+      return [{ label: `${activityDate} – ${activityEndDate}`, amount }];
+    }
+
     if (activityFilter === "year") {
       const year = activityDate.slice(0, 4);
       return Array.from({ length: 12 }, (_, index) => {
@@ -337,7 +345,13 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
         .reduce((sum, entry) => sum + entry.amount, 0);
       return { label: `Week ${index + 1}`, amount };
     });
-  }, [activityCategory, activityDate, activityFilter, financialRecords]);
+  }, [activityCategory, activityDate, activityEndDate, activityFilter, financialRecords]);
+
+  const selectedMonthLabel = new Date(`${activityDate.slice(0, 7)}-01T00:00:00`).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+  const selectedPeriodLabel = activityFilter === "range" ? `${activityDate} – ${activityEndDate}` : activityDate;
 
   const activitySpend = useMemo(
     () => activityData.reduce((sum, item) => sum + item.amount, 0),
@@ -733,13 +747,17 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                   <span className="text-xs font-medium uppercase tracking-wide text-slate-500">View by</span>
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex rounded-md bg-slate-100 p-1">
-                      {(["day", "month", "year"] as ActivityFilter[]).map((filter) => (
+                      {(["day", "month", "year", "range"] as ActivityFilter[]).map((filter) => (
                         <button
                           key={filter}
                           onClick={() => {
                             setActivityFilter(filter);
                             if (filter === "year") setActivityDate(activityDate.slice(0, 4));
                             if (filter === "month") setActivityDate(activityDate.length === 4 ? `${activityDate}-01` : activityDate.slice(0, 7));
+                            if (filter === "range") {
+                              setActivityDate(activityDate.length === 4 ? `${activityDate}-01-01` : activityDate.length === 7 ? `${activityDate}-01` : activityDate);
+                              if (activityEndDate.length === 7) setActivityEndDate(`${activityEndDate}-28`);
+                            }
                             if (filter === "day") {
                               setActivityDate(
                                 activityDate.length === 4
@@ -760,15 +778,58 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                         </button>
                       ))}
                     </div>
-                    <input
-                      type={activityFilter === "year" ? "number" : activityFilter === "month" ? "month" : "date"}
-                      value={activityDate}
-                      min={activityFilter === "year" ? "2000" : undefined}
-                      max={activityFilter === "year" ? "2100" : undefined}
-                      onChange={(event) => setActivityDate(event.target.value)}
-                      className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                      aria-label={`Select ${activityFilter}`}
-                    />
+                    {activityFilter === "month" && (
+                      <div className="flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700">
+                        <input
+                          type="month"
+                          value={activityDate.slice(0, 7)}
+                          onChange={(event) => setActivityDate(event.target.value)}
+                          className="w-8 border-0 bg-transparent p-0 outline-none"
+                          aria-label="Select month"
+                        />
+                        <span>{selectedMonthLabel}</span>
+                      </div>
+                    )}
+                    {activityFilter === "year" && (
+                      <input
+                        type="number"
+                        value={activityDate}
+                        min="2000"
+                        max="2100"
+                        onChange={(event) => setActivityDate(event.target.value)}
+                        className="h-9 w-24 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        aria-label="Select year"
+                      />
+                    )}
+                    {activityFilter === "day" && (
+                      <input
+                        type="date"
+                        value={activityDate}
+                        onChange={(event) => setActivityDate(event.target.value)}
+                        className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        aria-label="Select day"
+                      />
+                    )}
+                    {activityFilter === "range" && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <input
+                          type="date"
+                          value={activityDate}
+                          onChange={(event) => setActivityDate(event.target.value)}
+                          className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                          aria-label="Range start date"
+                        />
+                        <span className="text-xs text-slate-400">to</span>
+                        <input
+                          type="date"
+                          value={activityEndDate}
+                          min={activityDate}
+                          onChange={(event) => setActivityEndDate(event.target.value)}
+                          className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                          aria-label="Range end date"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="mt-5 border-t border-slate-100 pt-4">
@@ -795,7 +856,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                   <div>
                     <p className="text-xs uppercase tracking-wide text-slate-500">Selected period</p>
                     <p className="text-2xl font-light text-slate-900 mt-1">${activitySpend.toLocaleString()}</p>
-                    <p className="text-xs text-slate-500 mt-1">{activityCategoryLabel} · {activityDate}</p>
+                    <p className="text-xs text-slate-500 mt-1">{activityCategoryLabel} · {activityFilter === "month" ? selectedMonthLabel : selectedPeriodLabel}</p>
                   </div>
                   <p className="text-xs text-slate-500">{activityData.filter((item) => item.amount > 0).length} active periods</p>
                 </div>
