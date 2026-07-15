@@ -165,7 +165,43 @@ interface BoardExcoProps {
   member: Member;
 }
 
-type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts";
+const FinancialRecordRow = ({
+  record,
+  onSelect,
+}: {
+  record: FinancialRecord;
+  onSelect: (record: FinancialRecord) => void;
+}) => (
+  <div
+    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-slate-100 rounded-lg hover:bg-slate-50 cursor-pointer"
+    onClick={() => onSelect(record)}
+  >
+    <div className="flex-1 min-w-0">
+      <p className="font-medium text-slate-900 truncate">{record.title}</p>
+      <div className="flex flex-wrap items-center gap-3 mt-2">
+        <span className="text-xs font-medium text-slate-600">{record.category}</span>
+        <span className="text-xs text-slate-500">Uploaded {record.date}</span>
+      </div>
+    </div>
+    <div className="flex items-center gap-4 flex-shrink-0">
+      {record.amount !== undefined && <p className="font-semibold text-slate-900">${record.amount.toLocaleString()}</p>}
+      <span
+        className={`text-xs font-medium px-3 py-1.5 rounded-full ${
+          record.status === "approved"
+            ? "bg-emerald-50 text-emerald-700"
+            : record.status === "pending"
+            ? "bg-amber-50 text-amber-700"
+            : "bg-red-50 text-red-700"
+        }`}
+      >
+        {record.status}
+      </span>
+      <Eye className="h-4 w-4 text-slate-400" />
+    </div>
+  </div>
+);
+
+type TabType = "overview" | "renewals" | "authorizations" | "finance" | "invoices" | "receipts" | "contracts";
 
 const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
@@ -313,7 +349,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       {/* Tab Navigation */}
       <div className="border-b border-slate-200">
         <div className="flex gap-8">
-          {(["overview", "renewals", "authorizations", "finance", "contracts"] as TabType[]).map((tab) => (
+          {(["overview", "renewals", "authorizations", "finance", "invoices", "receipts", "contracts"] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -327,6 +363,8 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               {tab === "renewals" && "Member Renewals"}
               {tab === "authorizations" && "Authorizations"}
               {tab === "finance" && "Finance"}
+              {tab === "invoices" && "Invoices"}
+              {tab === "receipts" && "Receipts"}
               {tab === "contracts" && "Contracts"}
             </button>
           ))}
@@ -553,89 +591,106 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
         </div>
       )}
 
-      {/* Finance Tab */}
+      {/* Finance Overview Tab */}
       {activeTab === "finance" && (
         <div className="space-y-6">
-          {/* Finance Actions */}
-          <div className="flex gap-3">
-            {isAdmin && (
-              <Button
-                onClick={() => {
-                  setUploadType("receipt");
-                  setShowUploadModal(true);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                Upload Receipt
-              </Button>
-            )}
-            {isAdmin && (
-              <Button
-                onClick={() => {
-                  setUploadType("invoice");
-                  setShowUploadModal(true);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                Upload Invoice
-              </Button>
-            )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="border-0 shadow-sm lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Financial activity</CardTitle>
+                <CardDescription>Approved financial records by month</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-48 flex items-end gap-3 border-b border-slate-200 px-2">
+                  {[38, 52, 44, 70, 58, 82].map((height, index) => (
+                    <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                      <div className="w-full max-w-12 rounded-t-md bg-emerald-500/80" style={{ height: `${height}%` }} />
+                      <span className="text-[11px] text-slate-500">{["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"][index]}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Finance summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Approved value</p>
+                  <p className="text-2xl font-light text-slate-900 mt-1">${financialStats.totalAmount.toLocaleString()}</p>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                  <span className="text-sm text-slate-600">Invoices</span>
+                  <span className="font-medium text-slate-900">{financialRecords.filter((record) => record.type === "invoice").length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Receipts</span>
+                  <span className="font-medium text-slate-900">{financialRecords.filter((record) => record.type === "receipt").length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Pending review</span>
+                  <span className="font-medium text-amber-700">{financialStats.pending}</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+        </div>
+      )}
 
-          {/* Financial Records */}
+      {/* Invoices Tab */}
+      {activeTab === "invoices" && (
+        <div className="space-y-6">
+          {isAdmin && (
+            <Button
+              onClick={() => {
+                setUploadType("invoice");
+                setShowUploadModal(true);
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Invoice
+            </Button>
+          )}
           <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle>Financial Records</CardTitle>
+              <CardTitle>Invoices</CardTitle>
+              <CardDescription>Track invoices submitted for chamber activity and operations.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {financialRecords.map((record) => (
-                  <div
-                    key={record.id}
-                    className="flex items-center justify-between p-4 border border-slate-100 rounded-lg hover:bg-slate-50 cursor-pointer"
-                    onClick={() => setSelectedFile(record)}
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-900">{record.title}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-xs font-medium text-slate-600">{record.category}</span>
-                        <span
-                          className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${
-                            record.type === "receipt"
-                              ? "bg-blue-50 text-blue-700"
-                              : record.type === "invoice"
-                              ? "bg-purple-50 text-purple-700"
-                              : "bg-green-50 text-green-700"
-                          }`}
-                        >
-                          {record.type === "receipt" && "Receipt"}
-                          {record.type === "invoice" && "Invoice"}
-                          {record.type === "contract" && "Contract"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 flex-shrink-0">
-                      {record.amount && <p className="font-semibold text-slate-900">${record.amount.toLocaleString()}</p>}
-                      <span
-                        className={`text-xs font-medium px-3 py-1.5 rounded-full ${
-                          record.status === "approved"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : record.status === "pending"
-                            ? "bg-amber-50 text-amber-700"
-                            : "bg-red-50 text-red-700"
-                        }`}
-                      >
-                        {record.status === "approved" && "Approved"}
-                        {record.status === "pending" && "Pending"}
-                        {record.status === "rejected" && "Rejected"}
-                      </span>
-                      <Eye className="h-4 w-4 text-slate-400" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="space-y-3">
+              {financialRecords.filter((record) => record.type === "invoice").map((record) => (
+                <FinancialRecordRow key={record.id} record={record} onSelect={setSelectedFile} />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Receipts Tab */}
+      {activeTab === "receipts" && (
+        <div className="space-y-6">
+          {isAdmin && (
+            <Button
+              onClick={() => {
+                setUploadType("receipt");
+                setShowUploadModal(true);
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Receipt
+            </Button>
+          )}
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle>Receipts</CardTitle>
+              <CardDescription>Keep a clear record of chamber expenses and payments.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {financialRecords.filter((record) => record.type === "receipt").map((record) => (
+                <FinancialRecordRow key={record.id} record={record} onSelect={setSelectedFile} />
+              ))}
             </CardContent>
           </Card>
         </div>
