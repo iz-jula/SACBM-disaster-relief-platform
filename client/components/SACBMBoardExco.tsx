@@ -706,19 +706,19 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       {activeTab === "finance" && financeView === "summary" && (
         <div className="space-y-6">
           <FinanceSubnav activeView={financeView} onChange={setFinanceView} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-3xl">
             <Card className="border-0 shadow-sm">
-              <CardContent className="pt-5">
+              <CardContent className="px-5 py-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Spend to date</p>
-                <p className="text-3xl font-light text-slate-900 mt-2">${financialStats.spendToDate.toLocaleString()}</p>
-                <p className="text-xs text-slate-500 mt-2">Approved invoices and receipts</p>
+                <p className="text-2xl font-light text-slate-900 mt-1">${financialStats.spendToDate.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-1">Approved invoices and receipts</p>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm">
-              <CardContent className="pt-5">
+              <CardContent className="px-5 py-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Member renewal income</p>
-                <p className="text-3xl font-light text-emerald-700 mt-2">${financialStats.renewalIncome.toLocaleString()}</p>
-                <p className="text-xs text-slate-500 mt-2">Current renewal cycle</p>
+                <p className="text-2xl font-light text-emerald-700 mt-1">${financialStats.renewalIncome.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-1">Current renewal cycle</p>
               </CardContent>
             </Card>
           </div>
@@ -791,8 +791,12 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="mb-4 flex items-baseline justify-between">
-                  <p className="text-2xl font-light text-slate-900">${activitySpend.toLocaleString()}</p>
+                <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Selected period</p>
+                    <p className="text-2xl font-light text-slate-900 mt-1">${activitySpend.toLocaleString()}</p>
+                    <p className="text-xs text-slate-500 mt-1">{activityCategoryLabel} · {activityDate}</p>
+                  </div>
                   <p className="text-xs text-slate-500">{activityData.filter((item) => item.amount > 0).length} active periods</p>
                 </div>
                 <div className="h-48 flex items-end gap-1 border-b border-slate-200 px-2 overflow-hidden">
