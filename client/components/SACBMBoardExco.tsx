@@ -204,7 +204,8 @@ const FinancialRecordRow = ({
 type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts";
 
 type FinanceView = "summary" | "invoices" | "receipts";
-type ActivityFilter = "month" | "day" | "year";
+type ActivityFilter = "day" | "month" | "year";
+type ActivityCategory = "all" | "invoices" | "receipts" | "member-renewals";
 
 const FinanceSubnav = ({
   activeView,
@@ -238,6 +239,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [financeView, setFinanceView] = useState<FinanceView>("summary");
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("month");
+  const [activityCategory, setActivityCategory] = useState<ActivityCategory>("all");
   const [activityDate, setActivityDate] = useState("2024-02");
   const [selectedFile, setSelectedFile] = useState<FinancialRecord | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -285,14 +287,27 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   }, [financialRecords]);
 
   const activityData = useMemo(() => {
-    const approvedRecords = financialRecords.filter(
-      (record) => record.status === "approved" && (record.type === "receipt" || record.type === "invoice")
-    );
+    const activityEntries = [
+      ...financialRecords
+        .filter(
+          (record) =>
+            record.status === "approved" &&
+            (record.type === "receipt" || record.type === "invoice") &&
+            (activityCategory === "all" || activityCategory === `${record.type}s`)
+        )
+        .map((record) => ({ date: record.date, amount: record.amount || 0 })),
+      ...MOCK_MEMBER_RENEWALS
+        .filter(() => activityCategory === "all" || activityCategory === "member-renewals")
+        .map((renewal) => ({
+          date: renewal.renewalDate,
+          amount: { bronze: 500, gold: 1200, platinum: 2500 }[renewal.tier],
+        })),
+    ];
 
     if (activityFilter === "day") {
-      const amount = approvedRecords
-        .filter((record) => record.date === activityDate)
-        .reduce((sum, record) => sum + (record.amount || 0), 0);
+      const amount = activityEntries
+        .filter((entry) => entry.date === activityDate)
+        .reduce((sum, entry) => sum + entry.amount, 0);
       return [{ label: activityDate, amount }];
     }
 
@@ -300,9 +315,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       const year = activityDate.slice(0, 4);
       return Array.from({ length: 12 }, (_, index) => {
         const month = String(index + 1).padStart(2, "0");
-        const amount = approvedRecords
-          .filter((record) => record.date.startsWith(`${year}-${month}`))
-          .reduce((sum, record) => sum + (record.amount || 0), 0);
+        const amount = activityEntries
+          .filter((entry) => entry.date.startsWith(`${year}-${month}`))
+          .reduce((sum, entry) => sum + entry.amount, 0);
         return {
           label: new Date(Number(year), index, 1).toLocaleDateString("en-US", { month: "short" }),
           amount,
@@ -314,17 +329,24 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
     return Array.from({ length: new Date(year, month, 0).getDate() }, (_, index) => {
       const day = String(index + 1).padStart(2, "0");
       const date = `${activityDate}-${day}`;
-      const amount = approvedRecords
-        .filter((record) => record.date === date)
-        .reduce((sum, record) => sum + (record.amount || 0), 0);
+      const amount = activityEntries
+        .filter((entry) => entry.date === date)
+        .reduce((sum, entry) => sum + entry.amount, 0);
       return { label: day, amount };
     });
-  }, [activityDate, activityFilter, financialRecords]);
+  }, [activityCategory, activityDate, activityFilter, financialRecords]);
 
   const activitySpend = useMemo(
     () => activityData.reduce((sum, item) => sum + item.amount, 0),
     [activityData]
   );
+
+  const activityCategoryLabel =
+    activityCategory === "member-renewals"
+      ? "Member renewal income"
+      : activityCategory === "all"
+      ? "Financial activity"
+      : activityCategory.charAt(0).toUpperCase() + activityCategory.slice(1);
 
   const activityMax = Math.max(...activityData.map((item) => item.amount), 1);
 
@@ -703,17 +725,25 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <CardTitle>Financial activity</CardTitle>
-                    <CardDescription>Approved spend for the selected period</CardDescription>
+                    <CardDescription>{activityCategoryLabel} for the selected period</CardDescription>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {(["month", "day", "year"] as ActivityFilter[]).map((filter) => (
+                    {(["day", "month", "year"] as ActivityFilter[]).map((filter) => (
                       <button
                         key={filter}
                         onClick={() => {
                           setActivityFilter(filter);
                           if (filter === "year") setActivityDate(activityDate.slice(0, 4));
                           if (filter === "month") setActivityDate(activityDate.length === 4 ? `${activityDate}-01` : activityDate.slice(0, 7));
-                          if (filter === "day" && activityDate.length === 7) setActivityDate(`${activityDate}-01`);
+                          if (filter === "day") {
+                            setActivityDate(
+                              activityDate.length === 4
+                                ? `${activityDate}-01-01`
+                                : activityDate.length === 7
+                                ? `${activityDate}-01`
+                                : activityDate
+                            );
+                          }
                         }}
                         className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
                           activityFilter === filter
@@ -734,6 +764,22 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                       aria-label={`Select ${activityFilter}`}
                     />
                   </div>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium text-slate-500 mr-1">Filter:</span>
+                  {(["all", "invoices", "receipts", "member-renewals"] as ActivityCategory[]).map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setActivityCategory(category)}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                        activityCategory === category
+                          ? "bg-slate-900 text-white"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {category === "all" ? "All activity" : category === "member-renewals" ? "Member renewals" : category}
+                    </button>
+                  ))}
                 </div>
               </CardHeader>
               <CardContent>
