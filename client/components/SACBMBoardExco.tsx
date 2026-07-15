@@ -204,6 +204,7 @@ const FinancialRecordRow = ({
 type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts";
 
 type FinanceView = "summary" | "invoices" | "receipts";
+type ActivityFilter = "month" | "day" | "year";
 
 const FinanceSubnav = ({
   activeView,
@@ -236,6 +237,8 @@ const FinanceSubnav = ({
 const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [financeView, setFinanceView] = useState<FinanceView>("summary");
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>("month");
+  const [activityDate, setActivityDate] = useState("2024-02");
   const [selectedFile, setSelectedFile] = useState<FinancialRecord | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadType, setUploadType] = useState<"receipt" | "invoice" | "contract">("receipt");
@@ -280,6 +283,50 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       }, 0),
     };
   }, [financialRecords]);
+
+  const activityData = useMemo(() => {
+    const approvedRecords = financialRecords.filter(
+      (record) => record.status === "approved" && (record.type === "receipt" || record.type === "invoice")
+    );
+
+    if (activityFilter === "day") {
+      const amount = approvedRecords
+        .filter((record) => record.date === activityDate)
+        .reduce((sum, record) => sum + (record.amount || 0), 0);
+      return [{ label: activityDate, amount }];
+    }
+
+    if (activityFilter === "year") {
+      const year = activityDate.slice(0, 4);
+      return Array.from({ length: 12 }, (_, index) => {
+        const month = String(index + 1).padStart(2, "0");
+        const amount = approvedRecords
+          .filter((record) => record.date.startsWith(`${year}-${month}`))
+          .reduce((sum, record) => sum + (record.amount || 0), 0);
+        return {
+          label: new Date(Number(year), index, 1).toLocaleDateString("en-US", { month: "short" }),
+          amount,
+        };
+      });
+    }
+
+    const [year, month] = activityDate.split("-").map(Number);
+    return Array.from({ length: new Date(year, month, 0).getDate() }, (_, index) => {
+      const day = String(index + 1).padStart(2, "0");
+      const date = `${activityDate}-${day}`;
+      const amount = approvedRecords
+        .filter((record) => record.date === date)
+        .reduce((sum, record) => sum + (record.amount || 0), 0);
+      return { label: day, amount };
+    });
+  }, [activityDate, activityFilter, financialRecords]);
+
+  const activitySpend = useMemo(
+    () => activityData.reduce((sum, item) => sum + item.amount, 0),
+    [activityData]
+  );
+
+  const activityMax = Math.max(...activityData.map((item) => item.amount), 1);
 
   const renewalStats = useMemo(() => {
     const upcoming = MOCK_MEMBER_RENEWALS.filter((r) => r.status === "upcoming").length;
@@ -653,18 +700,58 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="border-0 shadow-sm lg:col-span-2">
               <CardHeader>
-                <CardTitle>Financial activity</CardTitle>
-                <CardDescription>Approved financial records by month</CardDescription>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <CardTitle>Financial activity</CardTitle>
+                    <CardDescription>Approved spend for the selected period</CardDescription>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(["month", "day", "year"] as ActivityFilter[]).map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => {
+                          setActivityFilter(filter);
+                          if (filter === "year") setActivityDate(activityDate.slice(0, 4));
+                          if (filter === "month") setActivityDate(activityDate.length === 4 ? `${activityDate}-01` : activityDate.slice(0, 7));
+                          if (filter === "day" && activityDate.length === 7) setActivityDate(`${activityDate}-01`);
+                        }}
+                        className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+                          activityFilter === filter
+                            ? "bg-emerald-600 text-white"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                    <input
+                      type={activityFilter === "year" ? "number" : activityFilter === "month" ? "month" : "date"}
+                      value={activityDate}
+                      min={activityFilter === "year" ? "2000" : undefined}
+                      max={activityFilter === "year" ? "2100" : undefined}
+                      onChange={(event) => setActivityDate(event.target.value)}
+                      className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      aria-label={`Select ${activityFilter}`}
+                    />
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="h-48 flex items-end gap-3 border-b border-slate-200 px-2">
-                  {[38, 52, 44, 70, 58, 82].map((height, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                      <div className="w-full max-w-12 rounded-t-md bg-emerald-500/80" style={{ height: `${height}%` }} />
-                      <span className="text-[11px] text-slate-500">{["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"][index]}</span>
+                <div className="mb-4 flex items-baseline justify-between">
+                  <p className="text-2xl font-light text-slate-900">${activitySpend.toLocaleString()}</p>
+                  <p className="text-xs text-slate-500">{activityData.filter((item) => item.amount > 0).length} active periods</p>
+                </div>
+                <div className="h-48 flex items-end gap-1 border-b border-slate-200 px-2 overflow-hidden">
+                  {activityData.map((item) => (
+                    <div key={item.label} className="flex-1 min-w-0 flex flex-col items-center justify-end gap-2 h-full group">
+                      <div className="relative w-full max-w-12 rounded-t-md bg-emerald-500/80 hover:bg-emerald-600 transition-colors" style={{ height: `${Math.max((item.amount / activityMax) * 100, item.amount > 0 ? 5 : 0)}%` }} title={`${item.label}: $${item.amount.toLocaleString()}`} />
+                      <span className="text-[10px] text-slate-500 truncate max-w-full">{item.label}</span>
                     </div>
                   ))}
                 </div>
+                {activitySpend === 0 && (
+                  <p className="mt-4 text-center text-sm text-slate-500">No approved financial activity for this period.</p>
+                )}
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm">
