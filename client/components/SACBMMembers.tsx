@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Mail, Phone, Building2, MapPin } from "lucide-react";
+import { Search, Mail, Phone, Building2, MapPin, UserPlus, Pencil, UserX } from "lucide-react";
 import { Member, MemberTier, MemberRole } from "@shared/api";
 
 // Mock members data
@@ -113,10 +113,34 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const [tierFilter, setTierFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [members, setMembers] = useState<Member[]>(() => {
+    if (typeof window === "undefined") return MOCK_MEMBERS;
+    const stored = localStorage.getItem("sacbmMembers");
+    return stored ? JSON.parse(stored) : MOCK_MEMBERS;
+  });
+  const [showMemberForm, setShowMemberForm] = useState(false);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [memberForm, setMemberForm] = useState({
+    firstName: "",
+    surname: "",
+    company: "",
+    jobTitle: "",
+    email: "",
+    phone: "",
+    address: "",
+    tier: MemberTier.BRONZE,
+    role: MemberRole.MEMBER,
+    isExco: false,
+    isBoard: false,
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sacbmMembers", JSON.stringify(members));
+  }, [members]);
 
   // Filter members
   const filteredMembers = useMemo(() => {
-    let result = MOCK_MEMBERS.filter((m) => m.id !== currentMember.id); // Exclude self
+    let result = members.filter((m) => m.id !== currentMember.id && m.isActive); // Exclude self and inactive members
 
     // Search filter
     if (searchTerm) {
@@ -142,7 +166,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     result.sort((a, b) => a.name.localeCompare(b.name));
 
     return result;
-  }, [searchTerm, tierFilter, roleFilter, currentMember.id]);
+  }, [searchTerm, tierFilter, roleFilter, currentMember.id, members]);
 
   const getTierColor = (tier: MemberTier) => {
     const colors: Record<MemberTier, string> = {
@@ -179,23 +203,82 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
 
   const getTierCounts = () => {
     const counts = {
-      bronze: MOCK_MEMBERS.filter((m) => m.tier === MemberTier.BRONZE).length,
-      gold: MOCK_MEMBERS.filter((m) => m.tier === MemberTier.GOLD).length,
-      platinum: MOCK_MEMBERS.filter((m) => m.tier === MemberTier.PLATINUM).length,
+      bronze: members.filter((m) => m.tier === MemberTier.BRONZE && m.isActive).length,
+      gold: members.filter((m) => m.tier === MemberTier.GOLD && m.isActive).length,
+      platinum: members.filter((m) => m.tier === MemberTier.PLATINUM && m.isActive).length,
     };
     return counts;
   };
 
   const counts = getTierCounts();
 
+  const openMemberForm = (member?: Member) => {
+    if (member) {
+      setEditingMemberId(member.id);
+      setMemberForm({
+        firstName: member.firstName || member.name.split(" ")[0] || "",
+        surname: member.surname || member.name.split(" ").slice(1).join(" "),
+        company: member.company,
+        jobTitle: member.jobTitle || "",
+        email: member.email,
+        phone: member.phone || "",
+        address: member.address || "",
+        tier: member.tier,
+        role: member.role,
+        isExco: member.isExco || member.role === MemberRole.EXCO,
+        isBoard: member.isBoard || member.role === MemberRole.BOARD,
+      });
+    } else {
+      setEditingMemberId(null);
+      setMemberForm({ firstName: "", surname: "", company: "", jobTitle: "", email: "", phone: "", address: "", tier: MemberTier.BRONZE, role: MemberRole.MEMBER, isExco: false, isBoard: false });
+    }
+    setShowMemberForm(true);
+  };
+
+  const saveMember = () => {
+    if (!memberForm.firstName.trim() || !memberForm.surname.trim() || !memberForm.company.trim() || !memberForm.email.trim()) return;
+    const memberData: Member = {
+      id: editingMemberId || `member-${Date.now()}`,
+      name: `${memberForm.firstName.trim()} ${memberForm.surname.trim()}`,
+      firstName: memberForm.firstName.trim(),
+      surname: memberForm.surname.trim(),
+      company: memberForm.company.trim(),
+      jobTitle: memberForm.jobTitle.trim(),
+      email: memberForm.email.trim(),
+      phone: memberForm.phone.trim(),
+      address: memberForm.address.trim(),
+      tier: memberForm.tier,
+      role: memberForm.role,
+      sacbmRole: memberForm.role === MemberRole.BOARD ? "board-member" : memberForm.role === MemberRole.EXCO ? "exco-member" : memberForm.role,
+      isExco: memberForm.isExco,
+      isBoard: memberForm.isBoard,
+      joinDate: editingMemberId ? members.find((item) => item.id === editingMemberId)?.joinDate || new Date().toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      isActive: true,
+    };
+    setMembers((current) => editingMemberId ? current.map((item) => item.id === editingMemberId ? { ...item, ...memberData } : item) : [...current, memberData]);
+    setShowMemberForm(false);
+  };
+
+  const toggleMemberStatus = (memberId: string) => {
+    setMembers((current) => current.map((item) => item.id === memberId ? { ...item, isActive: !item.isActive } : item));
+  };
+
   return (
     <div>
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">Members Directory</h2>
-        <p className="text-slate-600 text-sm mt-1">
-          Connect with {MOCK_MEMBERS.length} chamber members
-        </p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Members Directory</h2>
+          <p className="text-slate-600 text-sm mt-1">
+            Connect with {members.filter((item) => item.isActive).length} active chamber members
+          </p>
+        </div>
+        {currentMember.role === MemberRole.ADMIN && (
+          <button onClick={() => openMemberForm()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">
+            <UserPlus className="h-4 w-4" />
+            Add member
+          </button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -299,7 +382,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
 
       {/* Results Count */}
       <p className="text-sm text-slate-600 mb-4">
-        Showing {filteredMembers.length} of {MOCK_MEMBERS.length - 1} members
+        Showing {filteredMembers.length} of {members.filter((item) => item.isActive).length - 1} members
       </p>
 
       {/* Members Grid/List View */}
@@ -367,6 +450,12 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 <p className="text-xs text-slate-500 text-center mt-4">
                   Member since {new Date(member.joinDate).getFullYear()}
                 </p>
+                {currentMember.role === MemberRole.ADMIN && (
+                  <div className="mt-4 flex gap-2 border-t border-slate-100 pt-4">
+                    <button onClick={() => openMemberForm(member)} className="flex-1 rounded-md border border-slate-200 px-2 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50"><Pencil className="mr-1 inline h-3.5 w-3.5" />Edit</button>
+                    <button onClick={() => toggleMemberStatus(member.id)} className="flex-1 rounded-md border border-red-100 px-2 py-2 text-xs font-medium text-red-600 hover:bg-red-50"><UserX className="mr-1 inline h-3.5 w-3.5" />Deactivate</button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -422,6 +511,12 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                             <Phone className="h-5 w-5" />
                           </a>
                         )}
+                        {currentMember.role === MemberRole.ADMIN && (
+                          <>
+                            <button onClick={() => openMemberForm(member)} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100" title="Edit member"><Pencil className="h-5 w-5" /></button>
+                            <button onClick={() => toggleMemberStatus(member.id)} className="rounded-lg p-2 text-red-600 hover:bg-red-50" title="Deactivate member"><UserX className="h-5 w-5" /></button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -429,6 +524,50 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {showMemberForm && currentMember.role === MemberRole.ADMIN && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <Card className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border-0 shadow-2xl">
+            <CardContent className="p-6">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-light tracking-tight text-slate-900">{editingMemberId ? "Edit member" : "Add member"}</h3>
+                  <p className="mt-1 text-sm text-slate-600">Capture the member profile and SACBM governance responsibilities.</p>
+                </div>
+                <button onClick={() => setShowMemberForm(false)} className="rounded-md px-2 py-1 text-xl text-slate-400 hover:bg-slate-100">×</button>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input placeholder="First name" value={memberForm.firstName} onChange={(event) => setMemberForm((form) => ({ ...form, firstName: event.target.value }))} />
+                <Input placeholder="Surname" value={memberForm.surname} onChange={(event) => setMemberForm((form) => ({ ...form, surname: event.target.value }))} />
+                <Input placeholder="Company" value={memberForm.company} onChange={(event) => setMemberForm((form) => ({ ...form, company: event.target.value }))} />
+                <Input placeholder="Role within company" value={memberForm.jobTitle} onChange={(event) => setMemberForm((form) => ({ ...form, jobTitle: event.target.value }))} />
+                <Input type="email" placeholder="Email" value={memberForm.email} onChange={(event) => setMemberForm((form) => ({ ...form, email: event.target.value }))} />
+                <Input placeholder="Phone" value={memberForm.phone} onChange={(event) => setMemberForm((form) => ({ ...form, phone: event.target.value }))} />
+                <textarea placeholder="Address" value={memberForm.address} onChange={(event) => setMemberForm((form) => ({ ...form, address: event.target.value }))} rows={2} className="resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:col-span-2" />
+                <select value={memberForm.tier} onChange={(event) => setMemberForm((form) => ({ ...form, tier: event.target.value as MemberTier }))} className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+                  <option value={MemberTier.BRONZE}>Bronze membership</option>
+                  <option value={MemberTier.GOLD}>Gold membership</option>
+                  <option value={MemberTier.PLATINUM}>Platinum membership</option>
+                </select>
+                <select value={memberForm.role} onChange={(event) => setMemberForm((form) => ({ ...form, role: event.target.value as MemberRole }))} className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+                  <option value={MemberRole.MEMBER}>Member</option>
+                  <option value={MemberRole.BOARD}>Board</option>
+                  <option value={MemberRole.EXCO}>EXCO</option>
+                  <option value={MemberRole.ADMIN}>Admin</option>
+                </select>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-4 rounded-lg bg-slate-50 p-4">
+                <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={memberForm.isExco} onChange={(event) => setMemberForm((form) => ({ ...form, isExco: event.target.checked }))} className="accent-emerald-600" /> EXCO member</label>
+                <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={memberForm.isBoard} onChange={(event) => setMemberForm((form) => ({ ...form, isBoard: event.target.checked }))} className="accent-emerald-600" /> Board member</label>
+              </div>
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <Button variant="outline" onClick={() => setShowMemberForm(false)} className="border-slate-300">Cancel</Button>
+                <Button onClick={saveMember} disabled={!memberForm.firstName.trim() || !memberForm.surname.trim() || !memberForm.company.trim() || !memberForm.email.trim()} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">{editingMemberId ? "Save changes" : "Add member"}</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

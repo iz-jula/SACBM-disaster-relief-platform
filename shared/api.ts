@@ -33,6 +33,13 @@ export interface Member {
   company: string;
   tier: MemberTier;
   role: MemberRole;
+  firstName?: string;
+  surname?: string;
+  jobTitle?: string;
+  address?: string;
+  sacbmRole?: "member" | "board-member" | "exco-member" | "admin";
+  isExco?: boolean;
+  isBoard?: boolean;
   phone?: string;
   profileImage?: string;
   joinDate: string;
