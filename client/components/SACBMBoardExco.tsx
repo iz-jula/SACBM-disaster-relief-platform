@@ -51,6 +51,15 @@ interface MemberRenewal {
   lastRenewal: string;
 }
 
+interface AdminNotification {
+  id: string;
+  title: string;
+  message: string;
+  recipient: string;
+  createdAt: string;
+  read: boolean;
+}
+
 interface PendingAuthorization {
   id: string;
   title: string;
@@ -239,7 +248,7 @@ const FinancialRecordRow = ({
   </div>
 );
 
-type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts";
+type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts" | "admin";
 
 type FinanceView = "summary" | "invoices" | "receipts";
 type ActivityFilter = "day" | "month" | "year" | "range";
@@ -291,6 +300,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [authorizationRequests, setAuthorizationRequests] = useState<PendingAuthorization[]>(MOCK_PENDING_AUTHORIZATIONS);
   const [selectedAuthorization, setSelectedAuthorization] = useState<PendingAuthorization | null>(null);
   const [authorizationNotes, setAuthorizationNotes] = useState("");
+  const [adminNotifications, setAdminNotifications] = useState<AdminNotification[]>([]);
 
   const isAdmin = member.role === MemberRole.ADMIN;
   const hasAccess = [MemberRole.ADMIN, MemberRole.EXCO, MemberRole.BOARD].includes(member.role);
@@ -430,6 +440,21 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
     if (!selectedAuthorization) return;
     if (decision === "rejected" && !authorizationNotes.trim()) return;
 
+    if (decision === "rejected") {
+      const rejectionNote = authorizationNotes.trim();
+      setAdminNotifications((notifications) => [
+        {
+          id: `notification-${Date.now()}`,
+          title: "Authorization rejected",
+          message: `${selectedAuthorization.title} was rejected by ${member.name}. Reason: ${rejectionNote}`,
+          recipient: selectedAuthorization.requester,
+          createdAt: new Date().toISOString(),
+          read: false,
+        },
+        ...notifications,
+      ]);
+    }
+
     setAuthorizationRequests((requests) =>
       requests.map((request) => {
         if (request.id !== selectedAuthorization.id) return request;
@@ -542,7 +567,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       {/* Tab Navigation */}
       <div className="border-b border-slate-200 overflow-x-auto">
         <div className="flex min-w-max gap-6 px-1">
-          {(["overview", "renewals", "authorizations", "finance", "contracts"] as TabType[]).map((tab) => (
+          {(["overview", "renewals", "authorizations", "finance", "contracts", ...(isAdmin ? ["admin"] : [])] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => {
@@ -560,6 +585,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               {tab === "authorizations" && "Authorizations"}
               {tab === "finance" && "Finance"}
               {tab === "contracts" && "Contracts"}
+              {tab === "admin" && "Admin Operations"}
             </button>
           ))}
         </div>
@@ -787,6 +813,105 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               </div>
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* Admin Operations Tab */}
+      {activeTab === "admin" && isAdmin && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-medium text-slate-900">Admin Operations</h3>
+            <p className="mt-1 text-sm text-slate-600">Daily chamber management, notifications, and review queues.</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <Card className="border-0 shadow-sm">
+              <CardContent className="px-5 py-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Unread notifications</p>
+                <p className="mt-1 text-2xl font-light text-slate-900">{adminNotifications.filter((notification) => !notification.read).length}</p>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-sm">
+              <CardContent className="px-5 py-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Authorization queue</p>
+                <p className="mt-1 text-2xl font-light text-amber-600">{authStats.pending}</p>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-sm">
+              <CardContent className="px-5 py-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Financial records</p>
+                <p className="mt-1 text-2xl font-light text-emerald-700">{financialStats.totalRecords}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle>Admin notifications</CardTitle>
+              <CardDescription>Updates sent to request originators and chamber administrators.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {adminNotifications.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-slate-200 px-4 py-8 text-center">
+                  <p className="text-sm font-medium text-slate-700">No notifications yet</p>
+                  <p className="mt-1 text-xs text-slate-500">Rejection notes and workflow updates will appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {adminNotifications.map((notification) => (
+                    <button
+                      key={notification.id}
+                      onClick={() =>
+                        setAdminNotifications((notifications) =>
+                          notifications.map((item) => item.id === notification.id ? { ...item, read: true } : item)
+                        )
+                      }
+                      className={`w-full rounded-lg border p-4 text-left transition-colors hover:bg-slate-50 ${notification.read ? "border-slate-100" : "border-amber-200 bg-amber-50/50"}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{notification.title}</p>
+                          <p className="mt-1 text-sm text-slate-600">{notification.message}</p>
+                          <p className="mt-2 text-xs text-slate-500">Originator: {notification.recipient} · {new Date(notification.createdAt).toLocaleString()}</p>
+                        </div>
+                        {!notification.read && <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Daily management queue</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <button onClick={() => setActiveTab("authorizations")} className="flex w-full items-center justify-between rounded-lg border border-slate-100 p-3 text-left hover:bg-slate-50">
+                  <span className="text-sm text-slate-700">Review authorization requests</span>
+                  <span className="text-sm font-medium text-amber-700">{authStats.pending}</span>
+                </button>
+                <button onClick={() => { setActiveTab("finance"); setFinanceView("invoices"); }} className="flex w-full items-center justify-between rounded-lg border border-slate-100 p-3 text-left hover:bg-slate-50">
+                  <span className="text-sm text-slate-700">Manage invoices and receipts</span>
+                  <span className="text-sm font-medium text-slate-900">{financialStats.totalRecords}</span>
+                </button>
+                <button onClick={() => setActiveTab("renewals")} className="flex w-full items-center justify-between rounded-lg border border-slate-100 p-3 text-left hover:bg-slate-50">
+                  <span className="text-sm text-slate-700">Monitor member renewals</span>
+                  <span className="text-sm font-medium text-slate-900">{renewalStats.total}</span>
+                </button>
+              </CardContent>
+            </Card>
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Admin access</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-6 text-slate-600">This workspace is visible only to chamber administrators. Board and EXCO members continue to see the shared finance and authorization views without access to administrative operations.</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 
