@@ -376,14 +376,18 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
         <div className="fixed inset-0 bg-white z-50 flex">
           {/* Left Sidebar - Collapsible */}
           <div className={`${sidebarOpen ? "w-64" : "w-20"} bg-white border-r border-slate-200 flex flex-col p-4 overflow-y-auto transition-all duration-300`}>
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => setDetailedEvent(null)}
-                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors font-medium flex-1"
-              >
-                <ArrowLeft className="h-4 w-4 flex-shrink-0" />
-                {sidebarOpen && <span>Back</span>}
-              </button>
+            <div className="mb-6 border-b border-slate-200 pb-4">
+              {sidebarOpen ? (
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2Fbd6f78eaf13f40608158a138ec8f1c25%2Fb6df1f14bb5a44b792b09b4e7cb119ad?format=webp&width=200"
+                  alt="SACBM Logo"
+                  className="h-7 w-auto"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-700">
+                  <span className="text-sm font-bold text-white">S</span>
+                </div>
+              )}
             </div>
             {sidebarOpen && (
               <div className="flex-1 space-y-2">
@@ -443,6 +447,14 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
             {/* Main Content - Left 2/3 */}
             <div className="flex-1 overflow-auto">
               <div className="max-w-3xl mx-auto px-8 py-12">
+                <button
+                  onClick={() => setDetailedEvent(null)}
+                  className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to events
+                </button>
+
                 {/* Title */}
                 <h1 className="text-4xl md:text-5xl font-light tracking-tight text-slate-900 mb-6">
                   {detailedEvent.title}
