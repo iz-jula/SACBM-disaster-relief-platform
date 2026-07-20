@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -114,6 +114,12 @@ interface SACBMEventsProps {
 
 const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "past">("upcoming");
+  const [eventsData, setEventsData] = useState<Event[]>(() => {
+    if (typeof window === "undefined") return MOCK_EVENTS;
+    const stored = localStorage.getItem("sacbmEvents");
+    return stored ? JSON.parse(stored) : MOCK_EVENTS;
+  });
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [detailedEvent, setDetailedEvent] = useState<Event | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -123,6 +129,24 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
   const [showMaybeForm, setShowMaybeForm] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
   const [maybeDate, setMaybeDate] = useState("");
+  const [eventForm, setEventForm] = useState({
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    endTime: "",
+    location: "",
+    capacity: "",
+    rsvpDeadline: "",
+    zoomLink: "",
+    registrationInfo: "",
+    directionsInfo: "",
+    imageUrl: "",
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sacbmEvents", JSON.stringify(eventsData));
+  }, [eventsData]);
 
   // Initialize RSVPs for current member
   useMemo(() => {
@@ -133,11 +157,11 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
     setMemberRsvps(rsvps);
   }, []);
 
-  const upcomingEvents = MOCK_EVENTS.filter((e) => e.status === "upcoming").sort(
+  const upcomingEvents = eventsData.filter((e) => e.status === "upcoming").sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  const pastEvents = MOCK_EVENTS.filter((e) => e.status === "completed").sort(
+  const pastEvents = eventsData.filter((e) => e.status === "completed").sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
@@ -154,6 +178,49 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
     return new Date(deadline) < new Date();
   };
 
+  const resetEventForm = () => {
+    setEventForm({
+      title: "",
+      description: "",
+      date: "",
+      time: "",
+      endTime: "",
+      location: "",
+      capacity: "",
+      rsvpDeadline: "",
+      zoomLink: "",
+      registrationInfo: "",
+      directionsInfo: "",
+      imageUrl: "",
+    });
+  };
+
+  const saveEvent = () => {
+    if (!eventForm.title.trim() || !eventForm.description.trim() || !eventForm.date || !eventForm.time || !eventForm.location.trim() || !eventForm.rsvpDeadline) return;
+    const newEvent: Event = {
+      id: `event-${Date.now()}`,
+      title: eventForm.title.trim(),
+      description: eventForm.description.trim(),
+      date: eventForm.date,
+      time: eventForm.time,
+      endTime: eventForm.endTime || undefined,
+      location: eventForm.location.trim(),
+      capacity: eventForm.capacity ? Number(eventForm.capacity) : undefined,
+      imageUrl: eventForm.imageUrl.trim() || undefined,
+      createdBy: member.id,
+      createdDate: new Date().toISOString().split("T")[0],
+      status: "upcoming",
+      rsvpDeadline: eventForm.rsvpDeadline,
+      zoomLink: eventForm.zoomLink.trim() || undefined,
+      registrationInfo: eventForm.registrationInfo.trim() || undefined,
+      directionsInfo: eventForm.directionsInfo.trim() || undefined,
+    };
+    setEventsData((current) => [...current, newEvent]);
+    resetEventForm();
+    setShowCreateEvent(false);
+    setSelectedTab("upcoming");
+  };
+
   return (
     <div>
       {/* Header with Create Button */}
@@ -165,7 +232,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
           </p>
         </div>
         {member.role === MemberRole.ADMIN ? (
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 w-full md:w-auto">
+          <Button onClick={() => setShowCreateEvent(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 w-full md:w-auto">
             <Plus className="h-4 w-4" />
             Create Event
           </Button>
@@ -368,6 +435,80 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {showCreateEvent && member.role === MemberRole.ADMIN && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <Card className="max-h-[92vh] w-full max-w-3xl overflow-y-auto border-0 shadow-2xl">
+            <CardHeader className="border-b border-slate-100">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-xl font-light tracking-tight text-slate-900">Create event</CardTitle>
+                  <CardDescription className="mt-1">Add the event details members will see in the portal.</CardDescription>
+                </div>
+                <button type="button" onClick={() => setShowCreateEvent(false)} className="rounded-md px-2 py-1 text-xl text-slate-400 hover:bg-slate-100">×</button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <form onSubmit={(event) => { event.preventDefault(); saveEvent(); }} className="space-y-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Event title</label>
+                    <input required value={eventForm.title} onChange={(event) => setEventForm((form) => ({ ...form, title: event.target.value }))} placeholder="e.g. SACBM Members Breakfast" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Description</label>
+                    <Textarea required value={eventForm.description} onChange={(event) => setEventForm((form) => ({ ...form, description: event.target.value }))} placeholder="Describe the purpose and impact of the event" rows={4} />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Date</label>
+                    <input required type="date" value={eventForm.date} onChange={(event) => setEventForm((form) => ({ ...form, date: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700" />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">RSVP by</label>
+                    <input required type="date" value={eventForm.rsvpDeadline} onChange={(event) => setEventForm((form) => ({ ...form, rsvpDeadline: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700" />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Start time</label>
+                    <input required type="time" value={eventForm.time} onChange={(event) => setEventForm((form) => ({ ...form, time: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700" />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">End time</label>
+                    <input type="time" value={eventForm.endTime} onChange={(event) => setEventForm((form) => ({ ...form, endTime: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700" />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Location</label>
+                    <input required value={eventForm.location} onChange={(event) => setEventForm((form) => ({ ...form, location: event.target.value }))} placeholder="Venue or Online" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Capacity <span className="font-normal text-slate-400">(optional)</span></label>
+                    <input type="number" min="1" value={eventForm.capacity} onChange={(event) => setEventForm((form) => ({ ...form, capacity: event.target.value }))} placeholder="e.g. 100" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Zoom link <span className="font-normal text-slate-400">(optional)</span></label>
+                    <input type="url" value={eventForm.zoomLink} onChange={(event) => setEventForm((form) => ({ ...form, zoomLink: event.target.value }))} placeholder="https://zoom.us/..." className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">How to register <span className="font-normal text-slate-400">(optional)</span></label>
+                    <Textarea value={eventForm.registrationInfo} onChange={(event) => setEventForm((form) => ({ ...form, registrationInfo: event.target.value }))} placeholder="Explain how members should register or confirm attendance" rows={3} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">How to get there <span className="font-normal text-slate-400">(optional)</span></label>
+                    <Textarea value={eventForm.directionsInfo} onChange={(event) => setEventForm((form) => ({ ...form, directionsInfo: event.target.value }))} placeholder="Add venue directions or online access instructions" rows={3} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Cover image URL <span className="font-normal text-slate-400">(optional)</span></label>
+                    <input type="url" value={eventForm.imageUrl} onChange={(event) => setEventForm((form) => ({ ...form, imageUrl: event.target.value }))} placeholder="https://..." className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                </div>
+                <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+                  <Button type="button" variant="outline" onClick={() => setShowCreateEvent(false)} className="border-slate-300">Cancel</Button>
+                  <Button type="submit" className="bg-emerald-600 text-white hover:bg-emerald-700">Publish event</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
 
