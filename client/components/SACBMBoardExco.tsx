@@ -654,7 +654,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       {/* Tab Navigation */}
       <div className="border-b border-slate-200 overflow-x-auto">
         <div className="flex min-w-max gap-6 px-1">
-          {(["overview", "renewals", "authorizations", "finance", "contracts", ...(isAdmin ? ["admin"] : []), ...(isGovernanceMember ? ["memos"] : [])] as TabType[]).map((tab) => (
+          {(["overview", "renewals", "authorizations", "finance", "contracts", ...(isGovernanceMember ? ["memos"] : []), ...(isAdmin ? ["admin"] : [])] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => {
