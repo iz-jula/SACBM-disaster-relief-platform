@@ -270,6 +270,7 @@ type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contrac
 type FinanceView = "summary" | "invoices" | "receipts";
 type ActivityFilter = "day" | "month" | "year" | "range";
 type ActivityCategory = "all" | "invoices" | "receipts" | "member-renewals";
+type AdminView = "overview" | "approvals" | "finance" | "notifications";
 
 const FinanceSubnav = ({
   activeView,
@@ -319,6 +320,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [selectedAuthorization, setSelectedAuthorization] = useState<PendingAuthorization | null>(null);
   const [authorizationNotes, setAuthorizationNotes] = useState("");
   const [adminNotifications, setAdminNotifications] = useState<AdminNotification[]>([]);
+  const [adminView, setAdminView] = useState<AdminView>("overview");
   const [memos, setMemos] = useState<PortalMemo[]>(() => {
     if (typeof window === "undefined") return [];
     const stored = localStorage.getItem("sacbmMemos");
@@ -981,8 +983,19 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
             <h3 className="text-xl font-medium text-slate-900">Admin Operations</h3>
             <p className="mt-1 text-sm text-slate-600">Daily chamber management, notifications, and review queues.</p>
           </div>
+          <div className="flex min-w-max gap-2 overflow-x-auto border-b border-slate-200 pb-3">
+            {(["overview", "approvals", "finance", "notifications"] as AdminView[]).map((view) => (
+              <button
+                key={view}
+                onClick={() => setAdminView(view)}
+                className={`rounded-full px-4 py-2 text-sm font-medium capitalize transition-colors ${adminView === view ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+              >
+                {view}
+              </button>
+            ))}
+          </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className={`${adminView === "overview" ? "" : "hidden"} grid grid-cols-1 gap-4 md:grid-cols-3`}>
             <Card className="border-0 shadow-sm">
               <CardContent className="px-5 py-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Unread notifications</p>
@@ -1004,7 +1017,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Card className="border-0 shadow-sm">
+            <Card className={`${adminView === "finance" ? "" : "hidden"} border-0 shadow-sm`}>
               <CardHeader>
                 <CardTitle>Finance uploads</CardTitle>
                 <CardDescription>Store finance records and keep them ready for review.</CardDescription>
@@ -1015,7 +1028,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className={`${adminView === "approvals" ? "" : "hidden"} border-0 shadow-sm lg:col-span-2`}>
               <CardHeader>
                 <CardTitle>Send for approval</CardTitle>
                 <CardDescription>Select the EXCO or Board members required to approve this request.</CardDescription>
@@ -1053,7 +1066,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
 
           </div>
 
-          <Card className="border-0 shadow-sm">
+          <Card className={`${adminView === "notifications" ? "" : "hidden"} border-0 shadow-sm`}>
             <CardHeader>
               <CardTitle>Admin notifications</CardTitle>
               <CardDescription>Updates sent to request originators and chamber administrators.</CardDescription>
@@ -1091,7 +1104,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className={`${adminView === "overview" ? "" : "hidden"} grid grid-cols-1 gap-6 lg:grid-cols-2`}>
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle>Daily management queue</CardTitle>
