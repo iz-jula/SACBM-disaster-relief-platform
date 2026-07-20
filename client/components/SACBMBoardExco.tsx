@@ -909,6 +909,31 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
             <h3 className="text-xl font-medium text-slate-900">Memos</h3>
             <p className="mt-1 text-sm text-slate-600">Internal notes and updates sent to you by the chamber administration.</p>
           </div>
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle>Send a memo</CardTitle>
+              <CardDescription>Write to Admin, Board, or EXCO members.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Input value={memoSubject} onChange={(event) => setMemoSubject(event.target.value)} placeholder="Memo subject" />
+              <textarea value={memoBody} onChange={(event) => setMemoBody(event.target.value)} rows={4} placeholder="Write an internal note or update..." className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+              <div className="flex flex-wrap gap-2">
+                {AVAILABLE_REVIEWERS.filter((reviewer) => reviewer.name !== member.name).map((reviewer) => (
+                  <label key={reviewer.id} className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                    <input
+                      type="checkbox"
+                      checked={memoRecipients.includes(reviewer.id)}
+                      onChange={() => setMemoRecipients((recipients) => recipients.includes(reviewer.id) ? recipients.filter((id) => id !== reviewer.id) : [...recipients, reviewer.id])}
+                      className="accent-emerald-600"
+                    />
+                    {reviewer.name} <span className="text-xs text-slate-400">({reviewer.role})</span>
+                  </label>
+                ))}
+              </div>
+              <Button onClick={handleSendMemo} disabled={!memoSubject.trim() || !memoBody.trim() || memoRecipients.length === 0} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">Send memo</Button>
+            </CardContent>
+          </Card>
+
           {receivedMemos.length === 0 ? (
             <Card className="border-0 shadow-sm">
               <CardContent className="px-6 py-12 text-center">
@@ -1026,30 +1051,6 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Send internal memo</CardTitle>
-                <CardDescription>Share notes and chamber updates with selected Board or EXCO members.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Input value={memoSubject} onChange={(event) => setMemoSubject(event.target.value)} placeholder="Memo subject" />
-                <textarea value={memoBody} onChange={(event) => setMemoBody(event.target.value)} rows={4} placeholder="Write the memo or internal note..." className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
-                <div className="flex flex-wrap gap-2">
-                  {AVAILABLE_REVIEWERS.filter((reviewer) => reviewer.role !== MemberRole.ADMIN).map((reviewer) => (
-                    <label key={reviewer.id} className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                      <input
-                        type="checkbox"
-                        checked={memoRecipients.includes(reviewer.id)}
-                        onChange={() => setMemoRecipients((recipients) => recipients.includes(reviewer.id) ? recipients.filter((id) => id !== reviewer.id) : [...recipients, reviewer.id])}
-                        className="accent-emerald-600"
-                      />
-                      {reviewer.name}
-                    </label>
-                  ))}
-                </div>
-                <Button onClick={handleSendMemo} disabled={!memoSubject.trim() || !memoBody.trim() || memoRecipients.length === 0} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">Send memo</Button>
-              </CardContent>
-            </Card>
           </div>
 
           <Card className="border-0 shadow-sm">
