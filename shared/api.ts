@@ -36,6 +36,7 @@ export interface Member {
   firstName?: string;
   surname?: string;
   jobTitle?: string;
+  chamberTitle?: string;
   address?: string;
   sacbmRole?: "member" | "board-member" | "exco-member" | "admin";
   isExco?: boolean;

@@ -126,6 +126,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     surname: "",
     company: "",
     jobTitle: "",
+    chamberTitle: "",
     email: "",
     phone: "",
     address: "",
@@ -221,6 +222,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         surname: member.surname || member.name.split(" ").slice(1).join(" "),
         company: member.company,
         jobTitle: member.jobTitle || "",
+        chamberTitle: member.chamberTitle || "",
         email: member.email,
         phone: member.phone || "",
         address: member.address || "",
@@ -231,7 +233,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       });
     } else {
       setEditingMemberId(null);
-      setMemberForm({ firstName: "", surname: "", company: "", jobTitle: "", email: "", phone: "", address: "", tier: MemberTier.BRONZE, role: MemberRole.MEMBER, isExco: false, isBoard: false });
+      setMemberForm({ firstName: "", surname: "", company: "", jobTitle: "", chamberTitle: "", email: "", phone: "", address: "", tier: MemberTier.BRONZE, role: MemberRole.MEMBER, isExco: false, isBoard: false });
     }
     setShowMemberForm(true);
   };
@@ -245,6 +247,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       surname: memberForm.surname.trim(),
       company: memberForm.company.trim(),
       jobTitle: memberForm.jobTitle.trim(),
+      chamberTitle: memberForm.chamberTitle.trim(),
       email: memberForm.email.trim(),
       phone: memberForm.phone.trim(),
       address: memberForm.address.trim(),
@@ -413,6 +416,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                   <Building2 className="h-4 w-4" />
                   {member.company}
                 </p>
+                {member.chamberTitle && (
+                  <p className="mt-2 text-center text-xs font-medium text-emerald-700">{member.chamberTitle}</p>
+                )}
 
                 {/* Badges */}
                 <div className="flex flex-wrap justify-center gap-2 mt-4">
@@ -481,6 +487,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                           <Building2 className="h-4 w-4" />
                           {member.company}
                         </p>
+                        {member.chamberTitle && (
+                          <p className="mt-1 text-xs font-medium text-emerald-700">{member.chamberTitle}</p>
+                        )}
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           <Badge
                             className={`text-xs ${getTierColor(member.tier)}`}
@@ -544,6 +553,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 <Input placeholder="Surname" value={memberForm.surname} onChange={(event) => setMemberForm((form) => ({ ...form, surname: event.target.value }))} />
                 <Input placeholder="Company" value={memberForm.company} onChange={(event) => setMemberForm((form) => ({ ...form, company: event.target.value }))} />
                 <Input placeholder="Role within company" value={memberForm.jobTitle} onChange={(event) => setMemberForm((form) => ({ ...form, jobTitle: event.target.value }))} />
+                <Input placeholder="Role within SACBM (e.g. CEO of SACBM)" value={memberForm.chamberTitle} onChange={(event) => setMemberForm((form) => ({ ...form, chamberTitle: event.target.value }))} />
                 <Input type="email" placeholder="Email" value={memberForm.email} onChange={(event) => setMemberForm((form) => ({ ...form, email: event.target.value }))} />
                 <Input placeholder="Phone" value={memberForm.phone} onChange={(event) => setMemberForm((form) => ({ ...form, phone: event.target.value }))} />
                 <textarea placeholder="Address" value={memberForm.address} onChange={(event) => setMemberForm((form) => ({ ...form, address: event.target.value }))} rows={2} className="resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:col-span-2" />
