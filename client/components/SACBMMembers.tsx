@@ -553,25 +553,33 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 <Input placeholder="Surname" value={memberForm.surname} onChange={(event) => setMemberForm((form) => ({ ...form, surname: event.target.value }))} />
                 <Input placeholder="Company" value={memberForm.company} onChange={(event) => setMemberForm((form) => ({ ...form, company: event.target.value }))} />
                 <Input placeholder="Role within company" value={memberForm.jobTitle} onChange={(event) => setMemberForm((form) => ({ ...form, jobTitle: event.target.value }))} />
-                <Input placeholder="Role within SACBM (e.g. CEO of SACBM)" value={memberForm.chamberTitle} onChange={(event) => setMemberForm((form) => ({ ...form, chamberTitle: event.target.value }))} />
                 <Input type="email" placeholder="Email" value={memberForm.email} onChange={(event) => setMemberForm((form) => ({ ...form, email: event.target.value }))} />
                 <Input placeholder="Phone" value={memberForm.phone} onChange={(event) => setMemberForm((form) => ({ ...form, phone: event.target.value }))} />
                 <textarea placeholder="Address" value={memberForm.address} onChange={(event) => setMemberForm((form) => ({ ...form, address: event.target.value }))} rows={2} className="resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:col-span-2" />
-                <select value={memberForm.tier} onChange={(event) => setMemberForm((form) => ({ ...form, tier: event.target.value as MemberTier }))} className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
-                  <option value={MemberTier.BRONZE}>Bronze membership</option>
-                  <option value={MemberTier.GOLD}>Gold membership</option>
-                  <option value={MemberTier.PLATINUM}>Platinum membership</option>
-                </select>
-                <select value={memberForm.role} onChange={(event) => setMemberForm((form) => ({ ...form, role: event.target.value as MemberRole }))} className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
-                  <option value={MemberRole.MEMBER}>Member</option>
-                  <option value={MemberRole.BOARD}>Board</option>
-                  <option value={MemberRole.EXCO}>EXCO</option>
-                  <option value={MemberRole.ADMIN}>Admin</option>
-                </select>
               </div>
-              <div className="mt-5 flex flex-wrap gap-4 rounded-lg bg-slate-50 p-4">
-                <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={memberForm.isExco} onChange={(event) => setMemberForm((form) => ({ ...form, isExco: event.target.checked }))} className="accent-emerald-600" /> EXCO member</label>
-                <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={memberForm.isBoard} onChange={(event) => setMemberForm((form) => ({ ...form, isBoard: event.target.checked }))} className="accent-emerald-600" /> Board member</label>
+              <div className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-slate-900">SACBM profile</h4>
+                  <p className="mt-1 text-xs text-slate-600">Add the member’s chamber title and governance responsibilities.</p>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <select aria-label="Membership tier" value={memberForm.tier} onChange={(event) => setMemberForm((form) => ({ ...form, tier: event.target.value as MemberTier }))} className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+                    <option value={MemberTier.BRONZE}>Bronze membership</option>
+                    <option value={MemberTier.GOLD}>Gold membership</option>
+                    <option value={MemberTier.PLATINUM}>Platinum membership</option>
+                  </select>
+                  <Input placeholder="Chamber title (e.g. CEO of SACBM)" value={memberForm.chamberTitle} onChange={(event) => setMemberForm((form) => ({ ...form, chamberTitle: event.target.value }))} />
+                  <select aria-label="Role within SACBM" value={memberForm.role} onChange={(event) => setMemberForm((form) => ({ ...form, role: event.target.value as MemberRole }))} className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+                    <option value={MemberRole.MEMBER}>Member</option>
+                    <option value={MemberRole.BOARD}>Board</option>
+                    <option value={MemberRole.EXCO}>EXCO</option>
+                    <option value={MemberRole.ADMIN}>Admin</option>
+                  </select>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-4 border-t border-emerald-100 pt-4">
+                  <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={memberForm.isExco} onChange={(event) => setMemberForm((form) => ({ ...form, isExco: event.target.checked }))} className="accent-emerald-600" /> EXCO member</label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={memberForm.isBoard} onChange={(event) => setMemberForm((form) => ({ ...form, isBoard: event.target.checked }))} className="accent-emerald-600" /> Board member</label>
+                </div>
               </div>
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={() => setShowMemberForm(false)} className="border-slate-300">Cancel</Button>
