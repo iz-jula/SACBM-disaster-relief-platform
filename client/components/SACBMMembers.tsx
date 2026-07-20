@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Mail, Phone, Building2, MapPin, UserPlus, Pencil, UserX } from "lucide-react";
+import { Search, Mail, Phone, Building2, MapPin, UserPlus, Pencil, UserX, RotateCcw, Trash2 } from "lucide-react";
 import { Member, MemberTier, MemberRole } from "@shared/api";
 
 // Mock members data
@@ -266,6 +266,14 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const toggleMemberStatus = (memberId: string) => {
     setMembers((current) => current.map((item) => item.id === memberId ? { ...item, isActive: !item.isActive } : item));
   };
+
+  const deleteMember = (memberId: string) => {
+    const member = members.find((item) => item.id === memberId);
+    if (!member || !window.confirm(`Permanently delete ${member.name} from the directory?`)) return;
+    setMembers((current) => current.filter((item) => item.id !== memberId));
+  };
+
+  const inactiveMembers = members.filter((member) => !member.isActive);
 
   return (
     <div>
@@ -535,6 +543,40 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             </Card>
           ))}
         </div>
+      )}
+
+      {currentMember.role === MemberRole.ADMIN && inactiveMembers.length > 0 && (
+        <Card className="mt-8 border border-slate-200 shadow-sm">
+          <CardContent className="p-5">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900">Inactive members</h3>
+                <p className="mt-1 text-sm text-slate-500">Deactivated members are hidden from the directory but can still be restored or removed.</p>
+              </div>
+              <Badge variant="outline" className="border-slate-200 text-slate-600">{inactiveMembers.length}</Badge>
+            </div>
+            <div className="space-y-2">
+              {inactiveMembers.map((member) => (
+                <div key={member.id} className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-medium text-slate-800">{member.name}</p>
+                    <p className="truncate text-sm text-slate-500">{member.company} · {member.email}</p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => toggleMemberStatus(member.id)} className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                      <RotateCcw className="h-4 w-4" />
+                      Reactivate
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => deleteMember(member.id)} className="border-red-200 text-red-700 hover:bg-red-50">
+                      <Trash2 className="h-4 w-4" />
+                      Permanently delete
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {showMemberForm && currentMember.role === MemberRole.ADMIN && (
