@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,16 @@ interface AdminNotification {
   read: boolean;
 }
 
+interface PortalMemo {
+  id: string;
+  subject: string;
+  body: string;
+  sender: string;
+  recipientIds: string[];
+  createdAt: string;
+  readBy: string[];
+}
+
 interface PendingAuthorization {
   id: string;
   title: string;
@@ -76,6 +86,13 @@ interface PendingAuthorization {
   attachmentUrl?: string;
   rejectionNote?: string;
 }
+
+const AVAILABLE_REVIEWERS = [
+  { id: "sean-exco", name: "Sean Williams", role: MemberRole.EXCO },
+  { id: "amina-exco", name: "Amina Patel", role: MemberRole.EXCO },
+  { id: "thandi-board", name: "Thandi Mokoena", role: MemberRole.BOARD },
+  { id: "joao-admin", name: "João Silva", role: MemberRole.ADMIN },
+];
 
 const MONTHS = [
   "January",
@@ -248,7 +265,7 @@ const FinancialRecordRow = ({
   </div>
 );
 
-type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts" | "admin";
+type TabType = "overview" | "renewals" | "authorizations" | "finance" | "contracts" | "admin" | "memos";
 
 type FinanceView = "summary" | "invoices" | "receipts";
 type ActivityFilter = "day" | "month" | "year" | "range";
@@ -296,14 +313,32 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [uploadType, setUploadType] = useState<"receipt" | "invoice" | "contract">("receipt");
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadCategory, setUploadCategory] = useState("");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [financialRecords, setFinancialRecords] = useState<FinancialRecord[]>(MOCK_FINANCIAL_RECORDS);
   const [authorizationRequests, setAuthorizationRequests] = useState<PendingAuthorization[]>(MOCK_PENDING_AUTHORIZATIONS);
   const [selectedAuthorization, setSelectedAuthorization] = useState<PendingAuthorization | null>(null);
   const [authorizationNotes, setAuthorizationNotes] = useState("");
   const [adminNotifications, setAdminNotifications] = useState<AdminNotification[]>([]);
+  const [memos, setMemos] = useState<PortalMemo[]>(() => {
+    if (typeof window === "undefined") return [];
+    const stored = localStorage.getItem("sacbmMemos");
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [memoSubject, setMemoSubject] = useState("");
+  const [memoBody, setMemoBody] = useState("");
+  const [memoRecipients, setMemoRecipients] = useState<string[]>([]);
+  const [approvalTitle, setApprovalTitle] = useState("");
+  const [approvalAmount, setApprovalAmount] = useState("");
+  const [approvalType, setApprovalType] = useState<PendingAuthorization["type"]>("payment");
+  const [approvalRecipients, setApprovalRecipients] = useState<string[]>([]);
 
   const isAdmin = member.role === MemberRole.ADMIN;
   const hasAccess = [MemberRole.ADMIN, MemberRole.EXCO, MemberRole.BOARD].includes(member.role);
+  const isGovernanceMember = hasAccess;
+
+  useEffect(() => {
+    localStorage.setItem("sacbmMemos", JSON.stringify(memos));
+  }, [memos]);
 
   if (!hasAccess) {
     return (
@@ -436,6 +471,11 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
     return { pending, approved, highPriority };
   }, [authorizationRequests]);
 
+  const receivedMemos = useMemo(
+    () => memos.filter((memo) => memo.recipientIds.includes(member.id) || memo.recipientIds.some((id) => AVAILABLE_REVIEWERS.find((reviewer) => reviewer.id === id)?.name === member.name)),
+    [member.id, member.name, memos]
+  );
+
   const handleAuthorization = (decision: "approved" | "rejected") => {
     if (!selectedAuthorization) return;
     if (decision === "rejected" && !authorizationNotes.trim()) return;
@@ -477,8 +517,51 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
     setAuthorizationNotes("");
   };
 
+  const handleSendMemo = () => {
+    if (!memoSubject.trim() || !memoBody.trim() || memoRecipients.length === 0) return;
+    setMemos((current) => [
+      {
+        id: `memo-${Date.now()}`,
+        subject: memoSubject.trim(),
+        body: memoBody.trim(),
+        sender: member.name,
+        recipientIds: memoRecipients,
+        createdAt: new Date().toISOString(),
+        readBy: [],
+      },
+      ...current,
+    ]);
+    setMemoSubject("");
+    setMemoBody("");
+    setMemoRecipients([]);
+  };
+
+  const handleSendApproval = () => {
+    if (!approvalTitle.trim() || approvalRecipients.length === 0) return;
+    const recipients = AVAILABLE_REVIEWERS.filter((reviewer) => approvalRecipients.includes(reviewer.id));
+    const newRequest: PendingAuthorization = {
+      id: `authorization-${Date.now()}`,
+      title: approvalTitle.trim(),
+      requester: member.name,
+      amount: approvalAmount ? Number(approvalAmount) : undefined,
+      type: approvalType,
+      requestDate: new Date().toISOString().split("T")[0],
+      status: "pending",
+      priority: "medium",
+      requiredApprovals: recipients.length,
+      approvedBy: [],
+      pendingApprovers: recipients.map((recipient) => recipient.name),
+      deadline: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
+      attachmentUrl: "/docs/placeholder.pdf",
+    };
+    setAuthorizationRequests((requests) => [newRequest, ...requests]);
+    setApprovalTitle("");
+    setApprovalAmount("");
+    setApprovalRecipients([]);
+  };
+
   const handleUploadFile = () => {
-    if (uploadTitle.trim() && uploadCategory.trim()) {
+    if (uploadTitle.trim() && uploadCategory.trim() && uploadFile) {
       const newRecord: FinancialRecord = {
         id: `record-${Date.now()}`,
         title: uploadTitle,
@@ -486,13 +569,15 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
         date: new Date().toISOString().split("T")[0],
         uploadedBy: member.name,
         category: uploadCategory,
-        fileUrl: "/docs/placeholder.pdf",
-        status: isAdmin ? "approved" : "pending",
+        fileUrl: URL.createObjectURL(uploadFile),
+        fileSize: uploadFile.size / (1024 * 1024),
+        status: "approved",
       };
 
       setFinancialRecords([newRecord, ...financialRecords]);
       setUploadTitle("");
       setUploadCategory("");
+      setUploadFile(null);
       setShowUploadModal(false);
     }
   };
@@ -567,7 +652,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       {/* Tab Navigation */}
       <div className="border-b border-slate-200 overflow-x-auto">
         <div className="flex min-w-max gap-6 px-1">
-          {(["overview", "renewals", "authorizations", "finance", "contracts", ...(isAdmin ? ["admin"] : [])] as TabType[]).map((tab) => (
+          {(["overview", "renewals", "authorizations", "finance", "contracts", ...(isAdmin ? ["admin"] : []), ...(isGovernanceMember ? ["memos"] : [])] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => {
@@ -586,6 +671,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               {tab === "finance" && "Finance"}
               {tab === "contracts" && "Contracts"}
               {tab === "admin" && "Admin Operations"}
+              {tab === "memos" && "Memos"}
             </button>
           ))}
         </div>
@@ -816,6 +902,53 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
         </div>
       )}
 
+      {/* Memo Inbox */}
+      {activeTab === "memos" && isGovernanceMember && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-medium text-slate-900">Memos</h3>
+            <p className="mt-1 text-sm text-slate-600">Internal notes and updates sent to you by the chamber administration.</p>
+          </div>
+          {receivedMemos.length === 0 ? (
+            <Card className="border-0 shadow-sm">
+              <CardContent className="px-6 py-12 text-center">
+                <p className="text-sm font-medium text-slate-700">No memos yet</p>
+                <p className="mt-1 text-xs text-slate-500">Memos sent to you will appear here.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {receivedMemos.map((memo) => {
+                const isRead = memo.readBy.includes(member.id);
+                return (
+                  <Card key={memo.id} className={`border shadow-sm ${isRead ? "border-slate-100" : "border-emerald-200 bg-emerald-50/30"}`}>
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-slate-900">{memo.subject}</p>
+                          <p className="mt-1 text-xs text-slate-500">From {memo.sender} · {new Date(memo.createdAt).toLocaleString()}</p>
+                        </div>
+                        {!isRead && <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">New</span>}
+                      </div>
+                      <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-700">{memo.body}</p>
+                      {!isRead && (
+                        <Button
+                          variant="outline"
+                          className="mt-4 border-slate-300 text-slate-700"
+                          onClick={() => setMemos((items) => items.map((item) => item.id === memo.id ? { ...item, readBy: [...item.readBy, member.id] } : item))}
+                        >
+                          Mark as read
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Admin Operations Tab */}
       {activeTab === "admin" && isAdmin && (
         <div className="space-y-6">
@@ -841,6 +974,80 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               <CardContent className="px-5 py-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Financial records</p>
                 <p className="mt-1 text-2xl font-light text-emerald-700">{financialStats.totalRecords}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Finance uploads</CardTitle>
+                <CardDescription>Store finance records and keep them ready for review.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-3">
+                <Button onClick={() => { setUploadType("invoice"); setShowUploadModal(true); }} className="bg-emerald-600 text-white hover:bg-emerald-700">Upload invoice</Button>
+                <Button onClick={() => { setUploadType("receipt"); setShowUploadModal(true); }} variant="outline" className="border-slate-300">Upload receipt</Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Send for approval</CardTitle>
+                <CardDescription>Select the EXCO or Board members required to approve this request.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input value={approvalTitle} onChange={(event) => setApprovalTitle(event.target.value)} placeholder="Request title" />
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <Input type="number" value={approvalAmount} onChange={(event) => setApprovalAmount(event.target.value)} placeholder="Amount (optional)" />
+                  <Select value={approvalType} onValueChange={(value) => setApprovalType(value as PendingAuthorization["type"])}>
+                    <SelectTrigger><SelectValue placeholder="Request type" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="payment">Payment</SelectItem>
+                      <SelectItem value="document-approval">Document approval</SelectItem>
+                      <SelectItem value="event-approval">Event approval</SelectItem>
+                      <SelectItem value="member-change">Member change</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {AVAILABLE_REVIEWERS.filter((reviewer) => reviewer.role !== MemberRole.ADMIN).map((reviewer) => (
+                    <label key={reviewer.id} className="flex items-center gap-2 rounded-md border border-slate-100 p-2 text-sm text-slate-700 hover:bg-slate-50">
+                      <input
+                        type="checkbox"
+                        checked={approvalRecipients.includes(reviewer.id)}
+                        onChange={() => setApprovalRecipients((recipients) => recipients.includes(reviewer.id) ? recipients.filter((id) => id !== reviewer.id) : [...recipients, reviewer.id])}
+                        className="accent-emerald-600"
+                      />
+                      {reviewer.name} <span className="text-xs text-slate-400">({reviewer.role})</span>
+                    </label>
+                  ))}
+                </div>
+                <Button onClick={handleSendApproval} disabled={!approvalTitle.trim() || approvalRecipients.length === 0} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">Send approval request</Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Send internal memo</CardTitle>
+                <CardDescription>Share notes and chamber updates with selected Board or EXCO members.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input value={memoSubject} onChange={(event) => setMemoSubject(event.target.value)} placeholder="Memo subject" />
+                <textarea value={memoBody} onChange={(event) => setMemoBody(event.target.value)} rows={4} placeholder="Write the memo or internal note..." className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                <div className="flex flex-wrap gap-2">
+                  {AVAILABLE_REVIEWERS.filter((reviewer) => reviewer.role !== MemberRole.ADMIN).map((reviewer) => (
+                    <label key={reviewer.id} className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                      <input
+                        type="checkbox"
+                        checked={memoRecipients.includes(reviewer.id)}
+                        onChange={() => setMemoRecipients((recipients) => recipients.includes(reviewer.id) ? recipients.filter((id) => id !== reviewer.id) : [...recipients, reviewer.id])}
+                        className="accent-emerald-600"
+                      />
+                      {reviewer.name}
+                    </label>
+                  ))}
+                </div>
+                <Button onClick={handleSendMemo} disabled={!memoSubject.trim() || !memoBody.trim() || memoRecipients.length === 0} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">Send memo</Button>
               </CardContent>
             </Card>
           </div>
@@ -1407,6 +1614,16 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               </div>
 
               <div>
+                <label className="text-sm font-medium text-slate-700 block mb-2">File</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  onChange={(event) => setUploadFile(event.target.files?.[0] || null)}
+                  className="w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-emerald-700 hover:file:bg-emerald-100"
+                />
+              </div>
+
+              <div>
                 <label className="text-sm font-medium text-slate-700 block mb-2">Category</label>
                 <Select value={uploadCategory} onValueChange={setUploadCategory}>
                   <SelectTrigger className="border-slate-200">
@@ -1425,7 +1642,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               <div className="flex gap-3 pt-2">
                 <Button
                   onClick={handleUploadFile}
-                  disabled={!uploadTitle.trim() || !uploadCategory}
+                  disabled={!uploadTitle.trim() || !uploadCategory || !uploadFile}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
                   Upload
@@ -1435,6 +1652,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                     setShowUploadModal(false);
                     setUploadTitle("");
                     setUploadCategory("");
+                    setUploadFile(null);
                   }}
                   variant="outline"
                   className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-100"
