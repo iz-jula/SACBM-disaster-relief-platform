@@ -399,7 +399,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                   setSelectedDocumentIds(new Set());
                 }}
               >
-                <Check className="mr-2 h-4 w-4" />
+                {isSelectingDocuments ? <X className="mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />}
                 {isSelectingDocuments ? "Exit document selection" : "Select document"}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -690,12 +690,26 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             <Button
               type="button"
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={() => setSelectedDocumentIds(new Set())}
               disabled={selectedDocumentIds.size === 0}
               aria-label="Clear selected documents"
               title="Clear selected documents"
-              className="h-8 w-8 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              className="h-8 px-2 text-xs font-medium text-slate-600 hover:bg-transparent hover:text-slate-900"
+            >
+              Clear
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setIsSelectingDocuments(false);
+                setSelectedDocumentIds(new Set());
+              }}
+              aria-label="Exit document selection"
+              title="Exit document selection"
+              className="h-8 w-8 text-slate-500 hover:bg-transparent hover:text-slate-900"
             >
               <X className="h-4 w-4" />
             </Button>
