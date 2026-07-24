@@ -624,16 +624,20 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                   Back to events
                 </button>
 
+                {detailedEvent.imageUrl && (
+                  <img src={detailedEvent.imageUrl} alt={detailedEvent.title} className="mb-8 h-56 w-full rounded-2xl object-cover md:hidden" />
+                )}
+
                 {/* Title */}
                 <h1 className="text-4xl md:text-5xl font-light tracking-tight text-slate-900 mb-6">
                   {detailedEvent.title}
                 </h1>
 
-                {/* Zoom Link - If Online */}
+                {/* Online Meeting Link */}
                 {detailedEvent.zoomLink && (
-                  <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm font-medium text-blue-900 mb-2">Join online via Zoom</p>
-                    <a href={detailedEvent.zoomLink} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-700 hover:text-blue-900 break-all">
+                  <div className="mb-8 rounded-xl border border-blue-200 bg-blue-50/70 p-5">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-900">Online meeting link</p>
+                    <a href={detailedEvent.zoomLink} target="_blank" rel="noopener noreferrer" className="break-all text-sm font-semibold text-blue-700 hover:text-blue-900">
                       {detailedEvent.zoomLink}
                     </a>
                   </div>
@@ -719,9 +723,15 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
 
             {/* Sidebar - Right 1/3 with Image and RSVP */}
             <div className="hidden md:flex md:w-1/3 flex-col bg-white border-l border-slate-200 h-[calc(100vh-80px)] overflow-hidden">
-              {/* Image - Longer to cover top */}
-              <div className="h-2/3 min-h-[450px] bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                <Calendar className="h-24 w-24 text-slate-300" />
+              {/* Cover image */}
+              <div className="h-2/3 min-h-[450px] overflow-hidden bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center flex-shrink-0">
+                {detailedEvent.imageUrl ? (
+                  <img src={detailedEvent.imageUrl} alt={detailedEvent.title} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Calendar className="h-24 w-24 text-slate-300" />
+                  </div>
+                )}
               </div>
 
               {/* RSVP Section - Sticky Bottom */}
