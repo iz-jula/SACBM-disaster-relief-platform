@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Download, Search, Upload, Plus, Trash2, MoreHorizontal, Check } from "lucide-react";
+import { FileText, Download, Search, Upload, Plus, Trash2, MoreHorizontal, Check, Pencil, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -397,6 +397,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                 Download selected{selectedDocumentIds.size > 0 ? ` (${selectedDocumentIds.size})` : ""}
               </DropdownMenuItem>
               <DropdownMenuItem disabled={selectedDocumentIds.size === 0} onSelect={() => setSelectedDocumentIds(new Set())}>
+                <X className="mr-2 h-4 w-4" />
                 Clear selection
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -740,13 +741,14 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                             Download
                           </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => toggleDocumentSelection(doc.id)}>
-                            <Check className={`mr-2 h-4 w-4 ${selectedDocumentIds.has(doc.id) ? "opacity-100" : "opacity-0"}`} />
+                            <Check className="mr-2 h-4 w-4" />
                             {selectedDocumentIds.has(doc.id) ? "Remove from selection" : "Select for download"}
                           </DropdownMenuItem>
                           {member.role === MemberRole.ADMIN && (
                             <>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onSelect={() => openEditDocument(doc)}>
+                                <Pencil className="mr-2 h-4 w-4" />
                                 Edit details
                               </DropdownMenuItem>
                               <DropdownMenuItem
