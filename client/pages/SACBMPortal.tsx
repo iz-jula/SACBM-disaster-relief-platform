@@ -198,13 +198,6 @@ const SACBMPortal = () => {
         <div className="border-b border-slate-200 bg-white sticky top-0 z-30">
           <div className="px-6 py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => setProfileOpen(true)}
-                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105"
-                title="Open profile"
-              >
-                {currentMember.profileImage ? <img src={currentMember.profileImage} alt={currentMember.name} className="h-full w-full object-cover" /> : currentMember.name.split(" ").map(n => n[0]).join("")}
-              </button>
               {isMobile && (
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -230,15 +223,20 @@ const SACBMPortal = () => {
                 </button>
               )}
               {/* Profile Section */}
-              <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-                <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setProfileOpen(true)}
+                title="Open profile"
+                className="flex items-center gap-3 border-l border-slate-200 pl-4 text-left transition-opacity hover:opacity-80"
+              >
+                <div>
                   <p className="text-sm font-semibold text-slate-900">{currentMember.nickname || currentMember.name}</p>
                   <p className="text-xs text-slate-600">{currentMember.company}</p>
                 </div>
                 <div className="w-10 h-10 overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                   {currentMember.profileImage ? <img src={currentMember.profileImage} alt={currentMember.name} className="h-full w-full object-cover" /> : currentMember.name.split(" ").map(n => n[0]).join("")}
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
