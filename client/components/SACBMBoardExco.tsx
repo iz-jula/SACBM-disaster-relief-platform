@@ -600,7 +600,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                 <div>
                   <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Financial Records</p>
                   <p className="text-3xl font-light text-slate-900 mt-2">{financialStats.totalRecords}</p>
-                  <p className="text-xs text-slate-500 mt-2">{financialStats.pending} pending approval</p>
+                  <p className={`mt-2 text-xs font-medium ${financialStats.pending > 0 ? "text-amber-700" : "text-slate-500"}`}>
+                    {financialStats.pending} pending approval
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -612,7 +614,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                 <div>
                   <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Member Renewals</p>
                   <p className="text-3xl font-light text-slate-900 mt-2">{renewalStats.total}</p>
-                  <p className="text-xs text-slate-500 mt-2">{renewalStats.expiringSoon} expiring soon</p>
+                  <p className={`mt-2 text-xs font-medium ${renewalStats.expiringSoon > 0 ? "text-amber-700" : "text-slate-500"}`}>
+                    {renewalStats.expiringSoon} expiring soon
+                  </p>
                 </div>
               </div>
             </CardContent>
