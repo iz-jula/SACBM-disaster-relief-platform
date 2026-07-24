@@ -10,10 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DollarSign,
-  Users,
   FileText,
-  TrendingUp,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -605,7 +602,6 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                   <p className="text-3xl font-light text-slate-900 mt-2">{financialStats.totalRecords}</p>
                   <p className="text-xs text-slate-500 mt-2">{financialStats.pending} pending approval</p>
                 </div>
-                <DollarSign className="h-8 w-8 text-emerald-600 opacity-20" />
               </div>
             </CardContent>
           </Card>
@@ -618,7 +614,6 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                   <p className="text-3xl font-light text-slate-900 mt-2">{renewalStats.total}</p>
                   <p className="text-xs text-slate-500 mt-2">{renewalStats.expiringSoon} expiring soon</p>
                 </div>
-                <Users className="h-8 w-8 text-blue-600 opacity-20" />
               </div>
             </CardContent>
           </Card>
@@ -631,7 +626,6 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                   <p className="text-3xl font-light text-slate-900 mt-2">{authStats.pending}</p>
                   <p className="text-xs text-slate-500 mt-2">{authStats.highPriority} high priority</p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-amber-600 opacity-20" />
               </div>
             </CardContent>
           </Card>
@@ -644,7 +638,6 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                   <p className="text-3xl font-light text-slate-900 mt-2">${financialStats.totalAmount.toLocaleString()}</p>
                   <p className="text-xs text-slate-500 mt-2">{financialStats.approved} documents</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-purple-600 opacity-20" />
               </div>
             </CardContent>
           </Card>
