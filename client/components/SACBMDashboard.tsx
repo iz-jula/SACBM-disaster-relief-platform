@@ -40,7 +40,10 @@ const getNotificationColor = (notification: SacbmDashboardNotification) => {
 
 const SACBMDashboard = ({ member, onOpenEvent }: SACBMDashboardProps) => {
   const today = new Date();
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(() => {
+    const current = new Date();
+    return `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}-${String(current.getDate()).padStart(2, "0")}`;
+  });
   const [events, setEvents] = useState<Event[]>([]);
   const [activeMemberCount, setActiveMemberCount] = useState(0);
   const [notifications, setNotifications] = useState<SacbmDashboardNotification[]>([]);
