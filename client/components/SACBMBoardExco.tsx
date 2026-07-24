@@ -624,7 +624,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                 <div>
                   <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Pending Approvals</p>
                   <p className="text-3xl font-light text-slate-900 mt-2">{authStats.pending}</p>
-                  <p className="text-xs text-slate-500 mt-2">{authStats.highPriority} high priority</p>
+                  <p className={`mt-2 text-xs font-medium ${authStats.highPriority > 0 ? "text-red-600" : "text-slate-500"}`}>
+                    {authStats.highPriority} high priority
+                  </p>
                 </div>
               </div>
             </CardContent>
