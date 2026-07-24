@@ -412,8 +412,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             <Card key={member.id} className="border-0 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
               <CardContent className="p-6">
                 {/* Member Avatar */}
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white text-xl font-bold mx-auto mb-4">
-                  {member.name.split(" ").map((n) => n[0]).join("")}
+                <div className="flex items-center justify-center w-16 h-16 overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white text-xl font-bold mx-auto mb-4">
+                  {member.profileImage ? <img src={member.profileImage} alt={member.name} className="h-full w-full object-cover" /> : member.name.split(" ").map((n) => n[0]).join("")}
                 </div>
 
                 {/* Name */}
@@ -426,6 +426,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 </p>
                 {member.chamberTitle && (
                   <p className="mt-2 text-center text-xs font-medium text-emerald-700">{member.chamberTitle}</p>
+                )}
+                {member.funFact && (
+                  <p className="mt-2 text-center text-xs italic text-slate-500">“{member.funFact}”</p>
                 )}
 
                 {/* Badges */}
@@ -482,8 +485,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   {/* Avatar */}
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center font-bold">
-                    {member.name.split(" ").map((n) => n[0]).join("")}
+                  <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white flex items-center justify-center font-bold">
+                    {member.profileImage ? <img src={member.profileImage} alt={member.name} className="h-full w-full object-cover" /> : member.name.split(" ").map((n) => n[0]).join("")}
                   </div>
 
                   {/* Info */}
@@ -497,6 +500,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                         </p>
                         {member.chamberTitle && (
                           <p className="mt-1 text-xs font-medium text-emerald-700">{member.chamberTitle}</p>
+                        )}
+                        {member.funFact && (
+                          <p className="mt-1 text-xs italic text-slate-500">“{member.funFact}”</p>
                         )}
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           <Badge

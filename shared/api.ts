@@ -43,6 +43,8 @@ export interface Member {
   isBoard?: boolean;
   phone?: string;
   profileImage?: string;
+  nickname?: string;
+  funFact?: string;
   joinDate: string;
   isActive: boolean;
 }

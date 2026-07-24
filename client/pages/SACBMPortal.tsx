@@ -23,6 +23,8 @@ import { Member, MemberTier, MemberRole } from "@shared/api";
 const SACBMPortal = () => {
   const navigate = useNavigate();
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({ profileImage: "", nickname: "", funFact: "" });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentSection, setCurrentSection] = useState<"dashboard" | "documents" | "events" | "members" | "board-exco">("dashboard");
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -37,7 +39,9 @@ const SACBMPortal = () => {
   useEffect(() => {
     const stored = localStorage.getItem("currentMember");
     if (stored) {
-      setCurrentMember(JSON.parse(stored));
+      const storedMember = JSON.parse(stored) as Member;
+      setCurrentMember(storedMember);
+      setProfileForm({ profileImage: storedMember.profileImage || "", nickname: storedMember.nickname || "", funFact: storedMember.funFact || "" });
     } else {
       navigate("/sacbm-login");
     }
@@ -47,6 +51,19 @@ const SACBMPortal = () => {
     localStorage.removeItem("currentMember");
     setCurrentMember(null);
     navigate("/sacbm-login");
+  };
+
+  const saveProfile = () => {
+    if (!currentMember) return;
+    const updatedMember = { ...currentMember, profileImage: profileForm.profileImage || undefined, nickname: profileForm.nickname.trim() || undefined, funFact: profileForm.funFact.trim() || undefined };
+    setCurrentMember(updatedMember);
+    localStorage.setItem("currentMember", JSON.stringify(updatedMember));
+    const storedMembers = localStorage.getItem("sacbmMembers");
+    if (storedMembers) {
+      const members = JSON.parse(storedMembers) as Member[];
+      localStorage.setItem("sacbmMembers", JSON.stringify(members.map((member) => member.id === updatedMember.id ? { ...member, ...updatedMember } : member)));
+    }
+    setProfileOpen(false);
   };
 
   const getTierColor = (tier: MemberTier) => {
@@ -181,6 +198,13 @@ const SACBMPortal = () => {
         <div className="border-b border-slate-200 bg-white sticky top-0 z-30">
           <div className="px-6 py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => setProfileOpen(true)}
+                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-bold text-white shadow-sm transition-transform hover:scale-105"
+                title="Open profile"
+              >
+                {currentMember.profileImage ? <img src={currentMember.profileImage} alt={currentMember.name} className="h-full w-full object-cover" /> : currentMember.name.split(" ").map(n => n[0]).join("")}
+              </button>
               {isMobile && (
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -208,16 +232,67 @@ const SACBMPortal = () => {
               {/* Profile Section */}
               <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-slate-900">{currentMember.name}</p>
+                  <p className="text-sm font-semibold text-slate-900">{currentMember.nickname || currentMember.name}</p>
                   <p className="text-xs text-slate-600">{currentMember.company}</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                  {currentMember.name.split(" ").map(n => n[0]).join("")}
+                <div className="w-10 h-10 overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                  {currentMember.profileImage ? <img src={currentMember.profileImage} alt={currentMember.name} className="h-full w-full object-cover" /> : currentMember.name.split(" ").map(n => n[0]).join("")}
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {profileOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-start bg-black/30 p-4 pt-20 backdrop-blur-sm" onClick={() => setProfileOpen(false)}>
+            <Card className="w-full max-w-md border-0 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+              <CardContent className="p-6">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-light tracking-tight text-slate-900">My profile</h2>
+                    <p className="mt-1 text-sm text-slate-600">Personalise how you appear to other chamber members.</p>
+                  </div>
+                  <button onClick={() => setProfileOpen(false)} className="rounded-md px-2 py-1 text-xl text-slate-400 hover:bg-slate-100">×</button>
+                </div>
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-lg font-bold text-white">
+                    {profileForm.profileImage ? <img src={profileForm.profileImage} alt="Profile preview" className="h-full w-full object-cover" /> : currentMember.name.split(" ").map(n => n[0]).join("")}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <label className="mb-1 block text-sm font-medium text-slate-700">Profile picture <span className="font-normal text-slate-400">(PNG or JPG)</span></label>
+                    <input type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) setProfileForm((form) => ({ ...form, profileImage: URL.createObjectURL(file) }));
+                    }} className="block w-full text-xs text-slate-500 file:mr-2 file:rounded-md file:border-0 file:bg-emerald-50 file:px-2 file:py-1.5 file:font-medium file:text-emerald-700" />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Preferred name or nickname</label>
+                    <input value={profileForm.nickname} onChange={(event) => setProfileForm((form) => ({ ...form, nickname: event.target.value }))} placeholder={`Use ${currentMember.name.split(" ")[0]} or add a nickname`} className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Fun fact <span className="font-normal text-slate-400">(visible in Directory)</span></label>
+                    <textarea value={profileForm.funFact} onChange={(event) => setProfileForm((form) => ({ ...form, funFact: event.target.value }))} placeholder="e.g. I have visited 12 countries" rows={3} className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                  </div>
+                </div>
+                <div className="mt-6 border-t border-slate-100 pt-5">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Member information</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <div><p className="text-xs text-slate-500">Email</p><p className="truncate font-medium text-slate-800">{currentMember.email}</p></div>
+                    <div><p className="text-xs text-slate-500">Company</p><p className="truncate font-medium text-slate-800">{currentMember.company}</p></div>
+                    <div><p className="text-xs text-slate-500">Membership</p><p className="font-medium capitalize text-slate-800">{currentMember.tier}</p></div>
+                    <div><p className="text-xs text-slate-500">SACBM role</p><p className="font-medium capitalize text-slate-800">{currentMember.chamberTitle || currentMember.role}</p></div>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-5">
+                  <Button variant="outline" onClick={() => setProfileOpen(false)} className="border-slate-300">Cancel</Button>
+                  <Button onClick={saveProfile} className="bg-emerald-600 text-white hover:bg-emerald-700">Save profile</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Content Area */}
         <div className="p-6 md:p-8">
