@@ -402,14 +402,6 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                 <Check className="mr-2 h-4 w-4" />
                 {isSelectingDocuments ? "Exit document selection" : "Select document"}
               </DropdownMenuItem>
-              <DropdownMenuItem disabled={selectedDocumentIds.size === 0} onSelect={handleDownloadSelected}>
-                <Download className="mr-2 h-4 w-4" />
-                Download selected{selectedDocumentIds.size > 0 ? ` (${selectedDocumentIds.size})` : ""}
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled={selectedDocumentIds.size === 0} onSelect={() => setSelectedDocumentIds(new Set())}>
-                <X className="mr-2 h-4 w-4" />
-                Clear selection
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           {member.role === MemberRole.ADMIN ? (
@@ -677,6 +669,40 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
         </div>
       )}
 
+      {isSelectingDocuments && (
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+          <span className="text-xs font-medium text-slate-600">
+            {selectedDocumentIds.size} selected
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleDownloadSelected}
+              disabled={selectedDocumentIds.size === 0}
+              aria-label="Download selected documents"
+              title="Download selected documents"
+              className="h-8 w-8 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedDocumentIds(new Set())}
+              disabled={selectedDocumentIds.size === 0}
+              aria-label="Clear selected documents"
+              title="Clear selected documents"
+              className="h-8 w-8 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Documents List */}
       {documentsLoading ? (
         <Card className="border-0 shadow-sm">
@@ -696,7 +722,13 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             <Card
               key={doc.id}
               className={`border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${isSelectingDocuments && selectedDocumentIds.has(doc.id) ? "ring-2 ring-slate-300" : ""}`}
-              onClick={() => setSelectedDocument(doc)}
+              onClick={() => {
+                if (isSelectingDocuments) {
+                  toggleDocumentSelection(doc.id);
+                } else {
+                  setSelectedDocument(doc);
+                }
+              }}
             >
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
