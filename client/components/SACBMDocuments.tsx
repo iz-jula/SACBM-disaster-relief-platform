@@ -10,9 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Download, Search, Upload, Plus, Trash2 } from "lucide-react";
+import { FileText, Download, Search, Upload, Plus, Trash2, MoreHorizontal, Check } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Member, Document, MemberRole } from "@shared/api";
-import { createSacbmDocumentCategory, deleteSacbmDocument, deleteSacbmDocumentCategory, getSacbmDocumentCategories, getSacbmDocuments, uploadSacbmDocument } from "@/services/sacbmService";
+import { createSacbmDocumentCategory, deleteSacbmDocument, deleteSacbmDocumentCategory, getSacbmDocumentCategories, getSacbmDocuments, updateSacbmDocument, uploadSacbmDocument } from "@/services/sacbmService";
 
 // Mock documents data
 const MOCK_DOCUMENTS: Document[] = [
@@ -98,6 +105,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [showNewCategoryForm, setShowNewCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(true);
@@ -288,6 +296,19 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
     }
   };
 
+  const openEditDocument = (document: Document) => {
+    setEditingDocument(document);
+    setUploadForm({
+      title: document.title,
+      description: document.description || "",
+      category: document.category,
+      visibility: document.visibility as "all" | "board" | "exco",
+      file: null,
+    });
+    setUploadError("");
+    setShowUploadForm(true);
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -311,23 +332,39 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       setUploadError("Please enter a document title");
       return;
     }
-    if (!uploadForm.file) {
+    if (!editingDocument && !uploadForm.file) {
       setUploadError("Please select a file");
+      return;
+    }
+    if (!uploadForm.category) {
+      setUploadError("Please select a category");
       return;
     }
 
     setUploading(true);
     setUploadError("");
     try {
-      const newDocument = await uploadSacbmDocument({
-        memberId: member.id,
-        title: uploadForm.title,
-        description: uploadForm.description,
-        category: uploadForm.category,
-        visibility: uploadForm.visibility,
-        file: uploadForm.file,
-      });
-      setDocuments((current) => [newDocument, ...current]);
+      if (editingDocument) {
+        const updatedDocument = await updateSacbmDocument({
+          id: editingDocument.id,
+          title: uploadForm.title,
+          description: uploadForm.description,
+          category: uploadForm.category,
+          visibility: uploadForm.visibility,
+        });
+        setDocuments((current) => current.map((document) => document.id === updatedDocument.id ? updatedDocument : document));
+      } else {
+        const newDocument = await uploadSacbmDocument({
+          memberId: member.id,
+          title: uploadForm.title,
+          description: uploadForm.description,
+          category: uploadForm.category,
+          visibility: uploadForm.visibility,
+          file: uploadForm.file as File,
+        });
+        setDocuments((current) => [newDocument, ...current]);
+      }
+      setEditingDocument(null);
       setUploadForm({ title: "", description: "", category: "", visibility: "all", file: null });
       setShowUploadForm(false);
     } catch (error) {
@@ -347,15 +384,38 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             Access chamber documents, policies, and meeting minutes
           </p>
         </div>
-        {member.role === MemberRole.ADMIN ? (
-          <Button
-            onClick={() => setShowUploadForm(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 w-full md:w-auto"
-          >
-            <Upload className="h-4 w-4" />
-            Upload Document
-          </Button>
-        ) : null}
+        <div className="flex items-center justify-end gap-2 w-full md:w-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-600 hover:bg-slate-100" aria-label="Document options">
+                <MoreHorizontal className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem disabled={selectedDocumentIds.size === 0} onSelect={handleDownloadSelected}>
+                <Download className="mr-2 h-4 w-4" />
+                Download selected{selectedDocumentIds.size > 0 ? ` (${selectedDocumentIds.size})` : ""}
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled={selectedDocumentIds.size === 0} onSelect={() => setSelectedDocumentIds(new Set())}>
+                Clear selection
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {member.role === MemberRole.ADMIN ? (
+            <Button
+              onClick={() => {
+                setEditingDocument(null);
+                setUploadForm({ title: "", description: "", category: "", visibility: "all", file: null });
+                setUploadError("");
+                setShowUploadForm(true);
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">Upload Document</span>
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {documentsError && <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{documentsError}</p>}
@@ -420,7 +480,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
         <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-md border-0 shadow-2xl">
             <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-              <CardTitle className="text-xl font-light tracking-tight">Upload Document</CardTitle>
+              <CardTitle className="text-xl font-light tracking-tight">{editingDocument ? "Edit Document" : "Upload Document"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
               {/* Title */}
@@ -479,21 +539,22 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                 </Select>
               </div>
 
-              {/* File Upload */}
-              <div>
-                <label className="text-sm font-medium text-slate-700 block mb-2">Select File</label>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileSelect}
-                  className="w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
-                />
-                {uploadForm.file && (
-                  <p className="text-xs text-slate-600 mt-2">
-                    Selected: {uploadForm.file.name}
-                  </p>
-                )}
-              </div>
+              {!editingDocument && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-2">Select File</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileSelect}
+                    className="w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+                  />
+                  {uploadForm.file && (
+                    <p className="text-xs text-slate-600 mt-2">
+                      Selected: {uploadForm.file.name}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Error Message */}
               {uploadError && (
@@ -506,14 +567,15 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               <div className="flex gap-3 pt-2">
                 <Button
                   onClick={handleUpload}
-                  disabled={uploading || !uploadForm.title.trim() || !uploadForm.category || !uploadForm.file}
+                  disabled={uploading || !uploadForm.title.trim() || !uploadForm.category || (!editingDocument && !uploadForm.file)}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
-                  {uploading ? "Uploading..." : "Upload"}
+                  {uploading ? (editingDocument ? "Saving..." : "Uploading...") : (editingDocument ? "Save changes" : "Upload")}
                 </Button>
                 <Button
                   onClick={() => {
                     setShowUploadForm(false);
+                    setEditingDocument(null);
                     setUploadForm({
                       title: "",
                       description: "",
@@ -605,36 +667,6 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       )}
 
       {/* Documents List */}
-      {!documentsLoading && filteredDocuments.length > 0 && (
-        <div className="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-800">Select documents to download</p>
-            <p className="text-xs text-slate-500">{selectedDocumentIds.size} selected</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedDocumentIds(new Set())}
-              disabled={selectedDocumentIds.size === 0}
-              className="text-slate-600"
-            >
-              Clear
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleDownloadSelected}
-              disabled={selectedDocumentIds.size === 0}
-              className="gap-2 bg-slate-900 text-white hover:bg-slate-800"
-            >
-              <Download className="h-4 w-4" />
-              Download selected
-            </Button>
-          </div>
-        </div>
-      )}
       {documentsLoading ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="py-12 text-center text-sm text-slate-500">Loading chamber documents...</CardContent>
@@ -652,19 +684,11 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
           {filteredDocuments.map((doc) => (
             <Card
               key={doc.id}
-              className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              className={`border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${selectedDocumentIds.has(doc.id) ? "ring-2 ring-slate-300" : ""}`}
               onClick={() => setSelectedDocument(doc)}
             >
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  <input
-                    type="checkbox"
-                    checked={selectedDocumentIds.has(doc.id)}
-                    onChange={() => toggleDocumentSelection(doc.id)}
-                    onClick={(event) => event.stopPropagation()}
-                    aria-label={`Select ${doc.title}`}
-                    className="mt-3 h-4 w-4 flex-shrink-0 accent-slate-900"
-                  />
                   {/* Icon */}
                   <div className="p-3 bg-blue-50 rounded-lg flex-shrink-0">
                     <FileText className="h-6 w-6 text-blue-600" />
@@ -698,36 +722,45 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                         </div>
                       </div>
 
-                      <div className="flex flex-shrink-0 items-center gap-2 mt-2 md:mt-0">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-2"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            window.open(doc.fileUrl, "_blank", "noopener,noreferrer");
-                          }}
-                        >
-                          <Download className="h-4 w-4" />
-                          <span className="hidden sm:inline">Download</span>
-                        </Button>
-                        {member.role === MemberRole.ADMIN && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <Button
-                            size="sm"
+                            size="icon"
                             variant="ghost"
-                            className="h-9 w-9 p-0 text-red-700 hover:bg-red-50 hover:text-red-800"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleDeleteDocument(doc);
-                            }}
-                            disabled={deletingDocument === doc.id}
-                            aria-label={`Delete ${doc.title}`}
-                            title={deletingDocument === doc.id ? "Deleting..." : "Delete document"}
+                            className="h-9 w-9 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                            onClick={(event) => event.stopPropagation()}
+                            aria-label={`Options for ${doc.title}`}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <MoreHorizontal className="h-5 w-5" />
                           </Button>
-                        )}
-                      </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48" onClick={(event) => event.stopPropagation()}>
+                          <DropdownMenuItem onSelect={() => window.open(doc.fileUrl, "_blank", "noopener,noreferrer")}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => toggleDocumentSelection(doc.id)}>
+                            <Check className={`mr-2 h-4 w-4 ${selectedDocumentIds.has(doc.id) ? "opacity-100" : "opacity-0"}`} />
+                            {selectedDocumentIds.has(doc.id) ? "Remove from selection" : "Select for download"}
+                          </DropdownMenuItem>
+                          {member.role === MemberRole.ADMIN && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onSelect={() => openEditDocument(doc)}>
+                                Edit details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-red-700 focus:text-red-800"
+                                disabled={deletingDocument === doc.id}
+                                onSelect={() => handleDeleteDocument(doc)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {deletingDocument === doc.id ? "Deleting..." : "Delete document"}
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>

@@ -193,6 +193,36 @@ export async function deleteSacbmDocumentCategory(name: string) {
   if (error) throw new Error("We could not remove the document category.");
 }
 
+export async function updateSacbmDocument(input: {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  visibility: "all" | "board" | "exco";
+}) {
+  const { data, error } = await supabase
+    .from("sacbm_documents")
+    .update({
+      title: input.title.trim(),
+      description: input.description.trim() || null,
+      category: input.category,
+      visibility: input.visibility,
+    })
+    .eq("id", input.id)
+    .select("*")
+    .single();
+
+  if (error || !data) throw new Error("We could not update the document.");
+
+  const path = data.file_path || data.file_url;
+  const { data: signedUrl, error: signedUrlError } = await supabase.storage
+    .from("sacbm-assets")
+    .createSignedUrl(path, 3600);
+
+  if (signedUrlError || !signedUrl?.signedUrl) throw new Error("Document updated but the download link could not be prepared.");
+  return toDocument(data as SacbmDocumentRow, signedUrl.signedUrl);
+}
+
 export async function deleteSacbmDocument(documentId: string) {
   const { data: document, error: lookupError } = await supabase
     .from("sacbm_documents")
