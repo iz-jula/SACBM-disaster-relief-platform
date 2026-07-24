@@ -77,6 +77,16 @@ export async function signInSacbmMember(email: string, password: string): Promis
   return toMember(memberRow as SacbmMemberRow);
 }
 
+export async function requestSacbmPasswordReset(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo: `${window.location.origin}/sacbm-login`,
+  });
+
+  if (error) {
+    throw new Error("We could not send the credentials reset email. Please try again.");
+  }
+}
+
 export async function signOutSacbmMember() {
   await supabase.auth.signOut();
 }

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogIn, AlertCircle, ArrowLeft } from "lucide-react";
-import { signInSacbmMember } from "@/services/sacbmService";
+import { requestSacbmPasswordReset, signInSacbmMember } from "@/services/sacbmService";
 
 const SACBMLogin = () => {
   const navigate = useNavigate();
@@ -16,6 +16,10 @@ const SACBMLogin = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState("login");
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +34,22 @@ const SACBMLogin = () => {
       setError(err instanceof Error ? err.message : "An error occurred during login. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError("");
+    setResetSuccess(false);
+    setResetLoading(true);
+
+    try {
+      await requestSacbmPasswordReset(resetEmail);
+      setResetSuccess(true);
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : "We could not send the credentials reset email. Please try again.");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -62,7 +82,7 @@ const SACBMLogin = () => {
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login" className="text-sm">Sign In</TabsTrigger>
-                <TabsTrigger value="demo" className="text-sm">Demo Accounts</TabsTrigger>
+                <TabsTrigger value="forgot" className="text-sm">Forgot credentials</TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}
@@ -122,15 +142,50 @@ const SACBMLogin = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="demo" className="space-y-4">
-                <Alert className="border-slate-200 bg-slate-50 mb-4">
-                  <AlertCircle className="h-4 w-4 text-slate-600" />
-                  <AlertDescription className="text-slate-700 text-sm">
-                    SACBM accounts are managed by the chamber. Use the email and password provided to you by SACBM administration.
-                  </AlertDescription>
-                </Alert>
+              <TabsContent value="forgot" className="space-y-4">
                 <p className="text-sm text-slate-600">
-                  If your account is not yet active or linked to a member profile, contact the chamber administrator for assistance.
+                  Enter your SACBM email address and we will send you a link to reset your password.
+                </p>
+
+                {resetError && (
+                  <Alert className="border-red-200 bg-red-50">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-red-800">{resetError}</AlertDescription>
+                  </Alert>
+                )}
+
+                {resetSuccess && (
+                  <Alert className="border-emerald-200 bg-emerald-50">
+                    <AlertDescription className="text-emerald-800">
+                      If an active SACBM account exists for that email, a reset link has been sent.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <form onSubmit={handleResetCredentials} className="space-y-4">
+                  <div>
+                    <Label htmlFor="reset-email">Email Address</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="mt-2"
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={resetLoading}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+                  >
+                    {resetLoading ? "Sending link..." : "Send reset link"}
+                  </Button>
+                </form>
+
+                <p className="text-xs text-slate-500 text-center">
+                  If your account is not active or linked to a member profile, contact the chamber administrator.
                 </p>
               </TabsContent>
             </Tabs>
