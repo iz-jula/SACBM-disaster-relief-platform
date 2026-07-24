@@ -87,6 +87,38 @@ export async function requestSacbmPasswordReset(email: string) {
   }
 }
 
+export async function createSacbmMember(input: {
+  firstName: string;
+  surname: string;
+  company: string;
+  jobTitle: string;
+  chamberTitle: string;
+  email: string;
+  phone: string;
+  address: string;
+  tier: MemberTier;
+  role: MemberRole;
+  isExco: boolean;
+  isBoard: boolean;
+}): Promise<Member> {
+  const { data, error } = await supabase.functions.invoke("create-sacbm-member", {
+    body: {
+      ...input,
+      redirectTo: `${window.location.origin}/sacbm-login`,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message || "Could not register the member.");
+  }
+
+  if (!data?.member) {
+    throw new Error("Could not register the member.");
+  }
+
+  return toMember(data.member as SacbmMemberRow);
+}
+
 export async function signOutSacbmMember() {
   await supabase.auth.signOut();
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { createSacbmMember } from "@/services/sacbmService";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -117,6 +118,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
   const [showMemberForm, setShowMemberForm] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [memberSaving, setMemberSaving] = useState(false);
+  const [memberSaveError, setMemberSaveError] = useState("");
   const [memberForm, setMemberForm] = useState({
     firstName: "",
     surname: "",
@@ -228,11 +231,28 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       setEditingMemberId(null);
       setMemberForm({ firstName: "", surname: "", company: "", jobTitle: "", chamberTitle: "", email: "", phone: "", address: "", tier: MemberTier.BRONZE, role: MemberRole.MEMBER, isExco: false, isBoard: false });
     }
+    setMemberSaveError("");
     setShowMemberForm(true);
   };
 
-  const saveMember = () => {
+  const saveMember = async () => {
     if (!memberForm.firstName.trim() || !memberForm.surname.trim() || !memberForm.company.trim() || !memberForm.email.trim()) return;
+
+    if (!editingMemberId) {
+      setMemberSaving(true);
+      setMemberSaveError("");
+      try {
+        const createdMember = await createSacbmMember(memberForm);
+        setMembers((current) => [...current, createdMember]);
+        setShowMemberForm(false);
+      } catch (error) {
+        setMemberSaveError(error instanceof Error ? error.message : "Could not register the member.");
+      } finally {
+        setMemberSaving(false);
+      }
+      return;
+    }
+
     const memberData: Member = {
       id: editingMemberId || `member-${Date.now()}`,
       name: `${memberForm.firstName.trim()} ${memberForm.surname.trim()}`,
@@ -252,7 +272,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       joinDate: editingMemberId ? members.find((item) => item.id === editingMemberId)?.joinDate || new Date().toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
       isActive: true,
     };
-    setMembers((current) => editingMemberId ? current.map((item) => item.id === editingMemberId ? { ...item, ...memberData } : item) : [...current, memberData]);
+    setMembers((current) => current.map((item) => item.id === editingMemberId ? { ...item, ...memberData } : item));
     setShowMemberForm(false);
   };
 
@@ -589,6 +609,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 </div>
                 <button onClick={() => setShowMemberForm(false)} className="rounded-md px-2 py-1 text-xl text-slate-400 hover:bg-slate-100">×</button>
               </div>
+              {memberSaveError && (
+                <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{memberSaveError}</p>
+              )}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Input placeholder="First name" value={memberForm.firstName} onChange={(event) => setMemberForm((form) => ({ ...form, firstName: event.target.value }))} />
                 <Input placeholder="Surname" value={memberForm.surname} onChange={(event) => setMemberForm((form) => ({ ...form, surname: event.target.value }))} />
@@ -624,7 +647,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
               </div>
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Button variant="outline" onClick={() => setShowMemberForm(false)} className="border-slate-300">Cancel</Button>
-                <Button onClick={saveMember} disabled={!memberForm.firstName.trim() || !memberForm.surname.trim() || !memberForm.company.trim() || !memberForm.email.trim()} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">{editingMemberId ? "Save changes" : "Add member"}</Button>
+                <Button onClick={saveMember} disabled={memberSaving || !memberForm.firstName.trim() || !memberForm.surname.trim() || !memberForm.company.trim() || !memberForm.email.trim()} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">{memberSaving ? "Registering..." : editingMemberId ? "Save changes" : "Add member"}</Button>
               </div>
             </CardContent>
           </Card>
