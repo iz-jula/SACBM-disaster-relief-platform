@@ -25,6 +25,7 @@ const SACBMPortal = () => {
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentSection, setCurrentSection] = useState<"dashboard" | "documents" | "events" | "members" | "board-exco">("dashboard");
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -129,6 +130,7 @@ const SACBMPortal = () => {
                 key={item.id}
                 onClick={() => {
                   setCurrentSection(item.id as any);
+                  if (item.id === "events") setSelectedEventId(null);
                   if (isMobile) setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${
@@ -219,9 +221,9 @@ const SACBMPortal = () => {
 
         {/* Content Area */}
         <div className="p-6 md:p-8">
-          {currentSection === "dashboard" && <DashboardSection member={currentMember} />}
+          {currentSection === "dashboard" && <DashboardSection member={currentMember} onOpenEvent={(eventId) => { setSelectedEventId(eventId); setCurrentSection("events"); }} />}
           {currentSection === "documents" && <DocumentsSection member={currentMember} />}
-          {currentSection === "events" && <EventsSection member={currentMember} onNavigate={setCurrentSection} />}
+          {currentSection === "events" && <EventsSection member={currentMember} onNavigate={(section) => { setSelectedEventId(null); setCurrentSection(section); }} initialEventId={selectedEventId} />}
           {currentSection === "members" && <MembersSection member={currentMember} />}
           {currentSection === "board-exco" && <BoardExcoSection member={currentMember} />}
         </div>
@@ -231,12 +233,13 @@ const SACBMPortal = () => {
 };
 
 // Dashboard Section Component
-const DashboardSection = ({ member }: { member: Member }) => {
+const DashboardSection = ({ member, onOpenEvent }: { member: Member; onOpenEvent: (eventId: string) => void }) => {
   const [selectedDate, setSelectedDate] = useState<number | null>(15);
   const [memberRsvps, setMemberRsvps] = useState<Record<string, "accepted" | "declined" | "maybe">>({});
 
   const allEvents = [
     {
+      id: "1",
       title: "Annual SACBM Gala",
       date: 15,
       dateStr: "15 Mar",
@@ -244,6 +247,7 @@ const DashboardSection = ({ member }: { member: Member }) => {
       color: "from-purple-500 to-pink-500",
     },
     {
+      id: "2",
       title: "Business Breakfast",
       date: 28,
       dateStr: "28 Feb",
@@ -251,6 +255,7 @@ const DashboardSection = ({ member }: { member: Member }) => {
       color: "from-amber-500 to-orange-500",
     },
     {
+      id: "3",
       title: "Board Meeting",
       date: 15,
       dateStr: "15 Feb",
@@ -280,6 +285,12 @@ const DashboardSection = ({ member }: { member: Member }) => {
       ...prev,
       [eventTitle]: status,
     }));
+  };
+
+  const cycleRsvp = (eventTitle: string) => {
+    const current = memberRsvps[eventTitle];
+    const next = current === "accepted" ? "maybe" : current === "maybe" ? "declined" : "accepted";
+    handleRsvp(eventTitle, next);
   };
 
   return (
@@ -409,7 +420,7 @@ const DashboardSection = ({ member }: { member: Member }) => {
           {upcomingEvents.length > 0 ? (
             <div className="space-y-3">
               {upcomingEvents.map((event, idx) => (
-                <Card key={idx} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
+                <Card key={event.id} onClick={() => onOpenEvent(event.id)} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex items-center gap-4 p-4">
                       <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
@@ -426,18 +437,20 @@ const DashboardSection = ({ member }: { member: Member }) => {
                           {event.dateStr} • Hosted by SACBM
                         </p>
                       </div>
-                      {memberRsvps[event.title] ? (
-                        <span className="px-3 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg">
-                          {memberRsvps[event.title]}
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => handleRsvp(event.title, "accepted")}
-                          className="px-3 py-1 text-sm font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex-shrink-0"
-                        >
-                          RSVP
-                        </button>
-                      )}
+                      <button
+                        onClick={(eventClick) => {
+                          eventClick.stopPropagation();
+                          cycleRsvp(event.title);
+                        }}
+                        title="Click to change your response"
+                        className={`px-3 py-1 text-sm font-medium rounded-lg transition-colors flex-shrink-0 ${
+                          memberRsvps[event.title]
+                            ? "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                            : "text-emerald-600 hover:bg-emerald-50"
+                        }`}
+                      >
+                        {memberRsvps[event.title] ? `${memberRsvps[event.title]} · Change` : "RSVP"}
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
@@ -465,25 +478,28 @@ const DashboardSection = ({ member }: { member: Member }) => {
                   <div className="space-y-3">
                     {nextEvents.slice(0, 3).map((event, idx) => (
                       <div
-                        key={idx}
+                        key={event.id}
+                        onClick={() => onOpenEvent(event.id)}
                         className="flex items-start justify-between gap-3 p-3 bg-white rounded-lg border border-slate-100 hover:shadow-sm transition-shadow cursor-pointer"
                       >
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-slate-900">{event.title}</p>
                           <p className="text-xs text-slate-600 mt-1">Feb {event.date}</p>
                         </div>
-                        {memberRsvps[event.title] ? (
-                          <span className="px-2 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 rounded">
-                            {memberRsvps[event.title]}
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleRsvp(event.title, "accepted")}
-                            className="px-2 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors flex-shrink-0"
-                          >
-                            RSVP
-                          </button>
-                        )}
+                        <button
+                          onClick={(eventClick) => {
+                            eventClick.stopPropagation();
+                            cycleRsvp(event.title);
+                          }}
+                          title="Click to change your response"
+                          className={`px-2 py-1 text-xs font-medium rounded transition-colors flex-shrink-0 ${
+                            memberRsvps[event.title]
+                              ? "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                              : "text-emerald-600 hover:bg-emerald-50"
+                          }`}
+                        >
+                          {memberRsvps[event.title] ? `${memberRsvps[event.title]} · Change` : "RSVP"}
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -545,8 +561,8 @@ const DocumentsSection = ({ member }: { member: Member }) => {
 };
 
 // Events Section Component
-const EventsSection = ({ member, onNavigate }: { member: Member; onNavigate: (section: "dashboard" | "documents" | "events" | "members") => void }) => {
-  return <SACBMEvents member={member} onNavigate={onNavigate} />;
+const EventsSection = ({ member, onNavigate, initialEventId }: { member: Member; onNavigate: (section: "dashboard" | "documents" | "events" | "members") => void; initialEventId: string | null }) => {
+  return <SACBMEvents member={member} onNavigate={onNavigate} initialEventId={initialEventId} />;
 };
 
 // Members Section Component

@@ -116,9 +116,10 @@ const MOCK_RSVPS: EventRSVP[] = [
 interface SACBMEventsProps {
   member: Member;
   onNavigate?: (section: "dashboard" | "documents" | "events" | "members") => void;
+  initialEventId?: string | null;
 }
 
-const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
+const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEventId }) => {
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "past">("upcoming");
   const [eventsData, setEventsData] = useState<Event[]>(() => {
     if (typeof window === "undefined") return MOCK_EVENTS;
@@ -154,6 +155,12 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
   useEffect(() => {
     localStorage.setItem("sacbmEvents", JSON.stringify(eventsData));
   }, [eventsData]);
+
+  useEffect(() => {
+    if (!initialEventId) return;
+    const event = eventsData.find((item) => item.id === initialEventId);
+    if (event) setDetailedEvent(event);
+  }, [initialEventId, eventsData]);
 
   // Initialize RSVPs for current member
   useMemo(() => {
