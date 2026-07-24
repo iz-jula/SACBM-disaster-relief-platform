@@ -20,7 +20,7 @@ import {
   Home,
   FileText,
 } from "lucide-react";
-import { Member, Event, EventRSVP, MemberRole } from "@shared/api";
+import { Member, Event, EventAttachment, EventRSVP, MemberRole } from "@shared/api";
 
 // Mock events data
 const MOCK_EVENTS: Event[] = [
@@ -100,6 +100,12 @@ const MOCK_EVENTS: Event[] = [
   },
 ];
 
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
+  const hours = String(Math.floor(index / 2)).padStart(2, "0");
+  const minutes = index % 2 === 0 ? "00" : "30";
+  return `${hours}:${minutes}`;
+});
+
 // Mock RSVPs
 const MOCK_RSVPS: EventRSVP[] = [
   { id: "1", eventId: "1", memberId: "1", status: "accepted", rsvpDate: "2024-02-10" },
@@ -142,6 +148,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
     registrationInfo: "",
     directionsInfo: "",
     imageUrl: "",
+    attachments: [] as EventAttachment[],
   });
 
   useEffect(() => {
@@ -192,6 +199,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
       registrationInfo: "",
       directionsInfo: "",
       imageUrl: "",
+      attachments: [],
     });
   };
 
@@ -214,6 +222,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
       zoomLink: eventForm.zoomLink.trim() || undefined,
       registrationInfo: eventForm.registrationInfo.trim() || undefined,
       directionsInfo: eventForm.directionsInfo.trim() || undefined,
+      attachments: eventForm.attachments.length > 0 ? eventForm.attachments : undefined,
     };
     setEventsData((current) => [...current, newEvent]);
     resetEventForm();
@@ -471,11 +480,17 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">Start time</label>
-                    <input required type="time" value={eventForm.time} onChange={(event) => setEventForm((form) => ({ ...form, time: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700" />
+                    <select required value={eventForm.time} onChange={(event) => setEventForm((form) => ({ ...form, time: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+                      <option value="">Select time</option>
+                      {TIME_OPTIONS.map((time) => <option key={time} value={time}>{time}</option>)}
+                    </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">End time</label>
-                    <input type="time" value={eventForm.endTime} onChange={(event) => setEventForm((form) => ({ ...form, endTime: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700" />
+                    <label className="mb-2 block text-sm font-medium text-slate-700">End time <span className="font-normal text-slate-400">(optional)</span></label>
+                    <select value={eventForm.endTime} onChange={(event) => setEventForm((form) => ({ ...form, endTime: event.target.value }))} className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+                      <option value="">Select time</option>
+                      {TIME_OPTIONS.map((time) => <option key={time} value={time}>{time}</option>)}
+                    </select>
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">Location</label>
@@ -486,8 +501,8 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                     <input type="number" min="1" value={eventForm.capacity} onChange={(event) => setEventForm((form) => ({ ...form, capacity: event.target.value }))} placeholder="e.g. 100" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">Zoom link <span className="font-normal text-slate-400">(optional)</span></label>
-                    <input type="url" value={eventForm.zoomLink} onChange={(event) => setEventForm((form) => ({ ...form, zoomLink: event.target.value }))} placeholder="https://zoom.us/..." className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Online meeting link <span className="font-normal text-slate-400">(optional)</span></label>
+                    <input type="url" value={eventForm.zoomLink} onChange={(event) => setEventForm((form) => ({ ...form, zoomLink: event.target.value }))} placeholder="Paste Zoom, Teams, or Meet link" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-2 block text-sm font-medium text-slate-700">How to register <span className="font-normal text-slate-400">(optional)</span></label>
@@ -498,8 +513,21 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                     <Textarea value={eventForm.directionsInfo} onChange={(event) => setEventForm((form) => ({ ...form, directionsInfo: event.target.value }))} placeholder="Add venue directions or online access instructions" rows={3} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">Cover image URL <span className="font-normal text-slate-400">(optional)</span></label>
-                    <input type="url" value={eventForm.imageUrl} onChange={(event) => setEventForm((form) => ({ ...form, imageUrl: event.target.value }))} placeholder="https://..." className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Cover image <span className="font-normal text-slate-400">(PNG or JPG)</span></label>
+                    <input type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) setEventForm((form) => ({ ...form, imageUrl: URL.createObjectURL(file) }));
+                    }} className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-emerald-700" />
+                    <p className="mt-1 text-xs text-slate-500">Accepted formats: .png, .jpg, .jpeg</p>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Event attachments <span className="font-normal text-slate-400">(PDF or Excel)</span></label>
+                    <input type="file" multiple accept="application/pdf,.pdf,application/vnd.ms-excel,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx,text/csv,.csv" onChange={(event) => {
+                      const attachments = Array.from(event.target.files || []).map((file) => ({ name: file.name, fileUrl: URL.createObjectURL(file), fileType: file.type }));
+                      setEventForm((form) => ({ ...form, attachments }));
+                    }} className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700" />
+                    <p className="mt-1 text-xs text-slate-500">Attach agendas, registration sheets, budgets, or supporting documents.</p>
+                    {eventForm.attachments.length > 0 && <p className="mt-2 text-xs font-medium text-emerald-700">{eventForm.attachments.length} attachment{eventForm.attachments.length === 1 ? "" : "s"} selected</p>}
                   </div>
                 </div>
                 <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
@@ -659,6 +687,20 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate }) => {
                     </p>
                   </div>
                 </div>
+
+                {detailedEvent.attachments && detailedEvent.attachments.length > 0 && (
+                  <div className="mb-12">
+                    <h2 className="text-2xl font-semibold text-slate-900 mb-4">Event documents</h2>
+                    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      {detailedEvent.attachments.map((attachment) => (
+                        <a key={attachment.fileUrl} href={attachment.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50">
+                          <FileText className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{attachment.name}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Directions */}
                 <div className="mb-12">

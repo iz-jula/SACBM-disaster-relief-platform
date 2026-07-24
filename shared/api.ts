@@ -62,6 +62,12 @@ export interface Document {
   visibility: "admin" | "board" | "exco" | "all";
 }
 
+export interface EventAttachment {
+  name: string;
+  fileUrl: string;
+  fileType: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -79,6 +85,7 @@ export interface Event {
   zoomLink?: string;
   registrationInfo?: string;
   directionsInfo?: string;
+  attachments?: EventAttachment[];
 }
 
 export interface EventRSVP {
