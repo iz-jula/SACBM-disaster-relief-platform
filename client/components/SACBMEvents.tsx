@@ -19,6 +19,7 @@ import {
   Heart,
   Home,
   FileText,
+  Download,
 } from "lucide-react";
 import { Member, Event, EventAttachment, EventGallery, EventRSVP, MemberRole } from "@shared/api";
 
@@ -220,6 +221,21 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
       setGalleryImages((current) => ({ ...current, [galleryEvent.id]: [...(current[galleryEvent.id] || []), ...uploads] }));
     }
     event.target.value = "";
+  };
+
+  const downloadPhoto = (image: EventGallery) => {
+    const link = document.createElement("a");
+    link.href = image.imageUrl;
+    link.download = image.caption || "sacbm-event-photo";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.click();
+  };
+
+  const downloadAllPhotos = (images: EventGallery[]) => {
+    images.forEach((image, index) => {
+      window.setTimeout(() => downloadPhoto(image), index * 150);
+    });
   };
 
   const isRsvpDeadlinePass = (deadline: string) => {
@@ -502,14 +518,30 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
             </CardHeader>
             <CardContent className="p-6">
               {galleryImages[galleryEvent.id]?.length ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <>
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <p className="text-sm text-slate-500">{galleryImages[galleryEvent.id].length} photo{galleryImages[galleryEvent.id].length === 1 ? "" : "s"}</p>
+                    <Button variant="outline" size="sm" onClick={() => downloadAllPhotos(galleryImages[galleryEvent.id])} className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                      <Download className="h-4 w-4" />
+                      Download all photos
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {galleryImages[galleryEvent.id].map((image) => (
-                    <a key={image.id} href={image.imageUrl} target="_blank" rel="noopener noreferrer" className="group overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-                      <img src={image.imageUrl} alt={image.caption || galleryEvent.title} className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                      {image.caption && <p className="truncate px-3 py-2 text-xs text-slate-600">{image.caption}</p>}
-                    </a>
+                    <div key={image.id} className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                      <a href={image.imageUrl} target="_blank" rel="noopener noreferrer" className="group block">
+                        <img src={image.imageUrl} alt={image.caption || galleryEvent.title} className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                      </a>
+                      <div className="flex items-center justify-between gap-2 px-3 py-2">
+                        <p className="truncate text-xs text-slate-600">{image.caption || "Event photo"}</p>
+                        <button onClick={() => downloadPhoto(image)} title="Download photo" className="shrink-0 rounded-md p-1.5 text-slate-500 hover:bg-white hover:text-emerald-700">
+                          <Download className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
                   ))}
-                </div>
+                  </div>
+                </>
               ) : (
                 <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
                   <ImageIcon className="mx-auto mb-3 h-10 w-10 text-slate-300" />
