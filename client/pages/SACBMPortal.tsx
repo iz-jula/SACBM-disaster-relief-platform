@@ -19,6 +19,7 @@ import SACBMEvents from "@/components/SACBMEvents";
 import SACBMMembers from "@/components/SACBMMembers";
 import SACBMBoardExco from "@/components/SACBMBoardExco";
 import { Member, MemberTier, MemberRole } from "@shared/api";
+import { signOutSacbmMember } from "@/services/sacbmService";
 
 const SACBMPortal = () => {
   const navigate = useNavigate();
@@ -47,7 +48,8 @@ const SACBMPortal = () => {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOutSacbmMember();
     sessionStorage.removeItem("currentMember");
     setCurrentMember(null);
     navigate("/sacbm-login");

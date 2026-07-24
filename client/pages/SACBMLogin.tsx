@@ -6,56 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogIn, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
-import { Member, MemberTier, MemberRole } from "@shared/api";
-
-// Mock member database for demo
-const MOCK_MEMBERS: Member[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao@example.com",
-    company: "Silva Industries",
-    tier: MemberTier.PLATINUM,
-    role: MemberRole.ADMIN,
-    phone: "+258 84 123 4567",
-    joinDate: "2020-01-15",
-    isActive: true,
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria@example.com",
-    company: "Santos Commerce",
-    tier: MemberTier.GOLD,
-    role: MemberRole.BOARD,
-    phone: "+258 84 234 5678",
-    joinDate: "2021-03-20",
-    isActive: true,
-  },
-  {
-    id: "3",
-    name: "Pedro Costa",
-    email: "pedro@example.com",
-    company: "Costa Trading",
-    tier: MemberTier.GOLD,
-    role: MemberRole.EXCO,
-    phone: "+258 84 345 6789",
-    joinDate: "2022-05-10",
-    isActive: true,
-  },
-  {
-    id: "4",
-    name: "Ana Ferreira",
-    email: "ana@example.com",
-    company: "Ferreira Logistics",
-    tier: MemberTier.BRONZE,
-    role: MemberRole.MEMBER,
-    phone: "+258 84 456 7890",
-    joinDate: "2023-01-01",
-    isActive: true,
-  },
-];
+import { LogIn, AlertCircle, ArrowLeft } from "lucide-react";
+import { signInSacbmMember } from "@/services/sacbmService";
 
 const SACBMLogin = () => {
   const navigate = useNavigate();
@@ -71,24 +23,12 @@ const SACBMLogin = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // Mock authentication
-      const member = MOCK_MEMBERS.find(
-        (m) => m.email === email && password === "demo123"
-      );
-
-      if (!member) {
-        setError("Invalid email or password. Try: joao@example.com / demo123");
-        setLoading(false);
-        return;
-      }
-
+      const member = await signInSacbmMember(email, password);
       sessionStorage.setItem("currentMember", JSON.stringify(member));
       navigate("/sacbm-portal");
     } catch (err) {
-      setError("An error occurred during login. Please try again.");
+      setError(err instanceof Error ? err.message : "An error occurred during login. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
@@ -165,16 +105,6 @@ const SACBMLogin = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between text-sm">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" className="rounded" />
-                      <span className="text-slate-600">Remember me</span>
-                    </label>
-                    <a href="#" className="text-emerald-600 hover:text-emerald-700">
-                      Forgot password?
-                    </a>
-                  </div>
-
                   <Button
                     type="submit"
                     disabled={loading}
@@ -192,39 +122,16 @@ const SACBMLogin = () => {
                 </div>
               </TabsContent>
 
-              {/* Demo Accounts Tab */}
               <TabsContent value="demo" className="space-y-4">
-                <Alert className="border-emerald-200 bg-emerald-50 mb-4">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <AlertDescription className="text-emerald-800 text-sm">
-                    All demo accounts: password is <strong>demo123</strong>
+                <Alert className="border-slate-200 bg-slate-50 mb-4">
+                  <AlertCircle className="h-4 w-4 text-slate-600" />
+                  <AlertDescription className="text-slate-700 text-sm">
+                    SACBM accounts are managed by the chamber. Use the email and password provided to you by SACBM administration.
                   </AlertDescription>
                 </Alert>
-
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {MOCK_MEMBERS.map((member) => (
-                    <button
-                      key={member.id}
-                      onClick={() => {
-                        setEmail(member.email);
-                        setPassword("demo123");
-                        setSelectedTab("login");
-                      }}
-                      className="w-full p-3 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-left transition-colors text-sm"
-                    >
-                      <div className="font-semibold text-slate-900">{member.name}</div>
-                      <div className="text-xs text-slate-600 mt-0.5">{member.email}</div>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-700 rounded">
-                          {member.tier.toUpperCase()}
-                        </span>
-                        <span className="text-xs font-medium px-2 py-0.5 bg-slate-100 text-slate-700 rounded">
-                          {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <p className="text-sm text-slate-600">
+                  If your account is not yet active or linked to a member profile, contact the chamber administrator for assistance.
+                </p>
               </TabsContent>
             </Tabs>
           </CardContent>
