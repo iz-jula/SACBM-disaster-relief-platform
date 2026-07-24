@@ -130,18 +130,10 @@ interface SACBMEventsProps {
 
 const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEventId }) => {
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "past">("upcoming");
-  const [eventsData, setEventsData] = useState<Event[]>(() => {
-    if (typeof window === "undefined") return MOCK_EVENTS;
-    const stored = localStorage.getItem("sacbmEvents");
-    return stored ? JSON.parse(stored) : MOCK_EVENTS;
-  });
+  const [eventsData, setEventsData] = useState<Event[]>(MOCK_EVENTS);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [galleryEvent, setGalleryEvent] = useState<Event | null>(null);
-  const [galleryImages, setGalleryImages] = useState<Record<string, EventGallery[]>>(() => {
-    if (typeof window === "undefined") return MOCK_GALLERIES;
-    const stored = localStorage.getItem("sacbmEventGalleries");
-    return stored ? JSON.parse(stored) : MOCK_GALLERIES;
-  });
+  const [galleryImages, setGalleryImages] = useState<Record<string, EventGallery[]>>(MOCK_GALLERIES);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [detailedEvent, setDetailedEvent] = useState<Event | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -167,13 +159,6 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
     attachments: [] as EventAttachment[],
   });
 
-  useEffect(() => {
-    localStorage.setItem("sacbmEvents", JSON.stringify(eventsData));
-  }, [eventsData]);
-
-  useEffect(() => {
-    localStorage.setItem("sacbmEventGalleries", JSON.stringify(galleryImages));
-  }, [galleryImages]);
 
   useEffect(() => {
     if (!initialEventId) return;

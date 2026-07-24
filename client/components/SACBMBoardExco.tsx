@@ -318,11 +318,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [authorizationNotes, setAuthorizationNotes] = useState("");
   const [adminNotifications, setAdminNotifications] = useState<AdminNotification[]>([]);
   const [adminView, setAdminView] = useState<AdminView>("overview");
-  const [memos, setMemos] = useState<PortalMemo[]>(() => {
-    if (typeof window === "undefined") return [];
-    const stored = localStorage.getItem("sacbmMemos");
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [memos, setMemos] = useState<PortalMemo[]>([]);
   const [memoSubject, setMemoSubject] = useState("");
   const [memoBody, setMemoBody] = useState("");
   const [memoRecipients, setMemoRecipients] = useState<string[]>([]);
@@ -335,9 +331,6 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const hasAccess = [MemberRole.ADMIN, MemberRole.EXCO, MemberRole.BOARD].includes(member.role);
   const isGovernanceMember = hasAccess;
 
-  useEffect(() => {
-    localStorage.setItem("sacbmMemos", JSON.stringify(memos));
-  }, [memos]);
 
   if (!hasAccess) {
     return (

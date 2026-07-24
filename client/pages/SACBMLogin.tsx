@@ -85,8 +85,7 @@ const SACBMLogin = () => {
         return;
       }
 
-      // Store member in localStorage
-      localStorage.setItem("currentMember", JSON.stringify(member));
+      sessionStorage.setItem("currentMember", JSON.stringify(member));
       navigate("/sacbm-portal");
     } catch (err) {
       setError("An error occurred during login. Please try again.");

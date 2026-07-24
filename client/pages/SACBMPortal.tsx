@@ -37,7 +37,7 @@ const SACBMPortal = () => {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem("currentMember");
+    const stored = sessionStorage.getItem("currentMember");
     if (stored) {
       const storedMember = JSON.parse(stored) as Member;
       setCurrentMember(storedMember);
@@ -48,7 +48,7 @@ const SACBMPortal = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("currentMember");
+    sessionStorage.removeItem("currentMember");
     setCurrentMember(null);
     navigate("/sacbm-login");
   };
@@ -57,12 +57,7 @@ const SACBMPortal = () => {
     if (!currentMember) return;
     const updatedMember = { ...currentMember, profileImage: profileForm.profileImage || undefined, nickname: profileForm.nickname.trim() || undefined, funFact: profileForm.funFact.trim() || undefined };
     setCurrentMember(updatedMember);
-    localStorage.setItem("currentMember", JSON.stringify(updatedMember));
-    const storedMembers = localStorage.getItem("sacbmMembers");
-    if (storedMembers) {
-      const members = JSON.parse(storedMembers) as Member[];
-      localStorage.setItem("sacbmMembers", JSON.stringify(members.map((member) => member.id === updatedMember.id ? { ...member, ...updatedMember } : member)));
-    }
+    sessionStorage.setItem("currentMember", JSON.stringify(updatedMember));
     setProfileOpen(false);
   };
 

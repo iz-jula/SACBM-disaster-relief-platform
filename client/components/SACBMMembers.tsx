@@ -114,11 +114,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const [tierFilter, setTierFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [members, setMembers] = useState<Member[]>(() => {
-    if (typeof window === "undefined") return MOCK_MEMBERS;
-    const stored = localStorage.getItem("sacbmMembers");
-    return stored ? JSON.parse(stored) : MOCK_MEMBERS;
-  });
+  const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
   const [showMemberForm, setShowMemberForm] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberForm, setMemberForm] = useState({
@@ -136,9 +132,6 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     isBoard: false,
   });
 
-  useEffect(() => {
-    localStorage.setItem("sacbmMembers", JSON.stringify(members));
-  }, [members]);
 
   // Filter members
   const filteredMembers = useMemo(() => {
