@@ -10,9 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Download, Search, Upload, Plus } from "lucide-react";
+import { FileText, Download, Search, Upload, Plus, Trash2 } from "lucide-react";
 import { Member, Document, MemberRole } from "@shared/api";
-import { createSacbmDocumentCategory, getSacbmDocumentCategories, getSacbmDocuments, uploadSacbmDocument } from "@/services/sacbmService";
+import { createSacbmDocumentCategory, deleteSacbmDocumentCategory, getSacbmDocumentCategories, getSacbmDocuments, uploadSacbmDocument } from "@/services/sacbmService";
 
 // Mock documents data
 const MOCK_DOCUMENTS: Document[] = [
@@ -103,12 +103,13 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [documentsLoading, setDocumentsLoading] = useState(true);
   const [documentsError, setDocumentsError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
 
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
     title: "",
     description: "",
-    category: "other",
+    category: "",
     visibility: "all" as "all" | "board" | "exco",
     file: null as File | null,
   });
@@ -211,7 +212,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
     return labels[category] || category;
   };
 
-  const allCategories = ["governance", "policy", "meeting-minutes", "other", ...customCategories];
+  const allCategories = customCategories;
 
   const handleAddCategory = async () => {
     const categoryName = newCategoryName.trim().toLowerCase();
@@ -224,6 +225,21 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       setShowNewCategoryForm(false);
     } catch (error) {
       setDocumentsError(error instanceof Error ? error.message : "We could not create the document category.");
+    }
+  };
+
+  const handleDeleteCategory = async (categoryName: string) => {
+    setDeletingCategory(categoryName);
+    setDocumentsError("");
+    try {
+      await deleteSacbmDocumentCategory(categoryName);
+      setCustomCategories((current) => current.filter((category) => category !== categoryName));
+      if (categoryFilter === categoryName) setCategoryFilter("all");
+      if (uploadForm.category === categoryName) setUploadForm((current) => ({ ...current, category: "" }));
+    } catch (error) {
+      setDocumentsError(error instanceof Error ? error.message : "We could not remove the document category.");
+    } finally {
+      setDeletingCategory(null);
     }
   };
 
@@ -267,7 +283,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
         file: uploadForm.file,
       });
       setDocuments((current) => [newDocument, ...current]);
-      setUploadForm({ title: "", description: "", category: "other", visibility: "all", file: null });
+      setUploadForm({ title: "", description: "", category: "", visibility: "all", file: null });
       setShowUploadForm(false);
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "We could not upload the document.");
@@ -320,11 +336,9 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="governance">Governance</SelectItem>
-                <SelectItem value="policy">Policy</SelectItem>
-                <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-                {customCategories.map((cat) => (
+                {customCategories.length === 0 ? (
+                  <SelectItem value="__empty_categories" disabled>No categories yet</SelectItem>
+                ) : customCategories.map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat.charAt(0).toUpperCase() + cat.slice(1)}
                   </SelectItem>
@@ -391,14 +405,12 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                 <label className="text-sm font-medium text-slate-700 block mb-2">Category</label>
                 <Select value={uploadForm.category} onValueChange={(value) => setUploadForm((prev) => ({ ...prev, category: value }))}>
                   <SelectTrigger className="border-slate-200">
-                    <SelectValue />
+                    <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="governance">Governance</SelectItem>
-                    <SelectItem value="policy">Policy</SelectItem>
-                    <SelectItem value="meeting-minutes">Meeting Minutes</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                    {customCategories.map((cat) => (
+                    {customCategories.length === 0 ? (
+                      <SelectItem value="__empty_categories" disabled>Create a category first</SelectItem>
+                    ) : customCategories.map((cat) => (
                       <SelectItem key={cat} value={cat}>
                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
                       </SelectItem>
@@ -449,7 +461,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               <div className="flex gap-3 pt-2">
                 <Button
                   onClick={handleUpload}
-                  disabled={uploading || !uploadForm.title.trim() || !uploadForm.file}
+                  disabled={uploading || !uploadForm.title.trim() || !uploadForm.category || !uploadForm.file}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
                   {uploading ? "Uploading..." : "Upload"}
@@ -460,7 +472,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                     setUploadForm({
                       title: "",
                       description: "",
-                      category: "other",
+                      category: "",
                       visibility: "all",
                       file: null,
                     });
@@ -499,6 +511,30 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                   autoFocus
                 />
               </div>
+              {customCategories.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Existing categories</p>
+                  <div className="max-h-40 space-y-2 overflow-auto rounded-lg border border-slate-200 p-2">
+                    {customCategories.map((category) => (
+                      <div key={category} className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-slate-50">
+                        <span className="text-sm text-slate-700">{category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteCategory(category)}
+                          disabled={deletingCategory === category}
+                          className="h-8 gap-1.5 text-red-700 hover:bg-red-50 hover:text-red-800"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {deletingCategory === category ? "Removing..." : "Remove"}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-500">Categories can only be removed when no documents use them.</p>
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <Button
                   onClick={handleAddCategory}

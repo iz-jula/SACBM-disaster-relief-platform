@@ -176,6 +176,23 @@ export async function createSacbmDocumentCategory(memberId: string, name: string
   return data.name;
 }
 
+export async function deleteSacbmDocumentCategory(name: string) {
+  const { count, error: documentsError } = await supabase
+    .from("sacbm_documents")
+    .select("id", { count: "exact", head: true })
+    .eq("category", name);
+
+  if (documentsError) throw new Error("We could not check whether this category is in use.");
+  if ((count || 0) > 0) throw new Error("This category cannot be removed while documents use it.");
+
+  const { error } = await supabase
+    .from("sacbm_document_categories")
+    .delete()
+    .eq("name", name);
+
+  if (error) throw new Error("We could not remove the document category.");
+}
+
 export async function getSacbmDocuments() {
   const { data, error } = await supabase
     .from("sacbm_documents")
