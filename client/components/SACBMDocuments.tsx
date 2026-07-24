@@ -114,6 +114,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
   const [deletingDocument, setDeletingDocument] = useState<string | null>(null);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<Set<string>>(new Set());
+  const [isSelectingDocuments, setIsSelectingDocuments] = useState(false);
 
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
@@ -392,9 +393,14 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem onSelect={() => setSelectedDocumentIds(new Set(filteredDocuments.map((document) => document.id)))}>
+              <DropdownMenuItem
+                onSelect={() => {
+                  setIsSelectingDocuments((current) => !current);
+                  setSelectedDocumentIds(new Set());
+                }}
+              >
                 <Check className="mr-2 h-4 w-4" />
-                Select for download
+                {isSelectingDocuments ? "Exit document selection" : "Select document"}
               </DropdownMenuItem>
               <DropdownMenuItem disabled={selectedDocumentIds.size === 0} onSelect={handleDownloadSelected}>
                 <Download className="mr-2 h-4 w-4" />
@@ -689,24 +695,26 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
           {filteredDocuments.map((doc) => (
             <Card
               key={doc.id}
-              className={`border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${selectedDocumentIds.has(doc.id) ? "ring-2 ring-slate-300" : ""}`}
+              className={`border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${isSelectingDocuments && selectedDocumentIds.has(doc.id) ? "ring-2 ring-slate-300" : ""}`}
               onClick={() => setSelectedDocument(doc)}
             >
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={selectedDocumentIds.has(doc.id)}
-                    aria-label={`${selectedDocumentIds.has(doc.id) ? "Remove" : "Select"} ${doc.title} for download`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      toggleDocumentSelection(doc.id);
-                    }}
-                    className={`mt-3 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition-colors ${selectedDocumentIds.has(doc.id) ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-transparent hover:border-slate-500"}`}
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                  </button>
+                  {isSelectingDocuments && (
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={selectedDocumentIds.has(doc.id)}
+                      aria-label={`${selectedDocumentIds.has(doc.id) ? "Remove" : "Select"} ${doc.title} for download`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleDocumentSelection(doc.id);
+                      }}
+                      className={`mt-3 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition-colors ${selectedDocumentIds.has(doc.id) ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-transparent hover:border-slate-500"}`}
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                   {/* Icon */}
                   <div className="p-3 bg-blue-50 rounded-lg flex-shrink-0">
                     <FileText className="h-6 w-6 text-blue-600" />
