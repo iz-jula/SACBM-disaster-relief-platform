@@ -18,6 +18,7 @@ import SACBMDocuments from "@/components/SACBMDocuments";
 import SACBMEvents from "@/components/SACBMEvents";
 import SACBMMembers from "@/components/SACBMMembers";
 import SACBMBoardExco from "@/components/SACBMBoardExco";
+import SACBMDashboard from "@/components/SACBMDashboard";
 import { Member, MemberTier, MemberRole } from "@shared/api";
 import { getCurrentSacbmMember, signOutSacbmMember } from "@/services/sacbmService";
 
@@ -302,7 +303,7 @@ const SACBMPortal = () => {
 
         {/* Content Area */}
         <div className="p-6 md:p-8">
-          {currentSection === "dashboard" && <DashboardSection member={currentMember} onOpenEvent={(eventId) => { setSelectedEventId(eventId); setCurrentSection("events"); }} />}
+          {currentSection === "dashboard" && <SACBMDashboard member={currentMember} onOpenEvent={(eventId) => { setSelectedEventId(eventId); setCurrentSection("events"); }} />}
           {currentSection === "documents" && <DocumentsSection member={currentMember} />}
           {currentSection === "events" && <EventsSection member={currentMember} onNavigate={(section) => { setSelectedEventId(null); setCurrentSection(section); }} initialEventId={selectedEventId} />}
           {currentSection === "members" && <MembersSection member={currentMember} />}
