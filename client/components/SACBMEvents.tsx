@@ -400,7 +400,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
                                   }}
                                   className={`gap-2 ${
                                     rsvpStatus === "maybe"
-                                      ? "bg-amber-600 hover:bg-amber-700"
+                                      ? "bg-orange-600 hover:bg-orange-700"
                                       : "bg-slate-200 hover:bg-slate-300 text-slate-700"
                                   }`}
                                 >

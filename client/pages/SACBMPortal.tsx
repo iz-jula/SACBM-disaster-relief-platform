@@ -444,7 +444,11 @@ const DashboardSection = ({ member, onOpenEvent }: { member: Member; onOpenEvent
                         }}
                         title="Click to change your response"
                         className={`px-3 py-1 text-sm font-medium rounded-lg transition-colors flex-shrink-0 ${
-                          memberRsvps[event.title]
+                          memberRsvps[event.title] === "maybe"
+                            ? "text-orange-700 bg-orange-50 hover:bg-orange-100"
+                            : memberRsvps[event.title] === "declined"
+                            ? "text-red-700 bg-red-50 hover:bg-red-100"
+                            : memberRsvps[event.title] === "accepted"
                             ? "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
                             : "text-emerald-600 hover:bg-emerald-50"
                         }`}
@@ -493,7 +497,11 @@ const DashboardSection = ({ member, onOpenEvent }: { member: Member; onOpenEvent
                           }}
                           title="Click to change your response"
                           className={`px-2 py-1 text-xs font-medium rounded transition-colors flex-shrink-0 ${
-                            memberRsvps[event.title]
+                            memberRsvps[event.title] === "maybe"
+                              ? "text-orange-700 bg-orange-50 hover:bg-orange-100"
+                              : memberRsvps[event.title] === "declined"
+                              ? "text-red-700 bg-red-50 hover:bg-red-100"
+                              : memberRsvps[event.title] === "accepted"
                               ? "text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
                               : "text-emerald-600 hover:bg-emerald-50"
                           }`}
