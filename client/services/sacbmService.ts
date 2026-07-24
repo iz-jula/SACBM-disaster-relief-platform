@@ -1,5 +1,22 @@
-import { Event, EventRSVP, Member, MemberRole, MemberTier } from "@shared/api";
+import { Document, Event, EventRSVP, Member, MemberRole, MemberTier } from "@shared/api";
 import { supabase } from "@/services/supabaseService";
+
+type SacbmDocumentRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  uploaded_by: string | null;
+  uploaded_date: string;
+  file_url: string;
+  file_path: string | null;
+  file_size: number | null;
+  file_type: string | null;
+  is_approved: boolean;
+  approved_by: string | null;
+  approved_date: string | null;
+  visibility: "admin" | "board" | "exco" | "all";
+};
 
 type SacbmEventRow = {
   id: string;
@@ -42,6 +59,21 @@ type SacbmMemberRow = {
   join_date: string;
   is_active: boolean;
 };
+
+const toDocument = (row: SacbmDocumentRow, fileUrl: string): Document => ({
+  id: row.id,
+  title: row.title,
+  description: row.description || undefined,
+  category: row.category as Document["category"],
+  uploadedBy: row.uploaded_by || "",
+  uploadedDate: row.uploaded_date,
+  fileUrl,
+  fileSize: row.file_size ? Number((row.file_size / (1024 * 1024)).toFixed(1)) : 0,
+  isApproved: row.is_approved,
+  approvedBy: row.approved_by || undefined,
+  approvedDate: row.approved_date || undefined,
+  visibility: row.visibility,
+});
 
 const toEvent = (row: SacbmEventRow): Event => ({
   id: row.id,
@@ -121,6 +153,97 @@ export async function signInSacbmMember(email: string, password: string): Promis
     await supabase.auth.signOut();
     throw error;
   }
+}
+
+export async function getSacbmDocumentCategories() {
+  const { data, error } = await supabase
+    .from("sacbm_document_categories")
+    .select("name")
+    .order("name", { ascending: true });
+
+  if (error) throw new Error("We could not load document categories.");
+  return (data || []).map((category) => category.name);
+}
+
+export async function createSacbmDocumentCategory(memberId: string, name: string) {
+  const { data, error } = await supabase
+    .from("sacbm_document_categories")
+    .insert({ name: name.trim().toLowerCase(), created_by: memberId })
+    .select("name")
+    .single();
+
+  if (error || !data) throw new Error("We could not create the document category.");
+  return data.name;
+}
+
+export async function getSacbmDocuments() {
+  const { data, error } = await supabase
+    .from("sacbm_documents")
+    .select("*")
+    .eq("is_approved", true)
+    .order("uploaded_date", { ascending: false });
+
+  if (error) throw new Error("We could not load chamber documents.");
+
+  return Promise.all((data || []).map(async (row) => {
+    const document = row as SacbmDocumentRow;
+    const path = document.file_path || document.file_url;
+    const { data: signedUrl, error: signedUrlError } = await supabase.storage
+      .from("sacbm-assets")
+      .createSignedUrl(path, 3600);
+
+    if (signedUrlError || !signedUrl?.signedUrl) throw new Error("We could not prepare a document download.");
+    return toDocument(document, signedUrl.signedUrl);
+  }));
+}
+
+export async function uploadSacbmDocument(input: {
+  memberId: string;
+  title: string;
+  description: string;
+  category: string;
+  visibility: "all" | "board" | "exco";
+  file: File;
+}) {
+  const safeFileName = input.file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const filePath = `documents/${input.memberId}/${crypto.randomUUID()}-${safeFileName}`;
+  const { error: uploadError } = await supabase.storage.from("sacbm-assets").upload(filePath, input.file, {
+    contentType: input.file.type || "application/octet-stream",
+    upsert: false,
+  });
+
+  if (uploadError) throw new Error("We could not upload the document file.");
+
+  const { data, error } = await supabase
+    .from("sacbm_documents")
+    .insert({
+      title: input.title.trim(),
+      description: input.description.trim() || null,
+      category: input.category,
+      uploaded_by: input.memberId,
+      file_url: filePath,
+      file_path: filePath,
+      file_size: input.file.size,
+      file_type: input.file.type || null,
+      is_approved: true,
+      approved_by: input.memberId,
+      approved_date: new Date().toISOString(),
+      visibility: input.visibility,
+    })
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    await supabase.storage.from("sacbm-assets").remove([filePath]);
+    throw new Error("We could not save the document metadata.");
+  }
+
+  const { data: signedUrl, error: signedUrlError } = await supabase.storage
+    .from("sacbm-assets")
+    .createSignedUrl(filePath, 3600);
+
+  if (signedUrlError || !signedUrl?.signedUrl) throw new Error("Document uploaded but the download link could not be prepared.");
+  return toDocument(data as SacbmDocumentRow, signedUrl.signedUrl);
 }
 
 export type SacbmDashboardNotification = {

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { FileText, Download, Search, Upload, Plus } from "lucide-react";
 import { Member, Document, MemberRole } from "@shared/api";
+import { createSacbmDocumentCategory, getSacbmDocumentCategories, getSacbmDocuments, uploadSacbmDocument } from "@/services/sacbmService";
 
 // Mock documents data
 const MOCK_DOCUMENTS: Document[] = [
@@ -98,7 +99,10 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [uploadedDocuments, setUploadedDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
+  const [documentsError, setDocumentsError] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
@@ -110,9 +114,32 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   });
   const [uploadError, setUploadError] = useState("");
 
+  useEffect(() => {
+    let cancelled = false;
+    setDocumentsLoading(true);
+    setDocumentsError("");
+
+    Promise.all([getSacbmDocuments(), getSacbmDocumentCategories()])
+      .then(([loadedDocuments, loadedCategories]) => {
+        if (cancelled) return;
+        setDocuments(loadedDocuments);
+        setCustomCategories(loadedCategories);
+      })
+      .catch((error) => {
+        if (!cancelled) setDocumentsError(error instanceof Error ? error.message : "We could not load chamber documents.");
+      })
+      .finally(() => {
+        if (!cancelled) setDocumentsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Filter documents based on member's access level and approval status
   const accessibleDocuments = useMemo(() => {
-    const allDocs = [...MOCK_DOCUMENTS, ...uploadedDocuments];
+    const allDocs = documents;
     return allDocs.filter((doc) => {
       // Only show approved documents
       if (!doc.isApproved) return false;
@@ -128,7 +155,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       // Regular members see only "all" visibility
       return doc.visibility === "all";
     });
-  }, [member.role, uploadedDocuments]);
+  }, [member.role, documents]);
 
   // Filter and search
   const filteredDocuments = useMemo(() => {
@@ -186,11 +213,17 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
 
   const allCategories = ["governance", "policy", "meeting-minutes", "other", ...customCategories];
 
-  const handleAddCategory = () => {
-    if (newCategoryName.trim() && !allCategories.includes(newCategoryName.toLowerCase())) {
-      setCustomCategories([...customCategories, newCategoryName.toLowerCase()]);
+  const handleAddCategory = async () => {
+    const categoryName = newCategoryName.trim().toLowerCase();
+    if (!categoryName || allCategories.includes(categoryName)) return;
+
+    try {
+      const createdCategory = await createSacbmDocumentCategory(member.id, categoryName);
+      setCustomCategories((current) => [...current, createdCategory]);
       setNewCategoryName("");
       setShowNewCategoryForm(false);
+    } catch (error) {
+      setDocumentsError(error instanceof Error ? error.message : "We could not create the document category.");
     }
   };
 
@@ -212,7 +245,7 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!uploadForm.title.trim()) {
       setUploadError("Please enter a document title");
       return;
@@ -222,35 +255,25 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       return;
     }
 
-    // Create a mock URL for the file
-    const fileUrl = URL.createObjectURL(uploadForm.file);
-    const fileSizeMB = (uploadForm.file.size / (1024 * 1024)).toFixed(1);
-
-    const newDoc: Document = {
-      id: `doc-${Date.now()}`,
-      title: uploadForm.title,
-      description: uploadForm.description,
-      category: uploadForm.category,
-      uploadedBy: member.name,
-      uploadedDate: new Date().toISOString().split("T")[0],
-      fileUrl,
-      fileSize: parseFloat(fileSizeMB),
-      isApproved: true, // Auto-approve admin uploads
-      approvedBy: member.name,
-      approvedDate: new Date().toISOString().split("T")[0],
-      visibility: uploadForm.visibility,
-    };
-
-    setUploadedDocuments([...uploadedDocuments, newDoc]);
-    setUploadForm({
-      title: "",
-      description: "",
-      category: "other",
-      visibility: "all",
-      file: null,
-    });
+    setUploading(true);
     setUploadError("");
-    setShowUploadForm(false);
+    try {
+      const newDocument = await uploadSacbmDocument({
+        memberId: member.id,
+        title: uploadForm.title,
+        description: uploadForm.description,
+        category: uploadForm.category,
+        visibility: uploadForm.visibility,
+        file: uploadForm.file,
+      });
+      setDocuments((current) => [newDocument, ...current]);
+      setUploadForm({ title: "", description: "", category: "other", visibility: "all", file: null });
+      setShowUploadForm(false);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "We could not upload the document.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -273,6 +296,8 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
           </Button>
         ) : null}
       </div>
+
+      {documentsError && <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{documentsError}</p>}
 
       {/* Filters */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -424,10 +449,10 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               <div className="flex gap-3 pt-2">
                 <Button
                   onClick={handleUpload}
-                  disabled={!uploadForm.title.trim() || !uploadForm.file}
+                  disabled={uploading || !uploadForm.title.trim() || !uploadForm.file}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
                 >
-                  Upload
+                  {uploading ? "Uploading..." : "Upload"}
                 </Button>
                 <Button
                   onClick={() => {
@@ -499,7 +524,11 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       )}
 
       {/* Documents List */}
-      {filteredDocuments.length === 0 ? (
+      {documentsLoading ? (
+        <Card className="border-0 shadow-sm">
+          <CardContent className="py-12 text-center text-sm text-slate-500">Loading chamber documents...</CardContent>
+        </Card>
+      ) : filteredDocuments.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-12 pb-12 text-center">
             <FileText className="h-12 w-12 text-slate-300 mx-auto mb-4" />
