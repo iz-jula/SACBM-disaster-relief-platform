@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { FileText, Download, Search, Upload, Plus, Trash2 } from "lucide-react";
 import { Member, Document, MemberRole } from "@shared/api";
-import { createSacbmDocumentCategory, deleteSacbmDocumentCategory, getSacbmDocumentCategories, getSacbmDocuments, uploadSacbmDocument } from "@/services/sacbmService";
+import { createSacbmDocumentCategory, deleteSacbmDocument, deleteSacbmDocumentCategory, getSacbmDocumentCategories, getSacbmDocuments, uploadSacbmDocument } from "@/services/sacbmService";
 
 // Mock documents data
 const MOCK_DOCUMENTS: Document[] = [
@@ -104,6 +104,8 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
   const [documentsError, setDocumentsError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
+  const [deletingDocument, setDeletingDocument] = useState<string | null>(null);
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<Set<string>>(new Set());
 
   // Upload form state
   const [uploadForm, setUploadForm] = useState({
@@ -240,6 +242,49 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       setDocumentsError(error instanceof Error ? error.message : "We could not remove the document category.");
     } finally {
       setDeletingCategory(null);
+    }
+  };
+
+  const toggleDocumentSelection = (documentId: string) => {
+    setSelectedDocumentIds((current) => {
+      const next = new Set(current);
+      if (next.has(documentId)) next.delete(documentId);
+      else next.add(documentId);
+      return next;
+    });
+  };
+
+  const handleDownloadSelected = () => {
+    filteredDocuments
+      .filter((document) => selectedDocumentIds.has(document.id))
+      .forEach((document) => {
+        const link = window.document.createElement("a");
+        link.href = document.fileUrl;
+        link.download = document.title.replace(/[^a-zA-Z0-9._-]/g, "-");
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        link.click();
+      });
+  };
+
+  const handleDeleteDocument = async (document: Document) => {
+    if (!window.confirm(`Delete “${document.title}”? This cannot be undone.`)) return;
+
+    setDeletingDocument(document.id);
+    setDocumentsError("");
+    try {
+      await deleteSacbmDocument(document.id);
+      setDocuments((current) => current.filter((item) => item.id !== document.id));
+      setSelectedDocumentIds((current) => {
+        const next = new Set(current);
+        next.delete(document.id);
+        return next;
+      });
+      if (selectedDocument?.id === document.id) setSelectedDocument(null);
+    } catch (error) {
+      setDocumentsError(error instanceof Error ? error.message : "We could not delete the document.");
+    } finally {
+      setDeletingDocument(null);
     }
   };
 
@@ -560,6 +605,36 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
       )}
 
       {/* Documents List */}
+      {!documentsLoading && filteredDocuments.length > 0 && (
+        <div className="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-slate-800">Select documents to download</p>
+            <p className="text-xs text-slate-500">{selectedDocumentIds.size} selected</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedDocumentIds(new Set())}
+              disabled={selectedDocumentIds.size === 0}
+              className="text-slate-600"
+            >
+              Clear
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleDownloadSelected}
+              disabled={selectedDocumentIds.size === 0}
+              className="gap-2 bg-slate-900 text-white hover:bg-slate-800"
+            >
+              <Download className="h-4 w-4" />
+              Download selected
+            </Button>
+          </div>
+        </div>
+      )}
       {documentsLoading ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="py-12 text-center text-sm text-slate-500">Loading chamber documents...</CardContent>
@@ -582,6 +657,14 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             >
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedDocumentIds.has(doc.id)}
+                    onChange={() => toggleDocumentSelection(doc.id)}
+                    onClick={(event) => event.stopPropagation()}
+                    aria-label={`Select ${doc.title}`}
+                    className="mt-3 h-4 w-4 flex-shrink-0 accent-slate-900"
+                  />
                   {/* Icon */}
                   <div className="p-3 bg-blue-50 rounded-lg flex-shrink-0">
                     <FileText className="h-6 w-6 text-blue-600" />
@@ -615,16 +698,36 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                         </div>
                       </div>
 
-                      {/* Download Button */}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-shrink-0 gap-2 mt-2 md:mt-0"
-                        onClick={() => window.open(doc.fileUrl, "_blank")}
-                      >
-                        <Download className="h-4 w-4" />
-                        <span className="hidden sm:inline">Download</span>
-                      </Button>
+                      <div className="flex flex-shrink-0 items-center gap-2 mt-2 md:mt-0">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            window.open(doc.fileUrl, "_blank", "noopener,noreferrer");
+                          }}
+                        >
+                          <Download className="h-4 w-4" />
+                          <span className="hidden sm:inline">Download</span>
+                        </Button>
+                        {member.role === MemberRole.ADMIN && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-9 w-9 p-0 text-red-700 hover:bg-red-50 hover:text-red-800"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleDeleteDocument(doc);
+                            }}
+                            disabled={deletingDocument === doc.id}
+                            aria-label={`Delete ${doc.title}`}
+                            title={deletingDocument === doc.id ? "Deleting..." : "Delete document"}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

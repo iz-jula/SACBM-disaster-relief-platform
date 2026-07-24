@@ -193,6 +193,27 @@ export async function deleteSacbmDocumentCategory(name: string) {
   if (error) throw new Error("We could not remove the document category.");
 }
 
+export async function deleteSacbmDocument(documentId: string) {
+  const { data: document, error: lookupError } = await supabase
+    .from("sacbm_documents")
+    .select("file_path, file_url")
+    .eq("id", documentId)
+    .single();
+
+  if (lookupError || !document) throw new Error("We could not find this document.");
+
+  const filePath = document.file_path || document.file_url;
+  const { error: storageError } = await supabase.storage.from("sacbm-assets").remove([filePath]);
+  if (storageError) throw new Error("We could not remove the document file.");
+
+  const { error } = await supabase
+    .from("sacbm_documents")
+    .delete()
+    .eq("id", documentId);
+
+  if (error) throw new Error("We could not remove the document record.");
+}
+
 export async function getSacbmDocuments() {
   const { data, error } = await supabase
     .from("sacbm_documents")
