@@ -1,4 +1,4 @@
-import { Document, Event, EventRSVP, Member, MemberRole, MemberTier } from "@shared/api";
+import { Document, Event, EventAttachment, EventGallery, EventRSVP, Member, MemberRole, MemberTier } from "@shared/api";
 import { supabase } from "@/services/supabaseService";
 
 type SacbmDocumentRow = {
@@ -35,6 +35,26 @@ type SacbmEventRow = {
   zoom_link: string | null;
   registration_info: string | null;
   directions_info: string | null;
+};
+
+type SacbmEventGalleryRow = {
+  id: string;
+  event_id: string;
+  image_url: string;
+  caption: string | null;
+  uploaded_by: string | null;
+  uploaded_date: string;
+};
+
+type SacbmEventAttachmentRow = {
+  id: string;
+  event_id: string;
+  name: string;
+  file_url: string;
+  file_path: string | null;
+  file_type: string | null;
+  uploaded_by: string | null;
+  uploaded_date: string;
 };
 
 type SacbmMemberRow = {
@@ -75,7 +95,7 @@ const toDocument = (row: SacbmDocumentRow, fileUrl: string): Document => ({
   visibility: row.visibility,
 });
 
-const toEvent = (row: SacbmEventRow): Event => ({
+const toEvent = (row: SacbmEventRow, attachments: EventAttachment[] = []): Event => ({
   id: row.id,
   title: row.title,
   description: row.description,
@@ -92,6 +112,29 @@ const toEvent = (row: SacbmEventRow): Event => ({
   zoomLink: row.zoom_link || undefined,
   registrationInfo: row.registration_info || undefined,
   directionsInfo: row.directions_info || undefined,
+  attachments: attachments.length > 0 ? attachments : undefined,
+});
+
+async function getEventAssetUrl(path: string) {
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("blob:")) return path;
+  const { data, error } = await supabase.storage.from("sacbm-assets").createSignedUrl(path, 3600);
+  if (error || !data?.signedUrl) throw new Error("We could not prepare an event asset.");
+  return data.signedUrl;
+}
+
+const toGallery = async (row: SacbmEventGalleryRow): Promise<EventGallery> => ({
+  id: row.id,
+  eventId: row.event_id,
+  imageUrl: await getEventAssetUrl(row.image_url),
+  caption: row.caption || undefined,
+  uploadedBy: row.uploaded_by || "",
+  uploadedDate: row.uploaded_date,
+});
+
+const toAttachment = async (row: SacbmEventAttachmentRow): Promise<EventAttachment> => ({
+  name: row.name,
+  fileUrl: await getEventAssetUrl(row.file_path || row.file_url),
+  fileType: row.file_type || "application/octet-stream",
 });
 
 const toMember = (row: SacbmMemberRow): Member => ({
@@ -312,6 +355,147 @@ export async function uploadSacbmDocument(input: {
 
   if (signedUrlError || !signedUrl?.signedUrl) throw new Error("Document uploaded but the download link could not be prepared.");
   return toDocument(data as SacbmDocumentRow, signedUrl.signedUrl);
+}
+
+export async function getSacbmEvents() {
+  const [eventsResult, galleriesResult, attachmentsResult] = await Promise.all([
+    supabase.from("sacbm_events").select("*").order("date", { ascending: true }).order("time", { ascending: true }),
+    supabase.from("sacbm_event_galleries").select("*"),
+    supabase.from("sacbm_event_attachments").select("*"),
+  ]);
+
+  const firstError = eventsResult.error || galleriesResult.error || attachmentsResult.error;
+  if (firstError) throw new Error("We could not load chamber events.");
+
+  const attachmentRows = (attachmentsResult.data || []) as SacbmEventAttachmentRow[];
+  const attachmentsByEvent = new Map<string, EventAttachment[]>();
+
+  await Promise.all(attachmentRows.map(async (row) => {
+    const attachment = await toAttachment(row);
+    const current = attachmentsByEvent.get(row.event_id) || [];
+    attachmentsByEvent.set(row.event_id, [...current, attachment]);
+  }));
+
+  return Promise.all((eventsResult.data || []).map(async (row) => {
+    const event = row as SacbmEventRow;
+    const imageUrl = event.image_url ? await getEventAssetUrl(event.image_url) : null;
+    return toEvent({ ...event, image_url: imageUrl }, attachmentsByEvent.get(event.id) || []);
+  }));
+}
+
+export async function getSacbmEventGalleries(eventId: string) {
+  const { data, error } = await supabase
+    .from("sacbm_event_galleries")
+    .select("*")
+    .eq("event_id", eventId)
+    .order("uploaded_date", { ascending: true });
+
+  if (error) throw new Error("We could not load the event gallery.");
+  return Promise.all(((data || []) as SacbmEventGalleryRow[]).map(toGallery));
+}
+
+export async function createSacbmEvent(input: {
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  endTime: string;
+  location: string;
+  capacity?: number;
+  rsvpDeadline: string;
+  zoomLink: string;
+  registrationInfo: string;
+  directionsInfo: string;
+  createdBy: string;
+  imageFile?: File;
+  attachmentFiles: File[];
+}) {
+  const { data: eventRow, error } = await supabase
+    .from("sacbm_events")
+    .insert({
+      title: input.title.trim(),
+      description: input.description.trim(),
+      date: input.date,
+      time: input.time,
+      end_time: input.endTime || null,
+      location: input.location.trim(),
+      capacity: input.capacity || null,
+      created_by: input.createdBy,
+      status: "upcoming",
+      rsvp_deadline: input.rsvpDeadline,
+      zoom_link: input.zoomLink.trim() || null,
+      registration_info: input.registrationInfo.trim() || null,
+      directions_info: input.directionsInfo.trim() || null,
+    })
+    .select("*")
+    .single();
+
+  if (error || !eventRow) throw new Error("We could not create the event.");
+  const event = eventRow as SacbmEventRow;
+  let imageUrl: string | null = null;
+
+  if (input.imageFile) {
+    const imagePath = `events/${event.id}/cover-${crypto.randomUUID()}-${input.imageFile.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+    const { error: imageError } = await supabase.storage.from("sacbm-assets").upload(imagePath, input.imageFile, {
+      contentType: input.imageFile.type || "image/jpeg",
+      upsert: false,
+    });
+    if (imageError) throw new Error("The event was created but the cover image could not be uploaded.");
+    imageUrl = imagePath;
+    const { error: updateError } = await supabase.from("sacbm_events").update({ image_url: imagePath }).eq("id", event.id);
+    if (updateError) throw new Error("The event was created but the cover image could not be saved.");
+  }
+
+  const attachmentRows: SacbmEventAttachmentRow[] = [];
+  for (const file of input.attachmentFiles) {
+    const filePath = `events/${event.id}/attachments/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+    const { error: fileError } = await supabase.storage.from("sacbm-assets").upload(filePath, file, {
+      contentType: file.type || "application/octet-stream",
+      upsert: false,
+    });
+    if (fileError) throw new Error("The event was created but an attachment could not be uploaded.");
+    const { data: attachment, error: attachmentError } = await supabase
+      .from("sacbm_event_attachments")
+      .insert({ event_id: event.id, name: file.name, file_url: filePath, file_path: filePath, file_type: file.type || null, uploaded_by: input.createdBy })
+      .select("*")
+      .single();
+    if (attachmentError || !attachment) throw new Error("The event was created but an attachment could not be saved.");
+    attachmentRows.push(attachment as SacbmEventAttachmentRow);
+  }
+
+  const signedImageUrl = imageUrl ? await getEventAssetUrl(imageUrl) : null;
+  return toEvent({ ...event, image_url: signedImageUrl }, await Promise.all(attachmentRows.map(toAttachment)));
+}
+
+export async function uploadSacbmEventGallery(input: { eventId: string; memberId: string; files: File[] }) {
+  const uploaded = [] as EventGallery[];
+  for (const file of input.files) {
+    const filePath = `events/${input.eventId}/gallery/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+    const { error: uploadError } = await supabase.storage.from("sacbm-assets").upload(filePath, file, {
+      contentType: file.type || "image/jpeg",
+      upsert: false,
+    });
+    if (uploadError) throw new Error("We could not upload the event photo.");
+
+    const { data, error } = await supabase
+      .from("sacbm_event_galleries")
+      .insert({ event_id: input.eventId, image_url: filePath, caption: file.name, uploaded_by: input.memberId })
+      .select("*")
+      .single();
+    if (error || !data) throw new Error("We could not save the event photo.");
+    uploaded.push(await toGallery(data as SacbmEventGalleryRow));
+  }
+  return uploaded;
+}
+
+export async function getSacbmEventRsvps(memberId: string) {
+  const { data, error } = await supabase
+    .from("sacbm_event_rsvps")
+    .select("event_id, status")
+    .eq("member_id", memberId);
+
+  if (error) throw new Error("We could not load your event responses.");
+  return Object.fromEntries((data || []).map((rsvp) => [rsvp.event_id, rsvp.status as EventRSVP["status"]]));
 }
 
 export type SacbmDashboardNotification = {

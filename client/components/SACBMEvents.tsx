@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import {
   Download,
 } from "lucide-react";
 import { Member, Event, EventAttachment, EventGallery, EventRSVP, MemberRole } from "@shared/api";
+import { createSacbmEvent, getSacbmEventGalleries, getSacbmEventRsvps, getSacbmEvents, saveSacbmRsvp, uploadSacbmEventGallery } from "@/services/sacbmService";
 
 // Mock events data
 const MOCK_EVENTS: Event[] = [
@@ -130,10 +131,13 @@ interface SACBMEventsProps {
 
 const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEventId }) => {
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "past">("upcoming");
-  const [eventsData, setEventsData] = useState<Event[]>(MOCK_EVENTS);
+  const [eventsData, setEventsData] = useState<Event[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState("");
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [galleryEvent, setGalleryEvent] = useState<Event | null>(null);
-  const [galleryImages, setGalleryImages] = useState<Record<string, EventGallery[]>>(MOCK_GALLERIES);
+  const [galleryImages, setGalleryImages] = useState<Record<string, EventGallery[]>>({});
+  const [galleryLoading, setGalleryLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [detailedEvent, setDetailedEvent] = useState<Event | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -156,9 +160,34 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
     registrationInfo: "",
     directionsInfo: "",
     imageUrl: "",
+    imageFile: null as File | null,
     attachments: [] as EventAttachment[],
+    attachmentFiles: [] as File[],
   });
 
+
+  useEffect(() => {
+    let cancelled = false;
+    setEventsLoading(true);
+    setEventsError("");
+
+    Promise.all([getSacbmEvents(), getSacbmEventRsvps(member.id)])
+      .then(([loadedEvents, loadedRsvps]) => {
+        if (cancelled) return;
+        setEventsData(loadedEvents);
+        setMemberRsvps(loadedRsvps);
+      })
+      .catch((error) => {
+        if (!cancelled) setEventsError(error instanceof Error ? error.message : "We could not load chamber events.");
+      })
+      .finally(() => {
+        if (!cancelled) setEventsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [member.id]);
 
   useEffect(() => {
     if (!initialEventId) return;
@@ -166,14 +195,24 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
     if (event) setDetailedEvent(event);
   }, [initialEventId, eventsData]);
 
-  // Initialize RSVPs for current member
-  useMemo(() => {
-    const rsvps: Record<string, EventRSVP["status"]> = {};
-    MOCK_RSVPS.forEach((rsvp) => {
-      rsvps[rsvp.eventId] = rsvp.status;
-    });
-    setMemberRsvps(rsvps);
-  }, []);
+  useEffect(() => {
+    if (!galleryEvent) return;
+    let cancelled = false;
+    setGalleryLoading(true);
+    getSacbmEventGalleries(galleryEvent.id)
+      .then((images) => {
+        if (!cancelled) setGalleryImages((current) => ({ ...current, [galleryEvent.id]: images }));
+      })
+      .catch((error) => {
+        if (!cancelled) setEventsError(error instanceof Error ? error.message : "We could not load the event gallery.");
+      })
+      .finally(() => {
+        if (!cancelled) setGalleryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [galleryEvent]);
 
   const upcomingEvents = eventsData.filter((e) => e.status === "upcoming").sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -185,27 +224,31 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
 
   const events = selectedTab === "upcoming" ? upcomingEvents : pastEvents;
 
-  const handleRsvp = (eventId: string, status: EventRSVP["status"]) => {
-    setMemberRsvps((prev) => ({
-      ...prev,
-      [eventId]: status,
-    }));
+  const handleRsvp = async (eventId: string, status: EventRSVP["status"]) => {
+    try {
+      await saveSacbmRsvp(member.id, eventId, status);
+      setMemberRsvps((prev) => ({
+        ...prev,
+        [eventId]: status,
+      }));
+    } catch (error) {
+      setEventsError(error instanceof Error ? error.message : "We could not update your RSVP.");
+    }
   };
 
-  const addGalleryPhotos = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const addGalleryPhotos = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!galleryEvent) return;
-    const uploads = Array.from(event.target.files || []).map((file) => ({
-      id: `gallery-${Date.now()}-${file.name}`,
-      eventId: galleryEvent.id,
-      imageUrl: URL.createObjectURL(file),
-      caption: file.name,
-      uploadedBy: member.id,
-      uploadedDate: new Date().toISOString().split("T")[0],
-    }));
-    if (uploads.length > 0) {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+    setEventsError("");
+    try {
+      const uploads = await uploadSacbmEventGallery({ eventId: galleryEvent.id, memberId: member.id, files });
       setGalleryImages((current) => ({ ...current, [galleryEvent.id]: [...(current[galleryEvent.id] || []), ...uploads] }));
+    } catch (error) {
+      setEventsError(error instanceof Error ? error.message : "We could not upload the event photos.");
+    } finally {
+      event.target.value = "";
     }
-    event.target.value = "";
   };
 
   const downloadPhoto = (image: EventGallery) => {
@@ -241,35 +284,39 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
       registrationInfo: "",
       directionsInfo: "",
       imageUrl: "",
+      imageFile: null,
       attachments: [],
+      attachmentFiles: [],
     });
   };
 
-  const saveEvent = () => {
+  const saveEvent = async () => {
     if (!eventForm.title.trim() || !eventForm.description.trim() || !eventForm.date || !eventForm.time || !eventForm.location.trim() || !eventForm.rsvpDeadline) return;
-    const newEvent: Event = {
-      id: `event-${Date.now()}`,
-      title: eventForm.title.trim(),
-      description: eventForm.description.trim(),
-      date: eventForm.date,
-      time: eventForm.time,
-      endTime: eventForm.endTime || undefined,
-      location: eventForm.location.trim(),
-      capacity: eventForm.capacity ? Number(eventForm.capacity) : undefined,
-      imageUrl: eventForm.imageUrl.trim() || undefined,
-      createdBy: member.id,
-      createdDate: new Date().toISOString().split("T")[0],
-      status: "upcoming",
-      rsvpDeadline: eventForm.rsvpDeadline,
-      zoomLink: eventForm.zoomLink.trim() || undefined,
-      registrationInfo: eventForm.registrationInfo.trim() || undefined,
-      directionsInfo: eventForm.directionsInfo.trim() || undefined,
-      attachments: eventForm.attachments.length > 0 ? eventForm.attachments : undefined,
-    };
-    setEventsData((current) => [...current, newEvent]);
-    resetEventForm();
-    setShowCreateEvent(false);
-    setSelectedTab("upcoming");
+    setEventsError("");
+    try {
+      const newEvent = await createSacbmEvent({
+        title: eventForm.title,
+        description: eventForm.description,
+        date: eventForm.date,
+        time: eventForm.time,
+        endTime: eventForm.endTime,
+        location: eventForm.location,
+        capacity: eventForm.capacity ? Number(eventForm.capacity) : undefined,
+        rsvpDeadline: eventForm.rsvpDeadline,
+        zoomLink: eventForm.zoomLink,
+        registrationInfo: eventForm.registrationInfo,
+        directionsInfo: eventForm.directionsInfo,
+        createdBy: member.id,
+        imageFile: eventForm.imageFile || undefined,
+        attachmentFiles: eventForm.attachmentFiles,
+      });
+      setEventsData((current) => [...current, newEvent]);
+      resetEventForm();
+      setShowCreateEvent(false);
+      setSelectedTab("upcoming");
+    } catch (error) {
+      setEventsError(error instanceof Error ? error.message : "We could not create the event.");
+    }
   };
 
   return (
@@ -289,6 +336,8 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
           </Button>
         ) : null}
       </div>
+
+      {eventsError && <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{eventsError}</p>}
 
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b border-slate-200">
@@ -315,7 +364,11 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
       </div>
 
       {/* Events Grid */}
-      {events.length === 0 ? (
+      {eventsLoading ? (
+        <Card className="border-0 shadow-sm">
+          <CardContent className="py-12 text-center text-sm text-slate-500">Loading chamber events...</CardContent>
+        </Card>
+      ) : events.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-12 pb-12 text-center">
             <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
@@ -502,7 +555,9 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              {galleryImages[galleryEvent.id]?.length ? (
+              {galleryLoading ? (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center text-sm text-slate-500">Loading gallery...</div>
+              ) : galleryImages[galleryEvent.id]?.length ? (
                 <>
                   <div className="mb-5 flex items-center justify-between gap-3">
                     <p className="text-sm text-slate-500">{galleryImages[galleryEvent.id].length} photo{galleryImages[galleryEvent.id].length === 1 ? "" : "s"}</p>
@@ -620,18 +675,19 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
                     <label className="mb-2 block text-sm font-medium text-slate-700">Cover image <span className="font-normal text-slate-400">(PNG or JPG)</span></label>
                     <input type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" onChange={(event) => {
                       const file = event.target.files?.[0];
-                      if (file) setEventForm((form) => ({ ...form, imageUrl: URL.createObjectURL(file) }));
+                      if (file) setEventForm((form) => ({ ...form, imageFile: file, imageUrl: URL.createObjectURL(file) }));
                     }} className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-emerald-700" />
                     <p className="mt-1 text-xs text-slate-500">Accepted formats: .png, .jpg, .jpeg</p>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="mb-2 block text-sm font-medium text-slate-700">Event attachments <span className="font-normal text-slate-400">(PDF or Excel)</span></label>
                     <input type="file" multiple accept="application/pdf,.pdf,application/vnd.ms-excel,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx,text/csv,.csv" onChange={(event) => {
-                      const attachments = Array.from(event.target.files || []).map((file) => ({ name: file.name, fileUrl: URL.createObjectURL(file), fileType: file.type }));
-                      setEventForm((form) => ({ ...form, attachments }));
+                      const files = Array.from(event.target.files || []);
+                      const attachments = files.map((file) => ({ name: file.name, fileUrl: URL.createObjectURL(file), fileType: file.type }));
+                      setEventForm((form) => ({ ...form, attachments, attachmentFiles: files }));
                     }} className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700" />
                     <p className="mt-1 text-xs text-slate-500">Attach agendas, registration sheets, budgets, or supporting documents.</p>
-                    {eventForm.attachments.length > 0 && <p className="mt-2 text-xs font-medium text-emerald-700">{eventForm.attachments.length} attachment{eventForm.attachments.length === 1 ? "" : "s"} selected</p>}
+                    {eventForm.attachmentFiles.length > 0 && <p className="mt-2 text-xs font-medium text-emerald-700">{eventForm.attachmentFiles.length} attachment{eventForm.attachmentFiles.length === 1 ? "" : "s"} selected</p>}
                   </div>
                 </div>
                 <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
@@ -929,7 +985,10 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
                     <p className="text-xs font-medium text-slate-600 mb-4">Will you attend?</p>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: { status: "accepted" } }))}
+                        onClick={async () => {
+                          await handleRsvp(detailedEvent.id, "accepted");
+                          setRsvpResponse(prev => ({ ...prev, [detailedEvent.id]: { status: "accepted" } }));
+                        }}
                         className="flex-1 text-sm font-medium text-emerald-700 hover:text-emerald-900 py-2 text-center transition-colors"
                       >
                         Accept
@@ -971,7 +1030,8 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
                   />
                   <div className="flex gap-3 pt-2">
                     <Button
-                      onClick={() => {
+                      onClick={async () => {
+                        await handleRsvp(detailedEvent.id, "declined");
                         setRsvpResponse(prev => ({
                           ...prev,
                           [detailedEvent.id]: { status: "declined", reason: declineReason || "Can't attend" }
@@ -1043,8 +1103,9 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
                     </div>
                     <div className="flex gap-3 pt-2">
                       <Button
-                        onClick={() => {
+                        onClick={async () => {
                           if (isDateValid) {
+                            await handleRsvp(detailedEvent.id, "maybe");
                             setRsvpResponse(prev => ({
                               ...prev,
                               [detailedEvent.id]: { status: "maybe", date: new Date(maybeDate).toLocaleDateString() }
