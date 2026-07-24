@@ -19,7 +19,7 @@ import SACBMEvents from "@/components/SACBMEvents";
 import SACBMMembers from "@/components/SACBMMembers";
 import SACBMBoardExco from "@/components/SACBMBoardExco";
 import { Member, MemberTier, MemberRole } from "@shared/api";
-import { signOutSacbmMember } from "@/services/sacbmService";
+import { getCurrentSacbmMember, signOutSacbmMember } from "@/services/sacbmService";
 
 const SACBMPortal = () => {
   const navigate = useNavigate();
@@ -38,19 +38,31 @@ const SACBMPortal = () => {
   }, []);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("currentMember");
-    if (stored) {
-      const storedMember = JSON.parse(stored) as Member;
-      setCurrentMember(storedMember);
-      setProfileForm({ profileImage: storedMember.profileImage || "", nickname: storedMember.nickname || "", funFact: storedMember.funFact || "" });
-    } else {
-      navigate("/sacbm-login");
-    }
+    let cancelled = false;
+
+    const loadMember = async () => {
+      try {
+        const member = await getCurrentSacbmMember();
+        if (cancelled) return;
+        if (!member) {
+          navigate("/sacbm-login");
+          return;
+        }
+        setCurrentMember(member);
+        setProfileForm({ profileImage: member.profileImage || "", nickname: member.nickname || "", funFact: member.funFact || "" });
+      } catch {
+        if (!cancelled) navigate("/sacbm-login");
+      }
+    };
+
+    loadMember();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   const handleLogout = async () => {
     await signOutSacbmMember();
-    sessionStorage.removeItem("currentMember");
     setCurrentMember(null);
     navigate("/sacbm-login");
   };
@@ -59,7 +71,6 @@ const SACBMPortal = () => {
     if (!currentMember) return;
     const updatedMember = { ...currentMember, profileImage: profileForm.profileImage || undefined, nickname: profileForm.nickname.trim() || undefined, funFact: profileForm.funFact.trim() || undefined };
     setCurrentMember(updatedMember);
-    sessionStorage.setItem("currentMember", JSON.stringify(updatedMember));
     setProfileOpen(false);
   };
 

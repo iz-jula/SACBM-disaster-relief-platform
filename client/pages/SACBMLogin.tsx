@@ -27,8 +27,7 @@ const SACBMLogin = () => {
     setLoading(true);
 
     try {
-      const member = await signInSacbmMember(email, password);
-      sessionStorage.setItem("currentMember", JSON.stringify(member));
+      await signInSacbmMember(email, password);
       navigate("/sacbm-portal");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred during login. Please try again.");

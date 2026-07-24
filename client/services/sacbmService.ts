@@ -47,6 +47,26 @@ const toMember = (row: SacbmMemberRow): Member => ({
   isActive: row.is_active,
 });
 
+async function getMemberForUserId(userId: string): Promise<Member> {
+  const { data: memberRow, error: memberError } = await supabase
+    .from("sacbm_members")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (memberError) throw new Error("We could not load your chamber profile. Please try again.");
+  if (!memberRow) throw new Error("Your account is not linked to an active SACBM member profile.");
+
+  return toMember(memberRow as SacbmMemberRow);
+}
+
+export async function getCurrentSacbmMember(): Promise<Member | null> {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+  return getMemberForUserId(data.user.id);
+}
+
 export async function signInSacbmMember(email: string, password: string): Promise<Member> {
   const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
     email: email.trim().toLowerCase(),
@@ -57,24 +77,12 @@ export async function signInSacbmMember(email: string, password: string): Promis
     throw new Error(authError?.message || "Invalid email or password.");
   }
 
-  const { data: memberRow, error: memberError } = await supabase
-    .from("sacbm_members")
-    .select("*")
-    .eq("user_id", authData.user.id)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  if (memberError) {
+  try {
+    return await getMemberForUserId(authData.user.id);
+  } catch (error) {
     await supabase.auth.signOut();
-    throw new Error("We could not load your chamber profile. Please try again.");
+    throw error;
   }
-
-  if (!memberRow) {
-    await supabase.auth.signOut();
-    throw new Error("Your account is not linked to an active SACBM member profile.");
-  }
-
-  return toMember(memberRow as SacbmMemberRow);
 }
 
 export async function requestSacbmPasswordReset(email: string) {
