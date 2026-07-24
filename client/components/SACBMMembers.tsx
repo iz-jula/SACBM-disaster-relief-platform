@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { createSacbmMember } from "@/services/sacbmService";
+import { createSacbmMember, deleteSacbmMember, getSacbmMembers, setSacbmMemberActive, updateSacbmMember } from "@/services/sacbmService";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -115,11 +115,34 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const [tierFilter, setTierFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [membersLoading, setMembersLoading] = useState(true);
+  const [membersError, setMembersError] = useState("");
   const [showMemberForm, setShowMemberForm] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberSaving, setMemberSaving] = useState(false);
   const [memberSaveError, setMemberSaveError] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    setMembersLoading(true);
+    setMembersError("");
+
+    getSacbmMembers()
+      .then((loadedMembers) => {
+        if (!cancelled) setMembers(loadedMembers);
+      })
+      .catch((error) => {
+        if (!cancelled) setMembersError(error instanceof Error ? error.message : "We could not load the member directory.");
+      })
+      .finally(() => {
+        if (!cancelled) setMembersLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [memberForm, setMemberForm] = useState({
     firstName: "",
     surname: "",
@@ -253,37 +276,43 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       return;
     }
 
-    const memberData: Member = {
-      id: editingMemberId || `member-${Date.now()}`,
-      name: `${memberForm.firstName.trim()} ${memberForm.surname.trim()}`,
-      firstName: memberForm.firstName.trim(),
-      surname: memberForm.surname.trim(),
-      company: memberForm.company.trim(),
-      jobTitle: memberForm.jobTitle.trim(),
-      chamberTitle: memberForm.chamberTitle.trim(),
-      email: memberForm.email.trim(),
-      phone: memberForm.phone.trim(),
-      address: memberForm.address.trim(),
-      tier: memberForm.tier,
-      role: memberForm.role,
-      sacbmRole: memberForm.role === MemberRole.BOARD ? "board-member" : memberForm.role === MemberRole.EXCO ? "exco-member" : memberForm.role,
-      isExco: memberForm.isExco,
-      isBoard: memberForm.isBoard,
-      joinDate: editingMemberId ? members.find((item) => item.id === editingMemberId)?.joinDate || new Date().toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-      isActive: true,
-    };
-    setMembers((current) => current.map((item) => item.id === editingMemberId ? { ...item, ...memberData } : item));
-    setShowMemberForm(false);
+    setMemberSaving(true);
+    setMemberSaveError("");
+    try {
+      const updatedMember = await updateSacbmMember({ id: editingMemberId, ...memberForm });
+      setMembers((current) => current.map((item) => item.id === updatedMember.id ? updatedMember : item));
+      setShowMemberForm(false);
+    } catch (error) {
+      setMemberSaveError(error instanceof Error ? error.message : "Could not update the member.");
+    } finally {
+      setMemberSaving(false);
+    }
   };
 
-  const toggleMemberStatus = (memberId: string) => {
-    setMembers((current) => current.map((item) => item.id === memberId ? { ...item, isActive: !item.isActive } : item));
+  const toggleMemberStatus = async (memberId: string) => {
+    const existingMember = members.find((item) => item.id === memberId);
+    if (!existingMember) return;
+
+    setMembersError("");
+    try {
+      const updatedMember = await setSacbmMemberActive(memberId, !existingMember.isActive);
+      setMembers((current) => current.map((item) => item.id === updatedMember.id ? updatedMember : item));
+    } catch (error) {
+      setMembersError(error instanceof Error ? error.message : "We could not update the member status.");
+    }
   };
 
-  const deleteMember = (memberId: string) => {
+  const deleteMember = async (memberId: string) => {
     const member = members.find((item) => item.id === memberId);
     if (!member || !window.confirm(`Permanently delete ${member.name} from the directory?`)) return;
-    setMembers((current) => current.filter((item) => item.id !== memberId));
+
+    setMembersError("");
+    try {
+      await deleteSacbmMember(memberId);
+      setMembers((current) => current.filter((item) => item.id !== memberId));
+    } catch (error) {
+      setMembersError(error instanceof Error ? error.message : "We could not permanently delete the member.");
+    }
   };
 
   const inactiveMembers = members.filter((member) => !member.isActive);
@@ -298,6 +327,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             Connect with {members.filter((item) => item.isActive).length} active chamber members
           </p>
         </div>
+        {membersError && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{membersError}</p>}
         {currentMember.role === MemberRole.ADMIN && (
           <button onClick={() => openMemberForm()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">
             <UserPlus className="h-4 w-4" />
@@ -411,7 +441,11 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       </p>
 
       {/* Members Grid/List View */}
-      {filteredMembers.length === 0 ? (
+      {membersLoading ? (
+        <Card className="border-0 shadow-sm">
+          <CardContent className="py-12 text-center text-sm text-slate-500">Loading member directory...</CardContent>
+        </Card>
+      ) : filteredMembers.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-12 pb-12 text-center">
             <Building2 className="h-12 w-12 text-slate-300 mx-auto mb-4" />

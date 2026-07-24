@@ -590,6 +590,77 @@ export async function createSacbmMember(input: {
   return toMember(data.member as SacbmMemberRow);
 }
 
+export async function getSacbmMembers() {
+  const { data, error } = await supabase
+    .from("sacbm_members")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) throw new Error("We could not load the member directory.");
+  return (data || []).map((row) => toMember(row as SacbmMemberRow));
+}
+
+export async function updateSacbmMember(input: {
+  id: string;
+  firstName: string;
+  surname: string;
+  company: string;
+  jobTitle: string;
+  chamberTitle: string;
+  email: string;
+  phone: string;
+  address: string;
+  tier: MemberTier;
+  role: MemberRole;
+  isExco: boolean;
+  isBoard: boolean;
+}) {
+  const { data, error } = await supabase
+    .from("sacbm_members")
+    .update({
+      name: `${input.firstName.trim()} ${input.surname.trim()}`,
+      first_name: input.firstName.trim(),
+      surname: input.surname.trim(),
+      company: input.company.trim(),
+      job_title: input.jobTitle.trim() || null,
+      chamber_title: input.chamberTitle.trim() || null,
+      email: input.email.trim().toLowerCase(),
+      phone: input.phone.trim() || null,
+      address: input.address.trim() || null,
+      tier: input.tier,
+      role: input.role,
+      is_exco: input.isExco,
+      is_board: input.isBoard,
+    })
+    .eq("id", input.id)
+    .select("*")
+    .single();
+
+  if (error || !data) throw new Error("We could not update the member.");
+  return toMember(data as SacbmMemberRow);
+}
+
+export async function setSacbmMemberActive(memberId: string, isActive: boolean) {
+  const { data, error } = await supabase
+    .from("sacbm_members")
+    .update({ is_active: isActive })
+    .eq("id", memberId)
+    .select("*")
+    .single();
+
+  if (error || !data) throw new Error(isActive ? "We could not reactivate the member." : "We could not deactivate the member.");
+  return toMember(data as SacbmMemberRow);
+}
+
+export async function deleteSacbmMember(memberId: string) {
+  const { error } = await supabase
+    .from("sacbm_members")
+    .delete()
+    .eq("id", memberId);
+
+  if (error) throw new Error("We could not permanently delete the member.");
+}
+
 export async function signOutSacbmMember() {
   await supabase.auth.signOut();
 }
