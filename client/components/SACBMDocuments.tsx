@@ -392,6 +392,10 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem onSelect={() => setSelectedDocumentIds(new Set(filteredDocuments.map((document) => document.id)))}>
+                <Check className="mr-2 h-4 w-4" />
+                Select for download
+              </DropdownMenuItem>
               <DropdownMenuItem disabled={selectedDocumentIds.size === 0} onSelect={handleDownloadSelected}>
                 <Download className="mr-2 h-4 w-4" />
                 Download selected{selectedDocumentIds.size > 0 ? ` (${selectedDocumentIds.size})` : ""}
@@ -690,6 +694,19 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
             >
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selectedDocumentIds.has(doc.id)}
+                    aria-label={`${selectedDocumentIds.has(doc.id) ? "Remove" : "Select"} ${doc.title} for download`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleDocumentSelection(doc.id);
+                    }}
+                    className={`mt-3 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition-colors ${selectedDocumentIds.has(doc.id) ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-transparent hover:border-slate-500"}`}
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
                   {/* Icon */}
                   <div className="p-3 bg-blue-50 rounded-lg flex-shrink-0">
                     <FileText className="h-6 w-6 text-blue-600" />
@@ -739,10 +756,6 @@ const SACBMDocuments: React.FC<SACBMDocumentsProps> = ({ member }) => {
                           <DropdownMenuItem onSelect={() => window.open(doc.fileUrl, "_blank", "noopener,noreferrer")}>
                             <Download className="mr-2 h-4 w-4" />
                             Download
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => toggleDocumentSelection(doc.id)}>
-                            <Check className="mr-2 h-4 w-4" />
-                            {selectedDocumentIds.has(doc.id) ? "Remove from selection" : "Select for download"}
                           </DropdownMenuItem>
                           {member.role === MemberRole.ADMIN && (
                             <>
