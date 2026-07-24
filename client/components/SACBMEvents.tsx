@@ -20,7 +20,7 @@ import {
   Home,
   FileText,
 } from "lucide-react";
-import { Member, Event, EventAttachment, EventRSVP, MemberRole } from "@shared/api";
+import { Member, Event, EventAttachment, EventGallery, EventRSVP, MemberRole } from "@shared/api";
 
 // Mock events data
 const MOCK_EVENTS: Event[] = [
@@ -113,6 +113,14 @@ const MOCK_RSVPS: EventRSVP[] = [
   { id: "3", eventId: "3", memberId: "1", status: "maybe", rsvpDate: "2024-02-08" },
 ];
 
+const MOCK_GALLERIES: Record<string, EventGallery[]> = {
+  "5": [
+    { id: "gallery-5-1", eventId: "5", imageUrl: "https://images.unsplash.com/photo-1519671482677-504be0271101?w=900&h=650&fit=crop", caption: "Members connecting over lunch", uploadedBy: "admin", uploadedDate: "2024-01-21" },
+    { id: "gallery-5-2", eventId: "5", imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=900&h=650&fit=crop", caption: "A room full of new connections", uploadedBy: "admin", uploadedDate: "2024-01-21" },
+    { id: "gallery-5-3", eventId: "5", imageUrl: "https://images.unsplash.com/photo-1515169067868-5387ec356754?w=900&h=650&fit=crop", caption: "Chamber conversations", uploadedBy: "admin", uploadedDate: "2024-01-21" },
+  ],
+};
+
 interface SACBMEventsProps {
   member: Member;
   onNavigate?: (section: "dashboard" | "documents" | "events" | "members") => void;
@@ -127,6 +135,12 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
     return stored ? JSON.parse(stored) : MOCK_EVENTS;
   });
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [galleryEvent, setGalleryEvent] = useState<Event | null>(null);
+  const [galleryImages, setGalleryImages] = useState<Record<string, EventGallery[]>>(() => {
+    if (typeof window === "undefined") return MOCK_GALLERIES;
+    const stored = localStorage.getItem("sacbmEventGalleries");
+    return stored ? JSON.parse(stored) : MOCK_GALLERIES;
+  });
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [detailedEvent, setDetailedEvent] = useState<Event | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -155,6 +169,10 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
   useEffect(() => {
     localStorage.setItem("sacbmEvents", JSON.stringify(eventsData));
   }, [eventsData]);
+
+  useEffect(() => {
+    localStorage.setItem("sacbmEventGalleries", JSON.stringify(galleryImages));
+  }, [galleryImages]);
 
   useEffect(() => {
     if (!initialEventId) return;
@@ -186,6 +204,22 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
       ...prev,
       [eventId]: status,
     }));
+  };
+
+  const addGalleryPhotos = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!galleryEvent) return;
+    const uploads = Array.from(event.target.files || []).map((file) => ({
+      id: `gallery-${Date.now()}-${file.name}`,
+      eventId: galleryEvent.id,
+      imageUrl: URL.createObjectURL(file),
+      caption: file.name,
+      uploadedBy: member.id,
+      uploadedDate: new Date().toISOString().split("T")[0],
+    }));
+    if (uploads.length > 0) {
+      setGalleryImages((current) => ({ ...current, [galleryEvent.id]: [...(current[galleryEvent.id] || []), ...uploads] }));
+    }
+    event.target.value = "";
   };
 
   const isRsvpDeadlinePass = (deadline: string) => {
@@ -437,7 +471,7 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
                             className="gap-2"
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Navigate to event gallery
+                              setGalleryEvent(event);
                             }}
                           >
                             <ImageIcon className="h-4 w-4" />
@@ -451,6 +485,52 @@ const SACBMEvents: React.FC<SACBMEventsProps> = ({ member, onNavigate, initialEv
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {galleryEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onClick={() => setGalleryEvent(null)}>
+          <Card className="max-h-[90vh] w-full max-w-4xl overflow-y-auto border-0 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <CardHeader className="border-b border-slate-100">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <CardTitle className="text-xl font-light tracking-tight text-slate-900">{galleryEvent.title}</CardTitle>
+                  <CardDescription className="mt-1">Post-event gallery · {galleryEvent.location}</CardDescription>
+                </div>
+                <button onClick={() => setGalleryEvent(null)} className="rounded-md px-2 py-1 text-xl text-slate-400 hover:bg-slate-100">×</button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              {galleryImages[galleryEvent.id]?.length ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {galleryImages[galleryEvent.id].map((image) => (
+                    <a key={image.id} href={image.imageUrl} target="_blank" rel="noopener noreferrer" className="group overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                      <img src={image.imageUrl} alt={image.caption || galleryEvent.title} className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                      {image.caption && <p className="truncate px-3 py-2 text-xs text-slate-600">{image.caption}</p>}
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
+                  <ImageIcon className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+                  <p className="text-sm font-medium text-slate-700">No photos have been added yet</p>
+                  <p className="mt-1 text-sm text-slate-500">The gallery will appear here after the event.</p>
+                </div>
+              )}
+              {member.role === MemberRole.ADMIN && (
+                <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">Add event photos</p>
+                    <p className="mt-1 text-xs text-slate-500">PNG, JPG, or JPEG files</p>
+                  </div>
+                  <label className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700">
+                    Upload photos
+                    <input type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple onChange={addGalleryPhotos} className="hidden" />
+                  </label>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
