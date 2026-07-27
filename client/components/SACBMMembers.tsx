@@ -458,7 +458,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         {currentMember.role === MemberRole.ADMIN && (
           <button
             onClick={() => directoryMode === "companies" ? openCompanyForm() : openMemberForm()}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 transition-colors hover:border-slate-900 hover:bg-slate-50"
           >
             {directoryMode === "companies" ? <Building2 className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
             {directoryMode === "companies" ? "Add company" : "Add member"}
@@ -602,32 +602,40 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {companyEntries.map((company) => (
-              <Card key={company.id} onClick={() => setSelectedCompany(company)} className="cursor-pointer rounded-xl border border-slate-200 shadow-none transition-shadow hover:border-slate-300 hover:shadow-sm">
-                <CardContent className="p-6">
-                  <div className="mb-5 flex h-28 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-emerald-50 text-slate-400">
-                    {company.logoUrl ? <img src={company.logoUrl} alt={`${company.name} logo`} className="h-full w-full object-contain p-5" /> : (
-                      <div className="flex flex-col items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
-                        <Building2 className="h-8 w-8 text-slate-500" />
-                        <span>Company logo</span>
+              <Card key={company.id} onClick={() => setSelectedCompany(company)} className="group cursor-pointer rounded-2xl border border-slate-200 bg-white shadow-none transition-colors hover:border-slate-400">
+                <CardContent className="p-0">
+                  <div className="flex h-32 items-center justify-center overflow-hidden rounded-t-2xl border-b border-slate-200 bg-slate-50 text-slate-400">
+                    {company.logoUrl ? <img src={company.logoUrl} alt={`${company.name} logo`} className="h-full w-full object-contain p-6" /> : (
+                      <div className="flex items-center gap-3 text-slate-400">
+                        <Building2 className="h-6 w-6 stroke-[1.25]" />
+                        <span className="text-[10px] font-medium uppercase tracking-[0.22em]">Profile mark</span>
                       </div>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">{company.name}</h3>
-                  <p className="mt-1 text-sm text-slate-500">{company.representatives.length} representative{company.representatives.length === 1 ? "" : "s"}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {company.tiers.map((tier) => <Badge key={tier} className={`text-xs ${getTierColor(tier)}`} variant="outline">{getTierLabel(tier)}</Badge>)}
-                  </div>
-                  <div className="mt-5 border-t border-slate-100 pt-4">
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Representatives</p>
-                    <div className="space-y-2">
-                      {company.representatives.map((representative) => (
-                        <div key={representative.id} className="flex items-center justify-between gap-3 text-sm" onClick={(event) => event.stopPropagation()}>
-                          <span className="truncate text-slate-700">{representative.name}</span>
-                          <a href={`mailto:${representative.email}`} className="shrink-0 text-emerald-600 hover:text-emerald-700" title={`Email ${representative.name}`}><Mail className="h-4 w-4" /></a>
-                        </div>
-                      ))}
+                  <div className="p-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-lg font-medium tracking-tight text-slate-900">{company.name}</h3>
+                        <p className="mt-1 text-sm text-slate-500">{company.sector || "Chamber company"}</p>
+                      </div>
+                      <span className="mt-1 text-xs text-slate-400">{company.representatives.length} rep{company.representatives.length === 1 ? "" : "s"}</span>
+                    </div>
+                    <div className="mt-5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+                      {company.tiers.map((tier) => <span key={tier}>{getTierLabel(tier)}</span>)}
+                    </div>
+                    <div className="mt-5 border-t border-slate-100 pt-4">
+                      <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Representatives</p>
+                      <div className="space-y-2">
+                        {company.representatives.slice(0, 3).map((representative) => (
+                          <div key={representative.id} className="flex items-center justify-between gap-3 text-sm" onClick={(event) => event.stopPropagation()}>
+                            <span className="truncate text-slate-700">{representative.name}</span>
+                            <a href={`mailto:${representative.email}`} className="shrink-0 text-slate-400 transition-colors hover:text-slate-900" title={`Email ${representative.name}`}><Mail className="h-4 w-4" /></a>
+                          </div>
+                        ))}
+                        {company.representatives.length > 3 && <p className="pt-1 text-xs text-slate-400">+{company.representatives.length - 3} more</p>}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -833,7 +841,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 </div>
                 <button onClick={() => setSelectedCompany(null)} className="text-2xl leading-none text-slate-400 hover:text-slate-900">×</button>
               </div>
-              <div className="mb-6 flex h-32 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-emerald-50">
+              <div className="mb-6 flex h-32 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
                 {selectedCompany.logoUrl ? <img src={selectedCompany.logoUrl} alt={`${selectedCompany.name} logo`} className="h-full w-full object-contain p-6" /> : <Building2 className="h-10 w-10 text-slate-400" />}
               </div>
               <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
@@ -901,7 +909,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 <Input placeholder="Address" value={companyForm.address} onChange={(event) => setCompanyForm((form) => ({ ...form, address: event.target.value }))} />
                 <textarea placeholder="Company description" value={companyForm.description} onChange={(event) => setCompanyForm((form) => ({ ...form, description: event.target.value }))} rows={4} className="resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:col-span-2" />
               </div>
-              <div className="mt-6 flex justify-end gap-3"><Button variant="outline" onClick={() => setShowCompanyForm(false)}>Cancel</Button><Button disabled={companySaving} onClick={saveCompany} className="bg-emerald-600 text-white hover:bg-emerald-700">{companySaving ? "Saving..." : "Save company"}</Button></div>
+              <div className="mt-6 flex justify-end gap-3"><Button variant="outline" onClick={() => setShowCompanyForm(false)}>Cancel</Button><Button disabled={companySaving} onClick={saveCompany} className="bg-slate-900 text-white hover:bg-slate-800">{companySaving ? "Saving..." : "Save company"}</Button></div>
             </CardContent>
           </Card>
         </div>
