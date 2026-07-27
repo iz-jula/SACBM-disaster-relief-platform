@@ -24,6 +24,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Member, MemberRole } from "@shared/api";
+import { getSacbmGovernanceData } from "@/services/sacbmGovernanceService";
 
 interface FinancialRecord {
   id: string;
@@ -104,122 +105,6 @@ const MONTHS = [
   "October",
   "November",
   "December",
-];
-
-const MOCK_FINANCIAL_RECORDS: FinancialRecord[] = [
-  {
-    id: "1",
-    title: "Annual Gala Event Invoice",
-    type: "invoice",
-    amount: 5000,
-    date: "2024-02-10",
-    uploadedBy: "events-admin",
-    category: "events",
-    fileUrl: "/docs/invoice-gala.pdf",
-    status: "approved",
-  },
-  {
-    id: "2",
-    title: "Office Supplies Receipt",
-    type: "receipt",
-    amount: 250,
-    date: "2024-02-08",
-    uploadedBy: "admin",
-    category: "operations",
-    fileUrl: "/docs/receipt-supplies.pdf",
-    status: "approved",
-  },
-  {
-    id: "3",
-    title: "Speaker Honorarium Invoice",
-    type: "invoice",
-    amount: 1500,
-    date: "2024-02-12",
-    uploadedBy: "events-admin",
-    category: "events",
-    fileUrl: "/docs/invoice-speaker.pdf",
-    status: "pending",
-  },
-];
-
-const MOCK_MEMBER_RENEWALS: MemberRenewal[] = [
-  {
-    id: "1",
-    memberName: "John Smith",
-    company: "TechCore Solutions",
-    tier: "platinum",
-    currentExpiry: "2024-03-15",
-    renewalDate: "2024-02-28",
-    status: "upcoming",
-    lastRenewal: "2023-03-15",
-  },
-  {
-    id: "2",
-    memberName: "Sarah Johnson",
-    company: "BuildRight Consultancy",
-    tier: "gold",
-    currentExpiry: "2024-02-20",
-    renewalDate: "2024-02-10",
-    status: "expiring-soon",
-    lastRenewal: "2023-02-20",
-  },
-  {
-    id: "3",
-    memberName: "Mike Chen",
-    company: "Global Trading Inc",
-    tier: "bronze",
-    currentExpiry: "2024-01-31",
-    renewalDate: "2024-01-20",
-    status: "expired",
-    lastRenewal: "2023-01-31",
-  },
-];
-
-const MOCK_PENDING_AUTHORIZATIONS: PendingAuthorization[] = [
-  {
-    id: "1",
-    title: "Budget Approval: Q1 Marketing",
-    requester: "Marketing Lead",
-    amount: 3000,
-    type: "payment",
-    requestDate: "2024-02-10",
-    status: "pending",
-    priority: "high",
-    requiredApprovals: 3,
-    approvedBy: ["Thandi Mokoena"],
-    pendingApprovers: ["Ian Smith", "Amina Patel"],
-    deadline: "2024-02-18",
-    attachmentUrl: "/docs/q1-marketing-budget.pdf",
-  },
-  {
-    id: "2",
-    title: "New Member Application",
-    requester: "Admin",
-    type: "member-change",
-    requestDate: "2024-02-09",
-    status: "pending",
-    priority: "medium",
-    requiredApprovals: 2,
-    approvedBy: [],
-    pendingApprovers: ["Thandi Mokoena", "Amina Patel"],
-    deadline: "2024-02-20",
-    attachmentUrl: "/docs/new-member-application.pdf",
-  },
-  {
-    id: "3",
-    title: "Sponsorship Agreement",
-    requester: "Partnership Manager",
-    amount: 5000,
-    type: "document-approval",
-    requestDate: "2024-02-08",
-    status: "approved",
-    priority: "high",
-    requiredApprovals: 2,
-    approvedBy: ["Thandi Mokoena", "Amina Patel"],
-    pendingApprovers: [],
-    deadline: "2024-02-15",
-    attachmentUrl: "/docs/sponsorship-agreement.pdf",
-  },
 ];
 
 interface BoardExcoProps {
@@ -312,8 +197,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadCategory, setUploadCategory] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [financialRecords, setFinancialRecords] = useState<FinancialRecord[]>(MOCK_FINANCIAL_RECORDS);
-  const [authorizationRequests, setAuthorizationRequests] = useState<PendingAuthorization[]>(MOCK_PENDING_AUTHORIZATIONS);
+  const [financialRecords, setFinancialRecords] = useState<FinancialRecord[]>([]);
+  const [memberRenewals, setMemberRenewals] = useState<MemberRenewal[]>([]);
+  const [authorizationRequests, setAuthorizationRequests] = useState<PendingAuthorization[]>([]);
   const [selectedAuthorization, setSelectedAuthorization] = useState<PendingAuthorization | null>(null);
   const [authorizationNotes, setAuthorizationNotes] = useState("");
   const [adminNotifications, setAdminNotifications] = useState<AdminNotification[]>([]);
@@ -326,6 +212,29 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [approvalAmount, setApprovalAmount] = useState("");
   const [approvalType, setApprovalType] = useState<PendingAuthorization["type"]>("payment");
   const [approvalRecipients, setApprovalRecipients] = useState<string[]>([]);
+  const [governanceLoading, setGovernanceLoading] = useState(true);
+  const [governanceError, setGovernanceError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setGovernanceLoading(true);
+    setGovernanceError("");
+    getSacbmGovernanceData()
+      .then((data) => {
+        if (cancelled) return;
+        setFinancialRecords(data.financialRecords as FinancialRecord[]);
+        setMemberRenewals(data.memberRenewals as MemberRenewal[]);
+        setAuthorizationRequests(data.authorizationRequests as PendingAuthorization[]);
+        setMemos(data.memos as PortalMemo[]);
+      })
+      .catch((error) => {
+        if (!cancelled) setGovernanceError(error instanceof Error ? error.message : "We could not load the Board and EXCO workspace.");
+      })
+      .finally(() => {
+        if (!cancelled) setGovernanceLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const isAdmin = member.role === MemberRole.ADMIN;
   const hasAccess = [MemberRole.ADMIN, MemberRole.EXCO, MemberRole.BOARD].includes(member.role);
@@ -360,7 +269,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
       spendToDate: approved
         .filter((record) => record.type === "receipt" || record.type === "invoice")
         .reduce((sum, record) => sum + (record.amount || 0), 0),
-      renewalIncome: MOCK_MEMBER_RENEWALS.reduce((sum, renewal) => {
+      renewalIncome: memberRenewals.reduce((sum, renewal) => {
         const annualFee = { bronze: 500, gold: 1200, platinum: 2500 }[renewal.tier];
         return sum + annualFee;
       }, 0),
@@ -377,7 +286,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
             (activityCategory === "all" || activityCategory === `${record.type}s`)
         )
         .map((record) => ({ date: record.date, amount: record.amount || 0 })),
-      ...MOCK_MEMBER_RENEWALS
+      ...memberRenewals
         .filter(() => activityCategory === "all" || activityCategory === "member-renewals")
         .map((renewal) => ({
           date: renewal.renewalDate,
@@ -448,11 +357,11 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const activityMax = Math.max(...activityData.map((item) => item.amount), 1);
 
   const renewalStats = useMemo(() => {
-    const upcoming = MOCK_MEMBER_RENEWALS.filter((r) => r.status === "upcoming").length;
-    const expiringSoon = MOCK_MEMBER_RENEWALS.filter((r) => r.status === "expiring-soon").length;
-    const expired = MOCK_MEMBER_RENEWALS.filter((r) => r.status === "expired").length;
+    const upcoming = memberRenewals.filter((r) => r.status === "upcoming").length;
+    const expiringSoon = memberRenewals.filter((r) => r.status === "expiring-soon").length;
+    const expired = memberRenewals.filter((r) => r.status === "expired").length;
 
-    return { upcoming, expiringSoon, expired, total: MOCK_MEMBER_RENEWALS.length };
+    return { upcoming, expiringSoon, expired, total: memberRenewals.length };
   }, []);
 
   const authStats = useMemo(() => {
@@ -584,6 +493,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
         </p>
       </div>
 
+      {governanceError && <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{governanceError}</p>}
+      {governanceLoading && <p className="text-sm text-slate-500">Loading live governance data...</p>}
+
       {/* Overview Stats */}
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -682,7 +594,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               <CardTitle className="text-lg font-medium">Upcoming Renewals</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {MOCK_MEMBER_RENEWALS.slice(0, 3).map((renewal) => (
+              {memberRenewals.slice(0, 3).map((renewal) => (
                 <div key={renewal.id} className="flex items-start justify-between p-3 border border-slate-100 rounded-lg">
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">{renewal.memberName}</p>
@@ -713,7 +625,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               <CardTitle className="text-lg font-medium">Pending Approvals</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {MOCK_PENDING_AUTHORIZATIONS.filter((a) => a.status === "pending").slice(0, 3).map((auth) => (
+              {authorizationRequests.filter((a) => a.status === "pending").slice(0, 3).map((auth) => (
                 <div
                   key={auth.id}
                   className={`flex items-start justify-between p-3 border-l-4 rounded-lg ${
@@ -769,7 +681,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {MOCK_MEMBER_RENEWALS.map((renewal) => (
+                {memberRenewals.map((renewal) => (
                   <div key={renewal.id} className="flex items-center justify-between p-4 border border-slate-100 rounded-lg hover:bg-slate-50">
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
