@@ -504,9 +504,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             {companyEntries.map((company) => (
               <Card key={company.name} className="rounded-xl border border-slate-200 shadow-none transition-shadow hover:border-slate-300 hover:shadow-sm">
                 <CardContent className="p-6">
-                  <div className="mb-5 flex h-20 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-400">
-                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
-                      <Building2 className="h-5 w-5" />
+                  <div className="mb-5 flex h-28 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-emerald-50 text-slate-400">
+                    <div className="flex flex-col items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                      <Building2 className="h-8 w-8 text-slate-500" />
                       <span>Company logo</span>
                     </div>
                   </div>
