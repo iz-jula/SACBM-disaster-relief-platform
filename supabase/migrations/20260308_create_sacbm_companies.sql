@@ -18,6 +18,13 @@ create table if not exists public.sacbm_companies (
 alter table public.sacbm_members
   add column if not exists company_id uuid references public.sacbm_companies(id) on delete set null;
 
+alter table public.sacbm_companies
+  add column if not exists is_active boolean not null default true;
+
+update public.sacbm_companies
+set is_active = true
+where is_active is null;
+
 create index if not exists sacbm_members_company_id_idx
   on public.sacbm_members(company_id);
 
