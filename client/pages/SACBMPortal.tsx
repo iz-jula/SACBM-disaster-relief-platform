@@ -21,13 +21,16 @@ import SACBMBoardExco from "@/components/SACBMBoardExco";
 import SACBMDashboard from "@/components/SACBMDashboard";
 import { PortalCurrency } from "@/utils/currency";
 import { Member, MemberTier, MemberRole } from "@shared/api";
-import { getCurrentSacbmMember, signOutSacbmMember } from "@/services/sacbmService";
+import { getCurrentSacbmMember, signOutSacbmMember, updateSacbmMemberProfile } from "@/services/sacbmService";
 
 const SACBMPortal = () => {
   const navigate = useNavigate();
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({ profileImage: "", nickname: "", funFact: "" });
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentSection, setCurrentSection] = useState<"dashboard" | "documents" | "events" | "members" | "board-exco">("dashboard");
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -70,11 +73,26 @@ const SACBMPortal = () => {
     navigate("/sacbm-login");
   };
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
     if (!currentMember) return;
-    const updatedMember = { ...currentMember, profileImage: profileForm.profileImage || undefined, nickname: profileForm.nickname.trim() || undefined, funFact: profileForm.funFact.trim() || undefined };
-    setCurrentMember(updatedMember);
-    setProfileOpen(false);
+    setProfileSaving(true);
+    setProfileError("");
+    try {
+      const updatedMember = await updateSacbmMemberProfile({
+        id: currentMember.id,
+        nickname: profileForm.nickname,
+        funFact: profileForm.funFact,
+        profileImageFile: profileImageFile || undefined,
+      });
+      setCurrentMember(updatedMember);
+      setProfileForm({ profileImage: updatedMember.profileImage || "", nickname: updatedMember.nickname || "", funFact: updatedMember.funFact || "" });
+      setProfileImageFile(null);
+      setProfileOpen(false);
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : "We could not save your profile.");
+    } finally {
+      setProfileSaving(false);
+    }
   };
 
   const getTierColor = (tier: MemberTier) => {
@@ -288,7 +306,10 @@ const SACBMPortal = () => {
                     <label className="mb-1 block text-sm font-medium text-slate-700">Profile picture <span className="font-normal text-slate-400">(PNG or JPG)</span></label>
                     <input type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" onChange={(event) => {
                       const file = event.target.files?.[0];
-                      if (file) setProfileForm((form) => ({ ...form, profileImage: URL.createObjectURL(file) }));
+                      if (file) {
+                        setProfileImageFile(file);
+                        setProfileForm((form) => ({ ...form, profileImage: URL.createObjectURL(file) }));
+                      }
                     }} className="block w-full text-xs text-slate-500 file:mr-2 file:rounded-md file:border-0 file:bg-emerald-50 file:px-2 file:py-1.5 file:font-medium file:text-emerald-700" />
                   </div>
                 </div>
@@ -311,9 +332,10 @@ const SACBMPortal = () => {
                     <div><p className="text-xs text-slate-500">SACBM role</p><p className="font-medium capitalize text-slate-800">{currentMember.chamberTitle || currentMember.role}</p></div>
                   </div>
                 </div>
+                {profileError && <p className="mt-5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{profileError}</p>}
                 <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-5">
                   <Button variant="outline" onClick={() => setProfileOpen(false)} className="border-slate-300">Cancel</Button>
-                  <Button onClick={saveProfile} className="bg-emerald-600 text-white hover:bg-emerald-700">Save profile</Button>
+                  <Button onClick={saveProfile} disabled={profileSaving} className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:bg-slate-300">{profileSaving ? "Saving…" : "Save profile"}</Button>
                 </div>
               </CardContent>
             </Card>

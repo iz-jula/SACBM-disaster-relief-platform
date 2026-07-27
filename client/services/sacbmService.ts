@@ -193,6 +193,19 @@ const toMember = (row: SacbmMemberRow): Member => ({
   isActive: row.is_active,
 });
 
+async function resolveMemberProfileImage(path: string | null) {
+  if (!path) return undefined;
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("blob:")) return path;
+  const { data } = await supabase.storage.from("sacbm-assets").createSignedUrl(path, 3600);
+  return data?.signedUrl || undefined;
+}
+
+async function toMemberWithAssets(row: SacbmMemberRow) {
+  const member = toMember(row);
+  member.profileImage = await resolveMemberProfileImage(row.profile_image_url);
+  return member;
+}
+
 async function getMemberForUserId(userId: string): Promise<Member> {
   const { data: memberRow, error: memberError } = await supabase
     .from("sacbm_members")
@@ -204,7 +217,7 @@ async function getMemberForUserId(userId: string): Promise<Member> {
   if (memberError) throw new Error("We could not load your chamber profile. Please try again.");
   if (!memberRow) throw new Error("Your account is not linked to an active SACBM member profile.");
 
-  return toMember(memberRow as SacbmMemberRow);
+  return toMemberWithAssets(memberRow as SacbmMemberRow);
 }
 
 export async function getCurrentSacbmMember(): Promise<Member | null> {
@@ -630,7 +643,7 @@ export async function getSacbmCompanies() {
   ]);
 
   if (companiesResult.error || membersResult.error) throw new Error("We could not load the company directory.");
-  const members = (membersResult.data || []).map((row) => toMember(row as SacbmMemberRow));
+  const members = await Promise.all((membersResult.data || []).map((row) => toMemberWithAssets(row as SacbmMemberRow)));
   return (companiesResult.data || []).map((row) => {
     const company = row as SacbmCompanyRow;
     const representatives = members.filter((member) =>
@@ -730,7 +743,40 @@ export async function getSacbmMembers() {
     .order("name", { ascending: true });
 
   if (error) throw new Error("We could not load the member directory.");
-  return (data || []).map((row) => toMember(row as SacbmMemberRow));
+  return Promise.all((data || []).map((row) => toMemberWithAssets(row as SacbmMemberRow)));
+}
+
+export async function updateSacbmMemberProfile(input: { id: string; nickname: string; funFact: string; profileImageFile?: File }) {
+  let profileImagePath: string | undefined;
+  if (input.profileImageFile) {
+    const safeFileName = input.profileImageFile.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    profileImagePath = `profiles/${input.id}/${crypto.randomUUID()}-${safeFileName}`;
+    const { error: uploadError } = await supabase.storage.from("sacbm-assets").upload(profileImagePath, input.profileImageFile, {
+      contentType: input.profileImageFile.type || "application/octet-stream",
+      upsert: false,
+    });
+    if (uploadError) throw new Error("We could not upload your profile picture.");
+  }
+
+  const updates: Record<string, string | null> = {
+    nickname: input.nickname.trim() || null,
+    fun_fact: input.funFact.trim() || null,
+  };
+  if (profileImagePath) updates.profile_image_url = profileImagePath;
+
+  const { data, error } = await supabase
+    .from("sacbm_members")
+    .update(updates)
+    .eq("id", input.id)
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    if (profileImagePath) await supabase.storage.from("sacbm-assets").remove([profileImagePath]);
+    throw new Error("We could not save your profile.");
+  }
+
+  return toMemberWithAssets(data as SacbmMemberRow);
 }
 
 export async function updateSacbmMember(input: {
@@ -770,7 +816,7 @@ export async function updateSacbmMember(input: {
     .single();
 
   if (error || !data) throw new Error("We could not update the member.");
-  return toMember(data as SacbmMemberRow);
+  return toMemberWithAssets(data as SacbmMemberRow);
 }
 
 export async function setSacbmMemberActive(memberId: string, isActive: boolean) {
@@ -782,7 +828,7 @@ export async function setSacbmMemberActive(memberId: string, isActive: boolean) 
     .single();
 
   if (error || !data) throw new Error(isActive ? "We could not reactivate the member." : "We could not deactivate the member.");
-  return toMember(data as SacbmMemberRow);
+  return toMemberWithAssets(data as SacbmMemberRow);
 }
 
 export async function deleteSacbmMember(memberId: string) {
