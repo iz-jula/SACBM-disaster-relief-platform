@@ -831,29 +831,29 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       )}
 
       {selectedCompany && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onClick={() => setSelectedCompany(null)}>
-          <Card className="w-full max-w-xl rounded-2xl border-0 shadow-2xl" onClick={(event) => event.stopPropagation()}>
-            <CardContent className="p-7">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/25 p-4 backdrop-blur-sm" onClick={() => setSelectedCompany(null)}>
+          <Card className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white shadow-xl" onClick={(event) => event.stopPropagation()}>
+            <CardContent className="p-8">
               <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Company profile</p>
                   <h3 className="mt-2 text-2xl font-light tracking-tight text-slate-900">{selectedCompany.name}</h3>
                 </div>
-                <button onClick={() => setSelectedCompany(null)} className="text-2xl leading-none text-slate-400 hover:text-slate-900">×</button>
+                <button onClick={() => setSelectedCompany(null)} aria-label="Close company profile" className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-lg leading-none text-slate-400 transition-colors hover:border-slate-900 hover:text-slate-900">×</button>
               </div>
-              <div className="mb-6 flex h-32 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50">
-                {selectedCompany.logoUrl ? <img src={selectedCompany.logoUrl} alt={`${selectedCompany.name} logo`} className="h-full w-full object-contain p-6" /> : <Building2 className="h-10 w-10 text-slate-400" />}
+              <div className="mb-7 flex h-36 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
+                {selectedCompany.logoUrl ? <img src={selectedCompany.logoUrl} alt={`${selectedCompany.name} logo`} className="h-full w-full object-contain p-7" /> : <Building2 className="h-9 w-9 stroke-[1.25] text-slate-400" />}
               </div>
-              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                <div><p className="text-xs uppercase tracking-wide text-slate-400">Sector</p><p className="mt-1 text-slate-700">{selectedCompany.sector || "Not provided"}</p></div>
-                <div><p className="text-xs uppercase tracking-wide text-slate-400">Address</p><p className="mt-1 text-slate-700">{selectedCompany.address || "Not provided"}</p></div>
-                <div><p className="text-xs uppercase tracking-wide text-slate-400">Email</p><p className="mt-1 text-slate-700">{selectedCompany.email || "Not provided"}</p></div>
-                <div><p className="text-xs uppercase tracking-wide text-slate-400">Phone</p><p className="mt-1 text-slate-700">{selectedCompany.phone || "Not provided"}</p></div>
+              <div className="grid grid-cols-1 gap-x-8 gap-y-5 border-y border-slate-100 py-5 text-sm sm:grid-cols-2">
+                <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Sector</p><p className="mt-1.5 text-slate-700">{selectedCompany.sector || "Not provided"}</p></div>
+                <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Address</p><p className="mt-1.5 text-slate-700">{selectedCompany.address || "Not provided"}</p></div>
+                <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Email</p><p className="mt-1.5 text-slate-700">{selectedCompany.email || "Not provided"}</p></div>
+                <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Phone</p><p className="mt-1.5 text-slate-700">{selectedCompany.phone || "Not provided"}</p></div>
               </div>
-              {selectedCompany.description && <p className="mt-6 border-t border-slate-100 pt-5 text-sm leading-relaxed text-slate-600">{selectedCompany.description}</p>}
-              {selectedCompany.website && <a href={selectedCompany.website} target="_blank" rel="noreferrer" className="mt-5 inline-block text-sm font-medium text-emerald-700 hover:text-emerald-800">Visit company website</a>}
-              <div className="mt-6 border-t border-slate-100 pt-5">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Representatives</p>
+              {selectedCompany.description && <p className="mt-6 text-sm leading-relaxed text-slate-600">{selectedCompany.description}</p>}
+              {selectedCompany.website && <a href={selectedCompany.website} target="_blank" rel="noreferrer" className="mt-5 inline-block text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900">Visit company website</a>}
+              <div className="mt-7 border-t border-slate-100 pt-5">
+                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Representatives</p>
                 <div className="mt-3 space-y-2">
                   {selectedCompany.representatives.map((representative) => <div key={representative.id} className="flex justify-between text-sm"><span className="text-slate-700">{representative.name}</span><span className="text-slate-500">{representative.jobTitle || "Representative"}</span></div>)}
                 </div>
