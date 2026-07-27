@@ -60,6 +60,8 @@ export interface Company {
   website?: string;
   description?: string;
   logoUrl?: string;
+  membershipTier?: MemberTier;
+  renewalDate?: string;
   isActive: boolean;
   representatives: Member[];
 }

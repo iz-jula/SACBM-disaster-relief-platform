@@ -67,6 +67,8 @@ type SacbmCompanyRow = {
   website: string | null;
   description: string | null;
   logo_url: string | null;
+  membership_tier: MemberTier | null;
+  renewal_date: string | null;
   is_active: boolean;
 };
 
@@ -161,6 +163,8 @@ const toCompany = (row: SacbmCompanyRow, representatives: Member[] = []): Compan
   website: row.website || undefined,
   description: row.description || undefined,
   logoUrl: row.logo_url || undefined,
+  membershipTier: row.membership_tier || undefined,
+  renewalDate: row.renewal_date || undefined,
   isActive: row.is_active,
   representatives,
 });
@@ -644,6 +648,8 @@ export async function createSacbmCompany(input: {
   email: string;
   website: string;
   description: string;
+  membershipTier: MemberTier;
+  renewalDate: string;
   createdBy: string;
 }) {
   const { data, error } = await supabase
@@ -656,6 +662,8 @@ export async function createSacbmCompany(input: {
       email: input.email.trim() || null,
       website: input.website.trim() || null,
       description: input.description.trim() || null,
+      membership_tier: input.membershipTier,
+      renewal_date: input.renewalDate || null,
       created_by: input.createdBy,
     })
     .select("*")
@@ -674,6 +682,8 @@ export async function updateSacbmCompany(input: {
   email: string;
   website: string;
   description: string;
+  membershipTier: MemberTier;
+  renewalDate: string;
 }) {
   const { data, error } = await supabase
     .from("sacbm_companies")
@@ -685,6 +695,8 @@ export async function updateSacbmCompany(input: {
       email: input.email.trim() || null,
       website: input.website.trim() || null,
       description: input.description.trim() || null,
+      membership_tier: input.membershipTier,
+      renewal_date: input.renewalDate || null,
     })
     .eq("id", input.id)
     .select("*")

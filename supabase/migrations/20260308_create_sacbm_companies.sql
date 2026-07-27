@@ -21,6 +21,12 @@ alter table public.sacbm_members
 alter table public.sacbm_companies
   add column if not exists is_active boolean not null default true;
 
+alter table public.sacbm_companies
+  add column if not exists membership_tier text not null default 'bronze' check (membership_tier in ('bronze', 'gold', 'platinum'));
+
+alter table public.sacbm_companies
+  add column if not exists renewal_date date;
+
 update public.sacbm_companies
 set is_active = true
 where is_active is null;

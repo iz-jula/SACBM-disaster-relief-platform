@@ -155,7 +155,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     };
   }, []);
 
-  const [companyForm, setCompanyForm] = useState({ name: "", address: "", sector: "", phone: "", email: "", website: "", description: "" });
+  const [companyForm, setCompanyForm] = useState({ name: "", address: "", sector: "", phone: "", email: "", website: "", description: "", membershipTier: MemberTier.BRONZE, renewalDate: "" });
 
   const [memberForm, setMemberForm] = useState({
     firstName: "",
@@ -314,6 +314,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       email: company?.email || "",
       website: company?.website || "",
       description: company?.description || "",
+      membershipTier: company?.membershipTier || MemberTier.BRONZE,
+      renewalDate: company?.renewalDate || "",
     });
     setCompanyFormError("");
     setShowCompanyForm(true);
@@ -622,8 +624,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                       </div>
                       <span className="mt-1 text-xs text-slate-400">{company.representatives.length} rep{company.representatives.length === 1 ? "" : "s"}</span>
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
-                      {company.tiers.map((tier) => <span key={tier}>{getTierLabel(tier)}</span>)}
+                    <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                      <span className="font-medium text-slate-800">{getTierLabel(company.membershipTier || company.tiers[0] || MemberTier.BRONZE)} member</span>
+                      {company.renewalDate && <span>Renews {new Date(company.renewalDate).toLocaleDateString()}</span>}
                     </div>
                     <div className="mt-5 border-t border-slate-100 pt-4">
                       <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Representatives</p>
@@ -849,6 +852,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Address</p><p className="mt-1.5 text-slate-700">{selectedCompany.address || "Not provided"}</p></div>
                 <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Email</p><p className="mt-1.5 text-slate-700">{selectedCompany.email || "Not provided"}</p></div>
                 <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Phone</p><p className="mt-1.5 text-slate-700">{selectedCompany.phone || "Not provided"}</p></div>
+                <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Membership</p><p className="mt-1.5 font-medium text-slate-800">{getTierLabel(selectedCompany.membershipTier || MemberTier.BRONZE)}</p></div>
+                <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Renewal date</p><p className="mt-1.5 text-slate-700">{selectedCompany.renewalDate ? new Date(selectedCompany.renewalDate).toLocaleDateString() : "Not provided"}</p></div>
               </div>
               {selectedCompany.description && <p className="mt-6 text-sm leading-relaxed text-slate-600">{selectedCompany.description}</p>}
               {selectedCompany.website && <a href={selectedCompany.website} target="_blank" rel="noreferrer" className="mt-5 inline-block text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900">Visit company website</a>}
@@ -907,6 +912,11 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 <Input placeholder="Phone" value={companyForm.phone} onChange={(event) => setCompanyForm((form) => ({ ...form, phone: event.target.value }))} />
                 <Input placeholder="Website" value={companyForm.website} onChange={(event) => setCompanyForm((form) => ({ ...form, website: event.target.value }))} />
                 <Input placeholder="Address" value={companyForm.address} onChange={(event) => setCompanyForm((form) => ({ ...form, address: event.target.value }))} />
+                <Select value={companyForm.membershipTier} onValueChange={(value) => setCompanyForm((form) => ({ ...form, membershipTier: value as MemberTier }))}>
+                  <SelectTrigger><SelectValue placeholder="Membership tier" /></SelectTrigger>
+                  <SelectContent><SelectItem value={MemberTier.BRONZE}>Bronze membership</SelectItem><SelectItem value={MemberTier.GOLD}>Gold membership</SelectItem><SelectItem value={MemberTier.PLATINUM}>Platinum membership</SelectItem></SelectContent>
+                </Select>
+                <Input type="date" value={companyForm.renewalDate} onChange={(event) => setCompanyForm((form) => ({ ...form, renewalDate: event.target.value }))} />
                 <textarea placeholder="Company description" value={companyForm.description} onChange={(event) => setCompanyForm((form) => ({ ...form, description: event.target.value }))} rows={4} className="resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:col-span-2" />
               </div>
               <div className="mt-6 flex justify-end gap-3"><Button variant="outline" onClick={() => setShowCompanyForm(false)}>Cancel</Button><Button disabled={companySaving} onClick={saveCompany} className="bg-slate-900 text-white hover:bg-slate-800">{companySaving ? "Saving..." : "Save company"}</Button></div>
