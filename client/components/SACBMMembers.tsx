@@ -115,6 +115,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const [tierFilter, setTierFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [directoryMode, setDirectoryMode] = useState<"members" | "companies">("members");
   const [members, setMembers] = useState<Member[]>([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [membersError, setMembersError] = useState("");
@@ -158,6 +159,33 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     isBoard: false,
   });
 
+
+  const activeMembers = useMemo(() => members.filter((member) => member.isActive), [members]);
+
+  const companyEntries = useMemo(() => {
+    const companies = new Map<string, Member[]>();
+    activeMembers.forEach((member) => {
+      const companyKey = member.company.trim().toLowerCase();
+      const representatives = companies.get(companyKey) || [];
+      companies.set(companyKey, [...representatives, member]);
+    });
+
+    return Array.from(companies.values())
+      .map((representatives) => ({
+        name: representatives[0].company,
+        representatives,
+        tiers: Array.from(new Set(representatives.map((member) => member.tier))),
+        roles: Array.from(new Set(representatives.map((member) => member.role))),
+      }))
+      .filter((company) => {
+        const search = searchTerm.trim().toLowerCase();
+        const matchesSearch = !search || company.name.toLowerCase().includes(search) || company.representatives.some((member) => member.name.toLowerCase().includes(search));
+        const matchesTier = tierFilter === "all" || company.tiers.includes(tierFilter as MemberTier);
+        const matchesRole = roleFilter === "all" || company.roles.includes(roleFilter as MemberRole);
+        return matchesSearch && matchesTier && matchesRole;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [activeMembers, searchTerm, tierFilter, roleFilter]);
 
   // Filter members
   const filteredMembers = useMemo(() => {
@@ -324,7 +352,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Members Directory</h2>
           <p className="text-slate-600 text-sm mt-1">
-            Connect with {members.filter((item) => item.isActive).length} active chamber members
+            {directoryMode === "members" ? `Connect with ${activeMembers.length} active chamber members` : `Explore ${companyEntries.length} chamber companies`}
           </p>
         </div>
         {membersError && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{membersError}</p>}
@@ -362,6 +390,23 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="mb-4 inline-flex rounded-lg bg-slate-100 p-1">
+        <button
+          type="button"
+          onClick={() => setDirectoryMode("members")}
+          className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${directoryMode === "members" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          Members
+        </button>
+        <button
+          type="button"
+          onClick={() => setDirectoryMode("companies")}
+          className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${directoryMode === "companies" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"}`}
+        >
+          Companies
+        </button>
       </div>
 
       {/* Filters */}
@@ -437,7 +482,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
 
       {/* Results Count */}
       <p className="text-sm text-slate-600 mb-4">
-        Showing {filteredMembers.length} of {members.filter((item) => item.isActive).length - 1} members
+        {directoryMode === "members" ? `Showing ${filteredMembers.length} of ${Math.max(activeMembers.length - 1, 0)} members` : `Showing ${companyEntries.length} of ${companyEntries.length} companies`}
       </p>
 
       {/* Members Grid/List View */}
@@ -445,6 +490,44 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         <Card className="border-0 shadow-sm">
           <CardContent className="py-12 text-center text-sm text-slate-500">Loading member directory...</CardContent>
         </Card>
+      ) : directoryMode === "companies" ? (
+        companyEntries.length === 0 ? (
+          <Card className="border-0 shadow-sm">
+            <CardContent className="pt-12 pb-12 text-center">
+              <Building2 className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-600 font-medium">No companies found</p>
+              <p className="text-slate-500 text-sm mt-1">Try adjusting your search or filters</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {companyEntries.map((company) => (
+              <Card key={company.name} className="border-0 shadow-sm transition-shadow hover:shadow-md">
+                <CardContent className="p-6">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                    <Building2 className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900">{company.name}</h3>
+                  <p className="mt-1 text-sm text-slate-500">{company.representatives.length} representative{company.representatives.length === 1 ? "" : "s"}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {company.tiers.map((tier) => <Badge key={tier} className={`text-xs ${getTierColor(tier)}`} variant="outline">{getTierLabel(tier)}</Badge>)}
+                  </div>
+                  <div className="mt-5 border-t border-slate-100 pt-4">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Representatives</p>
+                    <div className="space-y-2">
+                      {company.representatives.map((representative) => (
+                        <div key={representative.id} className="flex items-center justify-between gap-3 text-sm">
+                          <span className="truncate text-slate-700">{representative.name}</span>
+                          <a href={`mailto:${representative.email}`} className="shrink-0 text-emerald-600 hover:text-emerald-700" title={`Email ${representative.name}`}><Mail className="h-4 w-4" /></a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )
       ) : filteredMembers.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="pt-12 pb-12 text-center">
