@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { createSacbmCompany, createSacbmMember, deleteSacbmMember, getSacbmCompanies, getSacbmMembers, setSacbmMemberActive, updateSacbmCompany, updateSacbmMember } from "@/services/sacbmService";
+import { createSacbmCompany, createSacbmMember, deleteSacbmCompany, deleteSacbmMember, getSacbmCompanies, getSacbmMembers, setSacbmCompanyActive, setSacbmMemberActive, updateSacbmCompany, updateSacbmMember } from "@/services/sacbmService";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -177,7 +177,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
 
   const companyEntries = useMemo(() => {
     const entries = new Map<string, Company>();
-    companies.forEach((company) => entries.set(company.name.trim().toLowerCase(), company));
+    companies.filter((company) => company.isActive).forEach((company) => entries.set(company.name.trim().toLowerCase(), company));
 
     activeMembers.forEach((member) => {
       const key = member.company.trim().toLowerCase();
@@ -185,7 +185,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       if (existing) {
         existing.representatives = [...existing.representatives, member];
       } else {
-        entries.set(key, { id: `derived-${key}`, name: member.company, representatives: [member] });
+        entries.set(key, { id: `derived-${key}`, name: member.company, isActive: true, representatives: [member] });
       }
     });
 
@@ -417,6 +417,32 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   };
 
   const inactiveMembers = members.filter((member) => !member.isActive);
+  const inactiveCompanies = companies.filter((company) => !company.isActive);
+
+  const toggleCompanyStatus = async (companyId: string, isActive: boolean) => {
+    setMembersError("");
+    try {
+      const updatedCompany = await setSacbmCompanyActive(companyId, isActive);
+      setCompanies((current) => current.map((company) => company.id === updatedCompany.id ? updatedCompany : company));
+      setSelectedCompany(null);
+    } catch (error) {
+      setMembersError(error instanceof Error ? error.message : "We could not update the company status.");
+    }
+  };
+
+  const permanentlyDeleteCompany = async (companyId: string) => {
+    const company = companies.find((item) => item.id === companyId);
+    if (!company || !window.confirm(`Permanently delete ${company.name} from the directory?`)) return;
+
+    setMembersError("");
+    try {
+      await deleteSacbmCompany(companyId);
+      setCompanies((current) => current.filter((item) => item.id !== companyId));
+      setSelectedCompany(null);
+    } catch (error) {
+      setMembersError(error instanceof Error ? error.message : "We could not permanently delete the company.");
+    }
+  };
 
   return (
     <div>
@@ -824,10 +850,40 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                   {selectedCompany.representatives.map((representative) => <div key={representative.id} className="flex justify-between text-sm"><span className="text-slate-700">{representative.name}</span><span className="text-slate-500">{representative.jobTitle || "Representative"}</span></div>)}
                 </div>
               </div>
-              {currentMember.role === MemberRole.ADMIN && !selectedCompany.id.startsWith("derived-") && <Button onClick={() => { setSelectedCompany(null); openCompanyForm(selectedCompany); }} className="mt-6 bg-slate-900 text-white hover:bg-slate-800">Edit company details</Button>}
+              {currentMember.role === MemberRole.ADMIN && !selectedCompany.id.startsWith("derived-") && (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <Button onClick={() => { setSelectedCompany(null); openCompanyForm(selectedCompany); }} className="bg-slate-900 text-white hover:bg-slate-800"><Pencil className="mr-2 h-4 w-4" />Edit company details</Button>
+                  <Button variant="outline" onClick={() => toggleCompanyStatus(selectedCompany.id, false)} className="border-red-200 text-red-700 hover:bg-red-50"><UserX className="mr-2 h-4 w-4" />Deactivate</Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {currentMember.role === MemberRole.ADMIN && inactiveCompanies.length > 0 && (
+        <Card className="mt-8 border border-slate-200 shadow-sm">
+          <CardContent className="p-5">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-base font-semibold text-slate-900">Inactive companies</h3>
+                <p className="mt-1 text-sm text-slate-500">Deactivated companies are hidden from the directory but can be restored or removed.</p>
+              </div>
+              <Badge variant="outline" className="border-slate-200 text-slate-600">{inactiveCompanies.length}</Badge>
+            </div>
+            <div className="space-y-2">
+              {inactiveCompanies.map((company) => (
+                <div key={company.id} className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0"><p className="font-medium text-slate-800">{company.name}</p><p className="text-sm text-slate-500">{company.sector || "Company profile"} · {company.representatives.length} representative{company.representatives.length === 1 ? "" : "s"}</p></div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => toggleCompanyStatus(company.id, true)} className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"><RotateCcw className="h-4 w-4" />Reactivate</Button>
+                    <Button variant="outline" size="sm" onClick={() => permanentlyDeleteCompany(company.id)} className="border-red-200 text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" />Permanently delete</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {showCompanyForm && currentMember.role === MemberRole.ADMIN && (

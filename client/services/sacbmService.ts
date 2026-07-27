@@ -67,6 +67,7 @@ type SacbmCompanyRow = {
   website: string | null;
   description: string | null;
   logo_url: string | null;
+  is_active: boolean;
 };
 
 type SacbmMemberRow = {
@@ -160,6 +161,7 @@ const toCompany = (row: SacbmCompanyRow, representatives: Member[] = []): Compan
   website: row.website || undefined,
   description: row.description || undefined,
   logoUrl: row.logo_url || undefined,
+  isActive: row.is_active,
   representatives,
 });
 
@@ -690,6 +692,23 @@ export async function updateSacbmCompany(input: {
 
   if (error || !data) throw new Error("We could not update the company.");
   return toCompany(data as SacbmCompanyRow);
+}
+
+export async function setSacbmCompanyActive(companyId: string, isActive: boolean) {
+  const { data, error } = await supabase
+    .from("sacbm_companies")
+    .update({ is_active: isActive })
+    .eq("id", companyId)
+    .select("*")
+    .single();
+
+  if (error || !data) throw new Error("We could not update the company status.");
+  return toCompany(data as SacbmCompanyRow);
+}
+
+export async function deleteSacbmCompany(companyId: string) {
+  const { error } = await supabase.from("sacbm_companies").delete().eq("id", companyId);
+  if (error) throw new Error("We could not permanently delete the company.");
 }
 
 export async function getSacbmMembers() {
