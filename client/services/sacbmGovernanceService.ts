@@ -51,13 +51,22 @@ export type GovernanceMemo = {
   readBy: string[];
 };
 
+export type GovernanceNotification = {
+  id: string;
+  title: string;
+  message: string;
+  recipient: string;
+  createdAt: string;
+  read: boolean;
+};
+
 const statusForRenewal = (date: string): GovernanceMemberRenewal["status"] => {
   const days = Math.ceil((new Date(date).getTime() - Date.now()) / 86400000);
   return days < 0 ? "expired" : days <= 60 ? "expiring-soon" : "upcoming";
 };
 
-export async function getSacbmGovernanceData() {
-  const [financialResult, authorizationResult, approvalResult, memoResult, memoRecipientResult, membersResult, companiesResult] = await Promise.all([
+export async function getSacbmGovernanceData(memberId: string) {
+  const [financialResult, authorizationResult, approvalResult, memoResult, memoRecipientResult, membersResult, companiesResult, notificationsResult] = await Promise.all([
     supabase.from("sacbm_financial_records").select("*").order("date", { ascending: false }),
     supabase.from("sacbm_authorizations").select("*").order("request_date", { ascending: false }),
     supabase.from("sacbm_authorization_approvals").select("*"),
@@ -65,9 +74,10 @@ export async function getSacbmGovernanceData() {
     supabase.from("sacbm_memo_recipients").select("*"),
     supabase.from("sacbm_members").select("*").eq("is_active", true).order("name", { ascending: true }),
     supabase.from("sacbm_companies").select("*").eq("is_active", true).order("name", { ascending: true }),
+    supabase.from("sacbm_notifications").select("*").eq("recipient_id", memberId).order("created_at", { ascending: false }),
   ]);
 
-  const firstError = financialResult.error || authorizationResult.error || approvalResult.error || memoResult.error || memoRecipientResult.error || membersResult.error || companiesResult.error;
+  const firstError = financialResult.error || authorizationResult.error || approvalResult.error || memoResult.error || memoRecipientResult.error || membersResult.error || companiesResult.error || notificationsResult.error;
   if (firstError) throw new Error("We could not load the Board and EXCO workspace.");
 
   const members = (membersResult.data || []) as Array<{ id: string; name: string; company: string; tier: MemberTier; role: MemberRole }>;
@@ -121,6 +131,7 @@ export async function getSacbmGovernanceData() {
         id: row.id,
         title: row.title,
         requester: memberNames.get(row.requester_id) || "Chamber administration",
+        requesterId: row.requester_id,
         amount: row.amount == null ? undefined : Number(row.amount),
         type: row.type,
         requestDate: row.request_date,
@@ -147,6 +158,14 @@ export async function getSacbmGovernanceData() {
         readBy: recipients.filter((recipient) => recipient.read_at).map((recipient) => recipient.recipient_id),
       };
     }) as GovernanceMemo[],
+    notifications: (notificationsResult.data || []).map((row) => ({
+      id: row.id,
+      title: row.title,
+      message: row.body,
+      recipient: memberNames.get(row.recipient_id) || "Chamber member",
+      createdAt: row.created_at,
+      read: Boolean(row.read_at),
+    })) as GovernanceNotification[],
   };
 }
 
@@ -195,4 +214,19 @@ export async function sendSacbmMemo(input: { senderId: string; subject: string; 
 export async function markSacbmMemoRead(memoId: string, memberId: string) {
   const { error } = await supabase.from("sacbm_memo_recipients").update({ read_at: new Date().toISOString() }).eq("memo_id", memoId).eq("recipient_id", memberId);
   if (error) throw new Error("We could not mark the memo as read.");
+}
+
+export async function createSacbmNotification(input: { recipientIds: string[]; title: string; body: string; type: "info" | "approval" | "rejection" | "event" | "finance" }) {
+  const { error } = await supabase.from("sacbm_notifications").insert(input.recipientIds.map((recipientId) => ({
+    recipient_id: recipientId,
+    title: input.title.trim(),
+    body: input.body.trim(),
+    type: input.type,
+  })));
+  if (error) throw new Error("We could not create the notification.");
+}
+
+export async function markSacbmNotificationRead(notificationId: string, memberId: string) {
+  const { error } = await supabase.from("sacbm_notifications").update({ read_at: new Date().toISOString() }).eq("id", notificationId).eq("recipient_id", memberId);
+  if (error) throw new Error("We could not mark the notification as read.");
 }

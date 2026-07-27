@@ -363,6 +363,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
               email: createdMember.email,
               website: "",
               description: "",
+              membershipTier: createdMember.tier,
+              renewalDate: "",
               createdBy: currentMember.id,
             });
             setCompanies((current) => [...current, { ...createdCompany, representatives: [createdMember] }]);

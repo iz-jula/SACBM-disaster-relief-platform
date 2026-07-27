@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { Member, MemberRole } from "@shared/api";
 import { PortalCurrency, formatPortalCurrency } from "@/utils/currency";
-import { createSacbmAuthorization, decideSacbmAuthorization, getSacbmGovernanceData, markSacbmMemoRead, sendSacbmMemo, uploadSacbmFinancialRecord } from "@/services/sacbmGovernanceService";
+import { createSacbmAuthorization, createSacbmNotification, decideSacbmAuthorization, getSacbmGovernanceData, markSacbmMemoRead, markSacbmNotificationRead, sendSacbmMemo, uploadSacbmFinancialRecord } from "@/services/sacbmGovernanceService";
 
 interface FinancialRecord {
   id: string;
@@ -84,6 +84,7 @@ interface PendingAuthorization {
   deadline: string;
   attachmentUrl?: string;
   rejectionNote?: string;
+  requesterId: string;
 }
 
 const DEFAULT_REVIEWERS = [
@@ -222,11 +223,12 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
     setGovernanceLoading(true);
     setGovernanceError("");
     try {
-      const data = await getSacbmGovernanceData();
+      const data = await getSacbmGovernanceData(member.id);
       setFinancialRecords(data.financialRecords as FinancialRecord[]);
       setMemberRenewals(data.memberRenewals as MemberRenewal[]);
       setAuthorizationRequests(data.authorizationRequests as PendingAuthorization[]);
       setMemos(data.memos as PortalMemo[]);
+      setAdminNotifications(data.notifications as AdminNotification[]);
       setReviewers(data.reviewers as typeof DEFAULT_REVIEWERS);
     } catch (error) {
       setGovernanceError(error instanceof Error ? error.message : "We could not load the Board and EXCO workspace.");
@@ -385,6 +387,15 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
     if (decision === "rejected" && !authorizationNotes.trim()) return;
 
     await decideSacbmAuthorization({ authorizationId: selectedAuthorization.id, approverId: member.id, decision, note: authorizationNotes });
+
+    if (decision === "rejected") {
+      await createSacbmNotification({
+        recipientIds: [selectedAuthorization.requesterId, member.id],
+        title: "Authorization rejected",
+        body: `${selectedAuthorization.title} was rejected by ${member.name}. Reason: ${authorizationNotes.trim()}`,
+        type: "rejection",
+      });
+    }
 
     await refreshGovernanceData();
     setSelectedAuthorization(null);
@@ -926,11 +937,10 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
                   {adminNotifications.map((notification) => (
                     <button
                       key={notification.id}
-                      onClick={() =>
-                        setAdminNotifications((notifications) =>
-                          notifications.map((item) => item.id === notification.id ? { ...item, read: true } : item)
-                        )
-                      }
+                      onClick={async () => {
+                        await markSacbmNotificationRead(notification.id, member.id);
+                        await refreshGovernanceData();
+                      }}
                       className={`w-full rounded-lg border p-4 text-left transition-colors hover:bg-slate-50 ${notification.read ? "border-slate-100" : "border-amber-200 bg-amber-50/50"}`}
                     >
                       <div className="flex items-start justify-between gap-4">
