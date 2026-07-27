@@ -31,6 +31,7 @@ export interface Member {
   name: string;
   email: string;
   company: string;
+  companyId?: string;
   tier: MemberTier;
   role: MemberRole;
   firstName?: string;

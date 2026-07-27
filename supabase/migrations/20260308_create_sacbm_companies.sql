@@ -1,3 +1,5 @@
+create extension if not exists pgcrypto;
+
 create table if not exists public.sacbm_companies (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
@@ -16,39 +18,28 @@ create table if not exists public.sacbm_companies (
 alter table public.sacbm_members
   add column if not exists company_id uuid references public.sacbm_companies(id) on delete set null;
 
-create index if not exists sacbm_members_company_id_idx on public.sacbm_members(company_id);
+create index if not exists sacbm_members_company_id_idx
+  on public.sacbm_members(company_id);
 
-alter table public.sacbm_companies enable row level security;
+create or replace function public.is_sacbm_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.sacbm_members
+    where user_id = auth.uid()
+      and role = 'admin'
+      and is_active = true
+  );
+$$;
 
-create policy "Active SACBM members can view companies"
-  on public.sacbm_companies for select
-  using (exists (
-    select 1 from public.sacbm_members viewer
-    where viewer.user_id = auth.uid() and viewer.is_active = true
-  ));
+revoke all on function public.is_sacbm_admin() from public;
+grant execute on function public.is_sacbm_admin() to authenticated;
 
-create policy "SACBM admins can create companies"
-  on public.sacbm_companies for insert
-  with check (exists (
-    select 1 from public.sacbm_members admin_member
-    where admin_member.user_id = auth.uid() and admin_member.role = 'admin' and admin_member.is_active = true
-  ));
-
-create policy "SACBM admins can update companies"
-  on public.sacbm_companies for update
-  using (exists (
-    select 1 from public.sacbm_members admin_member
-    where admin_member.user_id = auth.uid() and admin_member.role = 'admin' and admin_member.is_active = true
-  ));
-
-create policy "SACBM admins can delete companies"
-  on public.sacbm_companies for delete
-  using (exists (
-    select 1 from public.sacbm_members admin_member
-    where admin_member.user_id = auth.uid() and admin_member.role = 'admin' and admin_member.is_active = true
-  ));
-
-create or replace function public.set_sacbm_companies_updated_at()
+create or replace function public.set_sacbm_company_updated_at()
 returns trigger
 language plpgsql
 as $$
@@ -61,4 +52,37 @@ $$;
 drop trigger if exists sacbm_companies_updated_at on public.sacbm_companies;
 create trigger sacbm_companies_updated_at
 before update on public.sacbm_companies
-for each row execute function public.set_sacbm_companies_updated_at();
+for each row execute function public.set_sacbm_company_updated_at();
+
+alter table public.sacbm_companies enable row level security;
+
+drop policy if exists "Authenticated users can view SACBM companies" on public.sacbm_companies;
+create policy "Authenticated users can view SACBM companies"
+on public.sacbm_companies for select
+to authenticated
+using (true);
+
+drop policy if exists "SACBM admins can create companies" on public.sacbm_companies;
+create policy "SACBM admins can create companies"
+on public.sacbm_companies for insert
+to authenticated
+with check (public.is_sacbm_admin());
+
+drop policy if exists "SACBM admins can update companies" on public.sacbm_companies;
+create policy "SACBM admins can update companies"
+on public.sacbm_companies for update
+to authenticated
+using (public.is_sacbm_admin())
+with check (public.is_sacbm_admin());
+
+drop policy if exists "SACBM admins can delete companies" on public.sacbm_companies;
+create policy "SACBM admins can delete companies"
+on public.sacbm_companies for delete
+to authenticated
+using (public.is_sacbm_admin());
+
+update public.sacbm_members members
+set company_id = companies.id
+from public.sacbm_companies companies
+where members.company_id is null
+  and lower(trim(members.company)) = lower(trim(companies.name));

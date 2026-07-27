@@ -79,6 +79,7 @@ type SacbmMemberRow = {
   phone: string | null;
   address: string | null;
   company: string;
+  company_id: string | null;
   job_title: string | null;
   chamber_title: string | null;
   tier: MemberTier;
@@ -169,6 +170,7 @@ const toMember = (row: SacbmMemberRow): Member => ({
   surname: row.surname,
   email: row.email,
   company: row.company,
+  companyId: row.company_id || undefined,
   tier: row.tier,
   role: row.role,
   jobTitle: row.job_title || undefined,
@@ -625,7 +627,9 @@ export async function getSacbmCompanies() {
   const members = (membersResult.data || []).map((row) => toMember(row as SacbmMemberRow));
   return (companiesResult.data || []).map((row) => {
     const company = row as SacbmCompanyRow;
-    const representatives = members.filter((member) => member.company.trim().toLowerCase() === company.name.trim().toLowerCase());
+    const representatives = members.filter((member) =>
+      member.companyId === company.id || member.company.trim().toLowerCase() === company.name.trim().toLowerCase(),
+    );
     return toCompany(company, representatives);
   });
 }
