@@ -24,6 +24,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Member, MemberRole } from "@shared/api";
+import { PortalCurrency, formatPortalCurrency } from "@/utils/currency";
 import { createSacbmAuthorization, decideSacbmAuthorization, getSacbmGovernanceData, markSacbmMemoRead, sendSacbmMemo, uploadSacbmFinancialRecord } from "@/services/sacbmGovernanceService";
 
 interface FinancialRecord {
@@ -109,6 +110,7 @@ const MONTHS = [
 
 interface BoardExcoProps {
   member: Member;
+  currency: PortalCurrency;
 }
 
 const FinancialRecordRow = ({
@@ -182,7 +184,7 @@ const FinanceSubnav = ({
   </div>
 );
 
-const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
+const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [financeView, setFinanceView] = useState<FinanceView>("summary");
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("month");
@@ -552,7 +554,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Approved Amount</p>
-                  <p className="text-3xl font-light text-slate-900 mt-2">${financialStats.totalAmount.toLocaleString()}</p>
+                  <p className="text-3xl font-light text-slate-900 mt-2">{formatPortalCurrency(financialStats.totalAmount, currency)}</p>
                   <p className="text-xs text-slate-500 mt-2">{financialStats.approved} documents</p>
                 </div>
               </div>
@@ -792,7 +794,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                         </div>
                       </div>
                       <div className="flex items-center gap-4 flex-shrink-0">
-                        {auth.amount !== undefined && <p className="text-lg font-semibold text-slate-900">${auth.amount.toLocaleString()}</p>}
+                        {auth.amount !== undefined && <p className="text-lg font-semibold text-slate-900">{formatPortalCurrency(auth.amount, currency)}</p>}
                         <span
                           className={`text-xs font-medium px-3 py-1.5 rounded-full whitespace-nowrap ${
                             auth.status === "pending"
@@ -1179,14 +1181,14 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
             <Card className="border-0 shadow-sm">
               <CardContent className="px-5 py-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Spend to date</p>
-                <p className="text-2xl font-light text-slate-900 mt-1">${financialStats.spendToDate.toLocaleString()}</p>
+                <p className="text-2xl font-light text-slate-900 mt-1">{formatPortalCurrency(financialStats.spendToDate, currency)}</p>
                 <p className="text-xs text-slate-500 mt-1">Approved invoices and receipts</p>
               </CardContent>
             </Card>
             <Card className="border-0 shadow-sm">
               <CardContent className="px-5 py-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Member renewal income</p>
-                <p className="text-2xl font-light text-emerald-700 mt-1">${financialStats.renewalIncome.toLocaleString()}</p>
+                <p className="text-2xl font-light text-emerald-700 mt-1">{formatPortalCurrency(financialStats.renewalIncome, currency)}</p>
                 <p className="text-xs text-slate-500 mt-1">Current renewal cycle</p>
               </CardContent>
             </Card>
@@ -1357,7 +1359,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                 <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-wide text-slate-500">Selected period</p>
-                    <p className="text-2xl font-light text-slate-900 mt-1">${activitySpend.toLocaleString()}</p>
+                    <p className="text-2xl font-light text-slate-900 mt-1">{formatPortalCurrency(activitySpend, currency)}</p>
                     <p className="text-xs text-slate-500 mt-1">{activityCategoryLabel} · {activityFilter === "month" ? selectedMonthLabel : selectedPeriodLabel}</p>
                   </div>
                   <p className="text-xs text-slate-500">{activityData.filter((item) => item.amount > 0).length} active periods</p>
@@ -1365,7 +1367,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                 <div className="h-48 flex items-end gap-1 border-b border-slate-200 px-2 overflow-hidden">
                   {activityData.map((item) => (
                     <div key={item.label} className="flex-1 min-w-0 flex flex-col items-center justify-end gap-2 h-full group">
-                      <div className="relative w-full max-w-12 rounded-t-md bg-emerald-500/80 hover:bg-emerald-600 transition-colors" style={{ height: `${Math.max((item.amount / activityMax) * 100, item.amount > 0 ? 5 : 0)}%` }} title={`${item.label}: $${item.amount.toLocaleString()}`} />
+                      <div className="relative w-full max-w-12 rounded-t-md bg-emerald-500/80 hover:bg-emerald-600 transition-colors" style={{ height: `${Math.max((item.amount / activityMax) * 100, item.amount > 0 ? 5 : 0)}%` }} title={`${item.label}: ${formatPortalCurrency(item.amount, currency)}`} />
                       <span className="text-[10px] text-slate-500 truncate max-w-full">{item.label}</span>
                     </div>
                   ))}
@@ -1382,7 +1384,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Approved value</p>
-                  <p className="text-2xl font-light text-slate-900 mt-1">${financialStats.totalAmount.toLocaleString()}</p>
+                  <p className="text-2xl font-light text-slate-900 mt-1">{formatPortalCurrency(financialStats.totalAmount, currency)}</p>
                 </div>
                 <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                   <span className="text-sm text-slate-600">Invoices</span>

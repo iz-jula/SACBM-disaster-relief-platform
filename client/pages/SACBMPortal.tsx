@@ -19,6 +19,7 @@ import SACBMEvents from "@/components/SACBMEvents";
 import SACBMMembers from "@/components/SACBMMembers";
 import SACBMBoardExco from "@/components/SACBMBoardExco";
 import SACBMDashboard from "@/components/SACBMDashboard";
+import { PortalCurrency } from "@/utils/currency";
 import { Member, MemberTier, MemberRole } from "@shared/api";
 import { getCurrentSacbmMember, signOutSacbmMember } from "@/services/sacbmService";
 
@@ -31,6 +32,7 @@ const SACBMPortal = () => {
   const [currentSection, setCurrentSection] = useState<"dashboard" | "documents" | "events" | "members" | "board-exco">("dashboard");
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [currency, setCurrency] = useState<PortalCurrency>("MZN");
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -225,7 +227,22 @@ const SACBMPortal = () => {
                 </h1>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-1" aria-label="Currency display">
+                {(["MZN", "USD"] as PortalCurrency[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setCurrency(option)}
+                    aria-pressed={currency === option}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-colors ${
+                      currency === option ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
               {!isMobile && (
                 <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                   <Bell className="h-5 w-5 text-slate-600" />
@@ -307,7 +324,7 @@ const SACBMPortal = () => {
           {currentSection === "documents" && <DocumentsSection member={currentMember} />}
           {currentSection === "events" && <EventsSection member={currentMember} onNavigate={(section) => { setSelectedEventId(null); setCurrentSection(section); }} initialEventId={selectedEventId} />}
           {currentSection === "members" && <MembersSection member={currentMember} />}
-          {currentSection === "board-exco" && <BoardExcoSection member={currentMember} />}
+          {currentSection === "board-exco" && <BoardExcoSection member={currentMember} currency={currency} />}
         </div>
       </main>
     </div>
@@ -661,8 +678,8 @@ const MembersSection = ({ member }: { member: Member }) => {
 };
 
 // Board & EXCO Section Component
-const BoardExcoSection = ({ member }: { member: Member }) => {
-  return <SACBMBoardExco member={member} />;
+const BoardExcoSection = ({ member, currency }: { member: Member; currency: PortalCurrency }) => {
+  return <SACBMBoardExco member={member} currency={currency} />;
 };
 
 export default SACBMPortal;
