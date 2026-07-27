@@ -91,8 +91,12 @@ export async function getSacbmGovernanceData() {
   const approvals = (approvalResult.data || []) as Array<{ authorization_id: string; approver_id: string; status: string; note: string | null }>;
   const memoRecipients = (memoRecipientResult.data || []) as Array<{ memo_id: string; recipient_id: string; read_at: string | null }>;
 
-  return {
-    financialRecords: (financialResult.data || []).map((row) => ({
+  const financialRecords = await Promise.all((financialResult.data || []).map(async (row) => {
+    const filePath = row.file_path || row.file_url || "";
+    const { data: signed } = filePath
+      ? await supabase.storage.from("sacbm-assets").createSignedUrl(filePath, 3600)
+      : { data: null };
+    return {
       id: row.id,
       title: row.title,
       type: row.type,
@@ -100,9 +104,13 @@ export async function getSacbmGovernanceData() {
       date: row.date,
       uploadedBy: memberNames.get(row.uploaded_by) || "Chamber administration",
       category: row.description || "Finance",
-      fileUrl: row.file_url || row.file_path || "",
+      fileUrl: signed?.signedUrl || row.file_url || "",
       status: row.status,
-    })) as GovernanceFinancialRecord[],
+    };
+  })) as GovernanceFinancialRecord[];
+
+  return {
+    financialRecords,
     memberRenewals: renewals,
     authorizationRequests: (authorizationResult.data || []).map((row) => {
       const rowApprovals = approvals.filter((approval) => approval.authorization_id === row.id);

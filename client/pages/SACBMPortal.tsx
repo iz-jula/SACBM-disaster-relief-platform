@@ -228,21 +228,23 @@ const SACBMPortal = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-1" aria-label="Currency display">
-                {(["MZN", "USD"] as PortalCurrency[]).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setCurrency(option)}
-                    aria-pressed={currency === option}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-colors ${
-                      currency === option ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
+              {currentSection === "board-exco" && (
+                <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-1" aria-label="Currency display">
+                  {(["MZN", "USD"] as PortalCurrency[]).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setCurrency(option)}
+                      aria-pressed={currency === option}
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-colors ${
+                        currency === option ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
               {!isMobile && (
                 <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                   <Bell className="h-5 w-5 text-slate-600" />

@@ -218,26 +218,25 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
   const [governanceLoading, setGovernanceLoading] = useState(true);
   const [governanceError, setGovernanceError] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
+  const refreshGovernanceData = async () => {
     setGovernanceLoading(true);
     setGovernanceError("");
-    getSacbmGovernanceData()
-      .then((data) => {
-        if (cancelled) return;
-        setFinancialRecords(data.financialRecords as FinancialRecord[]);
-        setMemberRenewals(data.memberRenewals as MemberRenewal[]);
-        setAuthorizationRequests(data.authorizationRequests as PendingAuthorization[]);
-        setMemos(data.memos as PortalMemo[]);
-        setReviewers(data.reviewers as typeof DEFAULT_REVIEWERS);
-      })
-      .catch((error) => {
-        if (!cancelled) setGovernanceError(error instanceof Error ? error.message : "We could not load the Board and EXCO workspace.");
-      })
-      .finally(() => {
-        if (!cancelled) setGovernanceLoading(false);
-      });
-    return () => { cancelled = true; };
+    try {
+      const data = await getSacbmGovernanceData();
+      setFinancialRecords(data.financialRecords as FinancialRecord[]);
+      setMemberRenewals(data.memberRenewals as MemberRenewal[]);
+      setAuthorizationRequests(data.authorizationRequests as PendingAuthorization[]);
+      setMemos(data.memos as PortalMemo[]);
+      setReviewers(data.reviewers as typeof DEFAULT_REVIEWERS);
+    } catch (error) {
+      setGovernanceError(error instanceof Error ? error.message : "We could not load the Board and EXCO workspace.");
+    } finally {
+      setGovernanceLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refreshGovernanceData();
   }, []);
 
   const isAdmin = member.role === MemberRole.ADMIN;
@@ -387,39 +386,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
 
     await decideSacbmAuthorization({ authorizationId: selectedAuthorization.id, approverId: member.id, decision, note: authorizationNotes });
 
-    if (decision === "rejected") {
-      const rejectionNote = authorizationNotes.trim();
-      setAdminNotifications((notifications) => [
-        {
-          id: `notification-${Date.now()}`,
-          title: "Authorization rejected",
-          message: `${selectedAuthorization.title} was rejected by ${member.name}. Reason: ${rejectionNote}`,
-          recipient: selectedAuthorization.requester,
-          createdAt: new Date().toISOString(),
-          read: false,
-        },
-        ...notifications,
-      ]);
-    }
-
-    setAuthorizationRequests((requests) =>
-      requests.map((request) => {
-        if (request.id !== selectedAuthorization.id) return request;
-        if (decision === "rejected") {
-          return { ...request, status: "rejected", rejectionNote: authorizationNotes.trim() };
-        }
-        const approvedBy = request.approvedBy.includes(member.name)
-          ? request.approvedBy
-          : [...request.approvedBy, member.name];
-        const pendingApprovers = request.pendingApprovers.filter((approver) => approver !== member.name);
-        return {
-          ...request,
-          approvedBy,
-          pendingApprovers,
-          status: approvedBy.length >= request.requiredApprovals ? "approved" : "pending",
-        };
-      })
-    );
+    await refreshGovernanceData();
     setSelectedAuthorization(null);
     setAuthorizationNotes("");
   };
@@ -427,18 +394,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
   const handleSendMemo = async () => {
     if (!memoSubject.trim() || !memoBody.trim() || memoRecipients.length === 0) return;
     await sendSacbmMemo({ senderId: member.id, subject: memoSubject, body: memoBody, recipientIds: memoRecipients });
-    setMemos((current) => [
-      {
-        id: `memo-${Date.now()}`,
-        subject: memoSubject.trim(),
-        body: memoBody.trim(),
-        sender: member.name,
-        recipientIds: memoRecipients,
-        createdAt: new Date().toISOString(),
-        readBy: [],
-      },
-      ...current,
-    ]);
+    await refreshGovernanceData();
     setMemoSubject("");
     setMemoBody("");
     setMemoRecipients([]);
@@ -446,24 +402,8 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
 
   const handleSendApproval = async () => {
     if (!approvalTitle.trim() || approvalRecipients.length === 0) return;
-    const recipients = reviewers.filter((reviewer) => approvalRecipients.includes(reviewer.id));
     await createSacbmAuthorization({ requesterId: member.id, title: approvalTitle, amount: approvalAmount ? Number(approvalAmount) : undefined, type: approvalType, priority: "medium", deadline: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0], approverIds: approvalRecipients });
-    const newRequest: PendingAuthorization = {
-      id: `authorization-${Date.now()}`,
-      title: approvalTitle.trim(),
-      requester: member.name,
-      amount: approvalAmount ? Number(approvalAmount) : undefined,
-      type: approvalType,
-      requestDate: new Date().toISOString().split("T")[0],
-      status: "pending",
-      priority: "medium",
-      requiredApprovals: recipients.length,
-      approvedBy: [],
-      pendingApprovers: recipients.map((recipient) => recipient.name),
-      deadline: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
-      attachmentUrl: "/docs/placeholder.pdf",
-    };
-    setAuthorizationRequests((requests) => [newRequest, ...requests]);
+    await refreshGovernanceData();
     setApprovalTitle("");
     setApprovalAmount("");
     setApprovalRecipients([]);
@@ -471,19 +411,8 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
 
   const handleUploadFile = async () => {
     if (uploadTitle.trim() && uploadCategory.trim() && uploadFile) {
-      const savedRecord = await uploadSacbmFinancialRecord({ memberId: member.id, title: uploadTitle, type: uploadType, category: uploadCategory, file: uploadFile });
-      const newRecord: FinancialRecord = {
-        id: `record-${Date.now()}`,
-        title: uploadTitle,
-        type: uploadType,
-        date: new Date().toISOString().split("T")[0],
-        uploadedBy: member.name,
-        category: uploadCategory,
-        fileUrl: savedRecord.fileUrl,
-        status: savedRecord.status,
-      };
-
-      setFinancialRecords([newRecord, ...financialRecords]);
+      await uploadSacbmFinancialRecord({ memberId: member.id, title: uploadTitle, type: uploadType, category: uploadCategory, file: uploadFile });
+      await refreshGovernanceData();
       setUploadTitle("");
       setUploadCategory("");
       setUploadFile(null);
@@ -876,7 +805,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member, currency }) => {
                           className="mt-4 border-slate-300 text-slate-700"
                           onClick={async () => {
                             await markSacbmMemoRead(memo.id, member.id);
-                            setMemos((items) => items.map((item) => item.id === memo.id ? { ...item, readBy: [...item.readBy, member.id] } : item));
+                            await refreshGovernanceData();
                           }}
                         >
                           Mark as read
