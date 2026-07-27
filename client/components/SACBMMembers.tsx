@@ -189,7 +189,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
 
   // Filter members
   const filteredMembers = useMemo(() => {
-    let result = members.filter((m) => m.id !== currentMember.id && m.isActive); // Exclude self and inactive members
+    let result = members.filter((m) => m.isActive);
 
     // Search filter
     if (searchTerm) {
@@ -215,7 +215,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     result.sort((a, b) => a.name.localeCompare(b.name));
 
     return result;
-  }, [searchTerm, tierFilter, roleFilter, currentMember.id, members]);
+  }, [searchTerm, tierFilter, roleFilter, members]);
 
   const getTierColor = (tier: MemberTier) => {
     const colors: Record<MemberTier, string> = {
@@ -482,7 +482,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
 
       {/* Results Count */}
       <p className="text-sm text-slate-600 mb-4">
-        {directoryMode === "members" ? `Showing ${filteredMembers.length} of ${Math.max(activeMembers.length - 1, 0)} members` : `Showing ${companyEntries.length} of ${companyEntries.length} companies`}
+        {directoryMode === "members" ? `Showing ${filteredMembers.length} of ${activeMembers.length} members` : `Showing ${companyEntries.length} of ${companyEntries.length} companies`}
       </p>
 
       {/* Members Grid/List View */}
@@ -504,10 +504,13 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             {companyEntries.map((company) => (
               <Card key={company.name} className="rounded-xl border border-slate-200 shadow-none transition-shadow hover:border-slate-300 hover:shadow-sm">
                 <CardContent className="p-6">
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-white">
-                    <Building2 className="h-7 w-7" />
+                  <div className="mb-5 flex h-20 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-400">
+                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                      <Building2 className="h-5 w-5" />
+                      <span>Company logo</span>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900">{company.name}</h3>
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">{company.name}</h3>
                   <p className="mt-1 text-sm text-slate-500">{company.representatives.length} representative{company.representatives.length === 1 ? "" : "s"}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {company.tiers.map((tier) => <Badge key={tier} className={`text-xs ${getTierColor(tier)}`} variant="outline">{getTierLabel(tier)}</Badge>)}
