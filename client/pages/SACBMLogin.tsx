@@ -46,7 +46,7 @@ const SACBMLogin = () => {
       await requestSacbmPasswordReset(resetEmail);
       setResetSuccess(true);
     } catch (err) {
-      setResetError(err instanceof Error ? err.message : "We could not send the credentials reset email. Please try again.");
+      setResetError(err instanceof Error ? err.message : "We could not send the password reset email. Please try again.");
     } finally {
       setResetLoading(false);
     }
@@ -81,7 +81,7 @@ const SACBMLogin = () => {
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login" className="text-sm">Sign In</TabsTrigger>
-                <TabsTrigger value="forgot" className="text-sm">Forgot credentials</TabsTrigger>
+                <TabsTrigger value="forgot" className="text-sm">Reset password</TabsTrigger>
               </TabsList>
 
               {/* Login Tab */}
