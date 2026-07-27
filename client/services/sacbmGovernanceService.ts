@@ -57,15 +57,17 @@ const statusForRenewal = (date: string): GovernanceMemberRenewal["status"] => {
 };
 
 export async function getSacbmGovernanceData() {
-  const [financialResult, authorizationResult, memoResult, membersResult, companiesResult] = await Promise.all([
-    supabase.from("sacbm_financial_records").select("*").order("record_date", { ascending: false }),
-    supabase.from("sacbm_authorization_requests").select("*").order("created_at", { ascending: false }),
+  const [financialResult, authorizationResult, approvalResult, memoResult, memoRecipientResult, membersResult, companiesResult] = await Promise.all([
+    supabase.from("sacbm_financial_records").select("*").order("date", { ascending: false }),
+    supabase.from("sacbm_authorizations").select("*").order("request_date", { ascending: false }),
+    supabase.from("sacbm_authorization_approvals").select("*"),
     supabase.from("sacbm_memos").select("*").order("created_at", { ascending: false }),
+    supabase.from("sacbm_memo_recipients").select("*"),
     supabase.from("sacbm_members").select("*").eq("is_active", true).order("name", { ascending: true }),
     supabase.from("sacbm_companies").select("*").eq("is_active", true).order("name", { ascending: true }),
   ]);
 
-  const firstError = financialResult.error || authorizationResult.error || memoResult.error || membersResult.error || companiesResult.error;
+  const firstError = financialResult.error || authorizationResult.error || approvalResult.error || memoResult.error || memoRecipientResult.error || membersResult.error || companiesResult.error;
   if (firstError) throw new Error("We could not load the Board and EXCO workspace.");
 
   const members = (membersResult.data || []) as Array<{ id: string; name: string; company: string; tier: MemberTier; role: MemberRole }>;
@@ -86,43 +88,55 @@ export async function getSacbmGovernanceData() {
     }];
   });
 
+  const approvals = (approvalResult.data || []) as Array<{ authorization_id: string; approver_id: string; status: string; note: string | null }>;
+  const memoRecipients = (memoRecipientResult.data || []) as Array<{ memo_id: string; recipient_id: string; read_at: string | null }>;
+
   return {
     financialRecords: (financialResult.data || []).map((row) => ({
       id: row.id,
       title: row.title,
       type: row.type,
       amount: row.amount == null ? undefined : Number(row.amount),
-      date: row.record_date,
+      date: row.date,
       uploadedBy: memberNames.get(row.uploaded_by) || "Chamber administration",
-      category: row.category,
-      fileUrl: row.file_url || row.file_path,
+      category: row.description || "Finance",
+      fileUrl: row.file_url || row.file_path || "",
       status: row.status,
     })) as GovernanceFinancialRecord[],
     memberRenewals: renewals,
-    authorizationRequests: (authorizationResult.data || []).map((row) => ({
-      id: row.id,
-      title: row.title,
-      requester: memberNames.get(row.requester_id) || "Chamber administration",
-      amount: row.amount == null ? undefined : Number(row.amount),
-      type: row.type,
-      requestDate: row.request_date,
-      status: row.status,
-      priority: row.priority,
-      requiredApprovals: row.required_approvals,
-      approvedBy: (row.approved_by || []).map((id: string) => memberNames.get(id) || id),
-      pendingApprovers: (row.pending_approvers || []).map((id: string) => memberNames.get(id) || id),
-      deadline: row.deadline || "No deadline",
-      attachmentUrl: row.attachment_url || undefined,
-      rejectionNote: row.rejection_note || undefined,
-    })) as GovernanceAuthorization[],
-    memos: (memoResult.data || []).map((row) => ({
-      id: row.id,
-      subject: row.subject,
-      body: row.body,
-      sender: memberNames.get(row.sender_id) || "Chamber administration",
-      recipientIds: row.recipient_ids || [],
-      createdAt: row.created_at,
-      readBy: row.read_by || [],
-    })) as GovernanceMemo[],
+    authorizationRequests: (authorizationResult.data || []).map((row) => {
+      const rowApprovals = approvals.filter((approval) => approval.authorization_id === row.id);
+      const approvedBy = rowApprovals.filter((approval) => approval.status === "approved").map((approval) => memberNames.get(approval.approver_id) || approval.approver_id);
+      const pendingApprovers = rowApprovals.filter((approval) => approval.status === "pending").map((approval) => memberNames.get(approval.approver_id) || approval.approver_id);
+      const rejection = rowApprovals.find((approval) => approval.status === "rejected");
+      return {
+        id: row.id,
+        title: row.title,
+        requester: memberNames.get(row.requester_id) || "Chamber administration",
+        amount: row.amount == null ? undefined : Number(row.amount),
+        type: row.type,
+        requestDate: row.request_date,
+        status: row.status,
+        priority: row.priority,
+        requiredApprovals: row.required_approvals,
+        approvedBy,
+        pendingApprovers,
+        deadline: row.deadline || "No deadline",
+        attachmentUrl: row.attachment_url || undefined,
+        rejectionNote: rejection?.note || undefined,
+      };
+    }) as GovernanceAuthorization[],
+    memos: (memoResult.data || []).map((row) => {
+      const recipients = memoRecipients.filter((recipient) => recipient.memo_id === row.id);
+      return {
+        id: row.id,
+        subject: row.subject,
+        body: row.body,
+        sender: memberNames.get(row.sender_id) || "Chamber administration",
+        recipientIds: recipients.map((recipient) => recipient.recipient_id),
+        createdAt: row.created_at,
+        readBy: recipients.filter((recipient) => recipient.read_at).map((recipient) => recipient.recipient_id),
+      };
+    }) as GovernanceMemo[],
   };
 }
