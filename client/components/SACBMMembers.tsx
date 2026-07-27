@@ -350,14 +350,14 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Members Directory</h2>
+          <h2 className="text-2xl font-light tracking-tight text-slate-900">Members Directory</h2>
           <p className="text-slate-600 text-sm mt-1">
             {directoryMode === "members" ? `Connect with ${activeMembers.length} active chamber members` : `Explore ${companyEntries.length} chamber companies`}
           </p>
         </div>
         {membersError && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{membersError}</p>}
         {currentMember.role === MemberRole.ADMIN && (
-          <button onClick={() => openMemberForm()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">
+          <button onClick={() => openMemberForm()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700">
             <UserPlus className="h-4 w-4" />
             Add member
           </button>
@@ -365,34 +365,34 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="border-0 shadow-sm">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 mb-7">
+        <Card className="rounded-xl border border-amber-100 bg-amber-50/40 shadow-none">
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-amber-700 mb-2">{counts.bronze}</div>
+              <div className="text-3xl font-semibold text-amber-700 mb-2">{counts.bronze}</div>
               <p className="text-sm text-slate-600">Bronze Members</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm">
+        <Card className="rounded-xl border border-yellow-100 bg-yellow-50/40 shadow-none">
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-700 mb-2">{counts.gold}</div>
+              <div className="text-3xl font-semibold text-yellow-700 mb-2">{counts.gold}</div>
               <p className="text-sm text-slate-600">Gold Members</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm">
+        <Card className="rounded-xl border border-cyan-100 bg-cyan-50/40 shadow-none">
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-cyan-700 mb-2">{counts.platinum}</div>
+              <div className="text-3xl font-semibold text-cyan-700 mb-2">{counts.platinum}</div>
               <p className="text-sm text-slate-600">Platinum Members</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="mb-4 inline-flex rounded-lg bg-slate-100 p-1">
+      <div className="mb-4 inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
         <button
           type="button"
           onClick={() => setDirectoryMode("members")}
@@ -410,8 +410,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6 border-0 shadow-sm">
-        <CardContent className="pt-6">
+      <Card className="mb-6 rounded-xl border border-slate-200 shadow-none">
+        <CardContent className="pt-5">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="text-sm font-medium text-slate-700 block mb-2">Search</label>
@@ -421,14 +421,14 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                   placeholder="Search by name or company..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-10 focus:bg-white"
                 />
               </div>
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 block mb-2">Tier</label>
               <Select value={tierFilter} onValueChange={setTierFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-slate-50/50">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -442,7 +442,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             <div>
               <label className="text-sm font-medium text-slate-700 block mb-2">Role</label>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-slate-50/50">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -459,8 +459,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 onClick={() => setViewMode("grid")}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   viewMode === "grid"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 Grid
@@ -469,8 +469,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 onClick={() => setViewMode("list")}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   viewMode === "list"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 List
@@ -502,9 +502,9 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {companyEntries.map((company) => (
-              <Card key={company.name} className="border-0 shadow-sm transition-shadow hover:shadow-md">
+              <Card key={company.name} className="rounded-xl border border-slate-200 shadow-none transition-shadow hover:border-slate-300 hover:shadow-sm">
                 <CardContent className="p-6">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-white">
                     <Building2 className="h-7 w-7" />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-900">{company.name}</h3>
@@ -539,7 +539,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredMembers.map((member) => (
-            <Card key={member.id} className="border-0 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+            <Card key={member.id} className="rounded-xl border border-slate-200 shadow-none transition-shadow hover:border-slate-300 hover:shadow-sm overflow-hidden">
               <CardContent className="p-6">
                 {/* Member Avatar */}
                 <div className="flex items-center justify-center w-16 h-16 overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white text-xl font-bold mx-auto mb-4">
