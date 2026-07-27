@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { createSacbmMember, deleteSacbmMember, getSacbmMembers, setSacbmMemberActive, updateSacbmMember } from "@/services/sacbmService";
+import { createSacbmCompany, createSacbmMember, deleteSacbmMember, getSacbmCompanies, getSacbmMembers, setSacbmMemberActive, updateSacbmCompany, updateSacbmMember } from "@/services/sacbmService";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Mail, Phone, Building2, MapPin, UserPlus, Pencil, UserX, RotateCcw, Trash2 } from "lucide-react";
-import { Member, MemberTier, MemberRole } from "@shared/api";
+import { Company, Member, MemberTier, MemberRole } from "@shared/api";
 
 // Mock members data
 const MOCK_MEMBERS: Member[] = [
@@ -119,6 +119,12 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [membersError, setMembersError] = useState("");
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [showCompanyForm, setShowCompanyForm] = useState(false);
+  const [editingCompanyId, setEditingCompanyId] = useState<string | null>(null);
+  const [companySaving, setCompanySaving] = useState(false);
+  const [companyFormError, setCompanyFormError] = useState("");
   const [showMemberForm, setShowMemberForm] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberSaving, setMemberSaving] = useState(false);
@@ -128,9 +134,14 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     setMembersLoading(true);
     setMembersError("");
 
-    getSacbmMembers()
-      .then((loadedMembers) => {
-        if (!cancelled) setMembers(loadedMembers);
+    Promise.all([
+      getSacbmMembers(),
+      getSacbmCompanies().catch(() => [] as Company[]),
+    ])
+      .then(([loadedMembers, loadedCompanies]) => {
+        if (cancelled) return;
+        setMembers(loadedMembers);
+        setCompanies(loadedCompanies);
       })
       .catch((error) => {
         if (!cancelled) setMembersError(error instanceof Error ? error.message : "We could not load the member directory.");
@@ -143,6 +154,8 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       cancelled = true;
     };
   }, []);
+
+  const [companyForm, setCompanyForm] = useState({ name: "", address: "", sector: "", phone: "", email: "", website: "", description: "" });
 
   const [memberForm, setMemberForm] = useState({
     firstName: "",
@@ -163,19 +176,24 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
   const activeMembers = useMemo(() => members.filter((member) => member.isActive), [members]);
 
   const companyEntries = useMemo(() => {
-    const companies = new Map<string, Member[]>();
+    const entries = new Map<string, Company>();
+    companies.forEach((company) => entries.set(company.name.trim().toLowerCase(), company));
+
     activeMembers.forEach((member) => {
-      const companyKey = member.company.trim().toLowerCase();
-      const representatives = companies.get(companyKey) || [];
-      companies.set(companyKey, [...representatives, member]);
+      const key = member.company.trim().toLowerCase();
+      const existing = entries.get(key);
+      if (existing) {
+        existing.representatives = [...existing.representatives, member];
+      } else {
+        entries.set(key, { id: `derived-${key}`, name: member.company, representatives: [member] });
+      }
     });
 
-    return Array.from(companies.values())
-      .map((representatives) => ({
-        name: representatives[0].company,
-        representatives,
-        tiers: Array.from(new Set(representatives.map((member) => member.tier))),
-        roles: Array.from(new Set(representatives.map((member) => member.role))),
+    return Array.from(entries.values())
+      .map((company) => ({
+        ...company,
+        tiers: Array.from(new Set(company.representatives.map((member) => member.tier))),
+        roles: Array.from(new Set(company.representatives.map((member) => member.role))),
       }))
       .filter((company) => {
         const search = searchTerm.trim().toLowerCase();
@@ -185,7 +203,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         return matchesSearch && matchesTier && matchesRole;
       })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [activeMembers, searchTerm, tierFilter, roleFilter]);
+  }, [activeMembers, companies, searchTerm, tierFilter, roleFilter]);
 
   // Filter members
   const filteredMembers = useMemo(() => {
@@ -286,6 +304,44 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
     setShowMemberForm(true);
   };
 
+  const openCompanyForm = (company?: Company) => {
+    setEditingCompanyId(company && !company.id.startsWith("derived-") ? company.id : null);
+    setCompanyForm({
+      name: company?.name || "",
+      address: company?.address || "",
+      sector: company?.sector || "",
+      phone: company?.phone || "",
+      email: company?.email || "",
+      website: company?.website || "",
+      description: company?.description || "",
+    });
+    setCompanyFormError("");
+    setShowCompanyForm(true);
+  };
+
+  const saveCompany = async () => {
+    if (!companyForm.name.trim()) {
+      setCompanyFormError("Please enter a company name.");
+      return;
+    }
+
+    setCompanySaving(true);
+    setCompanyFormError("");
+    try {
+      const savedCompany = editingCompanyId
+        ? await updateSacbmCompany({ id: editingCompanyId, ...companyForm })
+        : await createSacbmCompany({ ...companyForm, createdBy: currentMember.id });
+      setCompanies((current) => editingCompanyId
+        ? current.map((company) => company.id === savedCompany.id ? { ...company, ...savedCompany } : company)
+        : [...current, savedCompany]);
+      setShowCompanyForm(false);
+    } catch (error) {
+      setCompanyFormError(error instanceof Error ? error.message : "We could not save the company.");
+    } finally {
+      setCompanySaving(false);
+    }
+  };
+
   const saveMember = async () => {
     if (!memberForm.firstName.trim() || !memberForm.surname.trim() || !memberForm.company.trim() || !memberForm.email.trim()) return;
 
@@ -295,6 +351,23 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
       try {
         const createdMember = await createSacbmMember(memberForm);
         setMembers((current) => [...current, createdMember]);
+        if (!companies.some((company) => company.name.trim().toLowerCase() === createdMember.company.trim().toLowerCase())) {
+          try {
+            const createdCompany = await createSacbmCompany({
+              name: createdMember.company,
+              address: createdMember.address || "",
+              sector: "",
+              phone: createdMember.phone || "",
+              email: createdMember.email,
+              website: "",
+              description: "",
+              createdBy: currentMember.id,
+            });
+            setCompanies((current) => [...current, { ...createdCompany, representatives: [createdMember] }]);
+          } catch {
+            // Company creation remains available from the Companies view if the company schema is not deployed yet.
+          }
+        }
         setShowMemberForm(false);
       } catch (error) {
         setMemberSaveError(error instanceof Error ? error.message : "Could not register the member.");
@@ -357,9 +430,12 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         </div>
         {membersError && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{membersError}</p>}
         {currentMember.role === MemberRole.ADMIN && (
-          <button onClick={() => openMemberForm()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700">
-            <UserPlus className="h-4 w-4" />
-            Add member
+          <button
+            onClick={() => directoryMode === "companies" ? openCompanyForm() : openMemberForm()}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700"
+          >
+            {directoryMode === "companies" ? <Building2 className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+            {directoryMode === "companies" ? "Add company" : "Add member"}
           </button>
         )}
       </div>
@@ -502,13 +578,15 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {companyEntries.map((company) => (
-              <Card key={company.name} className="rounded-xl border border-slate-200 shadow-none transition-shadow hover:border-slate-300 hover:shadow-sm">
+              <Card key={company.id} onClick={() => setSelectedCompany(company)} className="cursor-pointer rounded-xl border border-slate-200 shadow-none transition-shadow hover:border-slate-300 hover:shadow-sm">
                 <CardContent className="p-6">
-                  <div className="mb-5 flex h-28 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-emerald-50 text-slate-400">
-                    <div className="flex flex-col items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
-                      <Building2 className="h-8 w-8 text-slate-500" />
-                      <span>Company logo</span>
-                    </div>
+                  <div className="mb-5 flex h-28 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-emerald-50 text-slate-400">
+                    {company.logoUrl ? <img src={company.logoUrl} alt={`${company.name} logo`} className="h-full w-full object-contain p-5" /> : (
+                      <div className="flex flex-col items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                        <Building2 className="h-8 w-8 text-slate-500" />
+                        <span>Company logo</span>
+                      </div>
+                    )}
                   </div>
                   <h3 className="text-lg font-semibold tracking-tight text-slate-900">{company.name}</h3>
                   <p className="mt-1 text-sm text-slate-500">{company.representatives.length} representative{company.representatives.length === 1 ? "" : "s"}</p>
@@ -519,7 +597,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                     <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Representatives</p>
                     <div className="space-y-2">
                       {company.representatives.map((representative) => (
-                        <div key={representative.id} className="flex items-center justify-between gap-3 text-sm">
+                        <div key={representative.id} className="flex items-center justify-between gap-3 text-sm" onClick={(event) => event.stopPropagation()}>
                           <span className="truncate text-slate-700">{representative.name}</span>
                           <a href={`mailto:${representative.email}`} className="shrink-0 text-emerald-600 hover:text-emerald-700" title={`Email ${representative.name}`}><Mail className="h-4 w-4" /></a>
                         </div>
@@ -716,6 +794,61 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {selectedCompany && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onClick={() => setSelectedCompany(null)}>
+          <Card className="w-full max-w-xl rounded-2xl border-0 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <CardContent className="p-7">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Company profile</p>
+                  <h3 className="mt-2 text-2xl font-light tracking-tight text-slate-900">{selectedCompany.name}</h3>
+                </div>
+                <button onClick={() => setSelectedCompany(null)} className="text-2xl leading-none text-slate-400 hover:text-slate-900">×</button>
+              </div>
+              <div className="mb-6 flex h-32 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-100 via-white to-emerald-50">
+                {selectedCompany.logoUrl ? <img src={selectedCompany.logoUrl} alt={`${selectedCompany.name} logo`} className="h-full w-full object-contain p-6" /> : <Building2 className="h-10 w-10 text-slate-400" />}
+              </div>
+              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                <div><p className="text-xs uppercase tracking-wide text-slate-400">Sector</p><p className="mt-1 text-slate-700">{selectedCompany.sector || "Not provided"}</p></div>
+                <div><p className="text-xs uppercase tracking-wide text-slate-400">Address</p><p className="mt-1 text-slate-700">{selectedCompany.address || "Not provided"}</p></div>
+                <div><p className="text-xs uppercase tracking-wide text-slate-400">Email</p><p className="mt-1 text-slate-700">{selectedCompany.email || "Not provided"}</p></div>
+                <div><p className="text-xs uppercase tracking-wide text-slate-400">Phone</p><p className="mt-1 text-slate-700">{selectedCompany.phone || "Not provided"}</p></div>
+              </div>
+              {selectedCompany.description && <p className="mt-6 border-t border-slate-100 pt-5 text-sm leading-relaxed text-slate-600">{selectedCompany.description}</p>}
+              {selectedCompany.website && <a href={selectedCompany.website} target="_blank" rel="noreferrer" className="mt-5 inline-block text-sm font-medium text-emerald-700 hover:text-emerald-800">Visit company website</a>}
+              <div className="mt-6 border-t border-slate-100 pt-5">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Representatives</p>
+                <div className="mt-3 space-y-2">
+                  {selectedCompany.representatives.map((representative) => <div key={representative.id} className="flex justify-between text-sm"><span className="text-slate-700">{representative.name}</span><span className="text-slate-500">{representative.jobTitle || "Representative"}</span></div>)}
+                </div>
+              </div>
+              {currentMember.role === MemberRole.ADMIN && !selectedCompany.id.startsWith("derived-") && <Button onClick={() => { setSelectedCompany(null); openCompanyForm(selectedCompany); }} className="mt-6 bg-slate-900 text-white hover:bg-slate-800">Edit company details</Button>}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {showCompanyForm && currentMember.role === MemberRole.ADMIN && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <Card className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border-0 shadow-2xl">
+            <CardContent className="p-7">
+              <div className="mb-6 flex items-start justify-between"><div><p className="text-xs uppercase tracking-[0.18em] text-slate-400">Company profile</p><h3 className="mt-2 text-2xl font-light tracking-tight text-slate-900">{editingCompanyId ? "Edit company" : "Add company"}</h3></div><button onClick={() => setShowCompanyForm(false)} className="text-2xl leading-none text-slate-400 hover:text-slate-900">×</button></div>
+              {companyFormError && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{companyFormError}</p>}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input placeholder="Company name" value={companyForm.name} onChange={(event) => setCompanyForm((form) => ({ ...form, name: event.target.value }))} />
+                <Input placeholder="Sector" value={companyForm.sector} onChange={(event) => setCompanyForm((form) => ({ ...form, sector: event.target.value }))} />
+                <Input placeholder="Email" type="email" value={companyForm.email} onChange={(event) => setCompanyForm((form) => ({ ...form, email: event.target.value }))} />
+                <Input placeholder="Phone" value={companyForm.phone} onChange={(event) => setCompanyForm((form) => ({ ...form, phone: event.target.value }))} />
+                <Input placeholder="Website" value={companyForm.website} onChange={(event) => setCompanyForm((form) => ({ ...form, website: event.target.value }))} />
+                <Input placeholder="Address" value={companyForm.address} onChange={(event) => setCompanyForm((form) => ({ ...form, address: event.target.value }))} />
+                <textarea placeholder="Company description" value={companyForm.description} onChange={(event) => setCompanyForm((form) => ({ ...form, description: event.target.value }))} rows={4} className="resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:col-span-2" />
+              </div>
+              <div className="mt-6 flex justify-end gap-3"><Button variant="outline" onClick={() => setShowCompanyForm(false)}>Cancel</Button><Button disabled={companySaving} onClick={saveCompany} className="bg-emerald-600 text-white hover:bg-emerald-700">{companySaving ? "Saving..." : "Save company"}</Button></div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {showMemberForm && currentMember.role === MemberRole.ADMIN && (

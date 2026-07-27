@@ -1,4 +1,4 @@
-import { Document, Event, EventAttachment, EventGallery, EventRSVP, Member, MemberRole, MemberTier } from "@shared/api";
+import { Company, Document, Event, EventAttachment, EventGallery, EventRSVP, Member, MemberRole, MemberTier } from "@shared/api";
 import { supabase } from "@/services/supabaseService";
 
 type SacbmDocumentRow = {
@@ -55,6 +55,18 @@ type SacbmEventAttachmentRow = {
   file_type: string | null;
   uploaded_by: string | null;
   uploaded_date: string;
+};
+
+type SacbmCompanyRow = {
+  id: string;
+  name: string;
+  address: string | null;
+  sector: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  description: string | null;
+  logo_url: string | null;
 };
 
 type SacbmMemberRow = {
@@ -135,6 +147,19 @@ const toAttachment = async (row: SacbmEventAttachmentRow): Promise<EventAttachme
   name: row.name,
   fileUrl: await getEventAssetUrl(row.file_path || row.file_url),
   fileType: row.file_type || "application/octet-stream",
+});
+
+const toCompany = (row: SacbmCompanyRow, representatives: Member[] = []): Company => ({
+  id: row.id,
+  name: row.name,
+  address: row.address || undefined,
+  sector: row.sector || undefined,
+  phone: row.phone || undefined,
+  email: row.email || undefined,
+  website: row.website || undefined,
+  description: row.description || undefined,
+  logoUrl: row.logo_url || undefined,
+  representatives,
 });
 
 const toMember = (row: SacbmMemberRow): Member => ({
@@ -588,6 +613,79 @@ export async function createSacbmMember(input: {
   }
 
   return toMember(data.member as SacbmMemberRow);
+}
+
+export async function getSacbmCompanies() {
+  const [companiesResult, membersResult] = await Promise.all([
+    supabase.from("sacbm_companies").select("*").order("name", { ascending: true }),
+    supabase.from("sacbm_members").select("*").eq("is_active", true).order("name", { ascending: true }),
+  ]);
+
+  if (companiesResult.error || membersResult.error) throw new Error("We could not load the company directory.");
+  const members = (membersResult.data || []).map((row) => toMember(row as SacbmMemberRow));
+  return (companiesResult.data || []).map((row) => {
+    const company = row as SacbmCompanyRow;
+    const representatives = members.filter((member) => member.company.trim().toLowerCase() === company.name.trim().toLowerCase());
+    return toCompany(company, representatives);
+  });
+}
+
+export async function createSacbmCompany(input: {
+  name: string;
+  address: string;
+  sector: string;
+  phone: string;
+  email: string;
+  website: string;
+  description: string;
+  createdBy: string;
+}) {
+  const { data, error } = await supabase
+    .from("sacbm_companies")
+    .insert({
+      name: input.name.trim(),
+      address: input.address.trim() || null,
+      sector: input.sector.trim() || null,
+      phone: input.phone.trim() || null,
+      email: input.email.trim() || null,
+      website: input.website.trim() || null,
+      description: input.description.trim() || null,
+      created_by: input.createdBy,
+    })
+    .select("*")
+    .single();
+
+  if (error || !data) throw new Error("We could not create the company.");
+  return toCompany(data as SacbmCompanyRow);
+}
+
+export async function updateSacbmCompany(input: {
+  id: string;
+  name: string;
+  address: string;
+  sector: string;
+  phone: string;
+  email: string;
+  website: string;
+  description: string;
+}) {
+  const { data, error } = await supabase
+    .from("sacbm_companies")
+    .update({
+      name: input.name.trim(),
+      address: input.address.trim() || null,
+      sector: input.sector.trim() || null,
+      phone: input.phone.trim() || null,
+      email: input.email.trim() || null,
+      website: input.website.trim() || null,
+      description: input.description.trim() || null,
+    })
+    .eq("id", input.id)
+    .select("*")
+    .single();
+
+  if (error || !data) throw new Error("We could not update the company.");
+  return toCompany(data as SacbmCompanyRow);
 }
 
 export async function getSacbmMembers() {

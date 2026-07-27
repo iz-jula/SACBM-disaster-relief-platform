@@ -49,6 +49,19 @@ export interface Member {
   isActive: boolean;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  address?: string;
+  sector?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  description?: string;
+  logoUrl?: string;
+  representatives: Member[];
+}
+
 export interface Document {
   id: string;
   title: string;
