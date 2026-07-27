@@ -24,7 +24,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Member, MemberRole } from "@shared/api";
-import { getSacbmGovernanceData } from "@/services/sacbmGovernanceService";
+import { createSacbmAuthorization, decideSacbmAuthorization, getSacbmGovernanceData, markSacbmMemoRead, sendSacbmMemo, uploadSacbmFinancialRecord } from "@/services/sacbmGovernanceService";
 
 interface FinancialRecord {
   id: string;
@@ -85,7 +85,7 @@ interface PendingAuthorization {
   rejectionNote?: string;
 }
 
-const AVAILABLE_REVIEWERS = [
+const DEFAULT_REVIEWERS = [
   { id: "sean-exco", name: "Sean Williams", role: MemberRole.EXCO },
   { id: "amina-exco", name: "Amina Patel", role: MemberRole.EXCO },
   { id: "thandi-board", name: "Thandi Mokoena", role: MemberRole.BOARD },
@@ -203,6 +203,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   const [selectedAuthorization, setSelectedAuthorization] = useState<PendingAuthorization | null>(null);
   const [authorizationNotes, setAuthorizationNotes] = useState("");
   const [adminNotifications, setAdminNotifications] = useState<AdminNotification[]>([]);
+  const [reviewers, setReviewers] = useState<typeof DEFAULT_REVIEWERS>([]);
   const [adminView, setAdminView] = useState<AdminView>("overview");
   const [memos, setMemos] = useState<PortalMemo[]>([]);
   const [memoSubject, setMemoSubject] = useState("");
@@ -226,6 +227,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
         setMemberRenewals(data.memberRenewals as MemberRenewal[]);
         setAuthorizationRequests(data.authorizationRequests as PendingAuthorization[]);
         setMemos(data.memos as PortalMemo[]);
+        setReviewers(data.reviewers as typeof DEFAULT_REVIEWERS);
       })
       .catch((error) => {
         if (!cancelled) setGovernanceError(error instanceof Error ? error.message : "We could not load the Board and EXCO workspace.");
@@ -373,13 +375,15 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
   }, [authorizationRequests]);
 
   const receivedMemos = useMemo(
-    () => memos.filter((memo) => memo.recipientIds.includes(member.id) || memo.recipientIds.some((id) => AVAILABLE_REVIEWERS.find((reviewer) => reviewer.id === id)?.name === member.name)),
+    () => memos.filter((memo) => memo.recipientIds.includes(member.id) || memo.recipientIds.some((id) => reviewers.find((reviewer) => reviewer.id === id)?.name === member.name)),
     [member.id, member.name, memos]
   );
 
-  const handleAuthorization = (decision: "approved" | "rejected") => {
+  const handleAuthorization = async (decision: "approved" | "rejected") => {
     if (!selectedAuthorization) return;
     if (decision === "rejected" && !authorizationNotes.trim()) return;
+
+    await decideSacbmAuthorization({ authorizationId: selectedAuthorization.id, approverId: member.id, decision, note: authorizationNotes });
 
     if (decision === "rejected") {
       const rejectionNote = authorizationNotes.trim();
@@ -418,8 +422,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
     setAuthorizationNotes("");
   };
 
-  const handleSendMemo = () => {
+  const handleSendMemo = async () => {
     if (!memoSubject.trim() || !memoBody.trim() || memoRecipients.length === 0) return;
+    await sendSacbmMemo({ senderId: member.id, subject: memoSubject, body: memoBody, recipientIds: memoRecipients });
     setMemos((current) => [
       {
         id: `memo-${Date.now()}`,
@@ -437,9 +442,10 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
     setMemoRecipients([]);
   };
 
-  const handleSendApproval = () => {
+  const handleSendApproval = async () => {
     if (!approvalTitle.trim() || approvalRecipients.length === 0) return;
-    const recipients = AVAILABLE_REVIEWERS.filter((reviewer) => approvalRecipients.includes(reviewer.id));
+    const recipients = reviewers.filter((reviewer) => approvalRecipients.includes(reviewer.id));
+    await createSacbmAuthorization({ requesterId: member.id, title: approvalTitle, amount: approvalAmount ? Number(approvalAmount) : undefined, type: approvalType, priority: "medium", deadline: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0], approverIds: approvalRecipients });
     const newRequest: PendingAuthorization = {
       id: `authorization-${Date.now()}`,
       title: approvalTitle.trim(),
@@ -461,8 +467,9 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
     setApprovalRecipients([]);
   };
 
-  const handleUploadFile = () => {
+  const handleUploadFile = async () => {
     if (uploadTitle.trim() && uploadCategory.trim() && uploadFile) {
+      const savedRecord = await uploadSacbmFinancialRecord({ memberId: member.id, title: uploadTitle, type: uploadType, category: uploadCategory, file: uploadFile });
       const newRecord: FinancialRecord = {
         id: `record-${Date.now()}`,
         title: uploadTitle,
@@ -470,9 +477,8 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
         date: new Date().toISOString().split("T")[0],
         uploadedBy: member.name,
         category: uploadCategory,
-        fileUrl: URL.createObjectURL(uploadFile),
-        fileSize: uploadFile.size / (1024 * 1024),
-        status: "approved",
+        fileUrl: savedRecord.fileUrl,
+        status: savedRecord.status,
       };
 
       setFinancialRecords([newRecord, ...financialRecords]);
@@ -824,7 +830,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
               <Input value={memoSubject} onChange={(event) => setMemoSubject(event.target.value)} placeholder="Memo subject" />
               <textarea value={memoBody} onChange={(event) => setMemoBody(event.target.value)} rows={4} placeholder="Write an internal note or update..." className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
               <div className="flex flex-wrap gap-2">
-                {AVAILABLE_REVIEWERS.filter((reviewer) => reviewer.name !== member.name).map((reviewer) => (
+                {reviewers.filter((reviewer) => reviewer.name !== member.name).map((reviewer) => (
                   <label key={reviewer.id} className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
                     <input
                       type="checkbox"
@@ -866,7 +872,10 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                         <Button
                           variant="outline"
                           className="mt-4 border-slate-300 text-slate-700"
-                          onClick={() => setMemos((items) => items.map((item) => item.id === memo.id ? { ...item, readBy: [...item.readBy, member.id] } : item))}
+                          onClick={async () => {
+                            await markSacbmMemoRead(memo.id, member.id);
+                            setMemos((items) => items.map((item) => item.id === memo.id ? { ...item, readBy: [...item.readBy, member.id] } : item));
+                          }}
                         >
                           Mark as read
                         </Button>
@@ -952,7 +961,7 @@ const SACBMBoardExco: React.FC<BoardExcoProps> = ({ member }) => {
                   </Select>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {AVAILABLE_REVIEWERS.filter((reviewer) => reviewer.role !== MemberRole.ADMIN).map((reviewer) => (
+                  {reviewers.filter((reviewer) => reviewer.role !== MemberRole.ADMIN).map((reviewer) => (
                     <label key={reviewer.id} className="flex items-center gap-2 rounded-md border border-slate-100 p-2 text-sm text-slate-700 hover:bg-slate-50">
                       <input
                         type="checkbox"

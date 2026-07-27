@@ -126,6 +126,7 @@ export async function getSacbmGovernanceData() {
         rejectionNote: rejection?.note || undefined,
       };
     }) as GovernanceAuthorization[],
+    reviewers: members.filter((item) => [MemberRole.ADMIN, MemberRole.BOARD, MemberRole.EXCO].includes(item.role)).map((item) => ({ id: item.id, name: item.name, role: item.role })),
     memos: (memoResult.data || []).map((row) => {
       const recipients = memoRecipients.filter((recipient) => recipient.memo_id === row.id);
       return {
@@ -139,4 +140,51 @@ export async function getSacbmGovernanceData() {
       };
     }) as GovernanceMemo[],
   };
+}
+
+export async function uploadSacbmFinancialRecord(input: { memberId: string; title: string; type: "receipt" | "invoice" | "contract"; category: string; file: File }) {
+  const safeFileName = input.file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const filePath = `governance/${input.memberId}/${crypto.randomUUID()}-${safeFileName}`;
+  const { error: uploadError } = await supabase.storage.from("sacbm-assets").upload(filePath, input.file, { contentType: input.file.type || "application/octet-stream", upsert: false });
+  if (uploadError) throw new Error("We could not upload the finance file.");
+  const { data, error } = await supabase.from("sacbm_financial_records").insert({ title: input.title.trim(), type: input.type, date: new Date().toISOString().slice(0, 10), status: "approved", description: input.category.trim(), file_url: filePath, file_path: filePath, uploaded_by: input.memberId, approved_by: input.memberId }).select("*").single();
+  if (error || !data) { await supabase.storage.from("sacbm-assets").remove([filePath]); throw new Error("We could not save the finance record."); }
+  const { data: signed, error: signedError } = await supabase.storage.from("sacbm-assets").createSignedUrl(filePath, 3600);
+  if (signedError || !signed?.signedUrl) throw new Error("The record was saved but its download link could not be prepared.");
+  return { id: data.id, title: data.title, type: data.type, date: data.date, uploadedBy: "", category: data.description || "Finance", fileUrl: signed.signedUrl, status: data.status } as GovernanceFinancialRecord;
+}
+
+export async function createSacbmAuthorization(input: { requesterId: string; title: string; amount?: number; type: GovernanceAuthorization["type"]; priority: GovernanceAuthorization["priority"]; deadline: string; approverIds: string[] }) {
+  const { data, error } = await supabase.from("sacbm_authorizations").insert({ requester_id: input.requesterId, title: input.title.trim(), amount: input.amount ?? null, type: input.type, priority: input.priority, deadline: input.deadline || null, required_approvals: input.approverIds.length, status: "pending" }).select("id").single();
+  if (error || !data) throw new Error("We could not create the authorization request.");
+  if (input.approverIds.length > 0) {
+    const { error: approvalError } = await supabase.from("sacbm_authorization_approvals").insert(input.approverIds.map((approverId) => ({ authorization_id: data.id, approver_id: approverId, status: "pending" })));
+    if (approvalError) throw new Error("The authorization was created but reviewers could not be assigned.");
+  }
+  return data.id as string;
+}
+
+export async function decideSacbmAuthorization(input: { authorizationId: string; approverId: string; decision: "approved" | "rejected"; note?: string }) {
+  const { error: approvalError } = await supabase.from("sacbm_authorization_approvals").update({ status: input.decision, note: input.note?.trim() || null, decided_at: new Date().toISOString() }).eq("authorization_id", input.authorizationId).eq("approver_id", input.approverId);
+  if (approvalError) throw new Error("We could not record your authorization decision.");
+  const [{ data: request, error: requestError }, { data: approvals, error: approvalsError }] = await Promise.all([supabase.from("sacbm_authorizations").select("required_approvals").eq("id", input.authorizationId).single(), supabase.from("sacbm_authorization_approvals").select("status").eq("authorization_id", input.authorizationId)]);
+  if (requestError || approvalsError || !request) throw new Error("We could not refresh the authorization status.");
+  const rejected = (approvals || []).some((approval) => approval.status === "rejected");
+  const approvedCount = (approvals || []).filter((approval) => approval.status === "approved").length;
+  const status = rejected ? "rejected" : approvedCount >= request.required_approvals ? "approved" : "pending";
+  const { error: statusError } = await supabase.from("sacbm_authorizations").update({ status }).eq("id", input.authorizationId);
+  if (statusError) throw new Error("The decision was saved but the authorization status could not be updated.");
+}
+
+export async function sendSacbmMemo(input: { senderId: string; subject: string; body: string; recipientIds: string[] }) {
+  const { data, error } = await supabase.from("sacbm_memos").insert({ sender_id: input.senderId, subject: input.subject.trim(), body: input.body.trim() }).select("id").single();
+  if (error || !data) throw new Error("We could not send the memo.");
+  const { error: recipientError } = await supabase.from("sacbm_memo_recipients").insert(input.recipientIds.map((recipientId) => ({ memo_id: data.id, recipient_id: recipientId })));
+  if (recipientError) throw new Error("The memo was created but recipients could not be assigned.");
+  return data.id as string;
+}
+
+export async function markSacbmMemoRead(memoId: string, memberId: string) {
+  const { error } = await supabase.from("sacbm_memo_recipients").update({ read_at: new Date().toISOString() }).eq("memo_id", memoId).eq("recipient_id", memberId);
+  if (error) throw new Error("We could not mark the memo as read.");
 }
