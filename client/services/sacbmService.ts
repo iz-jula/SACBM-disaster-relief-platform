@@ -596,12 +596,17 @@ export async function saveSacbmRsvp(memberId: string, eventId: string, status: E
 
 export async function requestSacbmPasswordReset(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-    redirectTo: `${window.location.origin}/sacbm-login`,
+    redirectTo: `${window.location.origin}/sacbm-reset-password`,
   });
 
   if (error) {
     throw new Error("We could not send the credentials reset email. Please try again.");
   }
+}
+
+export async function updateSacbmPassword(password: string) {
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw new Error(error.message || "We could not update your password.");
 }
 
 export async function createSacbmMember(input: {
