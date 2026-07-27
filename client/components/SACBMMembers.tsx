@@ -626,7 +626,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                     </div>
                     <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
                       <span className="font-medium text-slate-800">{getTierLabel(company.membershipTier || company.tiers[0] || MemberTier.BRONZE)} member</span>
-                      {company.renewalDate && <span>Renews {new Date(company.renewalDate).toLocaleDateString()}</span>}
+                      {currentMember.role === MemberRole.ADMIN && company.renewalDate && <span>Renews {new Date(company.renewalDate).toLocaleDateString()}</span>}
                     </div>
                     <div className="mt-5 border-t border-slate-100 pt-4">
                       <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Representatives</p>
@@ -853,7 +853,7 @@ const SACBMMembers: React.FC<SACBMMembersProps> = ({ currentMember }) => {
                 <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Email</p><p className="mt-1.5 text-slate-700">{selectedCompany.email || "Not provided"}</p></div>
                 <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Phone</p><p className="mt-1.5 text-slate-700">{selectedCompany.phone || "Not provided"}</p></div>
                 <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Membership</p><p className="mt-1.5 font-medium text-slate-800">{getTierLabel(selectedCompany.membershipTier || MemberTier.BRONZE)}</p></div>
-                <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Renewal date</p><p className="mt-1.5 text-slate-700">{selectedCompany.renewalDate ? new Date(selectedCompany.renewalDate).toLocaleDateString() : "Not provided"}</p></div>
+                {currentMember.role === MemberRole.ADMIN && <div><p className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Renewal date</p><p className="mt-1.5 text-slate-700">{selectedCompany.renewalDate ? new Date(selectedCompany.renewalDate).toLocaleDateString() : "Not provided"}</p></div>}
               </div>
               {selectedCompany.description && <p className="mt-6 text-sm leading-relaxed text-slate-600">{selectedCompany.description}</p>}
               {selectedCompany.website && <a href={selectedCompany.website} target="_blank" rel="noreferrer" className="mt-5 inline-block text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900">Visit company website</a>}
