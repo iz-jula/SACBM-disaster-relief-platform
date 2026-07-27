@@ -2,7 +2,6 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { handleNewsAlerts } from "./routes/news";
 import {
   handleGetRequests,
   handleCreateRequest,
@@ -38,9 +37,6 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
-
-  // News alerts proxy
-  app.get("/api/news/alerts", handleNewsAlerts);
 
   // Dashboard consolidated data endpoint
   app.get("/api/dashboard-data", handleGetDashboardData);
