@@ -242,7 +242,7 @@ const OurMembers = () => {
                 const gradient = gradients[index % gradients.length];
 
                 return (
-                  <button
+                  <div
                     key={`${member.company}-${index}`}
                     onClick={() => setSelectedMember(member)}
                     className="w-full group text-left"
@@ -301,7 +301,7 @@ const OurMembers = () => {
                         </Button>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
