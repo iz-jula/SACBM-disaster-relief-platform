@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { ArrowRight, Search, X } from "lucide-react";
-import { getAchievements } from "@/services/achievementsService";
+import { getAchievements, normalizeCompanyName } from "@/services/achievementsService";
 import { getMemberCustomizations } from "@/services/supabaseService";
 
 interface Member {
@@ -33,7 +33,7 @@ const OurMembers = () => {
           getMemberCustomizations(),
         ]);
         const memberCustomizations = new Map(
-          customizations.map((customization) => [customization.company, customization]),
+          customizations.map((customization) => [normalizeCompanyName(customization.company), customization]),
         );
 
         // Group achievements by company and aggregate metrics

@@ -10,6 +10,19 @@ import {
 export type Achievement = Action;
 export type { Action };
 
+export function normalizeCompanyName(companyName: string): string {
+  const normalized = companyName.trim().replace(/\s+/g, " ");
+  const key = normalized.toLowerCase().replace(/[–—-]/g, " ").replace(/\s+/g, " ");
+
+  if (key.includes("coca cola")) return "Coca Cola";
+  if (key.includes("companhia industrial da matola") || key === "cim") {
+    return "CIM (Companhia Industrial da Matola)";
+  }
+  if (key === "trac" || key.includes("trans african concessions")) return "TRAC";
+
+  return normalized;
+}
+
 export interface AchievementsMetrics {
   totalAchievements: number;
   completedAchievements: number;
@@ -60,7 +73,10 @@ export async function getAchievements(
 
   try {
     console.log("Fetching achievements from database...");
-    const achievements = await getSupabaseActions(undefined, category);
+    const achievements = (await getSupabaseActions(undefined, category)).map((achievement) => ({
+      ...achievement,
+      company_name: normalizeCompanyName(achievement.company_name),
+    }));
 
     // Update cache
     achievementsCache.achievements = achievements;
@@ -112,7 +128,10 @@ export async function createAchievement(
   try {
     console.log("Creating achievement:", achievement);
 
-    const result = await createSupabaseAction(achievement);
+    const result = await createSupabaseAction({
+      ...achievement,
+      company_name: normalizeCompanyName(achievement.company_name),
+    });
 
     // Invalidate cache so fresh data is fetched
     achievementsCache.achievements = [];
