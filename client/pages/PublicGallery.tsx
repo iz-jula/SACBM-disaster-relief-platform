@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, Filter, Users, Calendar, X, TrendingUp, DollarSign } from "lucide-react";
+import { Search, Calendar, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import ImpactDetailModal from "@/components/ImpactDetailModal";
 import { getAchievements } from "@/services/achievementsService";
@@ -26,10 +24,12 @@ const getPlaceholderImageUrl = (achievementId?: number): string => {
 };
 
 const PublicGallery = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [achievements, setAchievements] = useState<any[]>([]);
   const [filteredAchievements, setFilteredAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
@@ -41,6 +41,7 @@ const PublicGallery = () => {
   useEffect(() => {
     const loadAchievements = async () => {
       try {
+        setLoadError(false);
         const data = await getAchievements();
         setAchievements(data);
         // Extract unique categories
@@ -57,12 +58,13 @@ const PublicGallery = () => {
         }
       } catch (error) {
         console.error("Failed to load achievements:", error);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     };
     loadAchievements();
-  }, [searchParams]);
+  }, [searchParams, retryCount]);
 
   // Filter and sort achievements
   useEffect(() => {
@@ -108,16 +110,14 @@ const PublicGallery = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <PublicNavbar />
-
       {/* Header */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-20">
           <h1 className="text-5xl sm:text-6xl font-light tracking-tight text-slate-900">
             Our Impact
           </h1>
-          <p className="mt-4 text-base text-slate-600 max-w-2xl">
-            Explore the measurable difference our members are making across Mozambique through social responsibility initiatives
+          <p className="mt-4 max-w-2xl text-base text-slate-600">
+            Explore the measurable difference our members are making across Mozambique through social responsibility initiatives.
           </p>
         </div>
       </div>
@@ -195,9 +195,17 @@ const PublicGallery = () => {
               </div>
             </div>
 
-            {/* Active Filters - More Minimal */}
-            {(selectedCategory !== "all" || selectedCompany !== "all") && (
-              <div className="flex flex-wrap gap-2 pt-2">
+            {/* Active Filters */}
+            {(searchTerm || selectedCategory !== "all" || selectedCompany !== "all") && (
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                {searchTerm && (
+                  <span className="flex items-center gap-2 rounded bg-slate-100 px-2.5 py-1 text-xs text-slate-600">
+                    Search: {searchTerm}
+                    <button onClick={() => setSearchTerm("")} className="hover:text-slate-900" aria-label="Clear search">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
                 {selectedCategory !== "all" && (
                   <span className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded flex items-center gap-2">
                     {selectedCategory}
@@ -231,6 +239,20 @@ const PublicGallery = () => {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <p className="text-slate-500">Loading impact stories...</p>
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <p className="text-slate-600 text-sm">We couldn&apos;t load the impact stories.</p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => {
+                setLoading(true);
+                setRetryCount((count) => count + 1);
+              }}
+            >
+              Try Again
+            </Button>
           </div>
         ) : filteredAchievements.length > 0 ? (
           <>
@@ -397,8 +419,21 @@ const PublicGallery = () => {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-24">
-            <p className="text-slate-500 text-sm">No impact stories found matching your filters</p>
+          <div className="flex flex-col items-center justify-center border border-dashed border-slate-200 px-6 py-24 text-center">
+            <p className="text-sm font-medium text-slate-700">No impact stories match these filters</p>
+            {(searchTerm || selectedCategory !== "all" || selectedCompany !== "all") && (
+              <Button
+                variant="outline"
+                className="mt-5"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("all");
+                  setSelectedCompany("all");
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
           </div>
         )}
       </div>

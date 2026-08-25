@@ -1,7 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+const supabaseKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  "";
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -11,6 +14,25 @@ export interface MemberCustomization {
   description: string;
   image_url?: string | null;
   updated_at?: string;
+}
+
+export interface SacbmCompany {
+  id: string;
+  name: string;
+  sector?: string | null;
+  description?: string | null;
+  logo_url?: string | null;
+}
+
+export async function getCompanies(): Promise<SacbmCompany[]> {
+  const { data, error } = await supabase
+    .from("sacbm_companies")
+    .select("id, name, sector, description, logo_url")
+    .eq("is_active", true)
+    .order("name");
+
+  if (error) throw error;
+  return data || [];
 }
 
 export async function getMemberCustomizations(): Promise<MemberCustomization[]> {
@@ -191,8 +213,8 @@ export async function getMetrics() {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
@@ -280,6 +302,7 @@ export function subscribeToRequests(callback: (request: RelieRequest) => void) {
 // Action/Achievement Interface - matches Supabase actions_table schema
 export interface Action {
   id?: number;
+  company_id?: string | null;
   company_name: string;
   type_action: string;
   description: string;
@@ -300,44 +323,49 @@ export interface Action {
   created_at?: string;
 }
 
+const ACTIONS_QUERY_TIMEOUT = 30000;
+
 // Fetch all actions - optimized query with timeout
 export async function getActions(
   status?: string,
   category?: string,
 ): Promise<Action[]> {
-  try {
-    let query = supabase
-      .from("actions_table")
-      .select("id,company_name,type_action,description,category,location,partner_organisation,people_impacted,amount,media,created_at")
-      .order("created_at", { ascending: false });
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      let query = supabase
+        .from("actions_table")
+        .select("id,company_id,company_name,type_action,description,category,location,partner_organisation,people_impacted,amount,media,created_at,sacbm_companies(name),action_media(id,media_url,storage_path,media_type,caption,display_order,created_at)")
+        .order("created_at", { ascending: false });
 
-    if (category) {
-      query = query.eq("category", category);
+      if (category) {
+        query = query.eq("category", category);
+      }
+
+      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+        setTimeout(() => {
+          resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+        }, ACTIONS_QUERY_TIMEOUT);
+      });
+
+      const { data, error } = await Promise.race([query, timeoutPromise]) as any;
+      if (error) throw error;
+      return (data || []).map((row: any) => ({
+        ...row,
+        company_name: row.sacbm_companies?.name || row.company_name,
+        media: row.action_media?.length
+          ? row.action_media.map((item: { media_url: string }) => item.media_url)
+          : row.media,
+        sacbm_companies: undefined,
+        action_media: undefined,
+      }));
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+      if (attempt === 3) throw error;
+      console.warn(`Supabase getActions attempt ${attempt} failed:`, errorMsg);
     }
-
-    // Wrap in timeout to prevent hanging
-    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
-      setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
-    });
-
-    const { data, error } = await Promise.race([
-      query,
-      timeoutPromise,
-    ]) as any;
-
-    if (error) {
-      console.warn("Supabase getActions:", error.message || error);
-      return [];
-    }
-    return data || [];
-  } catch (error) {
-    const errorMsg =
-      error instanceof Error ? error.message : JSON.stringify(error);
-    console.warn("Error fetching actions (returning empty):", errorMsg);
-    return [];
   }
+
+  return [];
 }
 
 // Get action metrics - optimized query with timeout
@@ -351,8 +379,8 @@ export async function getActionsMetrics() {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
@@ -429,6 +457,29 @@ export async function createAction(
         hint: error.hint,
       });
       throw error;
+    }
+
+    if (data && action.media) {
+      let mediaUrls: string[] = [];
+      try {
+        const parsed = JSON.parse(action.media);
+        mediaUrls = Array.isArray(parsed) ? parsed : [action.media];
+      } catch {
+        mediaUrls = [action.media];
+      }
+
+      const mediaRows = mediaUrls
+        .filter((mediaUrl) => mediaUrl)
+        .map((mediaUrl, display_order) => ({
+          action_id: data.id,
+          media_url: mediaUrl,
+          display_order,
+        }));
+
+      if (mediaRows.length > 0) {
+        const { error: mediaError } = await supabase.from("action_media").insert(mediaRows);
+        if (mediaError) throw mediaError;
+      }
     }
 
     console.log("Action created successfully:", data);
@@ -523,8 +574,8 @@ export async function getIngdRequests(): Promise<IngdRequest[]> {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
@@ -554,8 +605,8 @@ export async function getIngdMetrics() {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
