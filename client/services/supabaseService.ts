@@ -194,8 +194,8 @@ export async function getMetrics() {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
@@ -303,6 +303,8 @@ export interface Action {
   created_at?: string;
 }
 
+const ACTIONS_QUERY_TIMEOUT = 30000;
+
 // Fetch all actions - optimized query with timeout
 export async function getActions(
   status?: string,
@@ -321,8 +323,8 @@ export async function getActions(
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
@@ -354,8 +356,8 @@ export async function getActionsMetrics() {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
@@ -526,8 +528,8 @@ export async function getIngdRequests(): Promise<IngdRequest[]> {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
@@ -557,8 +559,8 @@ export async function getIngdMetrics() {
     // Wrap in timeout to prevent hanging
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
       setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 8 seconds") });
-      }, 8000);
+        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+      }, ACTIONS_QUERY_TIMEOUT);
     });
 
     const { data, error } = await Promise.race([
