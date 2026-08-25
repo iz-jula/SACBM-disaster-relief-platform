@@ -89,7 +89,7 @@ export async function getAchievements(
     const errorMsg =
       error instanceof Error ? error.message : JSON.stringify(error);
     console.error("Error fetching achievements:", errorMsg);
-    return [];
+    throw error;
   }
 }
 

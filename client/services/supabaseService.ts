@@ -310,39 +310,34 @@ export async function getActions(
   status?: string,
   category?: string,
 ): Promise<Action[]> {
-  try {
-    let query = supabase
-      .from("actions_table")
-      .select("id,company_name,type_action,description,category,location,partner_organisation,people_impacted,amount,media,created_at")
-      .order("created_at", { ascending: false });
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      let query = supabase
+        .from("actions_table")
+        .select("id,company_name,type_action,description,category,location,partner_organisation,people_impacted,amount,media,created_at")
+        .order("created_at", { ascending: false });
 
-    if (category) {
-      query = query.eq("category", category);
+      if (category) {
+        query = query.eq("category", category);
+      }
+
+      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
+        setTimeout(() => {
+          resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
+        }, ACTIONS_QUERY_TIMEOUT);
+      });
+
+      const { data, error } = await Promise.race([query, timeoutPromise]) as any;
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+      if (attempt === 3) throw error;
+      console.warn(`Supabase getActions attempt ${attempt} failed:`, errorMsg);
     }
-
-    // Wrap in timeout to prevent hanging
-    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) => {
-      setTimeout(() => {
-        resolve({ data: null, error: new Error("Query timeout after 30 seconds") });
-      }, ACTIONS_QUERY_TIMEOUT);
-    });
-
-    const { data, error } = await Promise.race([
-      query,
-      timeoutPromise,
-    ]) as any;
-
-    if (error) {
-      console.warn("Supabase getActions:", error.message || error);
-      return [];
-    }
-    return data || [];
-  } catch (error) {
-    const errorMsg =
-      error instanceof Error ? error.message : JSON.stringify(error);
-    console.warn("Error fetching actions (returning empty):", errorMsg);
-    return [];
   }
+
+  return [];
 }
 
 // Get action metrics - optimized query with timeout

@@ -30,6 +30,8 @@ const PublicGallery = () => {
   const [achievements, setAchievements] = useState<any[]>([]);
   const [filteredAchievements, setFilteredAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
@@ -41,6 +43,7 @@ const PublicGallery = () => {
   useEffect(() => {
     const loadAchievements = async () => {
       try {
+        setLoadError(false);
         const data = await getAchievements();
         setAchievements(data);
         // Extract unique categories
@@ -57,12 +60,13 @@ const PublicGallery = () => {
         }
       } catch (error) {
         console.error("Failed to load achievements:", error);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     };
     loadAchievements();
-  }, [searchParams]);
+  }, [searchParams, retryCount]);
 
   // Filter and sort achievements
   useEffect(() => {
@@ -231,6 +235,20 @@ const PublicGallery = () => {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <p className="text-slate-500">Loading impact stories...</p>
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <p className="text-slate-600 text-sm">We couldn&apos;t load the impact stories.</p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => {
+                setLoading(true);
+                setRetryCount((count) => count + 1);
+              }}
+            >
+              Try Again
+            </Button>
           </div>
         ) : filteredAchievements.length > 0 ? (
           <>
