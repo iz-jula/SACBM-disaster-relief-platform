@@ -3,7 +3,6 @@ import { ArrowRight, BarChart3, HeartHandshake, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PublicFooter from "@/components/PublicFooter";
-import PublicNavbar from "@/components/PublicNavbar";
 import { getActionsMetrics } from "@/services/supabaseService";
 
 interface Stats {
@@ -52,70 +51,59 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <PublicNavbar />
-
       <main>
         <section className="border-b border-slate-200 bg-slate-50">
-          <div className="mx-auto max-w-7xl px-6 py-20 sm:px-8 sm:py-28">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              Corporate social responsibility
-            </p>
-            <div className="mt-5 flex max-w-3xl flex-col gap-8">
+          <div className="mx-auto max-w-7xl px-6 py-16 sm:px-8 sm:py-20">
+            <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h1 className="text-4xl font-light tracking-tight text-slate-950 sm:text-6xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                  Impact at a glance
+                </p>
+                <h1 className="mt-3 text-3xl font-light tracking-tight text-slate-950 sm:text-5xl">
                   SACBM&apos;s CSR impact
                 </h1>
-                <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-                  A clear view of the difference our members are making across Mozambique.
-                </p>
               </div>
-              <div>
-                <Link to="/gallery">
-                  <Button className="bg-emerald-700 text-white hover:bg-emerald-800">
-                    View impact gallery
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
+              <p className="max-w-sm text-sm leading-6 text-slate-600">
+                A live summary of the difference our members are making across Mozambique.
+              </p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-3">
+              {statCards.map(({ label, value, description, icon: Icon }) => (
+                <div key={label} className="border border-slate-200 bg-white p-7 sm:p-8">
+                  <Icon className="h-5 w-5 text-emerald-700" />
+                  <p className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    {label}
+                  </p>
+                  <p className="mt-3 text-5xl font-light tracking-tight text-slate-950">
+                    {value}
+                  </p>
+                  <p className="mt-3 text-sm text-slate-500">{description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8 sm:py-24">
-          <div className="mb-10">
-            <h2 className="text-2xl font-light tracking-tight text-slate-950 sm:text-3xl">
-              Impact at a glance
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              Corporate social responsibility
+            </p>
+            <h2 className="mt-4 text-3xl font-light tracking-tight text-slate-950 sm:text-5xl">
+              See the work behind the numbers.
             </h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Aggregated from member CSR actions.
+            <p className="mt-5 text-base leading-7 text-slate-600">
+              Explore the individual initiatives, organizations, and communities represented in this summary.
             </p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-3">
-            {statCards.map(({ label, value, description, icon: Icon }) => (
-              <div key={label} className="border border-slate-200 bg-white p-7 sm:p-8">
-                <Icon className="h-5 w-5 text-emerald-700" />
-                <p className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  {label}
-                </p>
-                <p className="mt-3 text-5xl font-light tracking-tight text-slate-950">
-                  {value}
-                </p>
-                <p className="mt-3 text-sm text-slate-500">{description}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 flex flex-col items-start justify-between gap-5 border-t border-slate-200 pt-8 sm:flex-row sm:items-center">
-            <p className="max-w-xl text-sm leading-6 text-slate-600">
-              Explore the individual initiatives, organizations, and communities behind these figures.
-            </p>
-            <Link to="/gallery" className="shrink-0">
-              <Button variant="outline">
-                More details
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <div className="mt-8">
+              <Link to="/gallery">
+                <Button className="bg-emerald-700 text-white hover:bg-emerald-800">
+                  View impact gallery
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       </main>

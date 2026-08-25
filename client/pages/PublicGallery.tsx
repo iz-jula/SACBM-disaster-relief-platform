@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import ImpactDetailModal from "@/components/ImpactDetailModal";
 import { getAchievements } from "@/services/achievementsService";
@@ -111,8 +110,6 @@ const PublicGallery = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <PublicNavbar />
-
       {/* Header */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 sm:px-8 py-16 sm:py-20">
