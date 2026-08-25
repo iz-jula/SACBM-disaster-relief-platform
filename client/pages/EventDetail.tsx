@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import PublicNavbar from "@/components/PublicNavbar";
-import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, MapPin, Users, Clock, Download, FileText } from "lucide-react";
 import { getAllEvents, type Event } from "@/services/eventsService";
@@ -39,7 +38,7 @@ const EventDetail = () => {
             </Button>
           </div>
         </div>
-        <PublicFooter />
+
       </div>
     );
   }
@@ -281,7 +280,6 @@ const EventDetail = () => {
         </div>
       </div>
 
-      <PublicFooter />
     </div>
   );
 };
