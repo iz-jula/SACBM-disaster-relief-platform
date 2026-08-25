@@ -69,15 +69,6 @@ const PublicNavbar = () => {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
-            <Link
-              to="/members"
-              aria-label="Open Member Section"
-              title="Member Section"
-              className="hidden h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800 md:inline-flex"
-            >
-              <Users className="h-4 w-4" />
-            </Link>
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
