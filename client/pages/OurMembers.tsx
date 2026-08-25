@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import PublicNavbar from "@/components/PublicNavbar";
 import PublicFooter from "@/components/PublicFooter";
 import { ArrowRight, Search, X } from "lucide-react";
-import { getAchievements } from "@/services/achievementsService";
-import { getMemberCustomizations } from "@/services/supabaseService";
+import { getAchievements, normalizeCompanyName } from "@/services/achievementsService";
+import { getCompanies, getMemberCustomizations } from "@/services/supabaseService";
 
 interface Member {
+  companyId: string;
   company: string;
   actionCount: number;
   description?: string;
@@ -28,12 +29,13 @@ const OurMembers = () => {
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const [achievements, customizations] = await Promise.all([
+        const [achievements, customizations, companies] = await Promise.all([
           getAchievements(),
           getMemberCustomizations(),
+          getCompanies(),
         ]);
         const memberCustomizations = new Map(
-          customizations.map((customization) => [customization.company, customization]),
+          customizations.map((customization) => [normalizeCompanyName(customization.company), customization]),
         );
 
         // Group achievements by company and aggregate metrics
@@ -134,22 +136,28 @@ const OurMembers = () => {
           },
         };
 
-        const membersList: Member[] = Array.from(memberMap.entries()).map(
-          ([company, { count, image, totalPeopleImpacted, totalContribution }]) => {
-            const companyConfig = sectorMap[company];
-            const customization = memberCustomizations.get(company);
+        const membersList: Member[] = companies.map((companyRecord) => {
+          const company = companyRecord.name;
+          const aggregate = memberMap.get(normalizeCompanyName(company)) || {
+            count: 0,
+            image: undefined,
+            totalPeopleImpacted: 0,
+            totalContribution: 0,
+          };
+          const companyConfig = sectorMap[company];
+          const customization = memberCustomizations.get(normalizeCompanyName(company));
 
-            return {
-              company,
-              actionCount: count,
-              image: customization?.image_url || image || companyConfig?.image,
-              totalPeopleImpacted,
-              totalContribution,
-              sector: customization?.sector || companyConfig?.sector || "Business & Commerce",
-              description: customization?.description || companyConfig?.description || "Leading organization committed to creating positive social impact across Mozambique.",
-            };
-          }
-        );
+          return {
+            companyId: companyRecord.id,
+            company,
+            actionCount: aggregate.count,
+            image: customization?.image_url || aggregate.image || companyRecord.logo_url || companyConfig?.image,
+            totalPeopleImpacted: aggregate.totalPeopleImpacted,
+            totalContribution: aggregate.totalContribution,
+            sector: customization?.sector || companyRecord.sector || companyConfig?.sector || "Business & Commerce",
+            description: customization?.description || companyRecord.description || companyConfig?.description || "Leading organization committed to creating positive social impact across Mozambique.",
+          };
+        });
 
         setMembers(membersList);
         setFilteredMembers(membersList);
@@ -242,8 +250,8 @@ const OurMembers = () => {
                 const gradient = gradients[index % gradients.length];
 
                 return (
-                  <button
-                    key={`${member.company}-${index}`}
+                  <div
+                    key={member.companyId}
                     onClick={() => setSelectedMember(member)}
                     className="w-full group text-left"
                   >
@@ -301,7 +309,7 @@ const OurMembers = () => {
                         </Button>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

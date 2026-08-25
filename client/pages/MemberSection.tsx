@@ -16,6 +16,7 @@ import PublicNavbar from "@/components/PublicNavbar";
 import MemberGate from "@/components/MemberGate";
 import { LogOut, User, Building2, Plus, FileText, Download, AlertCircle, ChevronDown, ChevronUp, CheckCircle2, Circle, Loader, X, BarChart3, Mail } from "lucide-react";
 import { createAchievement, getAchievements } from "@/services/achievementsService";
+import { getCompanies, type SacbmCompany } from "@/services/supabaseService";
 
 const MemberSection = () => {
   const navigate = useNavigate();
@@ -59,9 +60,15 @@ const MemberSection = () => {
   const [hideAmount, setHideAmount] = useState(false);
   const [description, setDescription] = useState("");
   const [media, setMedia] = useState<string[]>([]);
+  const [companies, setCompanies] = useState<SacbmCompany[]>([]);
+  const [companyId, setCompanyId] = useState("");
 
   // Load member info from localStorage on mount
   useEffect(() => {
+    getCompanies().then(setCompanies).catch((error) => {
+      console.error("Error loading companies:", error);
+    });
+
     const stored = localStorage.getItem("memberInfo");
     if (stored) {
       setMemberInfo(JSON.parse(stored));
@@ -271,7 +278,7 @@ const MemberSection = () => {
   const handleSubmitAction = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!companyName || !actionType || !category || !description) {
+    if (!companyId || !actionType || !category || !description) {
       alert("Please fill in all required fields");
       return;
     }
@@ -281,11 +288,12 @@ const MemberSection = () => {
       const result = await createAchievement({
         type_action: actionType,
         description,
+        company_id: companyId,
         category: category as any,
         people_impacted: peopleImpacted ? parseInt(peopleImpacted) : 0,
         location: `${district}${province ? `, ${province}` : ""}`,
         media: media.length > 0 ? JSON.stringify(media) : null,
-        company_name: companyName,
+        company_name: companies.find((company) => company.id === companyId)?.name || "",
         amount: amount ? parseInt(amount) : 0,
         partner_organisation: partnerOrganisation || undefined,
       });
@@ -294,6 +302,7 @@ const MemberSection = () => {
         setSubmitSuccess(true);
 
         // Reset form
+        setCompanyId("");
         setCompanyName("");
         setActionType("");
         setCategory("");
@@ -431,14 +440,24 @@ const MemberSection = () => {
                     <Label htmlFor="companyName" className="text-sm font-medium">
                       Company Name *
                     </Label>
-                    <Input
-                      id="companyName"
-                      placeholder="Organization Name"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="mt-2"
-                      required
-                    />
+                    <Select
+                      value={companyId}
+                      onValueChange={(value) => {
+                        setCompanyId(value);
+                        setCompanyName(companies.find((company) => company.id === value)?.name || "");
+                      }}
+                    >
+                      <SelectTrigger id="companyName" className="mt-2">
+                        <SelectValue placeholder="Select your organization" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Type of Action and Category */}
