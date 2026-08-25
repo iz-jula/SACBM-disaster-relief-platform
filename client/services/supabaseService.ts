@@ -16,6 +16,25 @@ export interface MemberCustomization {
   updated_at?: string;
 }
 
+export interface SacbmCompany {
+  id: string;
+  name: string;
+  sector?: string | null;
+  description?: string | null;
+  logo_url?: string | null;
+}
+
+export async function getCompanies(): Promise<SacbmCompany[]> {
+  const { data, error } = await supabase
+    .from("sacbm_companies")
+    .select("id, name, sector, description, logo_url")
+    .eq("is_active", true)
+    .order("name");
+
+  if (error) throw error;
+  return data || [];
+}
+
 export async function getMemberCustomizations(): Promise<MemberCustomization[]> {
   const { data, error } = await supabase
     .from("member_customizations")
