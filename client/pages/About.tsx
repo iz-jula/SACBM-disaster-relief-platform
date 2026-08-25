@@ -1,7 +1,6 @@
 import { Heart, Users, Target, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PublicNavbar from "@/components/PublicNavbar";
-import PublicFooter from "@/components/PublicFooter";
 
 const About = () => {
   const values = [
@@ -136,8 +135,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <PublicFooter />
     </div>
   );
 };

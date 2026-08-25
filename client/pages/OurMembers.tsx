@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PublicNavbar from "@/components/PublicNavbar";
-import PublicFooter from "@/components/PublicFooter";
 import { ArrowRight, Search, X } from "lucide-react";
 import { getAchievements, normalizeCompanyName } from "@/services/achievementsService";
 import { getCompanies, getMemberCustomizations } from "@/services/supabaseService";
@@ -442,8 +441,6 @@ const OurMembers = () => {
         </div>
       )}
 
-      {/* Footer */}
-      {!selectedMember && <PublicFooter />}
     </div>
   );
 };

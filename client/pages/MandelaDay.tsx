@@ -10,7 +10,6 @@ import {
   X,
 } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
-import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { mandelaDayHelpNeeds } from "@/services/eventsService";
 import { getAchievements } from "@/services/achievementsService";
@@ -195,7 +194,6 @@ const MandelaDay = () => {
         </section>
       </main>
 
-      <PublicFooter />
 
       {isPosterOpen && (
         <div role="dialog" aria-modal="true" aria-label="Mandela Day poster" className="fixed inset-0 z-50 flex items-center justify-center bg-[#211510]/95 p-4" onClick={() => setIsPosterOpen(false)}>

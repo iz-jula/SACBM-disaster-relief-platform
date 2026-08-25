@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import PublicNavbar from "@/components/PublicNavbar";
-import PublicFooter from "@/components/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, MapPin, Users } from "lucide-react";
 import { getAllEvents, type Event } from "@/services/eventsService";
@@ -178,8 +177,6 @@ const Events = () => {
         </section>
       )}
 
-      {/* Footer */}
-      <PublicFooter />
     </div>
   );
 };

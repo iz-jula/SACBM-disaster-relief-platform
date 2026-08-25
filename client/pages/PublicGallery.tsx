@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PublicFooter from "@/components/PublicFooter";
 import ImpactDetailModal from "@/components/ImpactDetailModal";
 import { getAchievements } from "@/services/achievementsService";
 
@@ -446,8 +445,6 @@ const PublicGallery = () => {
         />
       )}
 
-      {/* Footer */}
-      {!selectedImpact && <PublicFooter />}
     </div>
   );
 };

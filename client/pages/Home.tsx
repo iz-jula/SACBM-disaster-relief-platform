@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { ArrowRight, BarChart3, HeartHandshake, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import PublicFooter from "@/components/PublicFooter";
 import { getActionsMetrics } from "@/services/supabaseService";
 
 interface Stats {
@@ -108,7 +107,6 @@ const Home = () => {
         </section>
       </main>
 
-      <PublicFooter />
     </div>
   );
 };
