@@ -302,6 +302,7 @@ export function subscribeToRequests(callback: (request: RelieRequest) => void) {
 // Action/Achievement Interface - matches Supabase actions_table schema
 export interface Action {
   id?: number;
+  company_id?: string | null;
   company_name: string;
   type_action: string;
   description: string;
@@ -333,7 +334,7 @@ export async function getActions(
     try {
       let query = supabase
         .from("actions_table")
-        .select("id,company_name,type_action,description,category,location,partner_organisation,people_impacted,amount,media,created_at")
+        .select("id,company_id,company_name,type_action,description,category,location,partner_organisation,people_impacted,amount,media,created_at,sacbm_companies(name),action_media(id,media_url,storage_path,media_type,caption,display_order,created_at)")
         .order("created_at", { ascending: false });
 
       if (category) {
@@ -348,7 +349,15 @@ export async function getActions(
 
       const { data, error } = await Promise.race([query, timeoutPromise]) as any;
       if (error) throw error;
-      return data || [];
+      return (data || []).map((row: any) => ({
+        ...row,
+        company_name: row.sacbm_companies?.name || row.company_name,
+        media: row.action_media?.length
+          ? row.action_media.map((item: { media_url: string }) => item.media_url)
+          : row.media,
+        sacbm_companies: undefined,
+        action_media: undefined,
+      }));
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
       if (attempt === 3) throw error;
@@ -448,6 +457,29 @@ export async function createAction(
         hint: error.hint,
       });
       throw error;
+    }
+
+    if (data && action.media) {
+      let mediaUrls: string[] = [];
+      try {
+        const parsed = JSON.parse(action.media);
+        mediaUrls = Array.isArray(parsed) ? parsed : [action.media];
+      } catch {
+        mediaUrls = [action.media];
+      }
+
+      const mediaRows = mediaUrls
+        .filter((mediaUrl) => mediaUrl)
+        .map((mediaUrl, display_order) => ({
+          action_id: data.id,
+          media_url: mediaUrl,
+          display_order,
+        }));
+
+      if (mediaRows.length > 0) {
+        const { error: mediaError } = await supabase.from("action_media").insert(mediaRows);
+        if (mediaError) throw mediaError;
+      }
     }
 
     console.log("Action created successfully:", data);

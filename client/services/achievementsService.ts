@@ -16,9 +16,15 @@ export function normalizeCompanyName(companyName: string): string {
 
   if (key.includes("coca cola")) return "Coca Cola";
   if (key.includes("companhia industrial da matola") || key === "cim") {
-    return "CIM (Companhia Industrial da Matola)";
+    return "CIM Premier Foods";
   }
-  if (key === "trac" || key.includes("trans african concessions")) return "TRAC";
+  if (key === "trac" || key.includes("trans african concessions") || key === "trac n4") {
+    return "Trac N4";
+  }
+  if (key === "tongaat hulett") return "Tongaat";
+  if (key === "grindrod group") return "Grindrod";
+  if (key.includes("lionshare auto group")) return "Lionshare";
+  if (key.includes("matola cargo terminal")) return "Matola Cargo";
 
   return normalized;
 }
